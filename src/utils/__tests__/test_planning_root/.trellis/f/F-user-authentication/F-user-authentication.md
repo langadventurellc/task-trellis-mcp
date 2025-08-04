@@ -3,6 +3,7 @@ id: F-user-authentication
 title: User Authentication Feature
 status: in-progress
 priority: high
+schema: v1.0
 created: 2025-01-12T14:00:00Z
 updated: 2025-01-15T12:00:00Z
 ---

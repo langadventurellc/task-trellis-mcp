@@ -3,6 +3,7 @@ id: P-ecommerce-platform
 title: E-commerce Platform
 status: in-progress
 priority: high
+schema: v1.0
 created: 2025-01-10T08:00:00Z
 updated: 2025-01-15T14:00:00Z
 ---
