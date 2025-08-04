@@ -1,0 +1,67 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__task-trellis__completeTask",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'cd \"$(git rev-parse --show-toplevel)\" && .claude/hooks/pre-complete-task.sh'"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|MultiEdit|Write|mcp__serena__delete_lines|mcp__serena__insert_after_symbol|mcp__serena__insert_at_line|mcp__serena__insert_before_symbol|mcp__serena__replace_text|mcp__serena__replace_lines|mcp__serena__replace_line|mcp__serena__replace_regex|mcp__serena__replace_symbol_body",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'cd \"$(git rev-parse --show-toplevel)\" && .claude/hooks/post-edit-task.sh'"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'ORIG_PWD=\"$(pwd)\" && cd \"$CLAUDE_PROJECT_DIR\" && .claude/hooks/post-complete-task.sh \"$ORIG_PWD\"'"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(npm view:*)",
+      "Bash(npx electron:*)",
+      "Bash(tsc --noEmit)",
+      "Bash(git tag:*)",
+      "WebFetch(domain:stackoverflow.com)",
+      "Bash(npx lint-staged:*)",
+      "mcp__serena__think_about_whether_you_are_done",
+      "mcp__serena__think_about_task_adherence",
+      "mcp__shadcn-ui__list_components",
+      "mcp__serena__initial_instructions",
+      "mcp__serena__check_onboarding_performed",
+      "mcp__serena__onboarding",
+      "mcp__serena__list_dir",
+      "mcp__serena__find_symbol",
+      "mcp__serena__get_symbols_overview",
+      "mcp__serena__list_memories",
+      "mcp__serena__write_memory",
+      "mcp__serena__find_file",
+      "mcp__serena__search_for_pattern",
+      "mcp__serena__replace_symbol_body",
+      "mcp__serena__replace_regex",
+      "mcp__serena__read_memory",
+      "mcp__serena__think_about_collected_information",
+      "mcp__serena__insert_after_symbol",
+      "mcp__serena__find_referencing_symbols",
+      "mcp__serena__get_current_config"
+    ],
+    "deny": []
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": ["task-trellis"]
+}

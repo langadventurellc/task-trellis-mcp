@@ -1,0 +1,62 @@
+{
+  "name": "task-trellis-mcp",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/langadventurellc/task-trellis-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/langadventurellc/task-trellis-mcp/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/langadventurellc/task-trellis-mcp.git"
+  },
+  "license": "GPL-3.0-only",
+  "author": "LangAdventure LLC",
+  "type": "module",
+  "main": "dist/server.js",
+  "bin": {
+    "task-trellis-mcp": "dist/server.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/server.js",
+    "serve": "npm run build && npm run start",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,md,json}\" --log-level silent",
+    "quality": "npm run lint && npm run format && npm run type-check"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.1"
+  },
+  "devDependencies": {
+    "@langadventurellc/tsla-linter": "^2.1.2",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.0.15",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "eslint": "^9.31.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-sonarjs": "^3.0.4",
+    "husky": "^9.1.7",
+    "jest": "^30.0.5",
+    "lint-staged": "^16.1.2",
+    "prettier": "^3.6.2",
+    "ts-jest": "^29.4.1",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.38.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "prettier --write"
+    ],
+    "*.{md,json,yml,yaml}": [
+      "prettier --write"
+    ],
+    "*.{css,scss}": [
+      "prettier --write"
+    ]
+  }
+}
