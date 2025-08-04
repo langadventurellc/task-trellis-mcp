@@ -1,12 +1,13 @@
 import { deserializeTrellisObject } from "../deserializeTrellisObject";
 import { serializeTrellisObject } from "../serializeTrellisObject";
 import { TrellisObject } from "../TrellisObject";
+import { TrellisObjectType } from "../TrellisObjectType";
 
 describe("TrellisObject Serialization/Deserialization Integration Tests", () => {
   describe("Round-trip serialization compatibility", () => {
     it("should handle basic TrellisObject round-trip", () => {
       const original: TrellisObject = {
-        id: "basic-test",
+        id: "T-basic-test",
         title: "Basic Test Task",
         status: "pending",
         priority: "medium",
@@ -19,6 +20,7 @@ describe("TrellisObject Serialization/Deserialization Integration Tests", () => 
         schema: "v1.0",
         childrenIds: ["child-1"],
         body: "Basic task description",
+        type: TrellisObjectType.TASK,
       };
 
       const serialized = serializeTrellisObject(original);
@@ -63,7 +65,7 @@ interface Example {
 Additional section with --- delimiters for testing.`;
 
       const original: TrellisObject = {
-        id: "complex-content-test",
+        id: "T-complex-content-test",
         title: 'Complex Content Test with "quotes" and symbols: @#$%',
         status: "in-progress",
         priority: "high",
@@ -87,6 +89,7 @@ Additional section with --- delimiters for testing.`;
         schema: "v2.1-beta",
         childrenIds: ["subtask-1", "subtask-2", "cleanup-task"],
         body: complexBody,
+        type: TrellisObjectType.TASK,
       };
 
       const serialized = serializeTrellisObject(original);
@@ -97,7 +100,7 @@ Additional section with --- delimiters for testing.`;
 
     it("should handle empty collections round-trip", () => {
       const original: TrellisObject = {
-        id: "empty-collections-test",
+        id: "T-empty-collections-test",
         title: "Empty Collections Test",
         status: "new",
         priority: "low",
@@ -107,6 +110,7 @@ Additional section with --- delimiters for testing.`;
         schema: "v1.0",
         childrenIds: [],
         body: "",
+        type: TrellisObjectType.TASK,
       };
 
       const serialized = serializeTrellisObject(original);
@@ -117,7 +121,7 @@ Additional section with --- delimiters for testing.`;
 
     it("should handle special characters and unicode round-trip", () => {
       const original: TrellisObject = {
-        id: "unicode-test-🚀",
+        id: "T-unicode-test-🚀",
         title: "Unicode Test: 你好世界 🌍 émojis & spëcial chars",
         status: "review",
         priority: "medium",
@@ -155,6 +159,7 @@ console.log(greeting);
 \`\`\`
 
 > Note: All unicode characters should be preserved.`,
+        type: TrellisObjectType.TASK,
       };
 
       const serialized = serializeTrellisObject(original);
@@ -199,7 +204,7 @@ This section starts with --- which could be problematic.
 The parser should handle all of this correctly.`;
 
       const original: TrellisObject = {
-        id: "yaml-body-test",
+        id: "T-yaml-body-test",
         title: "YAML Body Content Test",
         status: "testing",
         priority: "high",
@@ -209,6 +214,7 @@ The parser should handle all of this correctly.`;
         schema: "v1.0",
         childrenIds: [],
         body: yamlLikeBody,
+        type: TrellisObjectType.TASK,
       };
 
       const serialized = serializeTrellisObject(original);
@@ -221,23 +227,23 @@ The parser should handle all of this correctly.`;
       // Create large arrays and content to test performance and memory handling
       const largePrerequistes = Array.from(
         { length: 100 },
-        (_, i) => `prerequisite-${i}`
+        (_, i) => `prerequisite-${i}`,
       );
       const largeLog = Array.from(
         { length: 50 },
         (_, i) =>
-          `Log entry ${i}:\nThis is a multi-line log entry\nwith detailed information\nabout step ${i}`
+          `Log entry ${i}:\nThis is a multi-line log entry\nwith detailed information\nabout step ${i}`,
       );
       const largeChildrenIds = Array.from(
         { length: 200 },
-        (_, i) => `child-task-${i}`
+        (_, i) => `child-task-${i}`,
       );
 
       const largeAffectedFiles = new Map<string, string>();
       for (let i = 0; i < 150; i++) {
         largeAffectedFiles.set(
           `src/component-${i}.ts`,
-          i % 3 === 0 ? "created" : i % 3 === 1 ? "modified" : "deleted"
+          i % 3 === 0 ? "created" : i % 3 === 1 ? "modified" : "deleted",
         );
       }
 
@@ -260,7 +266,7 @@ ${Array.from({ length: 50 }, (_, i) => `const variable${i} = "value${i}";`).join
 ${"Final section content repeated multiple times to test large content handling. ".repeat(200)}`;
 
       const original: TrellisObject = {
-        id: "large-content-test",
+        id: "T-large-content-test",
         title: "Large Content Performance Test",
         status: "performance-testing",
         priority: "low",
@@ -270,6 +276,7 @@ ${"Final section content repeated multiple times to test large content handling.
         schema: "v1.0",
         childrenIds: largeChildrenIds,
         body: largeBody,
+        type: TrellisObjectType.TASK,
       };
 
       const serialized = serializeTrellisObject(original);
@@ -280,7 +287,7 @@ ${"Final section content repeated multiple times to test large content handling.
 
     it("should maintain Map order and exact string content", () => {
       const original: TrellisObject = {
-        id: "map-order-test",
+        id: "T-map-order-test",
         title: "Map Order Preservation Test",
         status: "testing",
         priority: "medium",
@@ -300,6 +307,7 @@ ${"Final section content repeated multiple times to test large content handling.
         schema: "v1.0",
         childrenIds: ["z-child", "a-child", "m-child"],
         body: "Test body content",
+        type: TrellisObjectType.TASK,
       };
 
       const serialized = serializeTrellisObject(original);
@@ -321,7 +329,7 @@ ${"Final section content repeated multiple times to test large content handling.
   describe("Serialization format validation", () => {
     it("should produce valid YAML frontmatter structure", () => {
       const original: TrellisObject = {
-        id: "format-test",
+        id: "F-format-test",
         title: "Format Validation Test",
         status: "validation",
         priority: "high",
@@ -331,13 +339,14 @@ ${"Final section content repeated multiple times to test large content handling.
         schema: "v1.0",
         childrenIds: ["format-child"],
         body: "Format validation body",
+        type: TrellisObjectType.FEATURE,
       };
 
       const serialized = serializeTrellisObject(original);
 
       // Check overall structure
       expect(serialized).toMatch(
-        /^---\n[\s\S]+\n---\n\nFormat validation body$/
+        /^---\n[\s\S]+\n---\n\nFormat validation body$/,
       );
 
       // Verify it can be deserialized
@@ -347,7 +356,7 @@ ${"Final section content repeated multiple times to test large content handling.
 
     it("should handle edge case: body starting with ---", () => {
       const original: TrellisObject = {
-        id: "edge-case-test",
+        id: "E-edge-case-test",
         title: "Edge Case Test",
         status: "testing",
         priority: "medium",
@@ -357,6 +366,7 @@ ${"Final section content repeated multiple times to test large content handling.
         schema: "v1.0",
         childrenIds: [],
         body: "---\nThis body starts with --- which is tricky\n---\nAnd has more --- markers",
+        type: TrellisObjectType.EPIC,
       };
 
       const serialized = serializeTrellisObject(original);
@@ -370,7 +380,7 @@ ${"Final section content repeated multiple times to test large content handling.
     it("should handle multiple different objects in sequence", () => {
       const objects: TrellisObject[] = [
         {
-          id: "seq-1",
+          id: "T-seq-1",
           title: "First Object",
           status: "done",
           priority: "low",
@@ -380,13 +390,14 @@ ${"Final section content repeated multiple times to test large content handling.
           schema: "v1.0",
           childrenIds: [],
           body: "First body",
+          type: TrellisObjectType.TASK,
         },
         {
-          id: "seq-2",
+          id: "P-seq-2",
           title: "Second Object",
           status: "in-progress",
           priority: "high",
-          prerequisites: ["seq-1"],
+          prerequisites: ["T-seq-1"],
           affectedFiles: new Map([
             ["file1.ts", "modified"],
             ["file2.ts", "created"],
@@ -398,29 +409,31 @@ ${"Final section content repeated multiple times to test large content handling.
           schema: "v2.0",
           childrenIds: ["seq-2-child"],
           body: "# Second Object\n\nMore complex content.",
+          type: TrellisObjectType.PROJECT,
         },
         {
-          id: "seq-3",
+          id: "F-seq-3",
           title: 'Third Object with "quotes"',
           status: "pending",
           priority: "medium",
-          prerequisites: ["seq-1", "seq-2"],
+          prerequisites: ["T-seq-1", "P-seq-2"],
           affectedFiles: new Map(),
           log: [],
           schema: "v1.5",
           childrenIds: ["seq-3a", "seq-3b"],
           body: "",
+          type: TrellisObjectType.FEATURE,
         },
       ];
 
       // Serialize all objects
       const serializedObjects = objects.map((obj) =>
-        serializeTrellisObject(obj)
+        serializeTrellisObject(obj),
       );
 
       // Deserialize all objects
       const deserializedObjects = serializedObjects.map((str) =>
-        deserializeTrellisObject(str)
+        deserializeTrellisObject(str),
       );
 
       // Verify each object matches the original

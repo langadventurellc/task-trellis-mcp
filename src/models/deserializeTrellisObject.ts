@@ -1,5 +1,6 @@
 import { parse } from "yaml";
 import { TrellisObject } from "./TrellisObject";
+import { inferObjectType } from "./inferObjectType";
 
 /**
  * Deserializes a markdown string with YAML frontmatter back to a TrellisObject
@@ -8,21 +9,21 @@ import { TrellisObject } from "./TrellisObject";
  * @throws Error if the input string is not properly formatted or missing required fields
  */
 export function deserializeTrellisObject(
-  markdownString: string
+  markdownString: string,
 ): TrellisObject {
   // Split the string into frontmatter and body sections
   // Find the first and second --- markers
   const frontmatterStart = markdownString.indexOf("---");
   if (frontmatterStart === -1) {
     throw new Error(
-      "Invalid format: Expected YAML frontmatter delimited by --- markers"
+      "Invalid format: Expected YAML frontmatter delimited by --- markers",
     );
   }
 
   const frontmatterEnd = markdownString.indexOf("---", frontmatterStart + 3);
   if (frontmatterEnd === -1) {
     throw new Error(
-      "Invalid format: Expected YAML frontmatter delimited by --- markers"
+      "Invalid format: Expected YAML frontmatter delimited by --- markers",
     );
   }
 
@@ -42,7 +43,7 @@ export function deserializeTrellisObject(
     frontmatter = parse(yamlContent);
   } catch (error) {
     throw new Error(
-      `Invalid YAML frontmatter: ${error instanceof Error ? error.message : "Unknown error"}`
+      `Invalid YAML frontmatter: ${error instanceof Error ? error.message : "Unknown error"}`,
     );
   }
 
@@ -78,7 +79,7 @@ export function deserializeTrellisObject(
     fm.affectedFiles !== null
   ) {
     for (const [key, value] of Object.entries(
-      fm.affectedFiles as Record<string, unknown>
+      fm.affectedFiles as Record<string, unknown>,
     )) {
       if (typeof value === "string") {
         affectedFilesMap.set(key, value);
@@ -97,6 +98,7 @@ export function deserializeTrellisObject(
   // Construct and return the TrellisObject
   const trellisObject: TrellisObject = {
     id: fm.id as string,
+    type: inferObjectType(fm.id as string),
     title: fm.title as string,
     status: fm.status as string,
     priority: fm.priority as string,

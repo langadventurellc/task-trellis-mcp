@@ -1,6 +1,7 @@
 import { parse } from "yaml";
 import { serializeTrellisObject } from "../serializeTrellisObject";
 import { TrellisObject } from "../TrellisObject";
+import { TrellisObjectType } from "../TrellisObjectType";
 
 describe("serializeTrellisObject", () => {
   it("should serialize a basic TrellisObject to markdown with YAML frontmatter", () => {
@@ -18,6 +19,7 @@ describe("serializeTrellisObject", () => {
       schema: "v1.0",
       childrenIds: ["child-1", "child-2"],
       body: "This is the main content of the task.",
+      type: TrellisObjectType.PROJECT,
     };
 
     const result = serializeTrellisObject(trellisObject);
@@ -63,6 +65,7 @@ describe("serializeTrellisObject", () => {
       schema: "v1.0",
       childrenIds: [],
       body: "Test body content",
+      type: TrellisObjectType.PROJECT,
     };
 
     const result = serializeTrellisObject(trellisObject);
@@ -75,11 +78,11 @@ describe("serializeTrellisObject", () => {
     expect(parsedYaml.log).toHaveLength(4);
     expect(parsedYaml.log[0]).toBe("Single line entry");
     expect(parsedYaml.log[1]).toBe(
-      "Multi-line entry:\nThis spans multiple lines\nWith various details\nAnd even more information"
+      "Multi-line entry:\nThis spans multiple lines\nWith various details\nAnd even more information",
     );
     expect(parsedYaml.log[2]).toBe("Another single line");
     expect(parsedYaml.log[3]).toBe(
-      "Complex multi-line:\n- Bullet point 1\n- Bullet point 2\n  - Nested point\n- Final point"
+      "Complex multi-line:\n- Bullet point 1\n- Bullet point 2\n  - Nested point\n- Final point",
     );
 
     // Verify the structure is still valid YAML
@@ -98,6 +101,7 @@ describe("serializeTrellisObject", () => {
       schema: "v1.0",
       childrenIds: [],
       body: "",
+      type: TrellisObjectType.PROJECT,
     };
 
     const result = serializeTrellisObject(trellisObject);
@@ -129,6 +133,7 @@ describe("serializeTrellisObject", () => {
       schema: "v2.0-beta",
       childrenIds: ["child-with-dashes", "child with spaces"],
       body: 'Body with "quotes", symbols: @#$%, and other special characters!',
+      type: TrellisObjectType.PROJECT,
     };
 
     const result = serializeTrellisObject(trellisObject);
@@ -140,7 +145,7 @@ describe("serializeTrellisObject", () => {
     const parsedYaml = parse(yamlPart);
     expect(parsedYaml.title).toBe('Title with "quotes" and symbols: @#$%');
     expect(parsedYaml.affectedFiles["src/file with spaces.ts"]).toBe(
-      'status with "quotes"'
+      'status with "quotes"',
     );
     expect(parsedYaml.log[0]).toBe('Log entry with "double quotes"');
   });
@@ -169,6 +174,7 @@ describe("serializeTrellisObject", () => {
       schema: "v1.0",
       childrenIds: [],
       body: bodyContent,
+      type: TrellisObjectType.PROJECT,
     };
 
     const result = serializeTrellisObject(trellisObject);
@@ -199,6 +205,7 @@ describe("serializeTrellisObject", () => {
       schema: "v1.0",
       childrenIds: [],
       body: "Test content",
+      type: TrellisObjectType.PROJECT,
     };
 
     const result = serializeTrellisObject(trellisObject);

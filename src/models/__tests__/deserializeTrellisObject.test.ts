@@ -1,11 +1,12 @@
 import { deserializeTrellisObject } from "../deserializeTrellisObject";
 import { serializeTrellisObject } from "../serializeTrellisObject";
 import { TrellisObject } from "../TrellisObject";
+import { TrellisObjectType } from "../TrellisObjectType";
 
 describe("deserializeTrellisObject", () => {
   it("should deserialize a basic markdown string with YAML frontmatter", () => {
     const markdownString = `---
-id: test-id-123
+id: T-test-id-123
 title: Test Task
 status: in-progress
 priority: high
@@ -29,7 +30,8 @@ This is the main content of the task.`;
     const result = deserializeTrellisObject(markdownString);
 
     expect(result).toEqual({
-      id: "test-id-123",
+      id: "T-test-id-123",
+      type: TrellisObjectType.TASK,
       title: "Test Task",
       status: "in-progress",
       priority: "high",
@@ -47,7 +49,7 @@ This is the main content of the task.`;
 
   it("should handle multi-line log entries correctly", () => {
     const markdownString = `---
-id: multiline-test
+id: T-multiline-test
 title: Multi-line Log Test
 status: pending
 priority: medium
@@ -78,17 +80,17 @@ Test body content`;
     expect(result.log).toHaveLength(4);
     expect(result.log[0]).toBe("Single line entry");
     expect(result.log[1]).toBe(
-      "Multi-line entry:\nThis spans multiple lines\nWith various details\nAnd even more information"
+      "Multi-line entry:\nThis spans multiple lines\nWith various details\nAnd even more information",
     );
     expect(result.log[2]).toBe("Another single line");
     expect(result.log[3]).toBe(
-      "Complex multi-line:\n- Bullet point 1\n- Bullet point 2\n  - Nested point\n- Final point"
+      "Complex multi-line:\n- Bullet point 1\n- Bullet point 2\n  - Nested point\n- Final point",
     );
   });
 
   it("should handle empty arrays and objects correctly", () => {
     const markdownString = `---
-id: empty-test
+id: T-empty-test
 title: Empty Collections Test
 status: new
 priority: low
@@ -112,7 +114,7 @@ childrenIds: []
 
   it("should handle special characters in strings", () => {
     const markdownString = `---
-id: special-chars-test
+id: T-special-chars-test
 title: 'Title with "quotes" and symbols: @#$%'
 status: in-progress
 priority: high
@@ -138,11 +140,11 @@ Body with "quotes", symbols: @#$%, and other special characters!`;
 
     expect(result.title).toBe('Title with "quotes" and symbols: @#$%');
     expect(result.affectedFiles.get("src/file with spaces.ts")).toBe(
-      'status with "quotes"'
+      'status with "quotes"',
     );
     expect(result.log[0]).toBe('Log entry with "double quotes"');
     expect(result.body).toBe(
-      'Body with "quotes", symbols: @#$%, and other special characters!'
+      'Body with "quotes", symbols: @#$%, and other special characters!',
     );
   });
 
@@ -152,7 +154,7 @@ title: Test
 body content`;
 
     expect(() => deserializeTrellisObject(invalidString)).toThrow(
-      "Invalid format: Expected YAML frontmatter delimited by --- markers"
+      "Invalid format: Expected YAML frontmatter delimited by --- markers",
     );
   });
 
@@ -166,7 +168,7 @@ invalid: [unclosed array
 body content`;
 
     expect(() => deserializeTrellisObject(invalidYamlString)).toThrow(
-      /Invalid YAML frontmatter:/
+      /Invalid YAML frontmatter:/,
     );
   });
 
@@ -182,7 +184,7 @@ schema: v1.0
 body content`;
 
     expect(() => deserializeTrellisObject(missingFieldString)).toThrow(
-      "Missing required field: priority"
+      "Missing required field: priority",
     );
   });
 
@@ -198,7 +200,7 @@ schema: v1.0
 body content`;
 
     expect(() => deserializeTrellisObject(invalidTypeString)).toThrow(
-      "Invalid type for field priority: Expected string"
+      "Invalid type for field priority: Expected string",
     );
   });
 
@@ -263,7 +265,7 @@ body content`;
 
   it("should handle complex markdown body content", () => {
     const complexBodyString = `---
-id: complex-body-test
+id: T-complex-body-test
 title: Complex Body Test
 status: pending
 priority: medium
@@ -307,7 +309,7 @@ const example = "code block";
 
   it("should perform round-trip serialization/deserialization correctly", () => {
     const originalObject: TrellisObject = {
-      id: "round-trip-test",
+      id: "T-round-trip-test",
       title: "Round Trip Test",
       status: "in-progress",
       priority: "high",
@@ -325,6 +327,7 @@ const example = "code block";
       schema: "v1.0",
       childrenIds: ["child-1", "child-2"],
       body: "# Task Description\n\nThis is the task body with **markdown** formatting.",
+      type: TrellisObjectType.TASK,
     };
 
     // Serialize then deserialize
@@ -343,13 +346,13 @@ const example = "code block";
 body content`;
 
     expect(() => deserializeTrellisObject(nonObjectString)).toThrow(
-      "Invalid frontmatter: Expected an object"
+      "Invalid frontmatter: Expected an object",
     );
   });
 
   it("should handle body content with --- markers", () => {
     const bodyWithDelimitersString = `---
-id: delim-test
+id: T-delim-test
 title: Delimiter Test
 status: pending
 priority: medium
