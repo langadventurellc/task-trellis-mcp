@@ -19,16 +19,25 @@ An MCP (Model Context Protocol) server for Task Trellis, a task management appli
 
 ### Commands
 
+#### Development & Build
+
+| Command         | Description                                         |
+| --------------- | --------------------------------------------------- |
+| `npm run build` | Compile TypeScript to JavaScript                    |
+| `npm run dev`   | Watch mode compilation with TypeScript (do not run) |
+| `npm start`     | Start the compiled server (do not run)              |
+| `npm run serve` | Build and start the server (do not run)             |
+
 #### Testing & Quality
 
-| Command          | Description                                           |
-| ---------------- | ----------------------------------------------------- |
-| `npm test`       | Run tests for all packages                            |
-| `npm test:e2e`   | Run end-to-end tests for desktop app                  |
-| `npm lint`       | Run linting for all packages                          |
-| `npm format`     | Format all TypeScript, JavaScript, and Markdown files |
-| `npm type-check` | Run TypeScript type checks for all packages           |
-| `npm quality`    | Run all quality checks (lint, format, type-check)     |
+| Command              | Description                                           |
+| -------------------- | ----------------------------------------------------- |
+| `npm test`           | Run unit tests with Jest                              |
+| `npm run test:watch` | Run tests in watch mode (do not run)                  |
+| `npm run lint`       | Run ESLint and fix issues automatically               |
+| `npm run format`     | Format all TypeScript, JavaScript, and Markdown files |
+| `npm run type-check` | Run TypeScript type checks without emitting files     |
+| `npm run quality`    | Run all quality checks (lint, format, type-check)     |
 
 ## Architecture
 
