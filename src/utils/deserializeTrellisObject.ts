@@ -1,8 +1,10 @@
 import { parse } from "yaml";
-import { TrellisObject } from "./TrellisObject";
+import {
+  TrellisObject,
+  TrellisObjectPriority,
+  TrellisObjectStatus,
+} from "../models";
 import { inferObjectType } from "./inferObjectType";
-import { TrellisObjectStatus } from "./TrellisObjectStatus";
-import { TrellisObjectPriority } from "./TrellisObjectPriority";
 
 /**
  * Deserializes a markdown string with YAML frontmatter back to a TrellisObject

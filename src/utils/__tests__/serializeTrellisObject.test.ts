@@ -1,9 +1,11 @@
 import { parse } from "yaml";
+import {
+  TrellisObject,
+  TrellisObjectPriority,
+  TrellisObjectStatus,
+  TrellisObjectType,
+} from "../../models";
 import { serializeTrellisObject } from "../serializeTrellisObject";
-import { TrellisObject } from "../TrellisObject";
-import { TrellisObjectType } from "../TrellisObjectType";
-import { TrellisObjectStatus } from "../TrellisObjectStatus";
-import { TrellisObjectPriority } from "../TrellisObjectPriority";
 
 describe("serializeTrellisObject", () => {
   it("should serialize a basic TrellisObject to markdown with YAML frontmatter", () => {

@@ -1,5 +1,5 @@
+import { TrellisObjectType } from "../../models";
 import { inferObjectType } from "../inferObjectType";
-import { TrellisObjectType } from "../TrellisObjectType";
 
 describe("inferObjectType", () => {
   it("should return PROJECT for IDs starting with P", () => {

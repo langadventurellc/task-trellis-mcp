@@ -1,4 +1,4 @@
-import { TrellisObjectType } from "./TrellisObjectType";
+import { TrellisObjectType } from "../models";
 
 export function inferObjectType(id: string): TrellisObjectType {
   if (!id || id.length === 0) {

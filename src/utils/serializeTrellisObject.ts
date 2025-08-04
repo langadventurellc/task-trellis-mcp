@@ -1,5 +1,5 @@
 import { stringify } from "yaml";
-import { TrellisObject } from "./TrellisObject";
+import { TrellisObject } from "../models";
 
 /**
  * Serializes a TrellisObject to a markdown string with YAML frontmatter
