@@ -2,7 +2,7 @@ import { join } from "path";
 import { findMarkdownFiles } from "../findMarkdownFiles";
 
 describe("findMarkdownFiles", () => {
-  const testRoot = join(__dirname, "test_planning_root");
+  const testRoot = join(__dirname, "schema1_0");
 
   it("should find all markdown files recursively", async () => {
     const files = await findMarkdownFiles(testRoot);
@@ -157,7 +157,7 @@ describe("findMarkdownFiles", () => {
   });
 
   it("should return empty array for directory with no markdown files", async () => {
-    const emptyDir = join(__dirname, "test_planning_root/.trellis/f");
+    const emptyDir = join(__dirname, "schema1_0/.trellis/f");
     const files = await findMarkdownFiles(emptyDir);
 
     // The f directory itself doesn't contain .md files, only subdirectories do

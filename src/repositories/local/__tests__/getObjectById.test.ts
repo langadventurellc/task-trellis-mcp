@@ -7,7 +7,7 @@ import {
 import { getObjectById } from "../getObjectById";
 
 describe("getObjectById", () => {
-  const testPlanningRoot = join(__dirname, "test_planning_root", ".trellis");
+  const testPlanningRoot = join(__dirname, "schema1_0", ".trellis");
 
   it("should find and return a Project object by ID", async () => {
     const result = await getObjectById(
