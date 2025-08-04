@@ -1,6 +1,6 @@
 import { readFile } from "fs/promises";
-import { TrellisObject } from "../models";
-import { deserializeTrellisObject } from "./deserializeTrellisObject";
+import { TrellisObject } from "../../models";
+import { deserializeTrellisObject } from "../../utils/deserializeTrellisObject";
 import { findMarkdownFiles } from "./findMarkdownFiles";
 
 /**

@@ -1,10 +1,10 @@
-import { getObjectById } from "../getObjectById";
 import { join } from "path";
 import {
-  TrellisObjectType,
-  TrellisObjectStatus,
   TrellisObjectPriority,
-} from "../../models";
+  TrellisObjectStatus,
+  TrellisObjectType,
+} from "../../../models";
+import { getObjectById } from "../getObjectById";
 
 describe("getObjectById", () => {
   const testPlanningRoot = join(__dirname, "test_planning_root", ".trellis");
