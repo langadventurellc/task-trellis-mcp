@@ -175,4 +175,80 @@ describe("findMarkdownFiles", () => {
     // Should have files at various nesting levels
     expect(maxDepth - minDepth).toBeGreaterThan(2);
   });
+
+  describe("excludeClosed parameter", () => {
+    it("should include closed tasks by default", async () => {
+      const files = await findMarkdownFiles(testRoot);
+
+      const closedTaskFiles = files.filter((file) =>
+        file.includes("/t/closed/"),
+      );
+
+      expect(closedTaskFiles.length).toBeGreaterThan(0);
+      expect(
+        closedTaskFiles.some((f) => f.includes("T-setup-user-schema.md")),
+      ).toBe(true);
+      expect(
+        closedTaskFiles.some((f) => f.includes("T-project-initialization.md")),
+      ).toBe(true);
+      expect(
+        closedTaskFiles.some((f) => f.includes("T-setup-auth-models.md")),
+      ).toBe(true);
+    });
+
+    it("should exclude closed tasks when excludeClosed is true", async () => {
+      const files = await findMarkdownFiles(testRoot, true);
+
+      const closedTaskFiles = files.filter((file) =>
+        file.includes("/t/closed/"),
+      );
+
+      expect(closedTaskFiles).toHaveLength(0);
+
+      // Should still include open tasks
+      const openTaskFiles = files.filter((file) => file.includes("/t/open/"));
+      expect(openTaskFiles.length).toBeGreaterThan(0);
+    });
+
+    it("should include closed tasks when excludeClosed is false", async () => {
+      const files = await findMarkdownFiles(testRoot, false);
+
+      const closedTaskFiles = files.filter((file) =>
+        file.includes("/t/closed/"),
+      );
+
+      expect(closedTaskFiles.length).toBeGreaterThan(0);
+      expect(
+        closedTaskFiles.some((f) => f.includes("T-setup-user-schema.md")),
+      ).toBe(true);
+    });
+
+    it("should still include non-task files when excludeClosed is true", async () => {
+      const files = await findMarkdownFiles(testRoot, true);
+
+      // Should still find project, epic, and feature files
+      const projectFiles = files.filter((file) => file.includes("/p/P-"));
+      const epicFiles = files.filter((file) => file.includes("/e/E-"));
+      const featureFiles = files.filter((file) => file.includes("/f/F-"));
+
+      expect(projectFiles.length).toBeGreaterThan(0);
+      expect(epicFiles.length).toBeGreaterThan(0);
+      expect(featureFiles.length).toBeGreaterThan(0);
+    });
+
+    it("should have fewer files when excludeClosed is true", async () => {
+      const allFiles = await findMarkdownFiles(testRoot);
+      const filteredFiles = await findMarkdownFiles(testRoot, true);
+
+      expect(filteredFiles.length).toBeLessThan(allFiles.length);
+
+      // The difference should be exactly the number of closed task files
+      const closedTaskFiles = allFiles.filter((file) =>
+        file.includes("/t/closed/"),
+      );
+      expect(allFiles.length - filteredFiles.length).toBe(
+        closedTaskFiles.length,
+      );
+    });
+  });
 });

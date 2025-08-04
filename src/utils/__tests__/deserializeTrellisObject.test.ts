@@ -210,7 +210,7 @@ body content`;
 
   it("should handle non-string values in arrays by filtering them out", () => {
     const mixedArrayString = `---
-id: test
+id: T-test
 title: Test Task
 status: open
 priority: high
@@ -241,7 +241,7 @@ body content`;
 
   it("should handle non-string values in affectedFiles by filtering them out", () => {
     const mixedObjectString = `---
-id: test
+id: T-test
 title: Test Task
 status: open
 priority: high

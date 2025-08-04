@@ -4,9 +4,13 @@ import { join } from "path";
 /**
  * Recursively finds all markdown files in a directory and its subdirectories
  * @param folderPath The root folder path to search
+ * @param excludeClosed Optional flag to exclude files in closed task folders (paths containing "/t/closed")
  * @returns Promise resolving to an array of full paths to markdown files
  */
-export async function findMarkdownFiles(folderPath: string): Promise<string[]> {
+export async function findMarkdownFiles(
+  folderPath: string,
+  excludeClosed?: boolean,
+): Promise<string[]> {
   const markdownFiles: string[] = [];
 
   async function scanDirectory(currentPath: string): Promise<void> {
@@ -20,6 +24,10 @@ export async function findMarkdownFiles(folderPath: string): Promise<string[]> {
         if (stats.isDirectory()) {
           await scanDirectory(fullPath);
         } else if (stats.isFile() && entry.toLowerCase().endsWith(".md")) {
+          // If excludeClosed is true, skip files in closed task folders
+          if (excludeClosed && fullPath.includes("/t/closed")) {
+            return;
+          }
           markdownFiles.push(fullPath);
         }
       }
