@@ -1,0 +1,58 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  packages: read
+
+jobs:
+  claude-review:
+    runs-on: ubuntu-latest
+    name: Claude Code Review
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Claude Code Review
+        uses: anthropics/claude-code-action@beta
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          allowed_tools: 'View,GlobTool,GrepTool,BatchTool'
+          direct_prompt: |
+            Please review only the code changes in this pull request and provide feedback.
+
+            IMPORTANT: Check the current CI status first. If all CI checks are passing (SUCCESS), ignore any historical comments about code quality failures. Only address current, real issues.
+
+            Focus on:
+            - Code quality and TypeScript/Node.js best practices
+            - Security vulnerabilities and potential issues
+            - Performance considerations
+            - Adherence to the project's coding standards in CLAUDE.md
+            - MCP server best practices
+            - Type safety and proper TypeScript type annotations
+            - Async/await patterns and error handling
+
+            Consider the project context:
+            - This is a TypeScript Node.js MCP server using @modelcontextprotocol/sdk
+            - Implements hierarchical project management (Projects → Epics → Features → Tasks)
+            - Uses Zod for data validation and YAML/Markdown for file storage
+            - Follows strict typing with TypeScript
+            - Uses ESLint for linting, Prettier for formatting, and Jest for testing
+
+            Avoid reviewing files in: node_modules/, dist/, coverage/, .npm/, temp/, bin/, .trellis/
