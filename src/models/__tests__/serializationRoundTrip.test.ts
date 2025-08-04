@@ -2,6 +2,8 @@ import { deserializeTrellisObject } from "../deserializeTrellisObject";
 import { serializeTrellisObject } from "../serializeTrellisObject";
 import { TrellisObject } from "../TrellisObject";
 import { TrellisObjectType } from "../TrellisObjectType";
+import { TrellisObjectStatus } from "../TrellisObjectStatus";
+import { TrellisObjectPriority } from "../TrellisObjectPriority";
 
 describe("TrellisObject Serialization/Deserialization Integration Tests", () => {
   describe("Round-trip serialization compatibility", () => {
@@ -9,8 +11,8 @@ describe("TrellisObject Serialization/Deserialization Integration Tests", () => 
       const original: TrellisObject = {
         id: "T-basic-test",
         title: "Basic Test Task",
-        status: "pending",
-        priority: "medium",
+        status: TrellisObjectStatus.OPEN,
+        priority: TrellisObjectPriority.MEDIUM,
         prerequisites: ["prereq-1", "prereq-2"],
         affectedFiles: new Map([
           ["src/component.ts", "modified"],
@@ -67,8 +69,8 @@ Additional section with --- delimiters for testing.`;
       const original: TrellisObject = {
         id: "T-complex-content-test",
         title: 'Complex Content Test with "quotes" and symbols: @#$%',
-        status: "in-progress",
-        priority: "high",
+        status: TrellisObjectStatus.IN_PROGRESS,
+        priority: TrellisObjectPriority.HIGH,
         prerequisites: [
           "setup environment",
           'install deps with "quotes"',
@@ -102,8 +104,8 @@ Additional section with --- delimiters for testing.`;
       const original: TrellisObject = {
         id: "T-empty-collections-test",
         title: "Empty Collections Test",
-        status: "new",
-        priority: "low",
+        status: TrellisObjectStatus.DRAFT,
+        priority: TrellisObjectPriority.LOW,
         prerequisites: [],
         affectedFiles: new Map(),
         log: [],
@@ -123,8 +125,8 @@ Additional section with --- delimiters for testing.`;
       const original: TrellisObject = {
         id: "T-unicode-test-🚀",
         title: "Unicode Test: 你好世界 🌍 émojis & spëcial chars",
-        status: "review",
-        priority: "medium",
+        status: TrellisObjectStatus.OPEN,
+        priority: TrellisObjectPriority.MEDIUM,
         prerequisites: [
           "Setup with émojis 🔧",
           "Config files: ~/.bashrc",
@@ -206,8 +208,8 @@ The parser should handle all of this correctly.`;
       const original: TrellisObject = {
         id: "T-yaml-body-test",
         title: "YAML Body Content Test",
-        status: "testing",
-        priority: "high",
+        status: TrellisObjectStatus.OPEN,
+        priority: TrellisObjectPriority.HIGH,
         prerequisites: ["yaml-parser-setup"],
         affectedFiles: new Map([["config/app.yaml", "created"]]),
         log: ["Added YAML config support"],
@@ -268,8 +270,8 @@ ${"Final section content repeated multiple times to test large content handling.
       const original: TrellisObject = {
         id: "T-large-content-test",
         title: "Large Content Performance Test",
-        status: "performance-testing",
-        priority: "low",
+        status: TrellisObjectStatus.OPEN,
+        priority: TrellisObjectPriority.LOW,
         prerequisites: largePrerequistes,
         affectedFiles: largeAffectedFiles,
         log: largeLog,
@@ -289,8 +291,8 @@ ${"Final section content repeated multiple times to test large content handling.
       const original: TrellisObject = {
         id: "T-map-order-test",
         title: "Map Order Preservation Test",
-        status: "testing",
-        priority: "medium",
+        status: TrellisObjectStatus.OPEN,
+        priority: TrellisObjectPriority.MEDIUM,
         prerequisites: ["first-prereq", "second-prereq", "third-prereq"],
         affectedFiles: new Map([
           ["z-last-file.ts", "created"],
@@ -331,8 +333,8 @@ ${"Final section content repeated multiple times to test large content handling.
       const original: TrellisObject = {
         id: "F-format-test",
         title: "Format Validation Test",
-        status: "validation",
-        priority: "high",
+        status: TrellisObjectStatus.OPEN,
+        priority: TrellisObjectPriority.HIGH,
         prerequisites: ["test-setup"],
         affectedFiles: new Map([["test.ts", "created"]]),
         log: ["Format test"],
@@ -358,8 +360,8 @@ ${"Final section content repeated multiple times to test large content handling.
       const original: TrellisObject = {
         id: "E-edge-case-test",
         title: "Edge Case Test",
-        status: "testing",
-        priority: "medium",
+        status: TrellisObjectStatus.OPEN,
+        priority: TrellisObjectPriority.MEDIUM,
         prerequisites: [],
         affectedFiles: new Map(),
         log: [],
@@ -382,8 +384,8 @@ ${"Final section content repeated multiple times to test large content handling.
         {
           id: "T-seq-1",
           title: "First Object",
-          status: "done",
-          priority: "low",
+          status: TrellisObjectStatus.DONE,
+          priority: TrellisObjectPriority.LOW,
           prerequisites: [],
           affectedFiles: new Map([["file1.ts", "created"]]),
           log: ["First object log"],
@@ -395,8 +397,8 @@ ${"Final section content repeated multiple times to test large content handling.
         {
           id: "P-seq-2",
           title: "Second Object",
-          status: "in-progress",
-          priority: "high",
+          status: TrellisObjectStatus.IN_PROGRESS,
+          priority: TrellisObjectPriority.HIGH,
           prerequisites: ["T-seq-1"],
           affectedFiles: new Map([
             ["file1.ts", "modified"],
@@ -414,8 +416,8 @@ ${"Final section content repeated multiple times to test large content handling.
         {
           id: "F-seq-3",
           title: 'Third Object with "quotes"',
-          status: "pending",
-          priority: "medium",
+          status: TrellisObjectStatus.OPEN,
+          priority: TrellisObjectPriority.MEDIUM,
           prerequisites: ["T-seq-1", "P-seq-2"],
           affectedFiles: new Map(),
           log: [],

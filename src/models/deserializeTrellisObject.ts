@@ -1,6 +1,8 @@
 import { parse } from "yaml";
 import { TrellisObject } from "./TrellisObject";
 import { inferObjectType } from "./inferObjectType";
+import { TrellisObjectStatus } from "./TrellisObjectStatus";
+import { TrellisObjectPriority } from "./TrellisObjectPriority";
 
 /**
  * Deserializes a markdown string with YAML frontmatter back to a TrellisObject
@@ -95,13 +97,37 @@ export function deserializeTrellisObject(
     return [];
   };
 
+  // Helper function to convert status string to enum
+  const toStatus = (statusString: unknown): TrellisObjectStatus => {
+    const status = statusString as string;
+    if (
+      Object.values(TrellisObjectStatus).includes(status as TrellisObjectStatus)
+    ) {
+      return status as TrellisObjectStatus;
+    }
+    throw new Error(`Invalid status value: ${status}`);
+  };
+
+  // Helper function to convert priority string to enum
+  const toPriority = (priorityString: unknown): TrellisObjectPriority => {
+    const priority = priorityString as string;
+    if (
+      Object.values(TrellisObjectPriority).includes(
+        priority as TrellisObjectPriority,
+      )
+    ) {
+      return priority as TrellisObjectPriority;
+    }
+    throw new Error(`Invalid priority value: ${priority}`);
+  };
+
   // Construct and return the TrellisObject
   const trellisObject: TrellisObject = {
     id: fm.id as string,
     type: inferObjectType(fm.id as string),
     title: fm.title as string,
-    status: fm.status as string,
-    priority: fm.priority as string,
+    status: toStatus(fm.status),
+    priority: toPriority(fm.priority),
     prerequisites: toStringArray(fm.prerequisites),
     affectedFiles: affectedFilesMap,
     log: toStringArray(fm.log),

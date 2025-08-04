@@ -2,14 +2,16 @@ import { parse } from "yaml";
 import { serializeTrellisObject } from "../serializeTrellisObject";
 import { TrellisObject } from "../TrellisObject";
 import { TrellisObjectType } from "../TrellisObjectType";
+import { TrellisObjectStatus } from "../TrellisObjectStatus";
+import { TrellisObjectPriority } from "../TrellisObjectPriority";
 
 describe("serializeTrellisObject", () => {
   it("should serialize a basic TrellisObject to markdown with YAML frontmatter", () => {
     const trellisObject: TrellisObject = {
       id: "test-id-123",
       title: "Test Task",
-      status: "in-progress",
-      priority: "high",
+      status: TrellisObjectStatus.IN_PROGRESS,
+      priority: TrellisObjectPriority.HIGH,
       prerequisites: ["prereq-1", "prereq-2"],
       affectedFiles: new Map([
         ["src/file1.ts", "modified"],
@@ -35,8 +37,8 @@ describe("serializeTrellisObject", () => {
     expect(parsedYaml).toEqual({
       id: "test-id-123",
       title: "Test Task",
-      status: "in-progress",
-      priority: "high",
+      status: TrellisObjectStatus.IN_PROGRESS,
+      priority: TrellisObjectPriority.HIGH,
       prerequisites: ["prereq-1", "prereq-2"],
       affectedFiles: {
         "src/file1.ts": "modified",
@@ -52,8 +54,8 @@ describe("serializeTrellisObject", () => {
     const trellisObject: TrellisObject = {
       id: "multiline-test",
       title: "Multi-line Log Test",
-      status: "pending",
-      priority: "medium",
+      status: TrellisObjectStatus.OPEN,
+      priority: TrellisObjectPriority.MEDIUM,
       prerequisites: [],
       affectedFiles: new Map(),
       log: [
@@ -93,8 +95,8 @@ describe("serializeTrellisObject", () => {
     const trellisObject: TrellisObject = {
       id: "empty-test",
       title: "Empty Collections Test",
-      status: "new",
-      priority: "low",
+      status: TrellisObjectStatus.DRAFT,
+      priority: TrellisObjectPriority.LOW,
       prerequisites: [],
       affectedFiles: new Map(),
       log: [],
@@ -118,8 +120,8 @@ describe("serializeTrellisObject", () => {
     const trellisObject: TrellisObject = {
       id: "special-chars-test",
       title: 'Title with "quotes" and symbols: @#$%',
-      status: "in-progress",
-      priority: "high",
+      status: TrellisObjectStatus.IN_PROGRESS,
+      priority: TrellisObjectPriority.HIGH,
       prerequisites: ["prereq with spaces", "prereq-with-dashes"],
       affectedFiles: new Map([
         ["src/file with spaces.ts", 'status with "quotes"'],
@@ -166,8 +168,8 @@ describe("serializeTrellisObject", () => {
     const trellisObject: TrellisObject = {
       id: "body-test",
       title: "Body Content Test",
-      status: "pending",
-      priority: "medium",
+      status: TrellisObjectStatus.OPEN,
+      priority: TrellisObjectPriority.MEDIUM,
       prerequisites: [],
       affectedFiles: new Map(),
       log: [],
@@ -193,8 +195,8 @@ describe("serializeTrellisObject", () => {
     const trellisObject: TrellisObject = {
       id: "complex-map-test",
       title: "Complex Map Test",
-      status: "in-progress",
-      priority: "high",
+      status: TrellisObjectStatus.IN_PROGRESS,
+      priority: TrellisObjectPriority.HIGH,
       prerequisites: [],
       affectedFiles: new Map([
         ["path/to/complex file name.ts", "created"],

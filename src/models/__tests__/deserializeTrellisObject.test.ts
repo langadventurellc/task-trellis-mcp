@@ -2,6 +2,8 @@ import { deserializeTrellisObject } from "../deserializeTrellisObject";
 import { serializeTrellisObject } from "../serializeTrellisObject";
 import { TrellisObject } from "../TrellisObject";
 import { TrellisObjectType } from "../TrellisObjectType";
+import { TrellisObjectStatus } from "../TrellisObjectStatus";
+import { TrellisObjectPriority } from "../TrellisObjectPriority";
 
 describe("deserializeTrellisObject", () => {
   it("should deserialize a basic markdown string with YAML frontmatter", () => {
@@ -33,8 +35,8 @@ This is the main content of the task.`;
       id: "T-test-id-123",
       type: TrellisObjectType.TASK,
       title: "Test Task",
-      status: "in-progress",
-      priority: "high",
+      status: TrellisObjectStatus.IN_PROGRESS,
+      priority: TrellisObjectPriority.HIGH,
       prerequisites: ["prereq-1", "prereq-2"],
       affectedFiles: new Map([
         ["src/file1.ts", "modified"],
@@ -51,7 +53,7 @@ This is the main content of the task.`;
     const markdownString = `---
 id: T-multiline-test
 title: Multi-line Log Test
-status: pending
+status: open
 priority: medium
 prerequisites: []
 affectedFiles: {}
@@ -92,7 +94,7 @@ Test body content`;
     const markdownString = `---
 id: T-empty-test
 title: Empty Collections Test
-status: new
+status: draft
 priority: low
 prerequisites: []
 affectedFiles: {}
@@ -176,7 +178,7 @@ body content`;
     const missingFieldString = `---
 id: test
 title: Test Task
-status: pending
+status: open
 # priority is missing
 schema: v1.0
 ---
@@ -192,7 +194,7 @@ body content`;
     const invalidTypeString = `---
 id: test
 title: Test Task
-status: pending
+status: open
 priority: 123  # should be string, not number
 schema: v1.0
 ---
@@ -208,7 +210,7 @@ body content`;
     const mixedArrayString = `---
 id: test
 title: Test Task
-status: pending
+status: open
 priority: high
 prerequisites:
   - valid string
@@ -239,7 +241,7 @@ body content`;
     const mixedObjectString = `---
 id: test
 title: Test Task
-status: pending
+status: open
 priority: high
 prerequisites: []
 affectedFiles:
@@ -267,7 +269,7 @@ body content`;
     const complexBodyString = `---
 id: T-complex-body-test
 title: Complex Body Test
-status: pending
+status: open
 priority: medium
 prerequisites: []
 affectedFiles: {}
@@ -311,8 +313,8 @@ const example = "code block";
     const originalObject: TrellisObject = {
       id: "T-round-trip-test",
       title: "Round Trip Test",
-      status: "in-progress",
-      priority: "high",
+      status: TrellisObjectStatus.IN_PROGRESS,
+      priority: TrellisObjectPriority.HIGH,
       prerequisites: ["prereq-1", "prereq-2"],
       affectedFiles: new Map([
         ["src/file1.ts", "modified"],
@@ -354,7 +356,7 @@ body content`;
     const bodyWithDelimitersString = `---
 id: T-delim-test
 title: Delimiter Test
-status: pending
+status: open
 priority: medium
 prerequisites: []
 affectedFiles: {}
