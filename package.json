@@ -1,5 +1,5 @@
 {
-  "name": "task-trellis-mcp",
+  "name": "@langadventurellc/task-trellis-mcp",
   "version": "0.0.0-development",
   "description": "An MCP server that helps AI coding agents break down projects into tasks and track their progress.",
   "homepage": "https://github.com/langadventurellc/task-trellis-mcp#readme",
