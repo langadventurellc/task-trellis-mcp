@@ -176,7 +176,7 @@ describe("findMarkdownFiles", () => {
     expect(maxDepth - minDepth).toBeGreaterThan(2);
   });
 
-  describe("excludeClosed parameter", () => {
+  describe("includeClosed parameter", () => {
     it("should include closed tasks by default", async () => {
       const files = await findMarkdownFiles(testRoot);
 
@@ -196,8 +196,8 @@ describe("findMarkdownFiles", () => {
       ).toBe(true);
     });
 
-    it("should exclude closed tasks when excludeClosed is true", async () => {
-      const files = await findMarkdownFiles(testRoot, true);
+    it("should exclude closed tasks when includeClosed is false", async () => {
+      const files = await findMarkdownFiles(testRoot, false);
 
       const closedTaskFiles = files.filter((file) =>
         file.includes("/t/closed/"),
@@ -210,8 +210,8 @@ describe("findMarkdownFiles", () => {
       expect(openTaskFiles.length).toBeGreaterThan(0);
     });
 
-    it("should include closed tasks when excludeClosed is false", async () => {
-      const files = await findMarkdownFiles(testRoot, false);
+    it("should include closed tasks when includeClosed is true", async () => {
+      const files = await findMarkdownFiles(testRoot, true);
 
       const closedTaskFiles = files.filter((file) =>
         file.includes("/t/closed/"),
@@ -223,8 +223,8 @@ describe("findMarkdownFiles", () => {
       ).toBe(true);
     });
 
-    it("should still include non-task files when excludeClosed is true", async () => {
-      const files = await findMarkdownFiles(testRoot, true);
+    it("should still include non-task files when includeClosed is false", async () => {
+      const files = await findMarkdownFiles(testRoot, false);
 
       // Should still find project, epic, and feature files
       const projectFiles = files.filter((file) => file.includes("/p/P-"));
@@ -236,9 +236,9 @@ describe("findMarkdownFiles", () => {
       expect(featureFiles.length).toBeGreaterThan(0);
     });
 
-    it("should have fewer files when excludeClosed is true", async () => {
+    it("should have fewer files when includeClosed is false", async () => {
       const allFiles = await findMarkdownFiles(testRoot);
-      const filteredFiles = await findMarkdownFiles(testRoot, true);
+      const filteredFiles = await findMarkdownFiles(testRoot, false);
 
       expect(filteredFiles.length).toBeLessThan(allFiles.length);
 
