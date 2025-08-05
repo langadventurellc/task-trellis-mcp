@@ -1,4 +1,5 @@
 .serena/cache
+src/repositories/local/__tests__/temp
 
 # Logs
 logs

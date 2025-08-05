@@ -55,5 +55,8 @@ export default class LocalRepository implements Repository {
 
   async saveObject(_trellisObject: TrellisObject) {}
 
-  async deleteObject(_id: string) {}
+  async deleteObject(id: string) {
+    const { deleteObjectById } = await import("./deleteObjectById");
+    return deleteObjectById(id, this.config.localRepositoryPath!);
+  }
 }
