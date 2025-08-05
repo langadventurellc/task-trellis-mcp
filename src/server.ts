@@ -98,6 +98,7 @@ server.setRequestHandler(ListToolsRequestSchema, () => {
   };
 });
 
+// eslint-disable-next-line statement-count/function-statement-count-warn
 server.setRequestHandler(CallToolRequestSchema, (request) => {
   const { name: toolName, arguments: args } = request.params;
 

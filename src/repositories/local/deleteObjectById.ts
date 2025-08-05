@@ -1,9 +1,84 @@
-import { readFile, unlink, rm } from "fs/promises";
+import { readFile, rm, unlink } from "fs/promises";
 import { dirname } from "path";
-import { deserializeTrellisObject } from "../../utils/deserializeTrellisObject";
+import { ServerConfig } from "../../configuration";
+import { TrellisObject } from "../../models";
+import {
+  deserializeTrellisObject,
+  isRequiredForOtherObjects,
+} from "../../utils";
 import { findMarkdownFiles } from "./findMarkdownFiles";
-import { isRequiredForOtherObjects } from "../../utils/isRequiredForOtherObjects";
-import { ServerConfig } from "../../configuration/ServerConfig";
+
+interface FoundObject {
+  filePath: string;
+  object: TrellisObject;
+}
+
+async function findObjectById(
+  id: string,
+  planningRoot: string,
+): Promise<FoundObject> {
+  const markdownFiles = await findMarkdownFiles(planningRoot);
+
+  for (const filePath of markdownFiles) {
+    try {
+      const fileContent = await readFile(filePath, "utf-8");
+      const trellisObject: TrellisObject =
+        deserializeTrellisObject(fileContent);
+
+      if (trellisObject.id === id) {
+        return { filePath, object: trellisObject };
+      }
+    } catch (error) {
+      console.warn(`Warning: Could not deserialize file ${filePath}:`, error);
+      continue;
+    }
+  }
+
+  throw new Error(`No object found with ID: ${id}`);
+}
+
+async function checkObjectDependencies(
+  targetObject: TrellisObject,
+  planningRoot: string,
+): Promise<void> {
+  const { LocalRepository } = await import("./LocalRepository");
+  const config: ServerConfig = {
+    mode: "local",
+    planningRootFolder: planningRoot,
+  };
+  const repository = new LocalRepository(config);
+
+  const isRequired = await isRequiredForOtherObjects(targetObject, repository);
+  if (isRequired) {
+    throw new Error(
+      `Cannot delete object ${targetObject.id} because it is required by other objects. Use force=true to override.`,
+    );
+  }
+}
+
+async function deleteObjectFile(filePath: string): Promise<void> {
+  await unlink(filePath);
+}
+
+async function deleteAssociatedFolder(
+  id: string,
+  filePath: string,
+): Promise<void> {
+  if (!id.startsWith("P-") && !id.startsWith("E-") && !id.startsWith("F-")) {
+    return;
+  }
+
+  const associatedFolderPath = dirname(filePath);
+
+  try {
+    await rm(associatedFolderPath, { recursive: true, force: true });
+  } catch (error) {
+    console.warn(
+      `Warning: Could not delete associated folder ${associatedFolderPath}:`,
+      error,
+    );
+  }
+}
 
 /**
  * Deletes a TrellisObject by its ID, including both the markdown file and associated folder
@@ -24,75 +99,13 @@ export async function deleteObjectById(
   planningRoot: string,
   force?: boolean,
 ): Promise<void> {
-  // Find all markdown files in the planning root
-  const markdownFiles = await findMarkdownFiles(planningRoot);
+  const foundObject = await findObjectById(id, planningRoot);
+  const { filePath, object } = foundObject;
 
-  // Search through each markdown file to find the one with the matching ID
-  let targetFilePath: string | null = null;
-  let targetObject = null;
-
-  for (const filePath of markdownFiles) {
-    try {
-      const fileContent = await readFile(filePath, "utf-8");
-      const trellisObject = deserializeTrellisObject(fileContent);
-
-      // Check if this object has the ID we're looking for
-      if (trellisObject.id === id) {
-        targetFilePath = filePath;
-        targetObject = trellisObject;
-        break;
-      }
-    } catch (error) {
-      // Skip files that can't be deserialized (might not be valid Trellis objects)
-      console.warn(`Warning: Could not deserialize file ${filePath}:`, error);
-      continue;
-    }
-  }
-
-  if (!targetFilePath || !targetObject) {
-    throw new Error(`No object found with ID: ${id}`);
-  }
-
-  // Check if the object is required for other objects unless force is true
   if (!force) {
-    // Create a LocalRepository instance to check dependencies
-    const { LocalRepository } = await import("./LocalRepository");
-    const config: ServerConfig = {
-      mode: "local",
-      planningRootFolder: planningRoot,
-    };
-    const repository = new LocalRepository(config);
-
-    const isRequired = await isRequiredForOtherObjects(
-      targetObject,
-      repository,
-    );
-    if (isRequired) {
-      throw new Error(
-        `Cannot delete object ${id} because it is required by other objects. Use force=true to override.`,
-      );
-    }
+    await checkObjectDependencies(object, planningRoot);
   }
 
-  // Delete the markdown file
-  await unlink(targetFilePath);
-
-  // If this is a project, epic, or feature, also delete the associated folder
-  if (id.startsWith("P-") || id.startsWith("E-") || id.startsWith("F-")) {
-    // The folder to delete is the parent directory of the markdown file
-    // For example: .trellis/f/F-user-authentication/F-user-authentication.md
-    // We want to delete: .trellis/f/F-user-authentication/
-    const associatedFolderPath = dirname(targetFilePath);
-
-    try {
-      // Delete the folder and all its contents recursively
-      await rm(associatedFolderPath, { recursive: true, force: true });
-    } catch (error) {
-      // If the folder doesn't exist or can't be deleted, log a warning but don't fail
-      console.warn(
-        `Warning: Could not delete associated folder ${associatedFolderPath}:`,
-        error,
-      );
-    }
-  }
+  await deleteObjectFile(filePath);
+  await deleteAssociatedFolder(id, filePath);
 }
