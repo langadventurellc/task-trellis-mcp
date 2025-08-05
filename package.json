@@ -1,7 +1,7 @@
 {
   "name": "task-trellis-mcp",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.0-development",
+  "description": "An MCP server that helps AI coding agents break down projects into tasks and track their progress.",
   "homepage": "https://github.com/langadventurellc/task-trellis-mcp#readme",
   "bugs": {
     "url": "https://github.com/langadventurellc/task-trellis-mcp/issues"
@@ -12,9 +12,21 @@
   },
   "license": "GPL-3.0-only",
   "author": "LangAdventure LLC",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "main": "dist/server.js",
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
   "bin": {
     "task-trellis-mcp": "dist/server.js"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "scripts": {
     "build": "tsc",
