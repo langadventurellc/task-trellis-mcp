@@ -33,6 +33,7 @@ An MCP (Model Context Protocol) server for Task Trellis, a task management appli
 | Command              | Description                                           |
 | -------------------- | ----------------------------------------------------- |
 | `npm test`           | Run unit tests with Jest                              |
+| `npm run test:e2e`   | Run end-to-end tests with Jest                        |
 | `npm run test:watch` | Run tests in watch mode (do not run)                  |
 | `npm run lint`       | Run ESLint and fix issues automatically               |
 | `npm run format`     | Format all TypeScript, JavaScript, and Markdown files |

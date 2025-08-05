@@ -5,7 +5,12 @@ title: Test task management workflow via MCP protocol
 status: open
 priority: high
 prerequisites:
-  - T-test-crud-operations-via-mcp
+  - T-implement-createobject-e2e-tests
+  - T-implement-getobject-e2e-tests
+  - T-implement-updateobject-e2e-tests
+  - T-implement-deleteobject-e2e-tests
+  - T-implement-listobjects-e2e-tests
+  - T-implement-file-validation-e2e
 created: "2025-08-05T16:41:03.122684"
 updated: "2025-08-05T16:41:03.122684"
 schema_version: "1.1"
