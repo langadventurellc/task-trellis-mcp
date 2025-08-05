@@ -19,23 +19,58 @@ export const appendObjectLogTool = {
   },
 } as const;
 
-export function handleAppendObjectLog(repository: Repository, args: unknown) {
+export async function handleAppendObjectLog(
+  repository: Repository,
+  args: unknown,
+) {
   const { id, contents } = args as {
     id: string;
     contents: string;
   };
 
-  // No-op implementation - just return the received parameters
-  return {
-    content: [
-      {
-        type: "text",
-        text: `Appended to object log: ${JSON.stringify(
-          { id, contents },
-          null,
-          2,
-        )}`,
-      },
-    ],
-  };
+  try {
+    // Load the existing object
+    const existingObject = await repository.getObjectById(id);
+    if (!existingObject) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error: Object with ID '${id}' not found`,
+          },
+        ],
+      };
+    }
+
+    // Create updated object with new log entry appended
+    const updatedObject = {
+      ...existingObject,
+      log: [...existingObject.log, contents],
+    };
+
+    // Save the updated object
+    await repository.saveObject(updatedObject);
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Successfully appended to object log: ${JSON.stringify(
+            { id, contents, totalLogEntries: updatedObject.log.length },
+            null,
+            2,
+          )}`,
+        },
+      ],
+    };
+  } catch (error) {
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Error appending to object log: ${error instanceof Error ? error.message : String(error)}`,
+        },
+      ],
+    };
+  }
 }
