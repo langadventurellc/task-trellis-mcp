@@ -251,4 +251,184 @@ describe("findMarkdownFiles", () => {
       );
     });
   });
+
+  describe("scope parameter", () => {
+    it("should filter files by project scope", async () => {
+      const files = await findMarkdownFiles(
+        testRoot,
+        true,
+        "P-ecommerce-platform",
+      );
+
+      // Should only include files within the P-ecommerce-platform project
+      files.forEach((file) => {
+        expect(file).toMatch(/\/p\/P-ecommerce-platform\//);
+      });
+
+      // Should include the project file itself
+      expect(files.some((f) => f.includes("P-ecommerce-platform.md"))).toBe(
+        true,
+      );
+
+      // Should include epics within the project
+      expect(files.some((f) => f.includes("E-user-management.md"))).toBe(true);
+      expect(files.some((f) => f.includes("E-product-catalog.md"))).toBe(true);
+
+      // Should include features within the project
+      expect(files.some((f) => f.includes("F-user-registration.md"))).toBe(
+        true,
+      );
+
+      // Should include tasks within the project
+      expect(files.some((f) => f.includes("T-setup-user-schema.md"))).toBe(
+        true,
+      );
+      expect(
+        files.some((f) => f.includes("T-create-registration-form.md")),
+      ).toBe(true);
+
+      // Should NOT include files from other projects
+      expect(files.some((f) => f.includes("P-mobile-app"))).toBe(false);
+
+      // Should NOT include standalone features or tasks
+      expect(
+        files.some(
+          (f) => f.includes("F-user-authentication") && !f.includes("/p/P-"),
+        ),
+      ).toBe(false);
+      expect(
+        files.some(
+          (f) => f.includes("T-setup-database") && !f.includes("/p/P-"),
+        ),
+      ).toBe(false);
+    });
+
+    it("should filter files by epic scope", async () => {
+      const files = await findMarkdownFiles(
+        testRoot,
+        true,
+        "E-user-management",
+      );
+
+      // Should only include files within the E-user-management epic
+      files.forEach((file) => {
+        expect(file).toMatch(/\/e\/E-user-management\//);
+      });
+
+      // Should include the epic file itself
+      expect(files.some((f) => f.includes("E-user-management.md"))).toBe(true);
+
+      // Should include features within the epic
+      expect(files.some((f) => f.includes("F-user-registration.md"))).toBe(
+        true,
+      );
+
+      // Should include tasks within the epic's features
+      expect(files.some((f) => f.includes("T-setup-user-schema.md"))).toBe(
+        true,
+      );
+      expect(
+        files.some((f) => f.includes("T-create-registration-form.md")),
+      ).toBe(true);
+
+      // Should NOT include files from other epics
+      expect(files.some((f) => f.includes("E-product-catalog"))).toBe(false);
+      expect(files.some((f) => f.includes("E-offline-sync"))).toBe(false);
+    });
+
+    it("should filter files by feature scope", async () => {
+      const files = await findMarkdownFiles(
+        testRoot,
+        true,
+        "F-user-registration",
+      );
+
+      // Should only include files within the F-user-registration feature
+      files.forEach((file) => {
+        expect(file).toMatch(/\/f\/F-user-registration\//);
+      });
+
+      // Should include the feature file itself
+      expect(files.some((f) => f.includes("F-user-registration.md"))).toBe(
+        true,
+      );
+
+      // Should include tasks within the feature
+      expect(files.some((f) => f.includes("T-setup-user-schema.md"))).toBe(
+        true,
+      );
+      expect(
+        files.some((f) => f.includes("T-create-registration-form.md")),
+      ).toBe(true);
+
+      // Should NOT include files from other features
+      expect(files.some((f) => f.includes("F-product-search"))).toBe(false);
+      expect(files.some((f) => f.includes("F-data-caching"))).toBe(false);
+    });
+
+    it("should work with standalone features", async () => {
+      const files = await findMarkdownFiles(
+        testRoot,
+        true,
+        "F-user-authentication",
+      );
+
+      // Should only include files within the standalone F-user-authentication feature
+      files.forEach((file) => {
+        expect(file).toMatch(/\/f\/F-user-authentication\//);
+        expect(file).not.toMatch(/\/p\/P-/); // Should not be within any project
+      });
+
+      // Should include the feature file itself
+      expect(files.some((f) => f.includes("F-user-authentication.md"))).toBe(
+        true,
+      );
+
+      // Should include tasks within the standalone feature
+      expect(files.some((f) => f.includes("T-implement-login.md"))).toBe(true);
+      expect(files.some((f) => f.includes("T-setup-auth-models.md"))).toBe(
+        true,
+      );
+    });
+
+    it("should return empty array for non-existent scope", async () => {
+      const files = await findMarkdownFiles(testRoot, true, "P-non-existent");
+
+      expect(files).toEqual([]);
+    });
+
+    it("should work with includeClosed=false and scope", async () => {
+      const files = await findMarkdownFiles(
+        testRoot,
+        false,
+        "E-user-management",
+      );
+
+      // Should only include files within the E-user-management epic
+      files.forEach((file) => {
+        expect(file).toMatch(/\/e\/E-user-management\//);
+        expect(file).not.toMatch(/\/t\/closed\//);
+      });
+
+      // Should include open tasks but not closed ones
+      expect(
+        files.some((f) => f.includes("T-create-registration-form.md")),
+      ).toBe(true);
+      expect(files.some((f) => f.includes("T-setup-user-schema.md"))).toBe(
+        false,
+      ); // This is in closed
+    });
+
+    it("should return all files when scope is undefined", async () => {
+      const filesWithoutScope = await findMarkdownFiles(testRoot);
+      const filesWithUndefinedScope = await findMarkdownFiles(
+        testRoot,
+        true,
+        undefined,
+      );
+
+      expect(filesWithoutScope).toEqual(filesWithUndefinedScope);
+      expect(filesWithoutScope).toHaveLength(20);
+    });
+  });
 });

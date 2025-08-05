@@ -5,11 +5,13 @@ import { join } from "path";
  * Recursively finds all markdown files in a directory and its subdirectories
  * @param folderPath The root folder path to search
  * @param includeClosed Optional flag to include files in closed task folders (paths containing "/t/closed"), defaults to true
+ * @param scope Optional scope ID to filter results to children of that scope object (e.g., "P-project-id", "E-epic-id", "F-feature-id")
  * @returns Promise resolving to an array of full paths to markdown files
  */
 export async function findMarkdownFiles(
   folderPath: string,
   includeClosed?: boolean,
+  scope?: string,
 ): Promise<string[]> {
   const markdownFiles: string[] = [];
 
@@ -28,6 +30,18 @@ export async function findMarkdownFiles(
           if (includeClosed === false && fullPath.includes("/t/closed")) {
             return;
           }
+
+          // If scope is provided, filter files to only include those within the scope
+          if (scope) {
+            const scopePattern = `/${scope}/`;
+            const matches = fullPath.includes(scopePattern);
+            // Match files within the scope directory or the scope file itself
+            if (!matches) {
+              // console.log(`Skipping file ${fullPath} not in scope ${scope}`);
+              continue;
+            }
+          }
+
           markdownFiles.push(fullPath);
         }
       }

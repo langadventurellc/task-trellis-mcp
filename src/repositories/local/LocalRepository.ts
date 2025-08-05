@@ -28,29 +28,13 @@ export class LocalRepository implements Repository {
     return await getObjectById(id, this.config.planningRootFolder!);
   }
 
-  async getObjects(includeClosed?: boolean) {
-    const { findMarkdownFiles } = await import("./findMarkdownFiles");
-    const { getObjectByFilePath } = await import("./getObjectByFilePath");
-
-    const markdownFiles = await findMarkdownFiles(
+  async getObjects(includeClosed?: boolean, scope?: string) {
+    const { getObjects } = await import("./getObjects");
+    return await getObjects(
       this.config.planningRootFolder!,
       includeClosed,
+      scope,
     );
-
-    const objects: TrellisObject[] = [];
-
-    for (const filePath of markdownFiles) {
-      try {
-        const trellisObject = await getObjectByFilePath(filePath);
-        objects.push(trellisObject);
-      } catch (error) {
-        // Skip files that can't be deserialized (might not be valid Trellis objects)
-        console.warn(`Warning: Could not deserialize file ${filePath}:`, error);
-        continue;
-      }
-    }
-
-    return objects;
   }
 
   async saveObject(trellisObject: TrellisObject): Promise<void> {
