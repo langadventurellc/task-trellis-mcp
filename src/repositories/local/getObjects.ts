@@ -1,10 +1,17 @@
-import { TrellisObject, TrellisObjectType } from "../../models";
+import {
+  TrellisObject,
+  TrellisObjectPriority,
+  TrellisObjectStatus,
+  TrellisObjectType,
+} from "../../models";
 
 export async function getObjects(
   planningRootFolder: string,
   includeClosed = false,
   scope?: string,
   type?: TrellisObjectType,
+  status?: TrellisObjectStatus,
+  priority?: TrellisObjectPriority,
 ): Promise<TrellisObject[]> {
   const { findMarkdownFiles } = await import("./findMarkdownFiles");
   const { getObjectByFilePath } = await import("./getObjectByFilePath");
@@ -23,6 +30,13 @@ export async function getObjects(
       if (type && trellisObject.type !== type) {
         continue; // Skip if type filter is applied and doesn't match
       }
+      if (status && trellisObject.status !== status) {
+        continue; // Skip if status filter is applied and doesn't match
+      }
+      if (priority && trellisObject.priority !== priority) {
+        continue; // Skip if priority filter is applied and doesn't match
+      }
+
       objects.push(trellisObject);
     } catch (error) {
       // Skip files that can't be deserialized (might not be valid Trellis objects)

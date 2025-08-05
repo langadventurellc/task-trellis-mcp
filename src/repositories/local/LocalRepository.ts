@@ -1,5 +1,10 @@
 import { ServerConfig } from "../../configuration/ServerConfig";
-import { TrellisObject } from "../../models";
+import {
+  TrellisObject,
+  TrellisObjectPriority,
+  TrellisObjectStatus,
+  TrellisObjectType,
+} from "../../models";
 import { Repository } from "../Repository";
 
 /**
@@ -28,12 +33,21 @@ export class LocalRepository implements Repository {
     return await getObjectById(id, this.config.planningRootFolder!);
   }
 
-  async getObjects(includeClosed?: boolean, scope?: string) {
+  async getObjects(
+    includeClosed?: boolean,
+    scope?: string,
+    type?: TrellisObjectType,
+    status?: TrellisObjectStatus,
+    priority?: TrellisObjectPriority,
+  ) {
     const { getObjects } = await import("./getObjects");
     return await getObjects(
       this.config.planningRootFolder!,
       includeClosed,
       scope,
+      type,
+      status,
+      priority,
     );
   }
 

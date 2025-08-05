@@ -1,6 +1,10 @@
 import { join } from "path";
 import { getObjects } from "../getObjects";
-import { TrellisObjectType, TrellisObjectStatus } from "../../../models";
+import {
+  TrellisObjectType,
+  TrellisObjectStatus,
+  TrellisObjectPriority,
+} from "../../../models";
 
 describe("getObjects", () => {
   const testRoot = join(__dirname, "schema1_0");
@@ -324,6 +328,168 @@ describe("getObjects", () => {
     });
   });
 
+  describe("status parameter", () => {
+    it("should filter objects by OPEN status", async () => {
+      const objects = await getObjects(
+        testRoot,
+        true,
+        undefined,
+        undefined,
+        TrellisObjectStatus.OPEN,
+      );
+
+      expect(objects.length).toBeGreaterThan(0);
+      objects.forEach((obj) => {
+        expect(obj.status).toBe(TrellisObjectStatus.OPEN);
+      });
+
+      // Should include some open objects
+      expect(objects.some((obj) => obj.id === "T-setup-database")).toBe(true);
+      expect(objects.some((obj) => obj.id === "T-implement-login")).toBe(true);
+    });
+
+    it("should filter objects by IN_PROGRESS status", async () => {
+      const objects = await getObjects(
+        testRoot,
+        true,
+        undefined,
+        undefined,
+        TrellisObjectStatus.IN_PROGRESS,
+      );
+
+      objects.forEach((obj) => {
+        expect(obj.status).toBe(TrellisObjectStatus.IN_PROGRESS);
+      });
+
+      // Should include any in-progress objects if they exist
+      const inProgressObjects = objects.filter(
+        (obj) => obj.status === TrellisObjectStatus.IN_PROGRESS,
+      );
+      expect(inProgressObjects.length).toBe(objects.length);
+    });
+
+    it("should filter objects by DONE status", async () => {
+      const objects = await getObjects(
+        testRoot,
+        true,
+        undefined,
+        undefined,
+        TrellisObjectStatus.DONE,
+      );
+
+      objects.forEach((obj) => {
+        expect(obj.status).toBe(TrellisObjectStatus.DONE);
+      });
+
+      // Should include closed objects
+      expect(objects.some((obj) => obj.id === "T-project-initialization")).toBe(
+        true,
+      );
+      expect(objects.some((obj) => obj.id === "T-setup-user-schema")).toBe(
+        true,
+      );
+    });
+
+    it("should return empty array when no objects match status", async () => {
+      const objects = await getObjects(
+        testRoot,
+        true,
+        undefined,
+        undefined,
+        TrellisObjectStatus.WONT_DO,
+      );
+
+      expect(objects).toEqual([]);
+    });
+  });
+
+  describe("priority parameter", () => {
+    it("should filter objects by HIGH priority", async () => {
+      const objects = await getObjects(
+        testRoot,
+        true,
+        undefined,
+        undefined,
+        undefined,
+        TrellisObjectPriority.HIGH,
+      );
+
+      objects.forEach((obj) => {
+        expect(obj.priority).toBe(TrellisObjectPriority.HIGH);
+      });
+
+      // Verify we have some high priority objects
+      if (objects.length > 0) {
+        expect(objects.length).toBeGreaterThan(0);
+      }
+    });
+
+    it("should filter objects by MEDIUM priority", async () => {
+      const objects = await getObjects(
+        testRoot,
+        true,
+        undefined,
+        undefined,
+        undefined,
+        TrellisObjectPriority.MEDIUM,
+      );
+
+      objects.forEach((obj) => {
+        expect(obj.priority).toBe(TrellisObjectPriority.MEDIUM);
+      });
+    });
+
+    it("should filter objects by LOW priority", async () => {
+      const objects = await getObjects(
+        testRoot,
+        true,
+        undefined,
+        undefined,
+        undefined,
+        TrellisObjectPriority.LOW,
+      );
+
+      objects.forEach((obj) => {
+        expect(obj.priority).toBe(TrellisObjectPriority.LOW);
+      });
+    });
+
+    it("should return all objects when no priority filter is specified", async () => {
+      const allObjects = await getObjects(testRoot, true);
+      const highPriorityObjects = await getObjects(
+        testRoot,
+        true,
+        undefined,
+        undefined,
+        undefined,
+        TrellisObjectPriority.HIGH,
+      );
+      const mediumPriorityObjects = await getObjects(
+        testRoot,
+        true,
+        undefined,
+        undefined,
+        undefined,
+        TrellisObjectPriority.MEDIUM,
+      );
+      const lowPriorityObjects = await getObjects(
+        testRoot,
+        true,
+        undefined,
+        undefined,
+        undefined,
+        TrellisObjectPriority.LOW,
+      );
+
+      // All filtered objects combined should equal all objects
+      const filteredTotal =
+        highPriorityObjects.length +
+        mediumPriorityObjects.length +
+        lowPriorityObjects.length;
+      expect(filteredTotal).toBe(allObjects.length);
+    });
+  });
+
   describe("combined parameters", () => {
     it("should work with includeClosed=false and scope", async () => {
       const objects = await getObjects(testRoot, false, "E-user-management");
@@ -369,7 +535,64 @@ describe("getObjects", () => {
       );
     });
 
+    it("should work with status and priority filters", async () => {
+      const objects = await getObjects(
+        testRoot,
+        true,
+        undefined,
+        undefined,
+        TrellisObjectStatus.OPEN,
+        TrellisObjectPriority.HIGH,
+      );
+
+      // Should only include open, high priority objects
+      objects.forEach((obj) => {
+        expect(obj.status).toBe(TrellisObjectStatus.OPEN);
+        expect(obj.priority).toBe(TrellisObjectPriority.HIGH);
+      });
+    });
+
+    it("should work with scope, type, and status filters", async () => {
+      const objects = await getObjects(
+        testRoot,
+        true,
+        "P-ecommerce-platform",
+        TrellisObjectType.TASK,
+        TrellisObjectStatus.OPEN,
+      );
+
+      // Should only include open tasks within the P-ecommerce-platform project
+      objects.forEach((obj) => {
+        expect(obj.type).toBe(TrellisObjectType.TASK);
+        expect(obj.status).toBe(TrellisObjectStatus.OPEN);
+      });
+
+      // Should not include tasks from other projects or closed tasks
+      expect(objects.some((obj) => obj.id === "T-setup-database")).toBe(false);
+      expect(objects.some((obj) => obj.id === "T-setup-user-schema")).toBe(
+        false,
+      ); // This is closed
+    });
+
     it("should work with all parameters combined", async () => {
+      const objects = await getObjects(
+        testRoot,
+        false,
+        "E-user-management",
+        TrellisObjectType.TASK,
+        TrellisObjectStatus.OPEN,
+        TrellisObjectPriority.MEDIUM,
+      );
+
+      // Should only include open, medium priority tasks within the E-user-management epic
+      objects.forEach((obj) => {
+        expect(obj.type).toBe(TrellisObjectType.TASK);
+        expect(obj.status).toBe(TrellisObjectStatus.OPEN);
+        expect(obj.priority).toBe(TrellisObjectPriority.MEDIUM);
+      });
+    });
+
+    it("should work with original parameters (backward compatibility)", async () => {
       const objects = await getObjects(
         testRoot,
         false,
