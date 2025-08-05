@@ -1,3 +1,5 @@
+import { Repository } from "../repositories/Repository.js";
+
 export const claimTaskTool = {
   name: "claim_task",
   description: "Claims a task in the task trellis system",
@@ -21,7 +23,7 @@ export const claimTaskTool = {
   },
 } as const;
 
-export function handleClaimTask(args: unknown) {
+export function handleClaimTask(repository: Repository, args: unknown) {
   const {
     scope,
     taskId,

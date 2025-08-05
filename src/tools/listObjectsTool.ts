@@ -1,3 +1,5 @@
+import { Repository } from "../repositories/Repository.js";
+
 export const listObjectsTool = {
   name: "list_objects",
   description: "Lists objects from the task trellis system",
@@ -30,7 +32,7 @@ export const listObjectsTool = {
   },
 } as const;
 
-export function handleListObjects(args: unknown) {
+export function handleListObjects(repository: Repository, args: unknown) {
   const {
     kind,
     scope,

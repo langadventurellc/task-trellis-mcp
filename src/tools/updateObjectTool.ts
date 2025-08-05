@@ -1,3 +1,5 @@
+import { Repository } from "../repositories/Repository.js";
+
 export const updateObjectTool = {
   name: "update_object",
   description: "Updates an existing object in the task trellis system",
@@ -37,7 +39,7 @@ export const updateObjectTool = {
   },
 } as const;
 
-export function handleUpdateObject(args: unknown) {
+export function handleUpdateObject(repository: Repository, args: unknown) {
   const {
     id,
     priority,

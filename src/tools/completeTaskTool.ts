@@ -1,3 +1,5 @@
+import { Repository } from "../repositories/Repository.js";
+
 export const completeTaskTool = {
   name: "complete_task",
   description: "Completes a task in the task trellis system",
@@ -24,7 +26,7 @@ export const completeTaskTool = {
   },
 } as const;
 
-export function handleCompleteTask(args: unknown) {
+export function handleCompleteTask(repository: Repository, args: unknown) {
   const { taskId, summary, filesChanged } = args as {
     taskId: string;
     summary: string;

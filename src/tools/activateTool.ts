@@ -21,6 +21,10 @@ export const activateTool = {
         type: "string",
         description: "URL for remote mode (optional, for non-standard URLs)",
       },
+      remoteProjectId: {
+        type: "string",
+        description: "Remote project ID (required for remote mode)",
+      },
     },
     required: ["mode"],
   },

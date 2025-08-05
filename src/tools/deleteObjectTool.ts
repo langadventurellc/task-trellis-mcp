@@ -1,3 +1,5 @@
+import { Repository } from "../repositories/Repository.js";
+
 export const deleteObjectTool = {
   name: "delete_object",
   description: "Deletes an object from the task trellis system",
@@ -18,7 +20,7 @@ export const deleteObjectTool = {
   },
 } as const;
 
-export function handleDeleteObject(args: unknown) {
+export function handleDeleteObject(repository: Repository, args: unknown) {
   const { id, force = false } = args as {
     id: string;
     force?: boolean;

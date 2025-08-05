@@ -1,3 +1,5 @@
+import { Repository } from "../repositories/Repository.js";
+
 export const appendObjectLogTool = {
   name: "append_object_log",
   description: "Appends content to an object's log in the task trellis system",
@@ -17,7 +19,7 @@ export const appendObjectLogTool = {
   },
 } as const;
 
-export function handleAppendObjectLog(args: unknown) {
+export function handleAppendObjectLog(repository: Repository, args: unknown) {
   const { id, contents } = args as {
     id: string;
     contents: string;

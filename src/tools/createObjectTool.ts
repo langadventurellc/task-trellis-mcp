@@ -1,3 +1,5 @@
+import { Repository } from "../repositories/Repository.js";
+
 export const createObjectTool = {
   name: "create_object",
   description: "Creates a new object in the task trellis system",
@@ -44,7 +46,7 @@ export const createObjectTool = {
   },
 } as const;
 
-export function handleCreateObject(args: unknown) {
+export function handleCreateObject(repository: Repository, args: unknown) {
   const {
     kind,
     title,

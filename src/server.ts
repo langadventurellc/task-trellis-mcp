@@ -9,6 +9,8 @@ import {
 import { Command } from "commander";
 import path from "path";
 import ServerConfig from "./configuration/ServerConfig.js";
+import { Repository } from "./repositories/Repository.js";
+import LocalRepository from "./repositories/local/LocalRepository.js";
 import {
   activateTool,
   appendObjectLogTool,
@@ -17,7 +19,6 @@ import {
   createObjectTool,
   deleteObjectTool,
   getObjectTool,
-  handleActivate,
   handleAppendObjectLog,
   handleClaimTask,
   handleCompleteTask,
@@ -60,6 +61,14 @@ const serverConfig: ServerConfig = {
 
 // eslint-disable-next-line no-console
 console.log("Server configuration:", serverConfig);
+
+function getRepository(): Repository {
+  if (serverConfig.mode === "local") {
+    return new LocalRepository(serverConfig);
+  } else {
+    throw new Error("Remote repository not yet implemented");
+  }
+}
 
 const server = new Server(
   {
@@ -109,27 +118,60 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
     };
   }
 
+  const repository = getRepository();
+
   switch (toolName) {
     case "create_object":
-      return handleCreateObject(args);
+      return handleCreateObject(repository, args);
     case "update_object":
-      return handleUpdateObject(args);
+      return handleUpdateObject(repository, args);
     case "get_object":
-      return handleGetObject(args);
+      return handleGetObject(repository, args);
     case "delete_object":
-      return handleDeleteObject(args);
+      return handleDeleteObject(repository, args);
     case "list_objects":
-      return handleListObjects(args);
+      return handleListObjects(repository, args);
     case "append_object_log":
-      return handleAppendObjectLog(args);
+      return handleAppendObjectLog(repository, args);
     case "claim_task":
-      return handleClaimTask(args);
+      return handleClaimTask(repository, args);
     case "complete_task":
-      return handleCompleteTask(args);
+      return handleCompleteTask(repository, args);
     case "prune_closed":
-      return handlePruneClosed(args);
-    case "activate":
-      return handleActivate(args);
+      return handlePruneClosed(repository, args);
+    case "activate": {
+      const { mode, projectRoot, apiToken, url, remoteProjectId } = args as {
+        mode: "local" | "remote";
+        projectRoot?: string;
+        apiToken?: string;
+        url?: string;
+        remoteProjectId?: string;
+      };
+
+      // Update server config based on activate parameters
+      serverConfig.mode = mode;
+
+      if (mode === "local" && projectRoot) {
+        serverConfig.planningRootFolder = path.join(projectRoot, ".trellis");
+      } else if (mode === "remote") {
+        if (url) serverConfig.remoteRepositoryUrl = url;
+        if (apiToken) serverConfig.remoteRepositoryApiToken = apiToken;
+        if (remoteProjectId) serverConfig.remoteProjectId = remoteProjectId;
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Activated in ${mode} mode. Server config updated: ${JSON.stringify(
+              serverConfig,
+              null,
+              2,
+            )}`,
+          },
+        ],
+      };
+    }
     default:
       throw new Error(`Unknown tool: ${toolName}`);
   }

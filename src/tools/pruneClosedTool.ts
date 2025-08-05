@@ -1,3 +1,5 @@
+import { Repository } from "../repositories/Repository.js";
+
 export const pruneClosedTool = {
   name: "prune_closed",
   description: "Prunes closed objects from the task trellis system",
@@ -17,7 +19,7 @@ export const pruneClosedTool = {
   },
 } as const;
 
-export function handlePruneClosed(args: unknown) {
+export function handlePruneClosed(repository: Repository, args: unknown) {
   const { scope, age } = args as {
     scope?: string;
     age: number;

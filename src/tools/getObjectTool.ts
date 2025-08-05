@@ -1,3 +1,5 @@
+import { Repository } from "../repositories/Repository.js";
+
 export const getObjectTool = {
   name: "get_object",
   description: "Gets an object from the task trellis system",
@@ -13,7 +15,7 @@ export const getObjectTool = {
   },
 } as const;
 
-export function handleGetObject(args: unknown) {
+export function handleGetObject(repository: Repository, args: unknown) {
   const { id } = args as {
     id: string;
   };
