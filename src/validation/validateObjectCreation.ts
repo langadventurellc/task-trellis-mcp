@@ -1,6 +1,8 @@
 import type { TrellisObject } from "../models/TrellisObject.js";
 import type { Repository } from "../repositories/Repository.js";
+import { inferObjectType } from "../utils/inferObjectType.js";
 import { validateParentExists } from "./validateParentExists.js";
+import { validateParentType } from "./validateParentType.js";
 
 /**
  * Validates a TrellisObject before creation.
@@ -14,6 +16,10 @@ export async function validateObjectCreation(
   trellisObject: TrellisObject,
   repository: Repository,
 ): Promise<void> {
+  // Validate parent type compatibility
+  const objectType = inferObjectType(trellisObject.id);
+  validateParentType(objectType, trellisObject.parent);
+
   // Validate parent existence
   await validateParentExists(trellisObject.parent, repository);
 

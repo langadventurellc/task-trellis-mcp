@@ -1,10 +1,11 @@
-Run lint-staged for conditional formatting
+#!/bin/sh
+# Run lint-staged for conditional formatting
 npx lint-staged
 
 # Run additional quality checks if code files were changed
 if git diff --staged --name-only | grep -E '\.(ts|tsx|js|jsx)$' > /dev/null; then
   echo "Code files detected, running quality checks..."
-  npm lint
+  npm run lint
   npm run type-check
   npm test
 fi

@@ -92,26 +92,9 @@ describe("createObjectTool", () => {
     it("should create a project with all parameters specified", async () => {
       mockGenerateUniqueId.mockReturnValue("P-new-project");
 
-      // Mock parent object to exist for validation
-      const mockParentObject: TrellisObject = {
-        id: "P-parent-project",
-        type: TrellisObjectType.PROJECT,
-        title: "Parent Project",
-        status: TrellisObjectStatus.OPEN,
-        priority: TrellisObjectPriority.MEDIUM,
-        prerequisites: [],
-        affectedFiles: new Map(),
-        log: [],
-        schema: "v1.0",
-        childrenIds: [],
-        body: "Parent project description",
-      };
-      mockRepository.getObjectById.mockResolvedValue(mockParentObject);
-
       const args = {
         kind: "project",
         title: "New Project",
-        parent: "P-parent-project",
         priority: "high",
         status: "open",
         prerequisites: ["P-dependency1", "P-dependency2"],
@@ -131,7 +114,7 @@ describe("createObjectTool", () => {
         title: "New Project",
         status: TrellisObjectStatus.OPEN,
         priority: TrellisObjectPriority.HIGH,
-        parent: "P-parent-project",
+        parent: undefined,
         prerequisites: ["P-dependency1", "P-dependency2"],
         affectedFiles: new Map(),
         log: [],
@@ -372,19 +355,56 @@ describe("createObjectTool", () => {
 
     it("should handle all object types correctly", async () => {
       const testCases = [
-        { kind: "project", expectedType: TrellisObjectType.PROJECT },
-        { kind: "epic", expectedType: TrellisObjectType.EPIC },
-        { kind: "feature", expectedType: TrellisObjectType.FEATURE },
-        { kind: "task", expectedType: TrellisObjectType.TASK },
+        {
+          kind: "project",
+          expectedType: TrellisObjectType.PROJECT,
+          expectedId: "P-project",
+        },
+        {
+          kind: "epic",
+          expectedType: TrellisObjectType.EPIC,
+          expectedId: "E-epic",
+          parent: "P-existing-project",
+        },
+        {
+          kind: "feature",
+          expectedType: TrellisObjectType.FEATURE,
+          expectedId: "F-feature",
+        },
+        {
+          kind: "task",
+          expectedType: TrellisObjectType.TASK,
+          expectedId: "T-task",
+        },
       ];
 
       for (const testCase of testCases) {
         mockRepository.saveObject.mockClear();
-        mockGenerateUniqueId.mockReturnValue(`ID-${testCase.kind}`);
+        mockRepository.getObjectById.mockClear();
+        mockGenerateUniqueId.mockReturnValue(testCase.expectedId);
+
+        // Mock parent object if needed
+        if (testCase.parent) {
+          const mockParentObject: TrellisObject = {
+            id: testCase.parent,
+            type: TrellisObjectType.PROJECT,
+            title: "Parent Project",
+            status: TrellisObjectStatus.OPEN,
+            priority: TrellisObjectPriority.MEDIUM,
+            prerequisites: [],
+            affectedFiles: new Map(),
+            log: [],
+            schema: "v1.0",
+            childrenIds: [],
+            body: "Parent project description",
+          };
+          mockRepository.getObjectById.mockResolvedValue(mockParentObject);
+        }
 
         const args = {
           kind: testCase.kind,
           title: `Test ${testCase.kind}`,
+          ...(testCase.parent && { parent: testCase.parent }),
         };
 
         await handleCreateObject(mockRepository, args);

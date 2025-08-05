@@ -28,12 +28,12 @@ describe("validateObjectCreation", () => {
     };
 
     testObject = {
-      id: "test-123",
+      id: "T-test-123",
       type: TrellisObjectType.TASK,
       title: "Test Task",
       status: TrellisObjectStatus.OPEN,
       priority: TrellisObjectPriority.MEDIUM,
-      parent: "parent-123",
+      parent: "F-parent-123",
       prerequisites: [],
       affectedFiles: new Map(),
       log: [],
@@ -53,7 +53,7 @@ describe("validateObjectCreation", () => {
     ).resolves.toBeUndefined();
 
     expect(mockValidateParentExists).toHaveBeenCalledWith(
-      "parent-123",
+      "F-parent-123",
       mockRepository,
     );
     expect(mockValidateParentExists).toHaveBeenCalledTimes(1);
@@ -76,7 +76,7 @@ describe("validateObjectCreation", () => {
 
   it("should throw ValidationError when parent validation fails", async () => {
     const validationError = new ValidationError(
-      "Parent object with ID 'parent-123' does not exist",
+      "Parent object with ID 'F-parent-123' does not exist",
       ValidationErrorCodes.PARENT_NOT_FOUND,
       "parent",
     );
@@ -88,32 +88,53 @@ describe("validateObjectCreation", () => {
 
     await expect(
       validateObjectCreation(testObject, mockRepository),
-    ).rejects.toThrow("Parent object with ID 'parent-123' does not exist");
+    ).rejects.toThrow("Parent object with ID 'F-parent-123' does not exist");
 
     expect(mockValidateParentExists).toHaveBeenCalledWith(
-      "parent-123",
+      "F-parent-123",
       mockRepository,
     );
   });
 
-  it("should validate all object types", async () => {
+  it("should validate all object types with appropriate parents", async () => {
     mockValidateParentExists.mockResolvedValue(undefined);
 
-    const objectTypes = [
-      TrellisObjectType.PROJECT,
-      TrellisObjectType.EPIC,
-      TrellisObjectType.FEATURE,
-      TrellisObjectType.TASK,
+    const testCases = [
+      {
+        type: TrellisObjectType.PROJECT,
+        id: "P-project-123",
+        parent: undefined,
+      },
+      {
+        type: TrellisObjectType.EPIC,
+        id: "E-epic-123",
+        parent: "P-project-123",
+      },
+      {
+        type: TrellisObjectType.FEATURE,
+        id: "F-feature-123",
+        parent: "E-epic-123",
+      },
+      {
+        type: TrellisObjectType.TASK,
+        id: "T-task-123",
+        parent: "F-feature-123",
+      },
     ];
 
-    for (const type of objectTypes) {
-      const objectOfType = { ...testObject, type };
+    for (const testCase of testCases) {
+      const objectOfType = {
+        ...testObject,
+        type: testCase.type,
+        id: testCase.id,
+        parent: testCase.parent,
+      };
 
       await expect(
         validateObjectCreation(objectOfType, mockRepository),
       ).resolves.toBeUndefined();
     }
 
-    expect(mockValidateParentExists).toHaveBeenCalledTimes(objectTypes.length);
+    expect(mockValidateParentExists).toHaveBeenCalledTimes(testCases.length);
   });
 });
