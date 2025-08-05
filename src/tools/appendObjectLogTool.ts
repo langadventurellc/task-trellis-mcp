@@ -1,4 +1,4 @@
-import { Repository } from "../repositories/Repository.js";
+import { Repository } from "../repositories";
 
 export const appendObjectLogTool = {
   name: "append_object_log",

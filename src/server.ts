@@ -78,7 +78,7 @@ const server = new Server(
     capabilities: {
       tools: {},
     },
-  }
+  },
 );
 
 server.setRequestHandler(ListToolsRequestSchema, () => {
@@ -144,7 +144,7 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
           text: `Activated in ${mode} mode. Server config updated: ${JSON.stringify(
             serverConfig,
             null,
-            2
+            2,
           )}`,
         },
       ],

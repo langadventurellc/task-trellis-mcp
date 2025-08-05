@@ -1,4 +1,4 @@
-import { Repository } from "../repositories/Repository.js";
+import { Repository } from "../repositories";
 
 export const claimTaskTool = {
   name: "claim_task",

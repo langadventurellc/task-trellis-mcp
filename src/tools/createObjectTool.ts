@@ -1,4 +1,11 @@
-import { Repository } from "../repositories/Repository.js";
+import {
+  TrellisObject,
+  TrellisObjectPriority,
+  TrellisObjectStatus,
+  TrellisObjectType,
+} from "../models";
+import { Repository } from "../repositories";
+import { generateUniqueId } from "../utils";
 
 export const createObjectTool = {
   name: "create_object",
@@ -46,7 +53,10 @@ export const createObjectTool = {
   },
 } as const;
 
-export function handleCreateObject(repository: Repository, args: unknown) {
+export async function handleCreateObject(
+  repository: Repository,
+  args: unknown,
+) {
   const {
     kind,
     title,
@@ -54,7 +64,7 @@ export function handleCreateObject(repository: Repository, args: unknown) {
     priority = "medium",
     status = "draft",
     prerequisites = [],
-    description,
+    description = "",
   } = args as {
     kind: string;
     title: string;
@@ -65,24 +75,38 @@ export function handleCreateObject(repository: Repository, args: unknown) {
     description?: string;
   };
 
-  // No-op implementation - just return the received parameters
+  // Get existing objects to generate unique ID
+  const existingObjects = await repository.getObjects(true);
+  const existingIds = existingObjects.map((obj) => obj.id);
+
+  // Generate unique ID
+  const objectType = kind as TrellisObjectType;
+  const id = generateUniqueId(title, objectType, existingIds);
+
+  // Create TrellisObject
+  const trellisObject: TrellisObject = {
+    id,
+    type: objectType,
+    title,
+    status: status as TrellisObjectStatus,
+    priority: priority as TrellisObjectPriority,
+    parent,
+    prerequisites,
+    affectedFiles: new Map(),
+    log: [],
+    schema: "v1.0",
+    childrenIds: [],
+    body: description,
+  };
+
+  // Save through repository
+  await repository.saveObject(trellisObject);
+
   return {
     content: [
       {
         type: "text",
-        text: `Created object: ${JSON.stringify(
-          {
-            kind,
-            title,
-            parent,
-            priority,
-            status,
-            prerequisites,
-            description,
-          },
-          null,
-          2,
-        )}`,
+        text: `Created object with ID: ${id}`,
       },
     ],
   };

@@ -1,4 +1,4 @@
-import { Repository } from "../repositories/Repository.js";
+import { Repository } from "../repositories";
 
 export const completeTaskTool = {
   name: "complete_task",

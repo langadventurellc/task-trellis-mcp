@@ -1,4 +1,4 @@
-import { Repository } from "../repositories/Repository";
+import { Repository } from "../repositories";
 
 export const getObjectTool = {
   name: "get_object",

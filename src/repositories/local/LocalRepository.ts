@@ -18,7 +18,7 @@ export class LocalRepository implements Repository {
     }
     if (!config.planningRootFolder) {
       throw new Error(
-        "LocalRepository requires planningRootFolder to be configured"
+        "LocalRepository requires planningRootFolder to be configured",
       );
     }
   }
@@ -34,7 +34,7 @@ export class LocalRepository implements Repository {
 
     const markdownFiles = await findMarkdownFiles(
       this.config.planningRootFolder!,
-      includeClosed
+      includeClosed,
     );
 
     const objects: TrellisObject[] = [];
