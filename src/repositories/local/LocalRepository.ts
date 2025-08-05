@@ -1,4 +1,4 @@
-import ServerConfig from "../../configuration/ServerConfig";
+import { ServerConfig } from "../../configuration/ServerConfig";
 import { TrellisObject } from "../../models";
 import { Repository } from "../Repository";
 
@@ -6,7 +6,7 @@ import { Repository } from "../Repository";
  * Local file-based repository implementation.
  * Manages Trellis objects stored as markdown files in the local filesystem.
  */
-export default class LocalRepository implements Repository {
+export class LocalRepository implements Repository {
   /**
    * Creates a new LocalRepository instance.
    *
@@ -18,13 +18,13 @@ export default class LocalRepository implements Repository {
     }
     if (!config.planningRootFolder) {
       throw new Error(
-        "LocalRepository requires localRepositoryPath to be configured",
+        "LocalRepository requires planningRootFolder to be configured"
       );
     }
   }
 
   async getObjectById(id: string) {
-    const { getObjectById } = await import("./getObjectById");
+    const { getObjectById } = await import("./getObjectById.js");
     return await getObjectById(id, this.config.planningRootFolder!);
   }
 
@@ -34,7 +34,7 @@ export default class LocalRepository implements Repository {
 
     const markdownFiles = await findMarkdownFiles(
       this.config.planningRootFolder!,
-      includeClosed,
+      includeClosed
     );
 
     const objects: TrellisObject[] = [];
@@ -58,8 +58,10 @@ export default class LocalRepository implements Repository {
     await saveObjectImpl(trellisObject, this.config.planningRootFolder!);
   }
 
-  async deleteObject(id: string) {
+  async deleteObject(id: string): Promise<void> {
     const { deleteObjectById } = await import("./deleteObjectById");
-    return await deleteObjectById(id, this.config.planningRootFolder!);
+    await deleteObjectById(id, this.config.planningRootFolder!);
   }
 }
+
+export default LocalRepository;

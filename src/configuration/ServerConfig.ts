@@ -1,4 +1,4 @@
-export default interface ServerConfig {
+export interface ServerConfig {
   mode: "local" | "remote";
   planningRootFolder?: string;
   remoteRepositoryUrl?: string;

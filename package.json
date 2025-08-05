@@ -12,7 +12,6 @@
   },
   "license": "GPL-3.0-only",
   "author": "LangAdventure LLC",
-  "type": "module",
   "main": "dist/server.js",
   "bin": {
     "task-trellis-mcp": "dist/server.js"

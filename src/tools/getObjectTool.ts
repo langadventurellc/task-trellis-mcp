@@ -1,4 +1,4 @@
-import { Repository } from "../repositories/Repository.js";
+import { Repository } from "../repositories/Repository";
 
 export const getObjectTool = {
   name: "get_object",
@@ -15,18 +15,41 @@ export const getObjectTool = {
   },
 } as const;
 
-export function handleGetObject(repository: Repository, args: unknown) {
+export async function handleGetObject(repository: Repository, args: unknown) {
   const { id } = args as {
     id: string;
   };
 
-  // No-op implementation - just return the received parameters
-  return {
-    content: [
-      {
-        type: "text",
-        text: `Retrieved object: ${JSON.stringify({ id }, null, 2)}`,
-      },
-    ],
-  };
+  try {
+    const object = await repository.getObjectById(id);
+
+    if (!object) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Object with ID "${id}" not found`,
+          },
+        ],
+      };
+    }
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Retrieved object: ${JSON.stringify(object, null, 2)}`,
+        },
+      ],
+    };
+  } catch (error) {
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Error retrieving object with ID "${id}": ${error instanceof Error ? error.message : String(error)}`,
+        },
+      ],
+    };
+  }
 }

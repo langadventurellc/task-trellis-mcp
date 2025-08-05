@@ -8,9 +8,8 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { Command } from "commander";
 import path from "path";
-import ServerConfig from "./configuration/ServerConfig.js";
-import { Repository } from "./repositories/Repository.js";
-import LocalRepository from "./repositories/local/LocalRepository.js";
+import { ServerConfig } from "./configuration";
+import { LocalRepository, Repository } from "./repositories";
 import {
   activateTool,
   appendObjectLogTool,
@@ -31,7 +30,7 @@ import {
   listObjectsTool,
   pruneClosedTool,
   updateObjectTool,
-} from "./tools/index.js";
+} from "./tools";
 
 // Parse command line arguments
 const program = new Command();
@@ -79,7 +78,7 @@ const server = new Server(
     capabilities: {
       tools: {},
     },
-  },
+  }
 );
 
 server.setRequestHandler(ListToolsRequestSchema, () => {
@@ -118,6 +117,40 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
     };
   }
 
+  if (toolName === "activate") {
+    const { mode, projectRoot, apiToken, url, remoteProjectId } = args as {
+      mode: "local" | "remote";
+      projectRoot?: string;
+      apiToken?: string;
+      url?: string;
+      remoteProjectId?: string;
+    };
+
+    // Update server config based on activate parameters
+    serverConfig.mode = mode;
+
+    if (mode === "local" && projectRoot) {
+      serverConfig.planningRootFolder = path.join(projectRoot, ".trellis");
+    } else if (mode === "remote") {
+      if (url) serverConfig.remoteRepositoryUrl = url;
+      if (apiToken) serverConfig.remoteRepositoryApiToken = apiToken;
+      if (remoteProjectId) serverConfig.remoteProjectId = remoteProjectId;
+    }
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Activated in ${mode} mode. Server config updated: ${JSON.stringify(
+            serverConfig,
+            null,
+            2
+          )}`,
+        },
+      ],
+    };
+  }
+
   const repository = getRepository();
 
   switch (toolName) {
@@ -139,39 +172,7 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
       return handleCompleteTask(repository, args);
     case "prune_closed":
       return handlePruneClosed(repository, args);
-    case "activate": {
-      const { mode, projectRoot, apiToken, url, remoteProjectId } = args as {
-        mode: "local" | "remote";
-        projectRoot?: string;
-        apiToken?: string;
-        url?: string;
-        remoteProjectId?: string;
-      };
-
-      // Update server config based on activate parameters
-      serverConfig.mode = mode;
-
-      if (mode === "local" && projectRoot) {
-        serverConfig.planningRootFolder = path.join(projectRoot, ".trellis");
-      } else if (mode === "remote") {
-        if (url) serverConfig.remoteRepositoryUrl = url;
-        if (apiToken) serverConfig.remoteRepositoryApiToken = apiToken;
-        if (remoteProjectId) serverConfig.remoteProjectId = remoteProjectId;
-      }
-
-      return {
-        content: [
-          {
-            type: "text",
-            text: `Activated in ${mode} mode. Server config updated: ${JSON.stringify(
-              serverConfig,
-              null,
-              2,
-            )}`,
-          },
-        ],
-      };
-    }
+    case "activate":
     default:
       throw new Error(`Unknown tool: ${toolName}`);
   }
