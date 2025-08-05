@@ -56,9 +56,9 @@ export class LocalRepository implements Repository {
     await saveObjectImpl(trellisObject, this.config.planningRootFolder!);
   }
 
-  async deleteObject(id: string): Promise<void> {
+  async deleteObject(id: string, force?: boolean): Promise<void> {
     const { deleteObjectById } = await import("./deleteObjectById");
-    await deleteObjectById(id, this.config.planningRootFolder!);
+    await deleteObjectById(id, this.config.planningRootFolder!, force);
   }
 }
 

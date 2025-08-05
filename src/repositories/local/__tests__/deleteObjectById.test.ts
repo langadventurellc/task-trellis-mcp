@@ -1,5 +1,5 @@
 import { join } from "path";
-import { cp, rm, access, readdir } from "fs/promises";
+import { cp, rm, access, readdir, writeFile } from "fs/promises";
 import { constants } from "fs";
 import { TrellisObjectType } from "../../../models";
 import { deleteObjectById } from "../deleteObjectById";
@@ -234,6 +234,89 @@ describe("deleteObjectById - Integration Tests", () => {
       await expect(
         access(projectsRootPath, constants.F_OK),
       ).resolves.not.toThrow();
+    });
+  });
+
+  describe("Force parameter functionality", () => {
+    beforeEach(async () => {
+      // Create test objects with prerequisite relationships
+      const taskWithPrerequisite = `---
+id: T-dependent-task
+title: Dependent Task
+status: open
+priority: medium
+schema: v1.0
+prerequisites:
+  - T-setup-database
+parent: F-user-authentication
+created: 2025-01-15T14:00:00Z
+updated: 2025-01-15T14:00:00Z
+---
+
+# Dependent Task
+
+This task depends on T-setup-database.
+`;
+
+      await writeFile(
+        join(
+          testPlanningRoot,
+          "f",
+          "F-user-authentication",
+          "t",
+          "open",
+          "T-dependent-task.md",
+        ),
+        taskWithPrerequisite,
+      );
+    });
+
+    it("should throw error when trying to delete object required by others without force", async () => {
+      // Try to delete T-setup-database which is required by T-dependent-task
+      await expect(
+        deleteObjectById("T-setup-database", testPlanningRoot),
+      ).rejects.toThrow(
+        "Cannot delete object T-setup-database because it is required by other objects. Use force=true to override.",
+      );
+
+      // Verify the object still exists
+      const task = await getObjectById("T-setup-database", testPlanningRoot);
+      expect(task).not.toBeNull();
+    });
+
+    it("should delete object required by others when force=true", async () => {
+      // Verify the prerequisite relationship exists
+      const dependentTask = await getObjectById(
+        "T-dependent-task",
+        testPlanningRoot,
+      );
+      expect(dependentTask).not.toBeNull();
+      expect(dependentTask!.prerequisites).toContain("T-setup-database");
+
+      // Delete T-setup-database with force=true
+      await deleteObjectById("T-setup-database", testPlanningRoot, true);
+
+      // Verify the object no longer exists
+      const result = await getObjectById("T-setup-database", testPlanningRoot);
+      expect(result).toBeNull();
+    });
+
+    it("should delete object not required by others without force parameter", async () => {
+      // Delete a task that has no dependencies (T-dependent-task doesn't depend on T-implement-login)
+      await deleteObjectById("T-implement-login", testPlanningRoot);
+
+      // Verify the task no longer exists
+      const result = await getObjectById("T-implement-login", testPlanningRoot);
+      expect(result).toBeNull();
+    });
+
+    it("should delete object not required by others with force=false", async () => {
+      // Delete a task that has no dependencies with explicit force=false
+      await deleteObjectById("T-implement-login", testPlanningRoot, false);
+
+      // Verify the task no longer exists
+      const result = await getObjectById("T-implement-login", testPlanningRoot);
+      expect(result).toBeNull();
     });
   });
 

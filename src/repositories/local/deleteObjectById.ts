@@ -2,23 +2,34 @@ import { readFile, unlink, rm } from "fs/promises";
 import { dirname } from "path";
 import { deserializeTrellisObject } from "../../utils/deserializeTrellisObject";
 import { findMarkdownFiles } from "./findMarkdownFiles";
+import { isRequiredForOtherObjects } from "../../utils/isRequiredForOtherObjects";
+import { ServerConfig } from "../../configuration/ServerConfig";
 
 /**
  * Deletes a TrellisObject by its ID, including both the markdown file and associated folder
+ *
+ * By default, the function checks if the object is required by other objects (as a prerequisite)
+ * and throws an error if it is. This safety check can be bypassed using the force parameter.
+ *
  * @param id The ID of the object to delete
  * @param planningRoot The root directory to search for markdown files
+ * @param force Optional. If true, bypasses dependency checks and deletes the object even if required by others. Defaults to false.
  * @returns Promise resolving when the object is successfully deleted
- * @throws Error if no object with the given ID is found or if deletion fails
+ * @throws Error if no object with the given ID is found
+ * @throws Error if object is required by other objects and force is false
+ * @throws Error if deletion fails due to file system issues
  */
 export async function deleteObjectById(
   id: string,
   planningRoot: string,
+  force?: boolean,
 ): Promise<void> {
   // Find all markdown files in the planning root
   const markdownFiles = await findMarkdownFiles(planningRoot);
 
   // Search through each markdown file to find the one with the matching ID
   let targetFilePath: string | null = null;
+  let targetObject = null;
 
   for (const filePath of markdownFiles) {
     try {
@@ -28,6 +39,7 @@ export async function deleteObjectById(
       // Check if this object has the ID we're looking for
       if (trellisObject.id === id) {
         targetFilePath = filePath;
+        targetObject = trellisObject;
         break;
       }
     } catch (error) {
@@ -37,8 +49,29 @@ export async function deleteObjectById(
     }
   }
 
-  if (!targetFilePath) {
+  if (!targetFilePath || !targetObject) {
     throw new Error(`No object found with ID: ${id}`);
+  }
+
+  // Check if the object is required for other objects unless force is true
+  if (!force) {
+    // Create a LocalRepository instance to check dependencies
+    const { LocalRepository } = await import("./LocalRepository");
+    const config: ServerConfig = {
+      mode: "local",
+      planningRootFolder: planningRoot,
+    };
+    const repository = new LocalRepository(config);
+
+    const isRequired = await isRequiredForOtherObjects(
+      targetObject,
+      repository,
+    );
+    if (isRequired) {
+      throw new Error(
+        `Cannot delete object ${id} because it is required by other objects. Use force=true to override.`,
+      );
+    }
   }
 
   // Delete the markdown file

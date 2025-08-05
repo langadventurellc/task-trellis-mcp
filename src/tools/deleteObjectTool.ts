@@ -20,19 +20,34 @@ export const deleteObjectTool = {
   },
 } as const;
 
-export function handleDeleteObject(repository: Repository, args: unknown) {
+export async function handleDeleteObject(
+  repository: Repository,
+  args: unknown,
+) {
   const { id, force = false } = args as {
     id: string;
     force?: boolean;
   };
 
-  // No-op implementation - just return the received parameters
-  return {
-    content: [
-      {
-        type: "text",
-        text: `Deleted object: ${JSON.stringify({ id, force }, null, 2)}`,
-      },
-    ],
-  };
+  try {
+    await repository.deleteObject(id, force);
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Successfully deleted object: ${id}`,
+        },
+      ],
+    };
+  } catch (error) {
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Error deleting object with ID "${id}": ${error instanceof Error ? error.message : String(error)}`,
+        },
+      ],
+    };
+  }
 }

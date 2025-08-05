@@ -15,5 +15,5 @@ export interface Repository {
     priority?: TrellisObjectPriority,
   ): Promise<TrellisObject[]>;
   saveObject(trellisObject: TrellisObject): Promise<void>;
-  deleteObject(id: string): Promise<void>;
+  deleteObject(id: string, force?: boolean): Promise<void>;
 }
