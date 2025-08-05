@@ -1,4 +1,5 @@
-import { matchesScope, filterByScope } from "../scopeFilter";
+import { filterByScope } from "../filterByScope";
+import { matchesScope } from "../scopeFilter";
 
 describe("scopeFilter", () => {
   describe("matchesScope", () => {

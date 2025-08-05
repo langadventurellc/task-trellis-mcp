@@ -61,5 +61,3 @@ export class LocalRepository implements Repository {
     await deleteObjectById(id, this.config.planningRootFolder!, force);
   }
 }
-
-export default LocalRepository;

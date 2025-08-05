@@ -4,6 +4,10 @@ import sonarjs from 'eslint-plugin-sonarjs';
 import { dirname } from 'path';
 import tseslint from 'typescript-eslint';
 import { fileURLToPath } from 'url';
+import {
+  multipleExportsPlugin,
+  statementCountPlugin,
+} from '@langadventurellc/tsla-linter';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -36,6 +40,10 @@ const eslintConfig = [
         tsconfigRootDir: __dirname,
       },
     },
+    plugins: {
+      'statement-count': statementCountPlugin,
+      'multiple-exports': multipleExportsPlugin,
+    },
     rules: {
       // TypeScript specific rules
       '@typescript-eslint/no-unused-vars': [
@@ -47,6 +55,22 @@ const eslintConfig = [
       'prefer-const': 'error',
       'no-var': 'error',
       'max-lines': ['warn', { max: 600, skipBlankLines: true }],
+      "statement-count/function-statement-count-warn": "warn",
+      "statement-count/function-statement-count-error": "error",
+      "statement-count/class-statement-count-warn": "warn",
+      "statement-count/class-statement-count-error": "error",
+      "multiple-exports/no-multiple-exports": [
+        "error",
+        {
+          checkClasses: true,
+          checkFunctions: true,
+          checkInterfaces: true,
+          checkTypes: true,
+          checkVariables: true,
+          excludeConstants: true,
+          ignoreBarrelFiles: true,
+        },
+      ],
     },
   },
 

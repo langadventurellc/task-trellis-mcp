@@ -1,5 +1,6 @@
 import type { Repository } from "../repositories/Repository.js";
-import { ValidationError, ValidationErrorCodes } from "./ValidationError.js";
+import { ValidationError } from "./ValidationError.js";
+import { ValidationErrorCodes } from "./ValidationErrorCodes.js";
 
 /**
  * Validates that a parent object exists in the repository.

@@ -22,26 +22,24 @@ export async function checkPrerequisitesComplete(
     return true;
   }
 
-  // Load all prerequisite objects
-  const prerequisiteLoadPromises = trellisObject.prerequisites.map((id) =>
-    repository.getObjectById(id),
-  );
+  // Use bulk getObjects call for better performance
+  const allObjects = await repository.getObjects();
+  const objectMap = new Map<string, TrellisObject>();
+  allObjects.forEach((obj) => objectMap.set(obj.id, obj));
 
-  const prerequisiteObjects = await Promise.all(prerequisiteLoadPromises);
+  // Check if any prerequisite that exists in our system is not complete
+  for (const prerequisiteId of trellisObject.prerequisites) {
+    const prerequisiteObj = objectMap.get(prerequisiteId);
 
-  // Check if any prerequisite is missing or not closed
-  for (let i = 0; i < prerequisiteObjects.length; i++) {
-    const prerequisite = prerequisiteObjects[i];
-
-    // If prerequisite doesn't exist, return false
-    if (!prerequisite) {
-      return false;
+    // If prerequisite is not in our system, it's fine (external dependency)
+    if (!prerequisiteObj) {
+      continue;
     }
 
-    // If prerequisite is not in a closed state (DONE or WONT_DO), return false
+    // If prerequisite is in our system but not done or wont-do, it's blocking
     if (
-      prerequisite.status !== TrellisObjectStatus.DONE &&
-      prerequisite.status !== TrellisObjectStatus.WONT_DO
+      prerequisiteObj.status !== TrellisObjectStatus.DONE &&
+      prerequisiteObj.status !== TrellisObjectStatus.WONT_DO
     ) {
       return false;
     }

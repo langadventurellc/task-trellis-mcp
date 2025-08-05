@@ -177,7 +177,7 @@ describe("checkPrerequisitesComplete", () => {
     expect(result).toBe(false);
   });
 
-  it("should return false when prerequisite does not exist in repository", async () => {
+  it("should return true when prerequisite does not exist in repository (external dependency)", async () => {
     const object = createMockObject("task-1", TrellisObjectStatus.OPEN, [
       "nonexistent-prereq",
     ]);
@@ -186,11 +186,28 @@ describe("checkPrerequisitesComplete", () => {
 
     const result = await checkPrerequisitesComplete(object, repository);
 
-    expect(result).toBe(false);
+    expect(result).toBe(true);
   });
 
-  it("should return false when some prerequisites exist and some don't", async () => {
+  it("should return true when some prerequisites exist (complete) and some don't (external)", async () => {
     const prereq1 = createMockObject("prereq-1", TrellisObjectStatus.DONE);
+    const object = createMockObject("task-1", TrellisObjectStatus.OPEN, [
+      "prereq-1",
+      "nonexistent-prereq",
+    ]);
+
+    const repository = new MockRepository([prereq1]);
+
+    const result = await checkPrerequisitesComplete(object, repository);
+
+    expect(result).toBe(true);
+  });
+
+  it("should return false when some prerequisites exist (incomplete) and some don't (external)", async () => {
+    const prereq1 = createMockObject(
+      "prereq-1",
+      TrellisObjectStatus.IN_PROGRESS,
+    );
     const object = createMockObject("task-1", TrellisObjectStatus.OPEN, [
       "prereq-1",
       "nonexistent-prereq",
@@ -251,10 +268,10 @@ describe("checkPrerequisitesComplete", () => {
       "prereq-1",
     ]);
 
-    // Mock repository that throws an error
+    // Mock repository that throws an error on getObjects
     const mockRepository = {
-      getObjectById: jest.fn().mockRejectedValue(new Error("Repository error")),
-      getObjects: jest.fn(),
+      getObjectById: jest.fn(),
+      getObjects: jest.fn().mockRejectedValue(new Error("Repository error")),
       saveObject: jest.fn(),
       deleteObject: jest.fn(),
     };

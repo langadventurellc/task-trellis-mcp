@@ -1,12 +1,13 @@
-import { Repository } from "../../repositories/Repository";
 import {
   TrellisObject,
-  TrellisObjectType,
-  TrellisObjectStatus,
   TrellisObjectPriority,
+  TrellisObjectStatus,
+  TrellisObjectType,
 } from "../../models";
+import { Repository } from "../../repositories/Repository";
 import { validateParentExists } from "../validateParentExists";
-import { ValidationError, ValidationErrorCodes } from "../ValidationError";
+import { ValidationError } from "../ValidationError";
+import { ValidationErrorCodes } from "../ValidationErrorCodes";
 
 describe("validateParentExists", () => {
   let mockRepository: jest.Mocked<Repository>;
