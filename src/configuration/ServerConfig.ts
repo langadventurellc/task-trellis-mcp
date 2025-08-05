@@ -1,6 +1,7 @@
 export default interface ServerConfig {
   mode: "local" | "remote";
-  localRepositoryPath?: string;
+  planningRootFolder?: string;
   remoteRepositoryUrl?: string;
+  remoteProjectId?: string;
   remoteRepositoryApiToken?: string;
 }

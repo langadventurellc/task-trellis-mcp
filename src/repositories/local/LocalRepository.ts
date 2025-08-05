@@ -16,7 +16,7 @@ export default class LocalRepository implements Repository {
     if (config.mode !== "local") {
       throw new Error("LocalRepository requires mode to be 'local'");
     }
-    if (!config.localRepositoryPath) {
+    if (!config.planningRootFolder) {
       throw new Error(
         "LocalRepository requires localRepositoryPath to be configured",
       );
@@ -25,7 +25,7 @@ export default class LocalRepository implements Repository {
 
   async getObjectById(id: string) {
     const { getObjectById } = await import("./getObjectById");
-    return await getObjectById(id, this.config.localRepositoryPath!);
+    return await getObjectById(id, this.config.planningRootFolder!);
   }
 
   async getObjects(includeClosed?: boolean) {
@@ -33,7 +33,7 @@ export default class LocalRepository implements Repository {
     const { getObjectByFilePath } = await import("./getObjectByFilePath");
 
     const markdownFiles = await findMarkdownFiles(
-      this.config.localRepositoryPath!,
+      this.config.planningRootFolder!,
       includeClosed,
     );
 
@@ -55,11 +55,11 @@ export default class LocalRepository implements Repository {
 
   async saveObject(trellisObject: TrellisObject): Promise<void> {
     const { saveObject: saveObjectImpl } = await import("./saveObject");
-    await saveObjectImpl(trellisObject, this.config.localRepositoryPath!);
+    await saveObjectImpl(trellisObject, this.config.planningRootFolder!);
   }
 
   async deleteObject(id: string) {
     const { deleteObjectById } = await import("./deleteObjectById");
-    return await deleteObjectById(id, this.config.localRepositoryPath!);
+    return await deleteObjectById(id, this.config.planningRootFolder!);
   }
 }
