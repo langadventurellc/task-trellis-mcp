@@ -1,6 +1,6 @@
+import ServerConfig from "../../configuration/ServerConfig";
 import { TrellisObject } from "../../models";
 import { Repository } from "../Repository";
-import ServerConfig from "../../configuration/ServerConfig";
 
 /**
  * Local file-based repository implementation.
@@ -25,7 +25,7 @@ export default class LocalRepository implements Repository {
 
   async getObjectById(id: string) {
     const { getObjectById } = await import("./getObjectById");
-    return getObjectById(id, this.config.localRepositoryPath!);
+    return await getObjectById(id, this.config.localRepositoryPath!);
   }
 
   async getObjects(includeClosed?: boolean) {
@@ -53,10 +53,13 @@ export default class LocalRepository implements Repository {
     return objects;
   }
 
-  async saveObject(_trellisObject: TrellisObject) {}
+  async saveObject(trellisObject: TrellisObject): Promise<void> {
+    const { saveObject: saveObjectImpl } = await import("./saveObject");
+    await saveObjectImpl(trellisObject, this.config.localRepositoryPath!);
+  }
 
   async deleteObject(id: string) {
     const { deleteObjectById } = await import("./deleteObjectById");
-    return deleteObjectById(id, this.config.localRepositoryPath!);
+    return await deleteObjectById(id, this.config.localRepositoryPath!);
   }
 }
