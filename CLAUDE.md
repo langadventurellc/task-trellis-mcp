@@ -14,7 +14,7 @@ An MCP (Model Context Protocol) server for Task Trellis, a task management appli
 
 **IMPORTANT** Run the following commands to ensure code quality after every change. Fix all issues as soon as possible.
 
-- `npm quality` - Run linting, formatting, and type checks
+- `npm run quality` - Run linting, formatting, and type checks
 - `npm test` - Run unit tests to ensure functionality
 
 ### Commands

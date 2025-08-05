@@ -1,5 +1,6 @@
 import { readdir, stat } from "fs/promises";
 import { join } from "path";
+import { matchesScope } from "./scopeFilter";
 
 /**
  * Recursively finds all markdown files in a directory and its subdirectories
@@ -32,14 +33,9 @@ export async function findMarkdownFiles(
           }
 
           // If scope is provided, filter files to only include those within the scope
-          if (scope) {
-            const scopePattern = `/${scope}/`;
-            const matches = fullPath.includes(scopePattern);
-            // Match files within the scope directory or the scope file itself
-            if (!matches) {
-              // console.log(`Skipping file ${fullPath} not in scope ${scope}`);
-              continue;
-            }
+          if (scope && !matchesScope(fullPath, scope)) {
+            // console.log(`Skipping file ${fullPath} not in scope ${scope}`);
+            continue;
           }
 
           markdownFiles.push(fullPath);

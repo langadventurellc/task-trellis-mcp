@@ -1,9 +1,10 @@
-import { TrellisObject } from "../../models";
+import { TrellisObject, TrellisObjectType } from "../../models";
 
 export async function getObjects(
   planningRootFolder: string,
   includeClosed = false,
   scope?: string,
+  type?: TrellisObjectType,
 ): Promise<TrellisObject[]> {
   const { findMarkdownFiles } = await import("./findMarkdownFiles");
   const { getObjectByFilePath } = await import("./getObjectByFilePath");
@@ -19,6 +20,9 @@ export async function getObjects(
   for (const filePath of markdownFiles) {
     try {
       const trellisObject = await getObjectByFilePath(filePath);
+      if (type && trellisObject.type !== type) {
+        continue; // Skip if type filter is applied and doesn't match
+      }
       objects.push(trellisObject);
     } catch (error) {
       // Skip files that can't be deserialized (might not be valid Trellis objects)
