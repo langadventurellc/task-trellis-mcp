@@ -1,6 +1,6 @@
-import { TrellisObjectType } from "./TrellisObjectType";
-import { TrellisObjectStatus } from "./TrellisObjectStatus";
 import { TrellisObjectPriority } from "./TrellisObjectPriority";
+import { TrellisObjectStatus } from "./TrellisObjectStatus";
+import { TrellisObjectType } from "./TrellisObjectType";
 
 export interface TrellisObject {
   id: string;
@@ -8,6 +8,7 @@ export interface TrellisObject {
   title: string;
   status: TrellisObjectStatus;
   priority: TrellisObjectPriority;
+  parent?: string;
   prerequisites: string[];
   affectedFiles: Map<string, string>;
   log: string[];
