@@ -73,7 +73,6 @@ describe("updateObjectTool", () => {
       expect(mockValidateStatusTransition).toHaveBeenCalledWith(
         expectedUpdatedObject,
         mockRepository,
-        false,
       );
       expect(mockRepository.saveObject).toHaveBeenCalledWith(
         expectedUpdatedObject,
@@ -137,7 +136,6 @@ describe("updateObjectTool", () => {
           status: "in-progress",
         }),
         mockRepository,
-        false,
       );
       expect(mockRepository.saveObject).toHaveBeenCalled();
       expect(result.content[0].text).toContain("Successfully updated object:");
@@ -159,7 +157,6 @@ describe("updateObjectTool", () => {
           status: "done",
         }),
         mockRepository,
-        false,
       );
       expect(mockRepository.saveObject).toHaveBeenCalled();
       expect(result.content[0].text).toContain("Successfully updated object:");
@@ -184,10 +181,9 @@ describe("updateObjectTool", () => {
       );
     });
 
-    it("should pass force parameter to validation function", async () => {
+    it("should bypass validation when force is true", async () => {
       mockRepository.getObjectById.mockResolvedValue(mockTrellisObject);
       mockRepository.saveObject.mockResolvedValue();
-      mockValidateStatusTransition.mockResolvedValue();
 
       const result = await handleUpdateObject(mockRepository, {
         id: "T-test-task",
@@ -195,14 +191,7 @@ describe("updateObjectTool", () => {
         force: true,
       });
 
-      expect(mockValidateStatusTransition).toHaveBeenCalledWith(
-        expect.objectContaining({
-          ...mockTrellisObject,
-          status: "in-progress",
-        }),
-        mockRepository,
-        true,
-      );
+      expect(mockValidateStatusTransition).not.toHaveBeenCalled();
       expect(mockRepository.saveObject).toHaveBeenCalled();
       expect(result.content[0].text).toContain("Successfully updated object:");
     });
@@ -297,7 +286,6 @@ describe("updateObjectTool", () => {
       expect(mockValidateStatusTransition).toHaveBeenCalledWith(
         expectedUpdatedObject,
         mockRepository,
-        false,
       );
       expect(mockRepository.saveObject).toHaveBeenCalledWith(
         expectedUpdatedObject,

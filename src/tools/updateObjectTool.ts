@@ -1,10 +1,10 @@
-import { Repository } from "../repositories";
-import { validateStatusTransition } from "../validation/validateStatusTransition";
 import {
   TrellisObject,
-  TrellisObjectStatus,
   TrellisObjectPriority,
+  TrellisObjectStatus,
 } from "../models";
+import { Repository } from "../repositories";
+import { validateStatusTransition } from "../validation/validateStatusTransition";
 
 export const updateObjectTool = {
   name: "update_object",
@@ -89,8 +89,8 @@ export async function handleUpdateObject(
     };
 
     // Validate status transition
-    if (status) {
-      await validateStatusTransition(updatedObject, repository, force);
+    if (status && !force) {
+      await validateStatusTransition(updatedObject, repository);
     }
 
     // Save the updated object

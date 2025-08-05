@@ -9,19 +9,12 @@ import { checkPrerequisitesComplete } from "../utils/checkPrerequisitesComplete.
  *
  * @param trellisObject - The object with the new status to validate
  * @param repository - Repository for checking prerequisite objects
- * @param force - If true, bypasses prerequisite validation
  * @throws Error if status transition is not allowed due to incomplete prerequisites
  */
 export async function validateStatusTransition(
   trellisObject: TrellisObject,
   repository: Repository,
-  force: boolean = false,
 ): Promise<void> {
-  // If force is true, skip all validation
-  if (force) {
-    return;
-  }
-
   // Only validate transitions to IN_PROGRESS and DONE
   const requiresPrerequisiteValidation =
     trellisObject.status === TrellisObjectStatus.IN_PROGRESS ||

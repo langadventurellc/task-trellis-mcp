@@ -1,10 +1,10 @@
-import { Repository } from "../../repositories/Repository";
 import {
   TrellisObject,
-  TrellisObjectType,
-  TrellisObjectStatus,
   TrellisObjectPriority,
+  TrellisObjectStatus,
+  TrellisObjectType,
 } from "../../models";
+import { Repository } from "../../repositories/Repository";
 import { validateStatusTransition } from "../validateStatusTransition";
 
 // Mock the checkPrerequisitesComplete function
@@ -143,45 +143,6 @@ describe("validateStatusTransition", () => {
 
       await expect(
         validateStatusTransition(object, mockRepository),
-      ).resolves.not.toThrow();
-
-      expect(mockCheckPrerequisitesComplete).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("Force parameter", () => {
-    it("should bypass validation when force is true for IN_PROGRESS", async () => {
-      const object = createMockObject(
-        "T-test",
-        TrellisObjectStatus.IN_PROGRESS,
-      );
-
-      await expect(
-        validateStatusTransition(object, mockRepository, true),
-      ).resolves.not.toThrow();
-
-      expect(mockCheckPrerequisitesComplete).not.toHaveBeenCalled();
-    });
-
-    it("should bypass validation when force is true for DONE", async () => {
-      const object = createMockObject("T-test", TrellisObjectStatus.DONE);
-
-      await expect(
-        validateStatusTransition(object, mockRepository, true),
-      ).resolves.not.toThrow();
-
-      expect(mockCheckPrerequisitesComplete).not.toHaveBeenCalled();
-    });
-
-    it("should bypass validation when force is true even with incomplete prerequisites", async () => {
-      const object = createMockObject(
-        "T-test",
-        TrellisObjectStatus.IN_PROGRESS,
-        ["T-prereq-1"],
-      );
-
-      await expect(
-        validateStatusTransition(object, mockRepository, true),
       ).resolves.not.toThrow();
 
       expect(mockCheckPrerequisitesComplete).not.toHaveBeenCalled();
