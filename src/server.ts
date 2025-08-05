@@ -6,6 +6,28 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
+import {
+  activateTool,
+  appendObjectLogTool,
+  claimTaskTool,
+  completeTaskTool,
+  createObjectTool,
+  deleteObjectTool,
+  getObjectTool,
+  handleActivate,
+  handleAppendObjectLog,
+  handleClaimTask,
+  handleCompleteTask,
+  handleCreateObject,
+  handleDeleteObject,
+  handleGetObject,
+  handleListObjects,
+  handlePruneClosed,
+  handleUpdateObject,
+  listObjectsTool,
+  pruneClosedTool,
+  updateObjectTool,
+} from "./tools";
 
 const server = new Server(
   {
@@ -16,25 +38,22 @@ const server = new Server(
     capabilities: {
       tools: {},
     },
-  },
+  }
 );
 
 server.setRequestHandler(ListToolsRequestSchema, () => {
   return {
     tools: [
-      {
-        name: "hello_world",
-        description: "Returns a simple hello world greeting",
-        inputSchema: {
-          type: "object",
-          properties: {
-            name: {
-              type: "string",
-              description: "Name to greet (optional)",
-            },
-          },
-        },
-      },
+      createObjectTool,
+      updateObjectTool,
+      getObjectTool,
+      deleteObjectTool,
+      listObjectsTool,
+      appendObjectLogTool,
+      claimTaskTool,
+      completeTaskTool,
+      pruneClosedTool,
+      activateTool,
     ],
   };
 });
@@ -42,16 +61,44 @@ server.setRequestHandler(ListToolsRequestSchema, () => {
 server.setRequestHandler(CallToolRequestSchema, (request) => {
   const { name: toolName, arguments: args } = request.params;
 
-  if (toolName === "hello_world") {
-    const name = (args as { name?: string })?.name || "World";
-    return {
-      content: [
-        {
-          type: "text",
-          text: `Hello, ${name}! This is your Task Trellis MCP server.`,
-        },
-      ],
-    };
+  if (toolName === "create_object") {
+    return handleCreateObject(args);
+  }
+
+  if (toolName === "update_object") {
+    return handleUpdateObject(args);
+  }
+
+  if (toolName === "get_object") {
+    return handleGetObject(args);
+  }
+
+  if (toolName === "delete_object") {
+    return handleDeleteObject(args);
+  }
+
+  if (toolName === "list_objects") {
+    return handleListObjects(args);
+  }
+
+  if (toolName === "append_object_log") {
+    return handleAppendObjectLog(args);
+  }
+
+  if (toolName === "claim_task") {
+    return handleClaimTask(args);
+  }
+
+  if (toolName === "complete_task") {
+    return handleCompleteTask(args);
+  }
+
+  if (toolName === "prune_closed") {
+    return handlePruneClosed(args);
+  }
+
+  if (toolName === "activate") {
+    return handleActivate(args);
   }
 
   throw new Error(`Unknown tool: ${toolName}`);
