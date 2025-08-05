@@ -1,12 +1,12 @@
-import { Repository } from "../../repositories/Repository";
 import {
   TrellisObject,
-  TrellisObjectType,
-  TrellisObjectStatus,
   TrellisObjectPriority,
+  TrellisObjectStatus,
+  TrellisObjectType,
 } from "../../models";
-import { handleCreateObject } from "../createObjectTool";
+import { Repository } from "../../repositories/Repository";
 import { generateUniqueId } from "../../utils/generateUniqueId";
+import { handleCreateObject } from "../createObjectTool";
 
 // Mock the generateUniqueId utility
 jest.mock("../../utils/generateUniqueId");
@@ -53,7 +53,7 @@ describe("createObjectTool", () => {
 
     it("should create a task with minimal required parameters", async () => {
       const args = {
-        kind: "task",
+        type: "task",
         title: "Test Task",
       };
 
@@ -93,7 +93,7 @@ describe("createObjectTool", () => {
       mockGenerateUniqueId.mockReturnValue("P-new-project");
 
       const args = {
-        kind: "project",
+        type: "project",
         title: "New Project",
         priority: "high",
         status: "open",
@@ -152,7 +152,7 @@ describe("createObjectTool", () => {
       mockRepository.getObjectById.mockResolvedValue(mockParentObject);
 
       const args = {
-        kind: "epic",
+        type: "epic",
         title: "Epic Title",
         parent: "P-project",
       };
@@ -187,7 +187,7 @@ describe("createObjectTool", () => {
       mockGenerateUniqueId.mockReturnValue("F-feature-id");
 
       const args = {
-        kind: "feature",
+        type: "feature",
         title: "Feature Title",
         priority: "low",
         status: "in-progress",
@@ -224,7 +224,7 @@ describe("createObjectTool", () => {
       mockGenerateUniqueId.mockReturnValue("T-task-with-prereqs");
 
       const args = {
-        kind: "task",
+        type: "task",
         title: "Task with Prerequisites",
         prerequisites: ["T-setup", "T-config", "F-auth"],
       };
@@ -280,7 +280,7 @@ describe("createObjectTool", () => {
       mockGenerateUniqueId.mockReturnValue("P-unique-project");
 
       const args = {
-        kind: "project",
+        type: "project",
         title: "Unique Project",
       };
 
@@ -298,7 +298,7 @@ describe("createObjectTool", () => {
       mockRepository.getObjects.mockRejectedValue(new Error(errorMessage));
 
       const args = {
-        kind: "task",
+        type: "task",
         title: "Test Task",
       };
 
@@ -315,7 +315,7 @@ describe("createObjectTool", () => {
       mockRepository.saveObject.mockRejectedValue(new Error(errorMessage));
 
       const args = {
-        kind: "task",
+        type: "task",
         title: "Test Task",
       };
 
@@ -332,7 +332,7 @@ describe("createObjectTool", () => {
       mockGenerateUniqueId.mockReturnValue("T-first-task");
 
       const args = {
-        kind: "task",
+        type: "task",
         title: "First Task",
       };
 
@@ -356,23 +356,23 @@ describe("createObjectTool", () => {
     it("should handle all object types correctly", async () => {
       const testCases = [
         {
-          kind: "project",
+          type: "project",
           expectedType: TrellisObjectType.PROJECT,
           expectedId: "P-project",
         },
         {
-          kind: "epic",
+          type: "epic",
           expectedType: TrellisObjectType.EPIC,
           expectedId: "E-epic",
           parent: "P-existing-project",
         },
         {
-          kind: "feature",
+          type: "feature",
           expectedType: TrellisObjectType.FEATURE,
           expectedId: "F-feature",
         },
         {
-          kind: "task",
+          type: "task",
           expectedType: TrellisObjectType.TASK,
           expectedId: "T-task",
         },
@@ -402,8 +402,8 @@ describe("createObjectTool", () => {
         }
 
         const args = {
-          kind: testCase.kind,
-          title: `Test ${testCase.kind}`,
+          type: testCase.type,
+          title: `Test ${testCase.type}`,
           ...(testCase.parent && { parent: testCase.parent }),
         };
 
@@ -434,7 +434,7 @@ describe("createObjectTool", () => {
         mockGenerateUniqueId.mockReturnValue(`T-status-test`);
 
         const args = {
-          kind: "task",
+          type: "task",
           title: "Status Test",
           status: testCase.status,
         };
@@ -461,7 +461,7 @@ describe("createObjectTool", () => {
         mockGenerateUniqueId.mockReturnValue(`T-priority-test`);
 
         const args = {
-          kind: "task",
+          type: "task",
           title: "Priority Test",
           priority: testCase.priority,
         };

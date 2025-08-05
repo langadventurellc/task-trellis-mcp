@@ -6,7 +6,7 @@ export const listObjectsTool = {
   inputSchema: {
     type: "object",
     properties: {
-      kind: {
+      type: {
         type: "string",
         description: "Type of objects to list",
       },
@@ -28,19 +28,19 @@ export const listObjectsTool = {
         default: false,
       },
     },
-    required: ["kind"],
+    required: ["type"],
   },
 } as const;
 
 export function handleListObjects(repository: Repository, args: unknown) {
   const {
-    kind,
+    type,
     scope,
     status,
     priority,
     includeClosed = false,
   } = args as {
-    kind: string;
+    type: string;
     scope?: string;
     status?: string;
     priority?: string;
@@ -54,7 +54,7 @@ export function handleListObjects(repository: Repository, args: unknown) {
         type: "text",
         text: `Listed objects: ${JSON.stringify(
           {
-            kind,
+            type,
             scope,
             status,
             priority,

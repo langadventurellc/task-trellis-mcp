@@ -14,7 +14,7 @@ export const createObjectTool = {
   inputSchema: {
     type: "object",
     properties: {
-      kind: {
+      type: {
         type: "string",
         description: "Type of object to create",
       },
@@ -50,7 +50,7 @@ export const createObjectTool = {
         description: "Description of the object",
       },
     },
-    required: ["kind", "title"],
+    required: ["type", "title"],
   },
 } as const;
 
@@ -59,7 +59,7 @@ export async function handleCreateObject(
   args: unknown,
 ) {
   const {
-    kind,
+    type,
     title,
     parent,
     priority = "medium",
@@ -67,7 +67,7 @@ export async function handleCreateObject(
     prerequisites = [],
     description = "",
   } = args as {
-    kind: string;
+    type: string;
     title: string;
     parent?: string;
     priority?: string;
@@ -81,7 +81,7 @@ export async function handleCreateObject(
   const existingIds = existingObjects.map((obj) => obj.id);
 
   // Generate unique ID
-  const objectType = kind as TrellisObjectType;
+  const objectType = type as TrellisObjectType;
   const id = generateUniqueId(title, objectType, existingIds);
 
   // Create TrellisObject
