@@ -7,13 +7,13 @@ import { findMarkdownFiles } from "./findMarkdownFiles";
  * Gets a TrellisObject by its ID by searching through markdown files
  * @param id The ID of the object to find
  * @param planningRoot The root directory to search for markdown files
- * @returns Promise resolving to the TrellisObject with the matching ID
- * @throws Error if no object with the given ID is found or if file reading fails
+ * @returns Promise resolving to the TrellisObject with the matching ID, or null if not found
+ * @throws Error if file reading fails
  */
 export async function getObjectById(
   id: string,
   planningRoot: string,
-): Promise<TrellisObject> {
+): Promise<TrellisObject | null> {
   // Find all markdown files in the planning root
   const markdownFiles = await findMarkdownFiles(planningRoot);
 
@@ -35,5 +35,5 @@ export async function getObjectById(
   }
 
   // If we get here, no object with the given ID was found
-  throw new Error(`No object found with ID: ${id}`);
+  return null;
 }

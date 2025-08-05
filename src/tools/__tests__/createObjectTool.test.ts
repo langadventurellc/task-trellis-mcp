@@ -92,6 +92,22 @@ describe("createObjectTool", () => {
     it("should create a project with all parameters specified", async () => {
       mockGenerateUniqueId.mockReturnValue("P-new-project");
 
+      // Mock parent object to exist for validation
+      const mockParentObject: TrellisObject = {
+        id: "P-parent-project",
+        type: TrellisObjectType.PROJECT,
+        title: "Parent Project",
+        status: TrellisObjectStatus.OPEN,
+        priority: TrellisObjectPriority.MEDIUM,
+        prerequisites: [],
+        affectedFiles: new Map(),
+        log: [],
+        schema: "v1.0",
+        childrenIds: [],
+        body: "Parent project description",
+      };
+      mockRepository.getObjectById.mockResolvedValue(mockParentObject);
+
       const args = {
         kind: "project",
         title: "New Project",
@@ -135,6 +151,22 @@ describe("createObjectTool", () => {
 
     it("should create an epic with default values", async () => {
       mockGenerateUniqueId.mockReturnValue("E-epic-id");
+
+      // Mock parent object to exist for validation
+      const mockParentObject: TrellisObject = {
+        id: "P-project",
+        type: TrellisObjectType.PROJECT,
+        title: "Parent Project",
+        status: TrellisObjectStatus.OPEN,
+        priority: TrellisObjectPriority.MEDIUM,
+        prerequisites: [],
+        affectedFiles: new Map(),
+        log: [],
+        schema: "v1.0",
+        childrenIds: [],
+        body: "Parent project description",
+      };
+      mockRepository.getObjectById.mockResolvedValue(mockParentObject);
 
       const args = {
         kind: "epic",

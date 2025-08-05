@@ -33,6 +33,10 @@ export async function getObjectFilePath(
       // Feature with parent - need to determine if parent is epic or project
       const parentObject = await getObjectById(parent, planningRoot);
 
+      if (!parentObject) {
+        throw new Error(`Parent object with ID '${parent}' not found`);
+      }
+
       if (parentObject.type === TrellisObjectType.EPIC) {
         // Feature under epic - need to get the project ID from the epic
         if (!parentObject.parent) {
@@ -84,6 +88,10 @@ async function getTaskFilePath(
   // Task with parent - need to determine parent type and hierarchy
   const parentObject = await getObjectById(parent, planningRoot);
 
+  if (!parentObject) {
+    throw new Error(`Parent object with ID '${parent}' not found`);
+  }
+
   if (parentObject.type === TrellisObjectType.FEATURE) {
     if (!parentObject.parent) {
       // Feature doesn't have parent - task goes under standalone feature
@@ -92,6 +100,10 @@ async function getTaskFilePath(
 
     // Feature has parent (epic) - need to get full hierarchy
     const epicObject = await getObjectById(parentObject.parent, planningRoot);
+
+    if (!epicObject) {
+      throw new Error(`Epic object with ID '${parentObject.parent}' not found`);
+    }
 
     if (epicObject.type !== TrellisObjectType.EPIC) {
       throw new Error(`Feature parent ${parentObject.parent} must be an epic`);

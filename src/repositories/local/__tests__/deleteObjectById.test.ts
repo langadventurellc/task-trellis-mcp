@@ -35,29 +35,29 @@ describe("deleteObjectById - Integration Tests", () => {
     it("should delete a standalone task file", async () => {
       // Verify the task exists first
       const task = await getObjectById("T-setup-database", testPlanningRoot);
-      expect(task.type).toBe(TrellisObjectType.TASK);
+      expect(task).not.toBeNull();
+      expect(task!.type).toBe(TrellisObjectType.TASK);
 
       // Delete the task
       await deleteObjectById("T-setup-database", testPlanningRoot);
 
       // Verify the task no longer exists
-      await expect(
-        getObjectById("T-setup-database", testPlanningRoot),
-      ).rejects.toThrow("No object found with ID: T-setup-database");
+      const result = await getObjectById("T-setup-database", testPlanningRoot);
+      expect(result).toBeNull();
     });
 
     it("should delete a task within a feature folder", async () => {
       // Verify the task exists first
       const task = await getObjectById("T-implement-login", testPlanningRoot);
-      expect(task.type).toBe(TrellisObjectType.TASK);
+      expect(task).not.toBeNull();
+      expect(task!.type).toBe(TrellisObjectType.TASK);
 
       // Delete the task
       await deleteObjectById("T-implement-login", testPlanningRoot);
 
       // Verify the task no longer exists
-      await expect(
-        getObjectById("T-implement-login", testPlanningRoot),
-      ).rejects.toThrow("No object found with ID: T-implement-login");
+      const result = await getObjectById("T-implement-login", testPlanningRoot);
+      expect(result).toBeNull();
 
       // Verify the feature folder still exists (only the task file should be deleted)
       const featureFolderPath = join(
@@ -78,7 +78,8 @@ describe("deleteObjectById - Integration Tests", () => {
         "F-user-authentication",
         testPlanningRoot,
       );
-      expect(feature.type).toBe(TrellisObjectType.FEATURE);
+      expect(feature).not.toBeNull();
+      expect(feature!.type).toBe(TrellisObjectType.FEATURE);
 
       // Verify the feature folder exists
       const featureFolderPath = join(
@@ -94,9 +95,11 @@ describe("deleteObjectById - Integration Tests", () => {
       await deleteObjectById("F-user-authentication", testPlanningRoot);
 
       // Verify the feature no longer exists
-      await expect(
-        getObjectById("F-user-authentication", testPlanningRoot),
-      ).rejects.toThrow("No object found with ID: F-user-authentication");
+      const result = await getObjectById(
+        "F-user-authentication",
+        testPlanningRoot,
+      );
+      expect(result).toBeNull();
 
       // Verify the feature folder no longer exists
       await expect(access(featureFolderPath, constants.F_OK)).rejects.toThrow();
@@ -105,7 +108,8 @@ describe("deleteObjectById - Integration Tests", () => {
     it("should delete a nested feature and its folder", async () => {
       // Verify the nested feature exists first
       const feature = await getObjectById("F-product-search", testPlanningRoot);
-      expect(feature.type).toBe(TrellisObjectType.FEATURE);
+      expect(feature).not.toBeNull();
+      expect(feature!.type).toBe(TrellisObjectType.FEATURE);
 
       // Verify the feature folder exists
       const featureFolderPath = join(
@@ -125,9 +129,8 @@ describe("deleteObjectById - Integration Tests", () => {
       await deleteObjectById("F-product-search", testPlanningRoot);
 
       // Verify the feature no longer exists
-      await expect(
-        getObjectById("F-product-search", testPlanningRoot),
-      ).rejects.toThrow("No object found with ID: F-product-search");
+      const result = await getObjectById("F-product-search", testPlanningRoot);
+      expect(result).toBeNull();
 
       // Verify the feature folder no longer exists
       await expect(access(featureFolderPath, constants.F_OK)).rejects.toThrow();
@@ -150,7 +153,8 @@ describe("deleteObjectById - Integration Tests", () => {
     it("should delete an epic file and its associated folder with all contents", async () => {
       // Verify the epic exists first
       const epic = await getObjectById("E-product-catalog", testPlanningRoot);
-      expect(epic.type).toBe(TrellisObjectType.EPIC);
+      expect(epic).not.toBeNull();
+      expect(epic!.type).toBe(TrellisObjectType.EPIC);
 
       // Verify the epic folder exists and has contents
       const epicFolderPath = join(
@@ -171,9 +175,8 @@ describe("deleteObjectById - Integration Tests", () => {
       await deleteObjectById("E-product-catalog", testPlanningRoot);
 
       // Verify the epic no longer exists
-      await expect(
-        getObjectById("E-product-catalog", testPlanningRoot),
-      ).rejects.toThrow("No object found with ID: E-product-catalog");
+      const result = await getObjectById("E-product-catalog", testPlanningRoot);
+      expect(result).toBeNull();
 
       // Verify the epic folder no longer exists
       await expect(access(epicFolderPath, constants.F_OK)).rejects.toThrow();
@@ -197,7 +200,8 @@ describe("deleteObjectById - Integration Tests", () => {
         "P-ecommerce-platform",
         testPlanningRoot,
       );
-      expect(project.type).toBe(TrellisObjectType.PROJECT);
+      expect(project).not.toBeNull();
+      expect(project!.type).toBe(TrellisObjectType.PROJECT);
 
       // Verify the project folder exists and has contents
       const projectFolderPath = join(
@@ -216,9 +220,11 @@ describe("deleteObjectById - Integration Tests", () => {
       await deleteObjectById("P-ecommerce-platform", testPlanningRoot);
 
       // Verify the project no longer exists
-      await expect(
-        getObjectById("P-ecommerce-platform", testPlanningRoot),
-      ).rejects.toThrow("No object found with ID: P-ecommerce-platform");
+      const result = await getObjectById(
+        "P-ecommerce-platform",
+        testPlanningRoot,
+      );
+      expect(result).toBeNull();
 
       // Verify the project folder no longer exists
       await expect(access(projectFolderPath, constants.F_OK)).rejects.toThrow();
@@ -266,17 +272,20 @@ describe("deleteObjectById - Integration Tests", () => {
       await deleteObjectById("P-ecommerce-platform", testPlanningRoot);
 
       // Verify other objects still exist
-      await expect(
-        getObjectById("P-mobile-app", testPlanningRoot),
-      ).resolves.toBeDefined();
-      await expect(
-        getObjectById("T-setup-database", testPlanningRoot),
-      ).resolves.toBeDefined();
+      const mobileApp = await getObjectById("P-mobile-app", testPlanningRoot);
+      expect(mobileApp).not.toBeNull();
+      const taskAgain = await getObjectById(
+        "T-setup-database",
+        testPlanningRoot,
+      );
+      expect(taskAgain).not.toBeNull();
 
       // Verify the deleted project is gone
-      await expect(
-        getObjectById("P-ecommerce-platform", testPlanningRoot),
-      ).rejects.toThrow("No object found with ID: P-ecommerce-platform");
+      const result = await getObjectById(
+        "P-ecommerce-platform",
+        testPlanningRoot,
+      );
+      expect(result).toBeNull();
     });
   });
 });

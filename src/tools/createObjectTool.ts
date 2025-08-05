@@ -6,6 +6,7 @@ import {
 } from "../models";
 import { Repository } from "../repositories";
 import { generateUniqueId } from "../utils";
+import { validateObjectCreation } from "../validation/validateObjectCreation.js";
 
 export const createObjectTool = {
   name: "create_object",
@@ -98,6 +99,9 @@ export async function handleCreateObject(
     childrenIds: [],
     body: description,
   };
+
+  // Validate object before saving
+  await validateObjectCreation(trellisObject, repository);
 
   // Save through repository
   await repository.saveObject(trellisObject);
