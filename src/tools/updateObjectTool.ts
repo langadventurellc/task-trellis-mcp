@@ -1,4 +1,10 @@
 import { Repository } from "../repositories";
+import { validateStatusTransition } from "../validation/validateStatusTransition";
+import {
+  TrellisObject,
+  TrellisObjectStatus,
+  TrellisObjectPriority,
+} from "../models";
 
 export const updateObjectTool = {
   name: "update_object",
@@ -39,7 +45,10 @@ export const updateObjectTool = {
   },
 } as const;
 
-export function handleUpdateObject(repository: Repository, args: unknown) {
+export async function handleUpdateObject(
+  repository: Repository,
+  args: unknown,
+) {
   const {
     id,
     priority,
@@ -56,24 +65,57 @@ export function handleUpdateObject(repository: Repository, args: unknown) {
     force?: boolean;
   };
 
-  // No-op implementation - just return the received parameters
-  return {
-    content: [
-      {
-        type: "text",
-        text: `Updated object: ${JSON.stringify(
+  try {
+    // Load the existing object
+    const existingObject = await repository.getObjectById(id);
+    if (!existingObject) {
+      return {
+        content: [
           {
-            id,
-            priority,
-            prerequisites,
-            body,
-            status,
-            force,
+            type: "text",
+            text: `Error: Object with ID '${id}' not found`,
           },
-          null,
-          2,
-        )}`,
-      },
-    ],
-  };
+        ],
+      };
+    }
+
+    // Create updated object with new properties, ensuring proper typing
+    const updatedObject: TrellisObject = {
+      ...existingObject,
+      ...(priority && { priority: priority as TrellisObjectPriority }),
+      ...(prerequisites && { prerequisites }),
+      ...(body && { body }),
+      ...(status && { status: status as TrellisObjectStatus }),
+    };
+
+    // Validate status transition
+    if (status) {
+      await validateStatusTransition(updatedObject, repository, force);
+    }
+
+    // Save the updated object
+    await repository.saveObject(updatedObject);
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Successfully updated object: ${JSON.stringify(
+            updatedObject,
+            null,
+            2,
+          )}`,
+        },
+      ],
+    };
+  } catch (error) {
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Error updating object: ${error instanceof Error ? error.message : String(error)}`,
+        },
+      ],
+    };
+  }
 }
