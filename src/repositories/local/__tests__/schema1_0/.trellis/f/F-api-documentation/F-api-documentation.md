@@ -2,7 +2,8 @@
 id: F-api-documentation
 title: API Documentation Feature
 status: open
-priority: normal
+priority: medium
+schema: v1.0
 created: 2025-01-13T09:00:00Z
 updated: 2025-01-13T09:00:00Z
 ---

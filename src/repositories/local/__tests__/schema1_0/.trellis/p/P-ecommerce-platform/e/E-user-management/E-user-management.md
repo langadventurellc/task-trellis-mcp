@@ -3,6 +3,7 @@ id: E-user-management
 title: User Management Epic
 status: in-progress
 priority: high
+schema: v1.0
 parent: P-ecommerce-platform
 created: 2025-01-11T10:00:00Z
 updated: 2025-01-15T13:00:00Z

@@ -2,7 +2,8 @@
 id: T-implement-elasticsearch
 title: Implement Elasticsearch Integration
 status: open
-priority: normal
+priority: medium
+schema: v1.0
 parent: F-product-search
 created: 2025-01-13T16:30:00Z
 updated: 2025-01-13T16:30:00Z

@@ -3,6 +3,7 @@ id: F-data-caching
 title: Data Caching Feature
 status: open
 priority: high
+schema: v1.0
 parent: E-offline-sync
 created: 2025-01-14T12:00:00Z
 updated: 2025-01-14T12:00:00Z

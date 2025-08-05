@@ -3,6 +3,7 @@ id: T-implement-login
 title: Implement User Login
 status: open
 priority: high
+schema: v1.0
 parent: F-user-authentication
 created: 2025-01-15T12:30:00Z
 updated: 2025-01-15T12:30:00Z

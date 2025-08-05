@@ -2,7 +2,8 @@
 id: T-implement-logging
 title: Implement Application Logging
 status: open
-priority: normal
+priority: medium
+schema: v1.0
 created: 2025-01-15T11:00:00Z
 updated: 2025-01-15T11:00:00Z
 ---

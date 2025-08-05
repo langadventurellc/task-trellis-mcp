@@ -3,6 +3,7 @@ id: T-implement-cache-layer
 title: Implement Cache Layer
 status: open
 priority: high
+schema: v1.0
 parent: F-data-caching
 created: 2025-01-14T12:30:00Z
 updated: 2025-01-14T12:30:00Z

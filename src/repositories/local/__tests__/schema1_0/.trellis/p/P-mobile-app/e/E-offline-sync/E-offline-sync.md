@@ -3,6 +3,7 @@ id: E-offline-sync
 title: Offline Synchronization Epic
 status: open
 priority: high
+schema: v1.0
 parent: P-mobile-app
 created: 2025-01-14T11:00:00Z
 updated: 2025-01-14T11:00:00Z

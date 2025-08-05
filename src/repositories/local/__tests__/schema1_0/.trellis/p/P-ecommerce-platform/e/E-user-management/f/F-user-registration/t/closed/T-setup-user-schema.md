@@ -3,6 +3,7 @@ id: T-setup-user-schema
 title: Setup User Database Schema
 status: done
 priority: high
+schema: v1.0
 parent: F-user-registration
 created: 2025-01-12T11:30:00Z
 updated: 2025-01-14T09:00:00Z

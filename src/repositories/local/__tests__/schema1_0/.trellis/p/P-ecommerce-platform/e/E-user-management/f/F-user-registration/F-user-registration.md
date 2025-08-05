@@ -3,6 +3,7 @@ id: F-user-registration
 title: User Registration Feature
 status: in-progress
 priority: high
+schema: v1.0
 parent: E-user-management
 created: 2025-01-12T11:00:00Z
 updated: 2025-01-15T15:00:00Z

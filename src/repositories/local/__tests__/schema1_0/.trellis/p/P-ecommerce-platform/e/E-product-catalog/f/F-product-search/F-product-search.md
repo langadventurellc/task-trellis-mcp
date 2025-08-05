@@ -2,7 +2,8 @@
 id: F-product-search
 title: Product Search Feature
 status: open
-priority: normal
+priority: medium
+schema: v1.0
 parent: E-product-catalog
 created: 2025-01-13T16:00:00Z
 updated: 2025-01-13T16:00:00Z
