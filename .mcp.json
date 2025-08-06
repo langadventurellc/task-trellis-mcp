@@ -2,8 +2,12 @@
   "mcpServers": {
     "task-trellis": {
       "type": "stdio",
-      "command": "uvx",
-      "args": ["--refresh", "task-trellis-mcp", "serve"],
+      "command": "node",
+      "args": [
+        "dist/server.js",
+        "--projectRootFolder",
+        "/Users/zach/code/task-trellis-mcp"
+      ],
       "env": {}
     },
     "serena": {

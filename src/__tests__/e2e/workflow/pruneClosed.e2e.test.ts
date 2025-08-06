@@ -3,7 +3,9 @@ import {
   TestEnvironment,
   createObjectContent,
   createObjectFile,
+  fileExists,
   type ObjectData,
+  type HierarchyOptions,
 } from "../utils";
 
 describe("E2E Workflow - pruneClosed", () => {
@@ -43,11 +45,25 @@ describe("E2E Workflow - pruneClosed", () => {
         { status: "closed" },
       );
 
+      const filePath = getObjectFilePath("task", "T-completed-old", {
+        status: "closed",
+      });
+
+      // Verify file exists before pruning
+      expect(await fileExists(testEnv.projectRoot, filePath)).toBe(true);
+
       const result = await client.callTool("prune_closed", {
         age: 30, // 30 minutes
       });
 
-      expect(result.content[0].text).toContain("Pruned closed objects");
+      // Verify successful pruning
+      expect(result.content[0].text).toContain(
+        "Pruned 1 closed objects older than 30 minutes",
+      );
+      expect(result.content[0].text).toContain("T-completed-old");
+
+      // Verify file has been deleted
+      expect(await fileExists(testEnv.projectRoot, filePath)).toBe(false);
     });
 
     it("should not prune recent completed tasks", async () => {
@@ -66,11 +82,24 @@ describe("E2E Workflow - pruneClosed", () => {
         { status: "closed" },
       );
 
+      const filePath = getObjectFilePath("task", "T-completed-recent", {
+        status: "closed",
+      });
+
+      // Verify file exists before pruning
+      expect(await fileExists(testEnv.projectRoot, filePath)).toBe(true);
+
       const result = await client.callTool("prune_closed", {
         age: 60, // 60 minutes
       });
 
-      expect(result.content[0].text).toContain("Pruned closed objects");
+      // Verify no pruning occurred (recent file should not be pruned)
+      expect(result.content[0].text).toContain(
+        "Pruned 0 closed objects older than 60 minutes",
+      );
+
+      // Verify file still exists
+      expect(await fileExists(testEnv.projectRoot, filePath)).toBe(true);
     });
 
     it("should prune tasks with wont-do status", async () => {
@@ -89,11 +118,25 @@ describe("E2E Workflow - pruneClosed", () => {
         { status: "closed" },
       );
 
+      const filePath = getObjectFilePath("task", "T-wont-do", {
+        status: "closed",
+      });
+
+      // Verify file exists before pruning
+      expect(await fileExists(testEnv.projectRoot, filePath)).toBe(true);
+
       const result = await client.callTool("prune_closed", {
         age: 60,
       });
 
-      expect(result.content[0].text).toContain("Pruned closed objects");
+      // Verify successful pruning
+      expect(result.content[0].text).toContain(
+        "Pruned 1 closed objects older than 60 minutes",
+      );
+      expect(result.content[0].text).toContain("T-wont-do");
+
+      // Verify file has been deleted
+      expect(await fileExists(testEnv.projectRoot, filePath)).toBe(false);
     });
   });
 
@@ -146,13 +189,33 @@ describe("E2E Workflow - pruneClosed", () => {
         { status: "closed" },
       );
 
+      const scopedFilePath = getObjectFilePath("task", "T-scoped-done", {
+        featureId,
+        status: "closed",
+      });
+      const outsideFilePath = getObjectFilePath("task", "T-outside-done", {
+        status: "closed",
+      });
+
+      // Verify both files exist before pruning
+      expect(await fileExists(testEnv.projectRoot, scopedFilePath)).toBe(true);
+      expect(await fileExists(testEnv.projectRoot, outsideFilePath)).toBe(true);
+
       const result = await client.callTool("prune_closed", {
         scope: featureId,
         age: 30,
       });
 
-      expect(result.content[0].text).toContain("Pruned closed objects");
+      // Verify only scoped object was pruned
+      expect(result.content[0].text).toContain(
+        "Pruned 1 closed objects older than 30 minutes in scope",
+      );
       expect(result.content[0].text).toContain(featureId);
+      expect(result.content[0].text).toContain("T-scoped-done");
+
+      // Verify scoped file has been deleted but outside file remains
+      expect(await fileExists(testEnv.projectRoot, scopedFilePath)).toBe(false);
+      expect(await fileExists(testEnv.projectRoot, outsideFilePath)).toBe(true);
     });
   });
 
@@ -197,11 +260,28 @@ describe("E2E Workflow - pruneClosed", () => {
         { projectId, epicId, featureId, status: "closed" },
       );
 
+      const filePath = getObjectFilePath("task", "T-dir-structure", {
+        projectId,
+        epicId,
+        featureId,
+        status: "closed",
+      });
+
+      // Verify file exists before pruning
+      expect(await fileExists(testEnv.projectRoot, filePath)).toBe(true);
+
       const result = await client.callTool("prune_closed", {
         age: 30,
       });
 
-      expect(result.content[0].text).toContain("Pruned closed objects");
+      // Verify successful pruning
+      expect(result.content[0].text).toContain(
+        "Pruned 1 closed objects older than 30 minutes",
+      );
+      expect(result.content[0].text).toContain("T-dir-structure");
+
+      // Verify file has been deleted
+      expect(await fileExists(testEnv.projectRoot, filePath)).toBe(false);
     });
   });
 
@@ -231,7 +311,9 @@ describe("E2E Workflow - pruneClosed", () => {
         age: 999999, // Very large age in minutes
       });
 
-      expect(result.content[0].text).toContain("Pruned closed objects");
+      expect(result.content[0].text).toContain(
+        "Pruned 0 closed objects older than 999999 minutes",
+      );
     });
 
     it("should handle zero age parameter", async () => {
@@ -239,7 +321,9 @@ describe("E2E Workflow - pruneClosed", () => {
         age: 0, // Prune everything
       });
 
-      expect(result.content[0].text).toContain("Pruned closed objects");
+      expect(result.content[0].text).toContain(
+        "Pruned 0 closed objects older than 0 minutes",
+      );
     });
   });
 
@@ -289,11 +373,33 @@ describe("E2E Workflow - pruneClosed", () => {
         { status: "closed" },
       );
 
+      const projectPath = getObjectFilePath("project", "P-done-project");
+      const featurePath = getObjectFilePath("feature", "F-done-feature");
+      const taskPath = getObjectFilePath("task", "T-done-task", {
+        status: "closed",
+      });
+
+      // Verify all files exist before pruning
+      expect(await fileExists(testEnv.projectRoot, projectPath)).toBe(true);
+      expect(await fileExists(testEnv.projectRoot, featurePath)).toBe(true);
+      expect(await fileExists(testEnv.projectRoot, taskPath)).toBe(true);
+
       const result = await client.callTool("prune_closed", {
         age: 30,
       });
 
-      expect(result.content[0].text).toContain("Pruned closed objects");
+      // Verify all closed objects were pruned
+      expect(result.content[0].text).toContain(
+        "Pruned 3 closed objects older than 30 minutes",
+      );
+      expect(result.content[0].text).toContain("P-done-project");
+      expect(result.content[0].text).toContain("F-done-feature");
+      expect(result.content[0].text).toContain("T-done-task");
+
+      // Verify all files have been deleted
+      expect(await fileExists(testEnv.projectRoot, projectPath)).toBe(false);
+      expect(await fileExists(testEnv.projectRoot, featurePath)).toBe(false);
+      expect(await fileExists(testEnv.projectRoot, taskPath)).toBe(false);
     });
   });
 
@@ -303,14 +409,20 @@ describe("E2E Workflow - pruneClosed", () => {
         age: 30,
       });
 
-      expect(result.content[0].text).toContain("Pruned closed objects");
+      expect(result.content[0].text).toContain(
+        "Pruned 0 closed objects older than 30 minutes",
+      );
     });
 
     it("should handle large number of completed tasks", async () => {
+      const taskIds: string[] = [];
+      const filePaths: string[] = [];
+
       // Create many completed tasks
       for (let i = 0; i < 20; i++) {
+        const taskId = `T-bulk-${i.toString().padStart(2, "0")}`;
         const taskData: ObjectData = {
-          id: `T-bulk-${i.toString().padStart(2, "0")}`,
+          id: taskId,
           title: `Bulk Task ${i}`,
           status: "done",
           priority: "low",
@@ -319,17 +431,72 @@ describe("E2E Workflow - pruneClosed", () => {
         await createObjectFile(
           testEnv.projectRoot,
           "task",
-          `T-bulk-${i.toString().padStart(2, "0")}`,
+          taskId,
           createObjectContent(taskData),
           { status: "closed" },
         );
+
+        taskIds.push(taskId);
+        filePaths.push(getObjectFilePath("task", taskId, { status: "closed" }));
+      }
+
+      // Verify all files exist before pruning
+      for (const filePath of filePaths) {
+        expect(await fileExists(testEnv.projectRoot, filePath)).toBe(true);
       }
 
       const result = await client.callTool("prune_closed", {
         age: 30,
       });
 
-      expect(result.content[0].text).toContain("Pruned closed objects");
+      // Verify all bulk tasks were pruned
+      expect(result.content[0].text).toContain(
+        "Pruned 20 closed objects older than 30 minutes",
+      );
+
+      // Verify all files have been deleted
+      for (const filePath of filePaths) {
+        expect(await fileExists(testEnv.projectRoot, filePath)).toBe(false);
+      }
     });
   });
+
+  // Helper function to get object file path
+  const getObjectFilePath = (
+    objectType: string,
+    objectId: string,
+    hierarchy?: HierarchyOptions,
+  ): string => {
+    switch (objectType) {
+      case "project": {
+        return `p/${objectId}/${objectId}.md`;
+      }
+      case "epic": {
+        if (!hierarchy?.projectId) throw new Error("Epic requires projectId");
+        return `p/${hierarchy.projectId}/e/${objectId}/${objectId}.md`;
+      }
+      case "feature": {
+        if (hierarchy?.epicId && hierarchy?.projectId) {
+          return `p/${hierarchy.projectId}/e/${hierarchy.epicId}/f/${objectId}/${objectId}.md`;
+        } else {
+          return `f/${objectId}/${objectId}.md`;
+        }
+      }
+      case "task": {
+        const statusFolder = hierarchy?.status || "open";
+        if (hierarchy?.featureId) {
+          if (hierarchy?.epicId && hierarchy?.projectId) {
+            return `p/${hierarchy.projectId}/e/${hierarchy.epicId}/f/${hierarchy.featureId}/t/${statusFolder}/${objectId}.md`;
+          } else {
+            return `f/${hierarchy.featureId}/t/${statusFolder}/${objectId}.md`;
+          }
+        } else {
+          return `t/${statusFolder}/${objectId}.md`;
+        }
+      }
+      default: {
+        throw new Error(`Unknown object type: ${objectType}`);
+      }
+    }
+  };
 });
