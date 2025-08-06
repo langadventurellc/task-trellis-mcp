@@ -1,106 +1,13 @@
 import * as fs from "fs/promises";
 import * as path from "path";
-import { stringify } from "yaml";
-import { McpTestClient } from "../utils/mcpTestClient";
-import { TestEnvironment } from "../utils/testEnvironment";
-
-// Helper to create proper Trellis object content with YAML frontmatter
-function createObjectContent(data: {
-  id: string;
-  title: string;
-  status?: string;
-  priority?: string;
-  parent?: string;
-  prerequisites?: string[];
-  affectedFiles?: Record<string, string>;
-  log?: string[];
-  schema?: string;
-  childrenIds?: string[];
-  body?: string;
-}): string {
-  const frontmatter = {
-    id: data.id,
-    title: data.title,
-    status: data.status || "open",
-    priority: data.priority || "medium",
-    parent: data.parent,
-    prerequisites: data.prerequisites || [],
-    affectedFiles: data.affectedFiles || {},
-    log: data.log || [],
-    schema: data.schema || "1.0",
-    childrenIds: data.childrenIds || [],
-  };
-
-  const yamlContent = stringify(frontmatter);
-  return `---\n${yamlContent}---\n\n${data.body || ""}`;
-}
-
-// Helper to create object file with proper directory structure
-async function createObjectFile(
-  projectRoot: string,
-  objectType: string,
-  objectId: string,
-  content: string,
-  hierarchy?: {
-    projectId?: string;
-    epicId?: string;
-    featureId?: string;
-    status?: "open" | "closed";
-  },
-): Promise<void> {
-  let relativePath: string;
-
-  switch (objectType) {
-    case "project": {
-      relativePath = `p/${objectId}/${objectId}.md`;
-      break;
-    }
-    case "epic": {
-      if (!hierarchy?.projectId) throw new Error("Epic requires projectId");
-      relativePath = `p/${hierarchy.projectId}/e/${objectId}/${objectId}.md`;
-      break;
-    }
-    case "feature": {
-      if (hierarchy?.epicId && hierarchy?.projectId) {
-        relativePath = `p/${hierarchy.projectId}/e/${hierarchy.epicId}/f/${objectId}/${objectId}.md`;
-      } else {
-        relativePath = `f/${objectId}/${objectId}.md`;
-      }
-      break;
-    }
-    case "task": {
-      const statusFolder = hierarchy?.status || "open";
-      if (hierarchy?.featureId) {
-        if (hierarchy?.epicId && hierarchy?.projectId) {
-          relativePath = `p/${hierarchy.projectId}/e/${hierarchy.epicId}/f/${hierarchy.featureId}/t/${statusFolder}/${objectId}.md`;
-        } else {
-          relativePath = `f/${hierarchy.featureId}/t/${statusFolder}/${objectId}.md`;
-        }
-      } else {
-        relativePath = `t/${statusFolder}/${objectId}.md`;
-      }
-      break;
-    }
-    default: {
-      throw new Error(`Unknown object type: ${objectType}`);
-    }
-  }
-
-  const filePath = path.join(projectRoot, ".trellis", relativePath);
-  const dirPath = path.dirname(filePath);
-  await fs.mkdir(dirPath, { recursive: true });
-  await fs.writeFile(filePath, content, "utf-8");
-}
-
-// Helper to parse getObject response
-function parseGetObjectResponse(responseText: string): any {
-  const prefix = "Retrieved object: ";
-  if (!responseText.startsWith(prefix)) {
-    throw new Error(`Unexpected response format: ${responseText}`);
-  }
-  const jsonString = responseText.substring(prefix.length);
-  return JSON.parse(jsonString);
-}
+import {
+  McpTestClient,
+  TestEnvironment,
+  createObjectContent,
+  createObjectFile,
+  parseGetObjectResponse,
+  type ObjectData,
+} from "../utils";
 
 describe("E2E CRUD - getObject", () => {
   let testEnv: TestEnvironment;
@@ -126,7 +33,7 @@ describe("E2E CRUD - getObject", () => {
 
   describe("Retrieve Existing Objects", () => {
     it("should retrieve an existing project with all fields", async () => {
-      const projectData = {
+      const projectData: ObjectData = {
         id: "P-test-project",
         title: "Test Project",
         status: "open",
@@ -169,7 +76,7 @@ describe("E2E CRUD - getObject", () => {
     });
 
     it("should retrieve an epic with parent project", async () => {
-      const epicData = {
+      const epicData: ObjectData = {
         id: "E-test-epic",
         title: "Test Epic",
         status: "in-progress",
@@ -198,7 +105,7 @@ describe("E2E CRUD - getObject", () => {
     });
 
     it("should retrieve a standalone feature", async () => {
-      const featureData = {
+      const featureData: ObjectData = {
         id: "F-standalone-feature",
         title: "Standalone Feature",
         status: "draft",
@@ -225,7 +132,7 @@ describe("E2E CRUD - getObject", () => {
 
     it("should retrieve a task with various statuses", async () => {
       // Open task
-      const openTaskData = {
+      const openTaskData: ObjectData = {
         id: "T-open-task",
         title: "Open Task",
         status: "open",
@@ -239,7 +146,7 @@ describe("E2E CRUD - getObject", () => {
       );
 
       // Closed task
-      const closedTaskData = {
+      const closedTaskData: ObjectData = {
         id: "T-closed-task",
         title: "Closed Task",
         status: "done",

@@ -1,8 +1,9 @@
-import * as fs from "fs/promises";
-import * as path from "path";
-import { parse } from "yaml";
-import { McpTestClient } from "../utils/mcpTestClient";
-import { TestEnvironment } from "../utils/testEnvironment";
+import {
+  McpTestClient,
+  TestEnvironment,
+  readObjectFile,
+  fileExists,
+} from "../utils";
 
 describe("E2E CRUD - createObject", () => {
   let testEnv: TestEnvironment;
@@ -26,29 +27,6 @@ describe("E2E CRUD - createObject", () => {
     testEnv?.cleanup();
   });
 
-  // Helper function to read and parse object file
-  async function readObjectFile(relativePath: string) {
-    const filePath = path.join(testEnv.projectRoot, ".trellis", relativePath);
-    const content = await fs.readFile(filePath, "utf-8");
-    const [, frontmatter, ...bodyParts] = content.split("---\n");
-    return {
-      yaml: parse(frontmatter),
-      body: bodyParts.join("---\n").trim(),
-      exists: true,
-    };
-  }
-
-  // Helper function to check file exists
-  async function fileExists(relativePath: string): Promise<boolean> {
-    try {
-      const filePath = path.join(testEnv.projectRoot, ".trellis", relativePath);
-      await fs.access(filePath);
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
   describe("Project Creation", () => {
     it("should create project with minimal parameters", async () => {
       const result = await client.callTool("create_object", {
@@ -62,7 +40,10 @@ describe("E2E CRUD - createObject", () => {
       );
 
       // Verify file creation
-      const file = await readObjectFile("p/P-test-project/P-test-project.md");
+      const file = await readObjectFile(
+        testEnv.projectRoot,
+        "p/P-test-project/P-test-project.md",
+      );
       expect(file.yaml.id).toBe("P-test-project");
       expect(file.yaml.title).toBe("Test Project");
       expect(file.yaml.status).toBe("draft");
@@ -84,7 +65,10 @@ describe("E2E CRUD - createObject", () => {
 
       expect(result.content[0].text).toContain("P-full-project");
 
-      const file = await readObjectFile("p/P-full-project/P-full-project.md");
+      const file = await readObjectFile(
+        testEnv.projectRoot,
+        "p/P-full-project/P-full-project.md",
+      );
       expect(file.yaml.priority).toBe("high");
       expect(file.yaml.status).toBe("open");
       expect(file.yaml.prerequisites).toEqual(["P-dep1", "P-dep2"]);
@@ -129,6 +113,7 @@ describe("E2E CRUD - createObject", () => {
       expect(result.content[0].text).toContain("E-test-epic");
 
       const file = await readObjectFile(
+        testEnv.projectRoot,
         `p/${projectId}/e/E-test-epic/E-test-epic.md`,
       );
       expect(file.yaml.id).toBe("E-test-epic");
@@ -211,6 +196,7 @@ describe("E2E CRUD - createObject", () => {
       expect(result.content[0].text).toContain("F-standalone-feature");
 
       const file = await readObjectFile(
+        testEnv.projectRoot,
         "f/F-standalone-feature/F-standalone-feature.md",
       );
       expect(file.yaml.parent).toBeUndefined();
@@ -227,6 +213,7 @@ describe("E2E CRUD - createObject", () => {
       expect(result.content[0].text).toContain("F-epic-feature");
 
       const file = await readObjectFile(
+        testEnv.projectRoot,
         `p/${projectId}/e/${epicId}/f/F-epic-feature/F-epic-feature.md`,
       );
       expect(file.yaml.parent).toBe(epicId);
@@ -270,7 +257,10 @@ describe("E2E CRUD - createObject", () => {
 
       expect(result.content[0].text).toContain("T-standalone-task");
 
-      const file = await readObjectFile("t/open/T-standalone-task.md");
+      const file = await readObjectFile(
+        testEnv.projectRoot,
+        "t/open/T-standalone-task.md",
+      );
       expect(file.yaml.status).toBe("open");
       expect(file.yaml.priority).toBe("high");
     });
@@ -284,7 +274,10 @@ describe("E2E CRUD - createObject", () => {
 
       expect(result.content[0].text).toContain("T-completed-task");
 
-      const file = await readObjectFile("t/closed/T-completed-task.md");
+      const file = await readObjectFile(
+        testEnv.projectRoot,
+        "t/closed/T-completed-task.md",
+      );
       expect(file.yaml.status).toBe("done");
     });
 
@@ -312,7 +305,10 @@ describe("E2E CRUD - createObject", () => {
 
       expect(result.content[0].text).toContain("T-task-with-dependencies");
 
-      const file = await readObjectFile("t/open/T-task-with-dependencies.md");
+      const file = await readObjectFile(
+        testEnv.projectRoot,
+        "t/open/T-task-with-dependencies.md",
+      );
       expect(file.yaml.prerequisites).toEqual([
         prereq1Id,
         prereq2Id,
@@ -331,6 +327,7 @@ describe("E2E CRUD - createObject", () => {
       expect(result.content[0].text).toContain("T-feature-task");
 
       const file = await readObjectFile(
+        testEnv.projectRoot,
         `f/${featureId}/t/open/T-feature-task.md`,
       );
       expect(file.yaml.parent).toBe(featureId);
@@ -348,6 +345,7 @@ describe("E2E CRUD - createObject", () => {
       expect(result.content[0].text).toContain("T-closed-feature-task");
 
       const file = await readObjectFile(
+        testEnv.projectRoot,
         `f/${featureId}/t/closed/T-closed-feature-task.md`,
       );
       expect(file.yaml.status).toBe("wont-do");
@@ -389,6 +387,7 @@ describe("E2E CRUD - createObject", () => {
       expect(result.content[0].text).toContain("T-task-with-specialcharacters");
 
       const file = await readObjectFile(
+        testEnv.projectRoot,
         "t/open/T-task-with-specialcharacters.md",
       );
       expect(file.yaml.title).toBe("Task with Special/Characters & Symbols!");
@@ -419,8 +418,12 @@ describe("E2E CRUD - createObject", () => {
       const id2 = result2.content[0].text.match(/ID: (T-[a-z0-9-]+)/)![1];
 
       expect(id1).not.toBe(id2);
-      expect(await fileExists(`t/open/${id1}.md`)).toBe(true);
-      expect(await fileExists(`t/open/${id2}.md`)).toBe(true);
+      expect(await fileExists(testEnv.projectRoot, `t/open/${id1}.md`)).toBe(
+        true,
+      );
+      expect(await fileExists(testEnv.projectRoot, `t/open/${id2}.md`)).toBe(
+        true,
+      );
     });
   });
 
@@ -467,23 +470,31 @@ describe("E2E CRUD - createObject", () => {
       const taskId = taskResult.content[0].text.match(/ID: (T-[a-z-]+)/)![1];
 
       // Verify complete file structure
-      expect(await fileExists(`p/${projectId}/${projectId}.md`)).toBe(true);
-      expect(await fileExists(`p/${projectId}/e/${epicId}/${epicId}.md`)).toBe(
-        true,
-      );
+      expect(
+        await fileExists(testEnv.projectRoot, `p/${projectId}/${projectId}.md`),
+      ).toBe(true);
       expect(
         await fileExists(
+          testEnv.projectRoot,
+          `p/${projectId}/e/${epicId}/${epicId}.md`,
+        ),
+      ).toBe(true);
+      expect(
+        await fileExists(
+          testEnv.projectRoot,
           `p/${projectId}/e/${epicId}/f/${featureId}/${featureId}.md`,
         ),
       ).toBe(true);
       expect(
         await fileExists(
+          testEnv.projectRoot,
           `p/${projectId}/e/${epicId}/f/${featureId}/t/open/${taskId}.md`,
         ),
       ).toBe(true);
 
       // Verify task has all expected properties
       const taskFile = await readObjectFile(
+        testEnv.projectRoot,
         `p/${projectId}/e/${epicId}/f/${featureId}/t/open/${taskId}.md`,
       );
       expect(taskFile.yaml.parent).toBe(featureId);
