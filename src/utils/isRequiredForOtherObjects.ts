@@ -1,5 +1,5 @@
+import { isOpen } from "../models";
 import { TrellisObject } from "../models/TrellisObject";
-import { TrellisObjectStatus } from "../models/TrellisObjectStatus";
 import { Repository } from "../repositories/Repository";
 
 /**
@@ -26,11 +26,7 @@ export async function isRequiredForOtherObjects(
 
     // Check if this object has our target object as a prerequisite
     if (obj.prerequisites.includes(trellisObject.id)) {
-      // Check if this object is not closed (i.e., not DONE or WONT_DO)
-      if (
-        obj.status !== TrellisObjectStatus.DONE &&
-        obj.status !== TrellisObjectStatus.WONT_DO
-      ) {
+      if (isOpen(obj)) {
         return true;
       }
     }

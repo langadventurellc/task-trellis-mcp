@@ -1,5 +1,5 @@
+import { isClaimable, isOpen } from "../models";
 import { TrellisObject } from "../models/TrellisObject";
-import { TrellisObjectStatus } from "../models/TrellisObjectStatus";
 
 /**
  * Filters a list of TrellisObjects to return only those that are available to work on.
@@ -19,8 +19,8 @@ export function filterUnavailableObjects(
   objects.forEach((obj) => objectMap.set(obj.id, obj));
 
   return objects.filter((obj) => {
-    // Rule 1: Object must have status "open"
-    if (obj.status !== TrellisObjectStatus.OPEN) {
+    // Rule 1: Object must be claimable
+    if (!isClaimable(obj)) {
       return false;
     }
 
@@ -33,11 +33,8 @@ export function filterUnavailableObjects(
         continue;
       }
 
-      // If prerequisite is in the list but not done or wont-do, exclude this object
-      if (
-        prerequisiteObj.status !== TrellisObjectStatus.DONE &&
-        prerequisiteObj.status !== TrellisObjectStatus.WONT_DO
-      ) {
+      // If prerequisite is open, exclude this object
+      if (isOpen(prerequisiteObj)) {
         return false;
       }
     }

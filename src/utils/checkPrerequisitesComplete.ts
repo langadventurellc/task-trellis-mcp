@@ -1,5 +1,5 @@
+import { isOpen } from "../models";
 import { TrellisObject } from "../models/TrellisObject";
-import { TrellisObjectStatus } from "../models/TrellisObjectStatus";
 import { Repository } from "../repositories/Repository";
 
 /**
@@ -36,11 +36,8 @@ export async function checkPrerequisitesComplete(
       continue;
     }
 
-    // If prerequisite is in our system but not done or wont-do, it's blocking
-    if (
-      prerequisiteObj.status !== TrellisObjectStatus.DONE &&
-      prerequisiteObj.status !== TrellisObjectStatus.WONT_DO
-    ) {
+    // If prerequisite is open, it's not complete
+    if (isOpen(prerequisiteObj)) {
       return false;
     }
   }
