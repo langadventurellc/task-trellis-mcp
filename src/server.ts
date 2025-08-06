@@ -58,9 +58,6 @@ const serverConfig: ServerConfig = {
     : {}),
 };
 
-// eslint-disable-next-line no-console
-console.log("Server configuration:", serverConfig);
-
 function getRepository(): Repository {
   if (serverConfig.mode === "local") {
     return new LocalRepository(serverConfig);
