@@ -2,7 +2,7 @@ import * as fs from "fs/promises";
 import * as path from "path";
 
 /**
- * Helper function to check if folder exists
+ * Helper function to check if folder exists within .trellis directory
  */
 export async function folderExists(
   projectRoot: string,

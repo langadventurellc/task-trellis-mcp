@@ -10,6 +10,7 @@ export { readObjectFile } from "./readObjectFile";
 // File system helpers
 export { fileExists } from "./fileExists";
 export { folderExists } from "./folderExists";
+export { pathExists } from "./pathExists";
 
 // Response parsers
 export { parseGetObjectResponse } from "./parseGetObjectResponse";

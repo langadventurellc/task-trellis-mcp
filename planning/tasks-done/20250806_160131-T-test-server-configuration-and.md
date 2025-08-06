@@ -1,14 +1,15 @@
 ---
 kind: task
 id: T-test-server-configuration-and
+status: done
 title: Test server configuration and activation via MCP protocol
-status: open
 priority: normal
 prerequisites:
   - T-set-up-e2e-test-infrastructure
 created: "2025-08-05T16:41:10.455950"
-updated: "2025-08-05T16:41:10.455950"
+updated: "2025-08-06T15:31:37.710520"
 schema_version: "1.1"
+worktree: null
 ---
 
 Test server configuration, activation, and initialization through MCP protocol.
@@ -130,3 +131,7 @@ describe("Server Configuration E2E", () => {
 - **Error Message Validation**: Ensure error messages are clear and actionable
 
 ### Log
+
+**2025-08-06T21:01:31.502326Z** - Implemented comprehensive E2E tests for server configuration and activation via MCP protocol. Created 5 test files covering activation tool functionality, CLI argument handling, pre-activation behavior, error scenarios, and directory setup. All tests pass with proper validation of server configuration states, tool blocking mechanisms, and .trellis directory structure creation. Tests verify that tools are properly blocked before activation and work correctly after activation, with appropriate error messaging and directory structure handling.
+
+- filesChanged: ["src/__tests__/e2e/configuration/activation.e2e.test.ts", "src/__tests__/e2e/configuration/commandLineArgs.e2e.test.ts", "src/__tests__/e2e/configuration/preActivation.e2e.test.ts", "src/__tests__/e2e/configuration/invalidConfig.e2e.test.ts", "src/__tests__/e2e/configuration/directorySetup.e2e.test.ts", "src/__tests__/e2e/utils/pathExists.ts", "src/__tests__/e2e/utils/folderExists.ts", "src/__tests__/e2e/utils/index.ts"]
