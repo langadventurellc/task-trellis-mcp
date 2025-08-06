@@ -7,7 +7,7 @@ describe("E2E Infrastructure - Client", () => {
 
   beforeEach(async () => {
     testEnv = new TestEnvironment();
-    await testEnv.setup();
+    testEnv.setup();
     client = new McpTestClient(testEnv.projectRoot);
     await client.connect();
   }, 30000);

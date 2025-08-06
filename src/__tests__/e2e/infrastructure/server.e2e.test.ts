@@ -5,9 +5,9 @@ describe("E2E Infrastructure - Server", () => {
   let testEnv: TestEnvironment;
   let client: McpTestClient;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     testEnv = new TestEnvironment();
-    await testEnv.setup();
+    testEnv.setup();
     client = new McpTestClient(testEnv.projectRoot);
   }, 30000);
 
