@@ -14,6 +14,7 @@ export { folderExists } from "./folderExists";
 // Response parsers
 export { parseGetObjectResponse } from "./parseGetObjectResponse";
 export { parseUpdateObjectResponse } from "./parseUpdateObjectResponse";
+export { parseListObjectsResponse } from "./parseListObjectsResponse";
 
 // Existing utilities
 export { McpTestClient } from "./mcpTestClient";
