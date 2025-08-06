@@ -43,7 +43,17 @@ export async function findMarkdownFiles(
       }
     } catch (error) {
       // Skip directories that can't be read (permissions, etc.)
-      console.warn(`Warning: Could not read directory ${currentPath}:`, error);
+      // Don't warn for ENOENT errors as directories may not exist yet
+      if (
+        error instanceof Error &&
+        "code" in error &&
+        error.code !== "ENOENT"
+      ) {
+        console.warn(
+          `Warning: Could not read directory ${currentPath}:`,
+          error,
+        );
+      }
     }
   }
 

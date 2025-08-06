@@ -1,10 +1,11 @@
-import { Repository } from "../repositories";
+import { isClaimable } from "../models";
 import { TrellisObject } from "../models/TrellisObject";
-import { TrellisObjectType } from "../models/TrellisObjectType";
 import { TrellisObjectStatus } from "../models/TrellisObjectStatus";
+import { TrellisObjectType } from "../models/TrellisObjectType";
+import { Repository } from "../repositories";
+import { checkPrerequisitesComplete } from "../utils/checkPrerequisitesComplete";
 import { filterUnavailableObjects } from "../utils/filterUnavailableObjects";
 import { sortTrellisObjects } from "../utils/sortTrellisObjects";
-import { checkPrerequisitesComplete } from "../utils/checkPrerequisitesComplete";
 
 export const claimTaskTool = {
   name: "claim_task",
@@ -86,10 +87,7 @@ async function validateTaskForClaiming(
 
   if (!force) {
     // Validate status is draft or open
-    if (
-      task.status !== TrellisObjectStatus.DRAFT &&
-      task.status !== TrellisObjectStatus.OPEN
-    ) {
+    if (!isClaimable(task)) {
       throw new Error(
         `Task "${taskId}" cannot be claimed (status: ${task.status}). Task must be in draft or open status.`,
       );

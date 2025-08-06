@@ -26,12 +26,15 @@ describe("getObjectByFilePath", () => {
         title: "Setup Database Connection",
         status: TrellisObjectStatus.OPEN,
         priority: TrellisObjectPriority.HIGH,
+        parent: undefined,
         prerequisites: [],
         affectedFiles: new Map(),
         log: [],
         schema: "v1.0",
         childrenIds: [],
         body: expect.stringContaining("Configure the database connection"),
+        created: "2025-01-15T10:00:00Z",
+        updated: "2025-01-15T10:00:00Z",
       });
     });
 
@@ -51,14 +54,20 @@ describe("getObjectByFilePath", () => {
         title: "User Authentication Feature",
         status: TrellisObjectStatus.IN_PROGRESS,
         priority: TrellisObjectPriority.HIGH,
+        parent: undefined,
         prerequisites: [],
         affectedFiles: new Map(),
         log: [],
         schema: "v1.0",
-        childrenIds: [],
+        childrenIds: expect.arrayContaining([
+          "T-implement-login",
+          "T-setup-auth-models",
+        ]),
         body: expect.stringContaining(
           "Implement comprehensive user authentication",
         ),
+        created: "2025-01-12T14:00:00Z",
+        updated: "2025-01-15T12:00:00Z",
       });
     });
 
@@ -78,12 +87,15 @@ describe("getObjectByFilePath", () => {
         title: "Project Initialization",
         status: TrellisObjectStatus.DONE,
         priority: TrellisObjectPriority.HIGH,
+        parent: undefined,
         prerequisites: [],
         affectedFiles: new Map(),
         log: [],
         schema: "v1.0",
         childrenIds: [],
         body: expect.stringContaining("Initialize the project structure"),
+        created: "2025-01-10T09:00:00Z",
+        updated: "2025-01-14T16:30:00Z",
       });
     });
   });

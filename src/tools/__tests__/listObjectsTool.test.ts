@@ -36,6 +36,8 @@ describe("listObjectsTool", () => {
         schema: "v1.0",
         childrenIds: [],
         body: "Project 1 body",
+        created: "2025-01-15T10:00:00Z",
+        updated: "2025-01-15T10:00:00Z",
       },
       {
         id: "T-task-1",
@@ -50,6 +52,8 @@ describe("listObjectsTool", () => {
         schema: "v1.0",
         childrenIds: [],
         body: "Task 1 body",
+        created: "2025-01-15T10:00:00Z",
+        updated: "2025-01-15T10:00:00Z",
       },
     ];
 

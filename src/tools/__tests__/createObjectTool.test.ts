@@ -43,6 +43,8 @@ describe("createObjectTool", () => {
         schema: "v1.0",
         childrenIds: [],
         body: "Existing project body",
+        created: "2025-01-15T10:00:00Z",
+        updated: "2025-01-15T10:00:00Z",
       },
     ];
 
@@ -78,6 +80,8 @@ describe("createObjectTool", () => {
         schema: "v1.0",
         childrenIds: [],
         body: "",
+        created: expect.any(String),
+        updated: expect.any(String),
       });
       expect(result).toEqual({
         content: [
@@ -121,6 +125,8 @@ describe("createObjectTool", () => {
         schema: "v1.0",
         childrenIds: [],
         body: "This is a new project description",
+        created: expect.any(String),
+        updated: expect.any(String),
       });
       expect(result).toEqual({
         content: [
@@ -148,6 +154,8 @@ describe("createObjectTool", () => {
         schema: "v1.0",
         childrenIds: [],
         body: "Parent project description",
+        created: "2025-01-15T10:00:00Z",
+        updated: "2025-01-15T10:00:00Z",
       };
       mockRepository.getObjectById.mockResolvedValue(mockParentObject);
 
@@ -172,6 +180,8 @@ describe("createObjectTool", () => {
         schema: "v1.0",
         childrenIds: [],
         body: "",
+        created: expect.any(String),
+        updated: expect.any(String),
       });
       expect(result).toEqual({
         content: [
@@ -209,6 +219,8 @@ describe("createObjectTool", () => {
         schema: "v1.0",
         childrenIds: [],
         body: "Feature description",
+        created: expect.any(String),
+        updated: expect.any(String),
       });
       expect(result).toEqual({
         content: [
@@ -260,6 +272,8 @@ describe("createObjectTool", () => {
           schema: "v1.0",
           childrenIds: [],
           body: "",
+          created: "2025-01-15T10:00:00Z",
+          updated: "2025-01-15T10:00:00Z",
         },
         {
           id: "F-feature-1",
@@ -273,6 +287,8 @@ describe("createObjectTool", () => {
           schema: "v1.0",
           childrenIds: [],
           body: "",
+          created: "2025-01-15T10:00:00Z",
+          updated: "2025-01-15T10:00:00Z",
         },
       ];
 
@@ -397,6 +413,8 @@ describe("createObjectTool", () => {
             schema: "v1.0",
             childrenIds: [],
             body: "Parent project description",
+            created: "2025-01-15T10:00:00Z",
+            updated: "2025-01-15T10:00:00Z",
           };
           mockRepository.getObjectById.mockResolvedValue(mockParentObject);
         }

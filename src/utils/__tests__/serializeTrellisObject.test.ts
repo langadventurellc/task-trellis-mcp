@@ -14,6 +14,7 @@ describe("serializeTrellisObject", () => {
       title: "Test Task",
       status: TrellisObjectStatus.IN_PROGRESS,
       priority: TrellisObjectPriority.HIGH,
+      parent: "parent-project-456",
       prerequisites: ["prereq-1", "prereq-2"],
       affectedFiles: new Map([
         ["src/file1.ts", "modified"],
@@ -24,6 +25,8 @@ describe("serializeTrellisObject", () => {
       childrenIds: ["child-1", "child-2"],
       body: "This is the main content of the task.",
       type: TrellisObjectType.PROJECT,
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
     };
 
     const result = serializeTrellisObject(trellisObject);
@@ -41,6 +44,7 @@ describe("serializeTrellisObject", () => {
       title: "Test Task",
       status: TrellisObjectStatus.IN_PROGRESS,
       priority: TrellisObjectPriority.HIGH,
+      parent: "parent-project-456",
       prerequisites: ["prereq-1", "prereq-2"],
       affectedFiles: {
         "src/file1.ts": "modified",
@@ -49,6 +53,8 @@ describe("serializeTrellisObject", () => {
       log: ["Initial commit", "Updated implementation"],
       schema: "v1.0",
       childrenIds: ["child-1", "child-2"],
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
     });
   });
 
@@ -70,6 +76,8 @@ describe("serializeTrellisObject", () => {
       childrenIds: [],
       body: "Test body content",
       type: TrellisObjectType.PROJECT,
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
     };
 
     const result = serializeTrellisObject(trellisObject);
@@ -106,6 +114,8 @@ describe("serializeTrellisObject", () => {
       childrenIds: [],
       body: "",
       type: TrellisObjectType.PROJECT,
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
     };
 
     const result = serializeTrellisObject(trellisObject);
@@ -138,6 +148,8 @@ describe("serializeTrellisObject", () => {
       childrenIds: ["child-with-dashes", "child with spaces"],
       body: 'Body with "quotes", symbols: @#$%, and other special characters!',
       type: TrellisObjectType.PROJECT,
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
     };
 
     const result = serializeTrellisObject(trellisObject);
@@ -179,6 +191,8 @@ describe("serializeTrellisObject", () => {
       childrenIds: [],
       body: bodyContent,
       type: TrellisObjectType.PROJECT,
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
     };
 
     const result = serializeTrellisObject(trellisObject);
@@ -210,6 +224,8 @@ describe("serializeTrellisObject", () => {
       childrenIds: [],
       body: "Test content",
       type: TrellisObjectType.PROJECT,
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
     };
 
     const result = serializeTrellisObject(trellisObject);
@@ -221,5 +237,32 @@ describe("serializeTrellisObject", () => {
       "another/path/file.js": "modified",
       "config/settings.json": "deleted",
     });
+  });
+
+  it("should handle TrellisObject without parent field", () => {
+    const trellisObject: TrellisObject = {
+      id: "no-parent-test",
+      title: "No Parent Test",
+      status: TrellisObjectStatus.OPEN,
+      priority: TrellisObjectPriority.MEDIUM,
+      // parent is undefined/not set
+      prerequisites: [],
+      affectedFiles: new Map(),
+      log: [],
+      schema: "v1.0",
+      childrenIds: [],
+      body: "Test content",
+      type: TrellisObjectType.PROJECT,
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
+    };
+
+    const result = serializeTrellisObject(trellisObject);
+    const yamlPart = result.split("---\n")[1];
+    const parsedYaml = parse(yamlPart);
+
+    // parent should be undefined or null in YAML
+    expect(parsedYaml.parent).toBeUndefined();
+    expect(parsedYaml.id).toBe("no-parent-test");
   });
 });

@@ -1,6 +1,7 @@
 import { readFile } from "fs/promises";
 import { TrellisObject } from "../../models";
 import { deserializeTrellisObject } from "../../utils/deserializeTrellisObject";
+import { getChildrenByFilePath } from "./getChildrenByFilePath";
 
 /**
  * Gets a TrellisObject by reading and deserializing a specific markdown file
@@ -12,5 +13,10 @@ export async function getObjectByFilePath(
   filePath: string,
 ): Promise<TrellisObject> {
   const fileContent = await readFile(filePath, "utf-8");
-  return deserializeTrellisObject(fileContent);
+  const trellisObject = deserializeTrellisObject(fileContent);
+
+  // Populate children using the file path
+  trellisObject.childrenIds = await getChildrenByFilePath(filePath);
+
+  return trellisObject;
 }

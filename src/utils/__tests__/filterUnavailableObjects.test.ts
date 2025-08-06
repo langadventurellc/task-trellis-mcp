@@ -23,9 +23,11 @@ describe("filterUnavailableObjects", () => {
     childrenIds: [],
     body: `Body for ${id}`,
     type: TrellisObjectType.TASK,
+    created: "2025-01-15T10:00:00Z",
+    updated: "2025-01-15T10:00:00Z",
   });
 
-  it("should only include objects with status 'open'", () => {
+  it("should only include claimable objects", () => {
     const objects: TrellisObject[] = [
       createMockObject("open-1", TrellisObjectStatus.OPEN),
       createMockObject("draft-1", TrellisObjectStatus.DRAFT),
@@ -37,12 +39,10 @@ describe("filterUnavailableObjects", () => {
 
     const result = filterUnavailableObjects(objects);
 
-    expect(result).toHaveLength(2);
+    expect(result).toHaveLength(3);
     expect(result[0].id).toBe("open-1");
-    expect(result[1].id).toBe("open-2");
-    result.forEach((obj) => {
-      expect(obj.status).toBe(TrellisObjectStatus.OPEN);
-    });
+    expect(result[1].id).toBe("draft-1");
+    expect(result[2].id).toBe("open-2");
   });
 
   it("should include objects with external prerequisites (not in list)", () => {
@@ -107,10 +107,10 @@ describe("filterUnavailableObjects", () => {
 
     const result = filterUnavailableObjects(objects);
 
-    // Only prereq-1 should be included (it's open with no dependencies)
-    // The tasks should be excluded because their prerequisites are not done/wont-do
-    expect(result).toHaveLength(1);
+    // The tasks should be excluded because their prerequisites are not claimable
+    expect(result).toHaveLength(2);
     expect(result[0].id).toBe("prereq-1");
+    expect(result[1].id).toBe("prereq-3");
   });
 
   it("should handle mixed prerequisites (some external, some internal)", () => {
@@ -180,6 +180,7 @@ describe("filterUnavailableObjects", () => {
     const objects: TrellisObject[] = [
       createMockObject("task-1", TrellisObjectStatus.OPEN),
       createMockObject("task-2", TrellisObjectStatus.DRAFT),
+      createMockObject("task-3", TrellisObjectStatus.IN_PROGRESS),
     ];
 
     const originalLength = objects.length;
@@ -187,7 +188,7 @@ describe("filterUnavailableObjects", () => {
 
     expect(objects.length).toBe(originalLength);
     expect(result).not.toBe(objects);
-    expect(result.length).toBe(1);
+    expect(result.length).toBe(2);
   });
 
   it("should handle self-referencing prerequisites", () => {

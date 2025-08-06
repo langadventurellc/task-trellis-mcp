@@ -3,7 +3,12 @@ export default {
   extensionsToTreatAsEsm: [".ts"],
   testEnvironment: "node",
   rootDir: ".",
-  testMatch: ["<rootDir>/src/**/__tests__/**/*.test.ts"],
+  testMatch: [
+    "<rootDir>/src/**/__tests__/**/*.test.ts"
+  ],
+  testPathIgnorePatterns: [
+    ".*\\.e2e\\.test\\.ts$"
+  ],
   collectCoverageFrom: [
     "src/**/*.ts",
     "!src/**/__tests__/**",

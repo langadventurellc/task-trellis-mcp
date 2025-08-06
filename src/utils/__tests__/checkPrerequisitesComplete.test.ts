@@ -51,6 +51,8 @@ describe("checkPrerequisitesComplete", () => {
     childrenIds: [],
     body: `Body for ${id}`,
     type: TrellisObjectType.TASK,
+    created: "2025-01-15T10:00:00Z",
+    updated: "2025-01-15T10:00:00Z",
   });
 
   it("should return true when object has no prerequisites", async () => {

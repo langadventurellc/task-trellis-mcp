@@ -23,6 +23,8 @@ describe("completeTaskTool", () => {
     affectedFiles: new Map(),
     log: [],
     schema: "1.0",
+    created: "2025-01-15T10:00:00Z",
+    updated: "2025-01-15T10:00:00Z",
     childrenIds: [],
     body: "This is a test task",
     ...overrides,
