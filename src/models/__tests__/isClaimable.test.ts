@@ -17,6 +17,8 @@ describe("isClaimable", () => {
     schema: "1.0",
     childrenIds: [],
     body: "Test body",
+    created: "2025-01-15T10:00:00Z",
+    updated: "2025-01-15T10:00:00Z",
   });
 
   describe("claimable states", () => {
@@ -62,6 +64,8 @@ describe("isClaimable", () => {
         schema: "1.0",
         childrenIds: [],
         body: "Test feature body",
+        created: "2025-01-15T10:00:00Z",
+        updated: "2025-01-15T10:00:00Z",
       };
 
       expect(isClaimable(featureObject)).toBe(true);
@@ -84,6 +88,8 @@ describe("isClaimable", () => {
         schema: "1.0",
         childrenIds: [],
         body: "Complex task in draft state",
+        created: "2025-01-15T10:00:00Z",
+        updated: "2025-01-15T10:00:00Z",
       };
 
       expect(isClaimable(complexObject)).toBe(true);
@@ -103,6 +109,8 @@ describe("isClaimable", () => {
         schema: "1.0",
         childrenIds: [],
         body: "Task currently being worked on",
+        created: "2025-01-15T10:00:00Z",
+        updated: "2025-01-15T10:00:00Z",
       };
 
       expect(isClaimable(complexObject)).toBe(false);

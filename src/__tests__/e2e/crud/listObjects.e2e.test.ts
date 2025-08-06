@@ -591,6 +591,19 @@ describe("E2E CRUD - listObjects", () => {
         }),
       );
 
+      // Create the expected child epic
+      await createObjectFile(
+        testEnv.projectRoot,
+        "epic",
+        "E-child",
+        createObjectContent({
+          id: "E-child",
+          title: "Child Epic",
+          parent: "P-detailed",
+        }),
+        { projectId: "P-detailed" },
+      );
+
       const result = await client.callTool("list_objects", {
         type: "project",
       });

@@ -17,6 +17,8 @@ describe("isOpen", () => {
     schema: "1.0",
     childrenIds: [],
     body: "Test body",
+    created: "2025-01-15T10:00:00Z",
+    updated: "2025-01-15T10:00:00Z",
   });
 
   describe("open states", () => {
@@ -62,6 +64,8 @@ describe("isOpen", () => {
         schema: "1.0",
         childrenIds: [],
         body: "Test epic body",
+        created: "2025-01-15T10:00:00Z",
+        updated: "2025-01-15T10:00:00Z",
       };
 
       expect(isOpen(epicObject)).toBe(true);
@@ -84,6 +88,8 @@ describe("isOpen", () => {
         schema: "1.0",
         childrenIds: ["T-child-1", "T-child-2"],
         body: "Complex feature with many properties",
+        created: "2025-01-15T10:00:00Z",
+        updated: "2025-01-15T10:00:00Z",
       };
 
       expect(isOpen(complexObject)).toBe(true);

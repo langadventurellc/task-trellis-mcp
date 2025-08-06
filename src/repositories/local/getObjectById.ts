@@ -2,6 +2,7 @@ import { readFile } from "fs/promises";
 import { TrellisObject } from "../../models";
 import { deserializeTrellisObject } from "../../utils/deserializeTrellisObject";
 import { findMarkdownFiles } from "./findMarkdownFiles";
+import { getChildrenByFilePath } from "./getChildrenByFilePath";
 
 /**
  * Gets a TrellisObject by its ID by searching through markdown files
@@ -25,6 +26,8 @@ export async function getObjectById(
 
       // Check if this object has the ID we're looking for
       if (trellisObject.id === id) {
+        // Populate children using the file path
+        trellisObject.childrenIds = await getChildrenByFilePath(filePath);
         return trellisObject;
       }
     } catch (error) {

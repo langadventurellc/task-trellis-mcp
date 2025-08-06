@@ -44,6 +44,8 @@ describe("validateParentExists", () => {
       schema: "v1.0",
       childrenIds: [],
       body: "Parent project description",
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
     };
 
     mockRepository.getObjectById.mockResolvedValue(mockParentObject);

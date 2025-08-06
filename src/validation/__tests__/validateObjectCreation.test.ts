@@ -41,6 +41,8 @@ describe("validateObjectCreation", () => {
       schema: "v1.0",
       childrenIds: [],
       body: "Test task description",
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
     };
 
     jest.clearAllMocks();

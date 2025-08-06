@@ -25,6 +25,8 @@ describe("TrellisObject Serialization/Deserialization Integration Tests", () => 
         childrenIds: ["child-1"],
         body: "Basic task description",
         type: TrellisObjectType.TASK,
+        created: "2025-01-15T10:00:00Z",
+        updated: "2025-01-15T10:00:00Z",
       };
 
       const serialized = serializeTrellisObject(original);
@@ -94,6 +96,8 @@ Additional section with --- delimiters for testing.`;
         childrenIds: ["subtask-1", "subtask-2", "cleanup-task"],
         body: complexBody,
         type: TrellisObjectType.TASK,
+        created: "2025-01-15T10:00:00Z",
+        updated: "2025-01-15T10:00:00Z",
       };
 
       const serialized = serializeTrellisObject(original);
@@ -115,6 +119,8 @@ Additional section with --- delimiters for testing.`;
         childrenIds: [],
         body: "",
         type: TrellisObjectType.TASK,
+        created: "2025-01-15T10:00:00Z",
+        updated: "2025-01-15T10:00:00Z",
       };
 
       const serialized = serializeTrellisObject(original);
@@ -164,6 +170,8 @@ console.log(greeting);
 
 > Note: All unicode characters should be preserved.`,
         type: TrellisObjectType.TASK,
+        created: "2025-01-15T10:00:00Z",
+        updated: "2025-01-15T10:00:00Z",
       };
 
       const serialized = serializeTrellisObject(original);
@@ -219,6 +227,8 @@ The parser should handle all of this correctly.`;
         childrenIds: [],
         body: yamlLikeBody,
         type: TrellisObjectType.TASK,
+        created: "2025-01-15T10:00:00Z",
+        updated: "2025-01-15T10:00:00Z",
       };
 
       const serialized = serializeTrellisObject(original);
@@ -281,6 +291,8 @@ ${"Final section content repeated multiple times to test large content handling.
         childrenIds: largeChildrenIds,
         body: largeBody,
         type: TrellisObjectType.TASK,
+        created: "2025-01-15T10:00:00Z",
+        updated: "2025-01-15T10:00:00Z",
       };
 
       const serialized = serializeTrellisObject(original);
@@ -312,6 +324,8 @@ ${"Final section content repeated multiple times to test large content handling.
         childrenIds: ["z-child", "a-child", "m-child"],
         body: "Test body content",
         type: TrellisObjectType.TASK,
+        created: "2025-01-15T10:00:00Z",
+        updated: "2025-01-15T10:00:00Z",
       };
 
       const serialized = serializeTrellisObject(original);
@@ -344,6 +358,8 @@ ${"Final section content repeated multiple times to test large content handling.
         childrenIds: ["format-child"],
         body: "Format validation body",
         type: TrellisObjectType.FEATURE,
+        created: "2025-01-15T10:00:00Z",
+        updated: "2025-01-15T10:00:00Z",
       };
 
       const serialized = serializeTrellisObject(original);
@@ -371,6 +387,8 @@ ${"Final section content repeated multiple times to test large content handling.
         childrenIds: [],
         body: "---\nThis body starts with --- which is tricky\n---\nAnd has more --- markers",
         type: TrellisObjectType.EPIC,
+        created: "2025-01-15T10:00:00Z",
+        updated: "2025-01-15T10:00:00Z",
       };
 
       const serialized = serializeTrellisObject(original);
@@ -395,6 +413,8 @@ ${"Final section content repeated multiple times to test large content handling.
           childrenIds: [],
           body: "First body",
           type: TrellisObjectType.TASK,
+          created: "2025-01-15T10:00:00Z",
+          updated: "2025-01-15T10:00:00Z",
         },
         {
           id: "P-seq-2",
@@ -414,6 +434,8 @@ ${"Final section content repeated multiple times to test large content handling.
           childrenIds: ["seq-2-child"],
           body: "# Second Object\n\nMore complex content.",
           type: TrellisObjectType.PROJECT,
+          created: "2025-01-15T10:00:00Z",
+          updated: "2025-01-15T10:00:00Z",
         },
         {
           id: "F-seq-3",
@@ -427,6 +449,8 @@ ${"Final section content repeated multiple times to test large content handling.
           childrenIds: ["seq-3a", "seq-3b"],
           body: "",
           type: TrellisObjectType.FEATURE,
+          created: "2025-01-15T10:00:00Z",
+          updated: "2025-01-15T10:00:00Z",
         },
       ];
 

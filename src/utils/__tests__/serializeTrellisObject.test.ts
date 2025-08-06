@@ -25,6 +25,8 @@ describe("serializeTrellisObject", () => {
       childrenIds: ["child-1", "child-2"],
       body: "This is the main content of the task.",
       type: TrellisObjectType.PROJECT,
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
     };
 
     const result = serializeTrellisObject(trellisObject);
@@ -51,6 +53,8 @@ describe("serializeTrellisObject", () => {
       log: ["Initial commit", "Updated implementation"],
       schema: "v1.0",
       childrenIds: ["child-1", "child-2"],
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
     });
   });
 
@@ -72,6 +76,8 @@ describe("serializeTrellisObject", () => {
       childrenIds: [],
       body: "Test body content",
       type: TrellisObjectType.PROJECT,
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
     };
 
     const result = serializeTrellisObject(trellisObject);
@@ -108,6 +114,8 @@ describe("serializeTrellisObject", () => {
       childrenIds: [],
       body: "",
       type: TrellisObjectType.PROJECT,
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
     };
 
     const result = serializeTrellisObject(trellisObject);
@@ -140,6 +148,8 @@ describe("serializeTrellisObject", () => {
       childrenIds: ["child-with-dashes", "child with spaces"],
       body: 'Body with "quotes", symbols: @#$%, and other special characters!',
       type: TrellisObjectType.PROJECT,
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
     };
 
     const result = serializeTrellisObject(trellisObject);
@@ -181,6 +191,8 @@ describe("serializeTrellisObject", () => {
       childrenIds: [],
       body: bodyContent,
       type: TrellisObjectType.PROJECT,
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
     };
 
     const result = serializeTrellisObject(trellisObject);
@@ -212,6 +224,8 @@ describe("serializeTrellisObject", () => {
       childrenIds: [],
       body: "Test content",
       type: TrellisObjectType.PROJECT,
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
     };
 
     const result = serializeTrellisObject(trellisObject);
@@ -239,6 +253,8 @@ describe("serializeTrellisObject", () => {
       childrenIds: [],
       body: "Test content",
       type: TrellisObjectType.PROJECT,
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
     };
 
     const result = serializeTrellisObject(trellisObject);

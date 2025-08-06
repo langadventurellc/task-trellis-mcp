@@ -1,13 +1,13 @@
 import js from '@eslint/js';
+import {
+  multipleExportsPlugin,
+  statementCountPlugin,
+} from '@langadventurellc/tsla-linter';
 import prettierConfig from 'eslint-config-prettier';
 import sonarjs from 'eslint-plugin-sonarjs';
 import { dirname } from 'path';
 import tseslint from 'typescript-eslint';
 import { fileURLToPath } from 'url';
-import {
-  multipleExportsPlugin,
-  statementCountPlugin,
-} from '@langadventurellc/tsla-linter';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -98,6 +98,10 @@ const eslintConfig = [
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/unbound-method': 'off',
+      "statement-count/function-statement-count-warn": "off",
+      "statement-count/function-statement-count-error": "off",
+      "statement-count/class-statement-count-warn": "off",
+      "statement-count/class-statement-count-error": "off",
     },
   },
 

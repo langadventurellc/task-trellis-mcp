@@ -84,7 +84,8 @@ export async function handleCreateObject(
   const objectType = type as TrellisObjectType;
   const id = generateUniqueId(title, objectType, existingIds);
 
-  // Create TrellisObject
+  // Create TrellisObject with current timestamp
+  const now = new Date().toISOString();
   const trellisObject: TrellisObject = {
     id,
     type: objectType,
@@ -97,6 +98,8 @@ export async function handleCreateObject(
     log: [],
     schema: "v1.0",
     childrenIds: [],
+    created: now,
+    updated: now,
     body: description,
   };
 

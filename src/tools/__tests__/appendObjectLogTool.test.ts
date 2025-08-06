@@ -34,6 +34,8 @@ describe("appendObjectLogTool", () => {
       schema: "1.0",
       childrenIds: [],
       body: "This is a test task",
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
     };
 
     it("should successfully append to object log", async () => {

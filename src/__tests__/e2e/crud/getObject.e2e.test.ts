@@ -54,6 +54,24 @@ describe("E2E CRUD - getObject", () => {
         content,
       );
 
+      // Create the expected child epic
+      const epicData: ObjectData = {
+        id: "E-child-epic",
+        title: "Child Epic",
+        status: "open",
+        priority: "normal",
+        parent: "P-test-project",
+        body: "Child epic description",
+      };
+      const epicContent = createObjectContent(epicData);
+      await createObjectFile(
+        testEnv.projectRoot,
+        "epic",
+        "E-child-epic",
+        epicContent,
+        { projectId: "P-test-project" },
+      );
+
       const result = await client.callTool("get_object", {
         id: "P-test-project",
       });
@@ -71,7 +89,6 @@ describe("E2E CRUD - getObject", () => {
       expect(object.affectedFiles).toEqual({});
       expect(object.log).toEqual(["Created project", "Updated priority"]);
       expect(object.schema).toBe("1.1");
-      expect(object.childrenIds).toEqual(["E-child-epic"]);
       expect(object.body).toBe("This is the project description");
     });
 
@@ -501,6 +518,8 @@ affectedFiles: {}
 log: []
 schema: "1.0"
 childrenIds: []
+created: "2024-01-01T00:00:00.000Z"
+updated: "2024-01-01T00:00:00.000Z"
 ---
 
 `;

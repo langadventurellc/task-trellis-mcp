@@ -5,6 +5,8 @@ import type { ObjectData } from "./ObjectData";
  * Creates YAML frontmatter content for Trellis objects
  */
 export function createObjectContent(data: ObjectData): string {
+  const defaultTimestamp = "2025-01-15T10:00:00Z";
+
   const frontmatter = {
     ...(data.kind && { kind: data.kind }),
     id: data.id,
@@ -17,8 +19,8 @@ export function createObjectContent(data: ObjectData): string {
     ...(data.log && { log: data.log }),
     schema: data.schema || "1.0",
     ...(data.childrenIds && { childrenIds: data.childrenIds }),
-    ...(data.created && { created: data.created }),
-    ...(data.updated && { updated: data.updated }),
+    created: data.created || defaultTimestamp,
+    updated: data.updated || defaultTimestamp,
   };
 
   // Remove undefined values

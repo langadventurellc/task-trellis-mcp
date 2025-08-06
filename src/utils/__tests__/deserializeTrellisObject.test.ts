@@ -28,6 +28,8 @@ schema: v1.0
 childrenIds:
   - child-1
   - child-2
+created: "2025-01-15T10:00:00Z"
+updated: "2025-01-15T10:00:00Z"
 ---
 
 This is the main content of the task.`;
@@ -50,6 +52,8 @@ This is the main content of the task.`;
       schema: "v1.0",
       childrenIds: ["child-1", "child-2"],
       body: "This is the main content of the task.",
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
     });
   });
 
@@ -77,6 +81,8 @@ log:
     - Final point
 schema: v1.0
 childrenIds: []
+created: "2025-01-15T10:00:00Z"
+updated: "2025-01-15T10:00:00Z"
 ---
 
 Test body content`;
@@ -105,6 +111,8 @@ affectedFiles: {}
 log: []
 schema: v1.0
 childrenIds: []
+created: "2025-01-15T10:00:00Z"
+updated: "2025-01-15T10:00:00Z"
 ---
 
 `;
@@ -138,6 +146,8 @@ schema: v2.0-beta
 childrenIds:
   - child-with-dashes
   - child with spaces
+created: "2025-01-15T10:00:00Z"
+updated: "2025-01-15T10:00:00Z"
 ---
 
 Body with "quotes", symbols: @#$%, and other special characters!`;
@@ -185,6 +195,8 @@ title: Test Task
 status: open
 # priority is missing
 schema: v1.0
+created: "2025-01-15T10:00:00Z"
+updated: "2025-01-15T10:00:00Z"
 ---
 
 body content`;
@@ -201,6 +213,8 @@ title: Test Task
 status: open
 priority: 123  # should be string, not number
 schema: v1.0
+created: "2025-01-15T10:00:00Z"
+updated: "2025-01-15T10:00:00Z"
 ---
 
 body content`;
@@ -230,6 +244,8 @@ schema: v1.0
 childrenIds:
   - valid-child
   - 789
+created: "2025-01-15T10:00:00Z"
+updated: "2025-01-15T10:00:00Z"
 ---
 
 body content`;
@@ -256,6 +272,8 @@ affectedFiles:
 log: []
 schema: v1.0
 childrenIds: []
+created: "2025-01-15T10:00:00Z"
+updated: "2025-01-15T10:00:00Z"
 ---
 
 body content`;
@@ -280,6 +298,8 @@ affectedFiles: {}
 log: []
 schema: v1.0
 childrenIds: []
+created: "2025-01-15T10:00:00Z"
+updated: "2025-01-15T10:00:00Z"
 ---
 
 # Main Task Description
@@ -335,6 +355,8 @@ const example = "code block";
       childrenIds: ["child-1", "child-2"],
       body: "# Task Description\n\nThis is the task body with **markdown** formatting.",
       type: TrellisObjectType.TASK,
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
     };
 
     // Serialize then deserialize
@@ -368,6 +390,8 @@ affectedFiles: {}
 log: []
 schema: v1.0
 childrenIds: []
+created: "2025-01-15T10:00:00Z"
+updated: "2025-01-15T10:00:00Z"
 ---
 
 This body contains --- markers
@@ -398,6 +422,8 @@ affectedFiles: {}
 log: []
 schema: v1.0
 childrenIds: []
+created: "2025-01-15T10:00:00Z"
+updated: "2025-01-15T10:00:00Z"
 ---
 
 Test body content`;

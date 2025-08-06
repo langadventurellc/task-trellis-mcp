@@ -22,6 +22,9 @@ describe("getObjectById", () => {
     expect(result!.status).toBe(TrellisObjectStatus.IN_PROGRESS);
     expect(result!.priority).toBe(TrellisObjectPriority.HIGH);
     expect(result!.body).toContain("# E-commerce Platform");
+    expect(result!.childrenIds).toEqual(
+      expect.arrayContaining(["E-product-catalog", "E-user-management"]),
+    );
   });
 
   it("should find and return a Task object by ID", async () => {
@@ -48,6 +51,9 @@ describe("getObjectById", () => {
     expect(result!.title).toBeDefined();
     expect(result!.status).toBeDefined();
     expect(result!.priority).toBeDefined();
+    expect(result!.childrenIds).toEqual(
+      expect.arrayContaining(["T-implement-login", "T-setup-auth-models"]),
+    );
   });
 
   it("should return null when object ID is not found", async () => {

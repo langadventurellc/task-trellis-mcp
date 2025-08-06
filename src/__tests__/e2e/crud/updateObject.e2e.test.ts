@@ -315,6 +315,40 @@ This is the new body content with markdown formatting.
         { projectId: "P-project", epicId: "E-parent-epic" },
       );
 
+      // Create the expected child tasks
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-child-1",
+        createObjectContent({
+          id: "T-child-1",
+          title: "Child Task 1",
+          parent: "F-preserve-test",
+        }),
+        {
+          projectId: "P-project",
+          epicId: "E-parent-epic",
+          featureId: "F-preserve-test",
+          status: "open",
+        },
+      );
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-child-2",
+        createObjectContent({
+          id: "T-child-2",
+          title: "Child Task 2",
+          parent: "F-preserve-test",
+        }),
+        {
+          projectId: "P-project",
+          epicId: "E-parent-epic",
+          featureId: "F-preserve-test",
+          status: "open",
+        },
+      );
+
       // Update only priority
       const result = await client.callTool("update_object", {
         id: "F-preserve-test",

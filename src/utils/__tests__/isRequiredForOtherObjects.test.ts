@@ -51,6 +51,8 @@ describe("isRequiredForOtherObjects", () => {
     childrenIds: [],
     body: `Body for ${id}`,
     type: TrellisObjectType.TASK,
+    created: "2025-01-15T10:00:00Z",
+    updated: "2025-01-15T10:00:00Z",
   });
 
   it("should return false when no other objects exist", async () => {

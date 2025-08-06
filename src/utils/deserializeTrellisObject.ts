@@ -68,6 +68,8 @@ function validateRequiredFields(fm: Record<string, unknown>): void {
     "status",
     "priority",
     "schema",
+    "created",
+    "updated",
   ] as const;
 
   for (const field of requiredFields) {
@@ -171,6 +173,8 @@ export function deserializeTrellisObject(
     log: toStringArray(fm.log),
     schema: fm.schema as string,
     childrenIds: toStringArray(fm.childrenIds),
+    created: fm.created as string,
+    updated: fm.updated as string,
     body: bodyContent,
   };
 

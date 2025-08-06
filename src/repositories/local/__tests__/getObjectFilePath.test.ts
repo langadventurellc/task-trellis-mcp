@@ -37,6 +37,8 @@ describe("getObjectFilePath", () => {
     schema: "1.0",
     childrenIds: [],
     body: "",
+    created: "2025-01-15T10:00:00Z",
+    updated: "2025-01-15T10:00:00Z",
   });
 
   describe("Project objects", () => {

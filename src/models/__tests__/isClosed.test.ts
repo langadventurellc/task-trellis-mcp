@@ -17,6 +17,8 @@ describe("isClosed", () => {
     schema: "1.0",
     childrenIds: [],
     body: "Test body",
+    created: "2025-01-15T10:00:00Z",
+    updated: "2025-01-15T10:00:00Z",
   });
 
   describe("closed states", () => {
@@ -62,6 +64,8 @@ describe("isClosed", () => {
         schema: "1.0",
         childrenIds: [],
         body: "Test project body",
+        created: "2025-01-15T10:00:00Z",
+        updated: "2025-01-15T10:00:00Z",
       };
 
       expect(isClosed(projectObject)).toBe(true);
@@ -84,6 +88,8 @@ describe("isClosed", () => {
         schema: "1.0",
         childrenIds: ["T-child-1"],
         body: "Complex task with many properties",
+        created: "2025-01-15T10:00:00Z",
+        updated: "2025-01-15T10:00:00Z",
       };
 
       expect(isClosed(complexObject)).toBe(true);
