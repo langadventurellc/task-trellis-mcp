@@ -14,6 +14,7 @@ id: T-test-id-123
 title: Test Task
 status: in-progress
 priority: high
+parent: F-parent-feature-456
 prerequisites:
   - prereq-1
   - prereq-2
@@ -39,6 +40,7 @@ This is the main content of the task.`;
       title: "Test Task",
       status: TrellisObjectStatus.IN_PROGRESS,
       priority: TrellisObjectPriority.HIGH,
+      parent: "F-parent-feature-456",
       prerequisites: ["prereq-1", "prereq-2"],
       affectedFiles: new Map([
         ["src/file1.ts", "modified"],
@@ -317,6 +319,7 @@ const example = "code block";
       title: "Round Trip Test",
       status: TrellisObjectStatus.IN_PROGRESS,
       priority: TrellisObjectPriority.HIGH,
+      parent: "F-parent-feature-789",
       prerequisites: ["prereq-1", "prereq-2"],
       affectedFiles: new Map([
         ["src/file1.ts", "modified"],
@@ -382,5 +385,27 @@ and should handle them correctly.
 ---
 
 Even multiple --- sections should work.`);
+  });
+
+  it("should handle markdown without parent field", () => {
+    const markdownString = `---
+id: P-no-parent-test
+title: No Parent Test
+status: open
+priority: medium
+prerequisites: []
+affectedFiles: {}
+log: []
+schema: v1.0
+childrenIds: []
+---
+
+Test body content`;
+
+    const result = deserializeTrellisObject(markdownString);
+
+    expect(result.parent).toBeUndefined();
+    expect(result.id).toBe("P-no-parent-test");
+    expect(result.title).toBe("No Parent Test");
   });
 });

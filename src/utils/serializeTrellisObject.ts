@@ -16,6 +16,7 @@ export function serializeTrellisObject(trellisObject: TrellisObject): string {
     title: trellisObject.title,
     status: trellisObject.status,
     priority: trellisObject.priority,
+    parent: trellisObject.parent,
     prerequisites: trellisObject.prerequisites,
     affectedFiles: affectedFilesObj,
     log: trellisObject.log,

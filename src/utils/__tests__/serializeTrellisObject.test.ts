@@ -14,6 +14,7 @@ describe("serializeTrellisObject", () => {
       title: "Test Task",
       status: TrellisObjectStatus.IN_PROGRESS,
       priority: TrellisObjectPriority.HIGH,
+      parent: "parent-project-456",
       prerequisites: ["prereq-1", "prereq-2"],
       affectedFiles: new Map([
         ["src/file1.ts", "modified"],
@@ -41,6 +42,7 @@ describe("serializeTrellisObject", () => {
       title: "Test Task",
       status: TrellisObjectStatus.IN_PROGRESS,
       priority: TrellisObjectPriority.HIGH,
+      parent: "parent-project-456",
       prerequisites: ["prereq-1", "prereq-2"],
       affectedFiles: {
         "src/file1.ts": "modified",
@@ -221,5 +223,30 @@ describe("serializeTrellisObject", () => {
       "another/path/file.js": "modified",
       "config/settings.json": "deleted",
     });
+  });
+
+  it("should handle TrellisObject without parent field", () => {
+    const trellisObject: TrellisObject = {
+      id: "no-parent-test",
+      title: "No Parent Test",
+      status: TrellisObjectStatus.OPEN,
+      priority: TrellisObjectPriority.MEDIUM,
+      // parent is undefined/not set
+      prerequisites: [],
+      affectedFiles: new Map(),
+      log: [],
+      schema: "v1.0",
+      childrenIds: [],
+      body: "Test content",
+      type: TrellisObjectType.PROJECT,
+    };
+
+    const result = serializeTrellisObject(trellisObject);
+    const yamlPart = result.split("---\n")[1];
+    const parsedYaml = parse(yamlPart);
+
+    // parent should be undefined or null in YAML
+    expect(parsedYaml.parent).toBeUndefined();
+    expect(parsedYaml.id).toBe("no-parent-test");
   });
 });
