@@ -1,110 +1,358 @@
 # Task Trellis MCP
 
-An MCP (Model Context Protocol) server for Task Trellis, a tool to help AI coding agents break down complex work into manageable tasks that allow it to work effectively. This server provides a structured task hierarchy and workflow management system, enabling AI agents to claim, complete, and manage tasks efficiently.
+> Transform AI coding chaos into organized productivity
+
+[![npm version](https://badge.fury.io/js/%40langadventurellc%2Ftask-trellis-mcp.svg)](https://www.npmjs.com/package/@langadventurellc/task-trellis-mcp)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
+An MCP (Model Context Protocol) server that greatly improves how AI coding agents handle complex projects. Task Trellis breaks down large development efforts into manageable, trackable work items with built-in workflow management, dependency handling, and progress tracking.
+
+## Table of Contents
+
+- [Why Task Trellis?](#why-task-trellis)
+- [Core Benefits](#core-benefits)
+- [Usage](#usage)
+- [Available Tools](#available-tools)
+- [Project Hierarchy](#project-hierarchy)
+- [Prerequisites & Dependencies](#prerequisites--dependencies)
+- [File Storage](#file-storage)
+- [Installation](#installation)
+- [Quick Test](#quick-test)
+- [Configuration Options](#configuration-options)
+- [Troubleshooting](#troubleshooting)
+
+## Why Task Trellis?
+
+### Without Task Trellis
+
+- AI agents lose track of complex, multi-step projects
+- Agents spin out of control with no clear task structure
+- Tasks are often too large or vague, leading to confusion
+- No way to manage dependencies or prerequisites
+- No visibility into what's been completed vs. what's pending
+- Tasks get forgotten, duplicated, or done out of order
+- Zero coordination between multiple AI sessions
+- Complex projects become chaotic and overwhelming
+
+### With Task Trellis
+
+- **Structured Breakdown**: Automatically organize projects into hierarchical tasks (depending on the size of the effort required)
+  - For large projects, create a project with epics, features, and tasks
+  - For medium projects, create features with tasks
+  - For small tasks, create standalone tasks
+- **Smart Dependencies**: Prevent tasks from starting until prerequisites are complete
+- **Progress Tracking**: Real-time visibility into what's done, in-progress, and pending
+- **Session Continuity**: Pick up exactly where you left off across AI conversations
+- **Workflow Management**: Built-in task claiming, completion, and validation workflows
+- **File Change Tracking**: Automatic documentation of what files were modified for each task
+
+## Core Benefits
+
+**Focused Execution**: AI agents work on one clearly-defined task at a time  
+**Progress Visibility**: Always know project status and what's next  
+**Dependency Management**: Automatic task ordering based on prerequisites  
+**Audit Trail**: Complete history of all work completed and changes made  
+**Multi-Session Support**: Seamlessly collaborate across different AI conversations  
+**Productivity Boost**: Reduce context switching and eliminate forgotten tasks
+
+## Usage
+
+### Basic Workflow
+
+See sample prompts (written as Claude Code slash commands): [Sample Prompts](docs/sample_prompts/index.md)
+
+1. **Create Tasks**
+   - For large projects
+   - Create a project
+   - Create epics to group features
+   - Create features to break down epics
+   - Create tasks for specific work items
+   - For medium-sized projects
+     - Create standalone feature
+     - Create tasks directly under the feature
+   - For small tasks
+     - Create standalone tasks
+
+2. **Claim & Work on Tasks**
+   - AI agent claims next available task
+   - Works on the specific task requirements
+   - Marks task complete with file changes documented
+
+3. **Track Progress**
+   - View completed vs. pending work
+   - See dependency relationships
+   - Monitor overall project health
 
 ## Available Tools
 
-This MCP server provides comprehensive task management functionality through the following tools:
-
 ### Core Object Management
 
-- **create_object**: Creates new objects (projects, epics, features, tasks) in the task hierarchy
-  - Supports parent-child relationships and prerequisites
-  - Validates hierarchy constraints (project → epic → feature → task)
-  - Parameters: type, title, parent (optional), priority, status, prerequisites, description
-
-- **update_object**: Updates existing objects with new properties
-  - Change status, priority, prerequisites, or content
-  - Validates status transitions and maintains object integrity
-  - Parameters: id, priority, status, prerequisites, body, force
-
-- **replace_object_body_regex**: Performs targeted regex-based replacements within object body content
-  - Enables surgical text edits without recreating entire body content
-  - Safer and more efficient than wholesale body replacement for specific modifications
-  - Parameters: id, regex, replacement, allowMultipleOccurrences (optional)
-
-- **get_object**: Retrieves detailed information about a specific object by ID
-  - Returns complete object data including metadata, relationships, and history
-  - Parameters: id
-
-- **delete_object**: Permanently removes objects from the system
-  - Validates relationships and prevents deletion of objects with dependencies
-  - Parameters: id, force
-
-- **list_objects**: Retrieves and filters objects based on various criteria
-  - Filter by type, status, priority, scope, or closed status
-  - Essential for discovering and managing work items
-  - Parameters: type, scope (optional), status (optional), priority (optional), includeClosed
+- **create_object** - Create projects, epics, features, or tasks with hierarchical relationships
+- **update_object** - Modify object properties, status, priority, or prerequisites
+- **get_object** - Retrieve detailed object information with history and relationships
+- **list_objects** - Query and filter objects by type, status, priority, or scope
+- **delete_object** - Remove objects (with dependency validation)
+- **replace_object_body_regex** - Make targeted content edits using regex patterns
 
 ### Task Workflow Management
 
-- **claim_task**: Claims available tasks for execution by AI agents
-  - Automatically selects highest priority ready tasks
-  - Validates prerequisites and readiness criteria
-  - Parameters: scope (optional), taskId (optional), force
-
-- **complete_task**: Marks tasks as completed and records completion details
-  - Documents file changes and completion summary
-  - Updates task status and triggers dependent task progression
-  - Parameters: taskId, summary, filesChanged
-
-- **append_object_log**: Adds progress updates and notes to object activity logs
-  - Essential for tracking work history and documenting decisions
-  - Creates permanent audit trail for retrospectives and debugging
-  - Parameters: id, contents
+- **claim_task** - Claim available tasks for execution with automatic priority ordering
+- **complete_task** - Mark tasks complete with file change documentation
+- **append_object_log** - Add progress notes and status updates to task history
 
 ### System Management
 
-- **activate**: Initializes the task trellis system in local or remote mode
-  - Only needs to be run if the server wasn't started with command line arguments (`--projectRootFolder` for local mode or `--mode remote` for remote mode)
-  - Configures data storage and validates connectivity
-  - Parameters: mode, projectRoot (local), apiToken (remote), remoteProjectId (remote), url (optional)
+- **activate** - Initialize the task system (if not configured via command line)
+- **prune_closed** - Clean up old completed/cancelled objects for maintenance
 
-- **prune_closed**: Maintenance tool to remove old completed/cancelled objects
-  - Improves system performance and reduces clutter
-  - Validates relationships before deletion to maintain integrity
-  - Parameters: age, scope (optional)
+## Project Hierarchy
 
-### Usage
+Task Trellis supports a flexible 4-level hierarchy:
 
-1. **Build the server:**
+```
+Project (Top-level container)
+└── Epic (Large feature groupings)
+    └── Feature (Specific functionality)
+        └── Task (Individual work items)
+```
 
-   ```bash
-   npm run build
-   ```
+**Supported Patterns:**
 
-2. **Start the server:**
+- Full hierarchy: `Project → Epic → Feature → Task`
+- Simplified: `Feature → Task`
+- Standalone: `Task` only
 
-   ```bash
-   npm run serve
-   ```
+## Prerequisites & Dependencies
 
-3. **Configure in your MCP client:**
-   ```json
-   {
-     "mcpServers": {
-       "task-trellis": {
-         "type": "stdio",
-         "command": "npx",
-         "args": ["@langadventurellc/task-trellis-mcp"]
-       }
-     }
-   }
-   ```
+Tasks can have prerequisites that must be completed before they become available:
 
-### Command Line Options
+```typescript
+{
+  "type": "task",
+  "title": "Deploy authentication system",
+  "prerequisites": ["T-user-registration", "T-login-system", "T-email-verification"]
+}
+```
 
-The server accepts the following optional command line arguments:
+## File Storage
+
+Task Trellis uses a local file-based storage system with different hierarchy patterns:
+
+### Full Project Hierarchy
+
+```
+your-project/
+└── .trellis/
+    └── p/
+        └── P-project-id/
+            └── e/
+                └── E-epic-id/
+                    └── f/
+                        └── F-feature-id/
+                            └── t/
+                                ├── open/
+                                │   └── T-task-id.md
+                                └── closed/
+                                    └── T-completed-task-id.md
+```
+
+### Feature-Only Hierarchy
+
+```
+your-project/
+└── .trellis/
+    └── f/
+        └── F-feature-id/
+            └── t/
+                ├── open/
+                │   └── T-task-id.md
+                └── closed/
+                    └── T-completed-task-id.md
+```
+
+### Standalone Tasks
+
+```
+your-project/
+└── .trellis/
+    └── t/
+        ├── open/
+        │   └── T-task-id.md
+        └── closed/
+            └── T-completed-task-id.md
+```
+
+Each object is stored as a Markdown file with YAML frontmatter metadata and content body.
+
+## Installation
+
+### Claude Code
+
+The easiest way to install Task Trellis MCP in Claude Code:
+
+```bash
+claude mcp add @langadventurellc/task-trellis-mcp --projectRootFolder "$(pwd)"
+```
+
+Or (you'll be required to call the activate tool once to set the project root folder):
+
+```bash
+claude mcp add @langadventurellc/task-trellis-mcp
+```
+
+### VS Code with GitHub Copilot
+
+1. Add Task Trellis to your VS Code settings. Open your settings JSON file and add:
+
+```json
+{
+  "github.copilot.chat.mcpServers": {
+    "task-trellis": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@langadventurellc/task-trellis-mcp",
+        "--projectRootFolder",
+        "${workspaceFolder}"
+      ]
+    }
+  }
+}
+```
+
+### Cursor
+
+Install Task Trellis MCP in Cursor by adding to your Cursor settings:
+
+**Method 1: Via Settings UI**
+
+1. Open Cursor Settings (⌘/Ctrl + ,)
+2. Search for "MCP"
+3. Add new server with:
+   - **Name**: `task-trellis`
+   - **Command**: `npx`
+   - **Args**: `["-y", "@langadventurellc/task-trellis-mcp", "--projectRootFolder", "${workspaceFolder}"]`
+
+**Method 2: Via Configuration File**
+Add to your Cursor configuration:
+
+```json
+{
+  "mcpServers": {
+    "task-trellis": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@langadventurellc/task-trellis-mcp",
+        "--projectRootFolder",
+        "${workspaceFolder}"
+      ]
+    }
+  }
+}
+```
+
+### Windsurf
+
+Add Task Trellis to your Windsurf MCP configuration:
+
+```json
+{
+  "mcpServers": {
+    "task-trellis": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@langadventurellc/task-trellis-mcp",
+        "--projectRootFolder",
+        "${workspaceRoot}"
+      ]
+    }
+  }
+}
+```
+
+### Cline (VS Code Extension)
+
+1. Add Task Trellis to your Cline MCP servers in VS Code settings:
+
+```json
+{
+  "cline.mcpServers": {
+    "task-trellis": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@langadventurellc/task-trellis-mcp",
+        "--projectRootFolder",
+        "${workspaceFolder}"
+      ]
+    }
+  }
+}
+```
+
+### Continue (VS Code Extension)
+
+1. Add to your Continue configuration file (`~/.continue/config.json`):
+
+```json
+{
+  "mcpServers": {
+    "task-trellis": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@langadventurellc/task-trellis-mcp",
+        "--projectRootFolder",
+        "/path/to/your/project"
+      ]
+    }
+  }
+}
+```
+
+### Other MCP Clients
+
+For any MCP-compatible client, use this configuration:
+
+```json
+{
+  "mcpServers": {
+    "task-trellis": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@langadventurellc/task-trellis-mcp",
+        "--projectRootFolder",
+        "/absolute/path/to/project"
+      ]
+    }
+  }
+}
+```
+
+## Quick Test
+
+After installation, test that Task Trellis is working by asking your AI assistant:
+
+> "Create a new project called 'My Test Project'"
+
+If configured correctly, the AI should respond with a confirmation and create the project structure in your specified project root folder.
+
+## Configuration Options
+
+The Task Trellis MCP server supports these command-line options:
 
 - `--mode <mode>` - Server mode (default: "local")
   - `local` - Use local file-based storage
-  - `remote` - Use remote repository (not yet implemented)
+  - `remote` - Use remote repository (planned feature)
 
 - `--projectRootFolder <path>` - Project root folder path
-  - When specified, creates a `.trellis` folder inside the project root for task storage
+  - Creates a `.trellis` folder inside the project root for task storage
   - Example: `--projectRootFolder /path/to/my-project` creates `/path/to/my-project/.trellis/`
 
-**Example with options:**
+**Advanced Configuration Example:**
 
 ```json
 {
@@ -124,12 +372,28 @@ The server accepts the following optional command line arguments:
 }
 ```
 
-**Note:** You can also configure the server at runtime using the `activate` tool instead of command line arguments.
+## Troubleshooting
 
-### Development
+### Common Issues
 
-- `npm run build` - Build TypeScript to JavaScript
-- `npm run dev` - Watch mode for development
-- `npm test` - Run Jest tests
-- `npm run test:watch` - Run tests in watch mode
-- `npm run quality` - Run linting, formatting, and type checks
+**Tasks not appearing:**
+
+- Ensure prerequisites are completed
+- Check task status (should be 'open' or 'draft')
+- Verify project scope configuration
+
+**Configuration issues:**
+
+- Validate JSON syntax in MCP client configuration
+- Ensure absolute paths are used for `--projectRootFolder`
+- Restart your MCP client after configuration changes
+
+### Getting Help
+
+- **Issues**: [Report bugs or feature requests](https://github.com/langadventurellc/task-trellis-mcp/issues)
+- **Documentation**: Check this README and inline tool descriptions
+- **Community**: Share experiences and get help from other users
+
+## License
+
+GPL-3.0-only - see [LICENSE](LICENSE) file for details.
