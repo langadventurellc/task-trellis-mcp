@@ -27,9 +27,11 @@ import {
   handleGetObject,
   handleListObjects,
   handlePruneClosed,
+  handleReplaceObjectBodyRegex,
   handleUpdateObject,
   listObjectsTool,
   pruneClosedTool,
+  replaceObjectBodyRegexTool,
   updateObjectTool,
 } from "./tools";
 
@@ -119,6 +121,7 @@ server.setRequestHandler(ListToolsRequestSchema, () => {
   const tools: unknown[] = [
     createObjectTool,
     updateObjectTool,
+    replaceObjectBodyRegexTool,
     getObjectTool,
     deleteObjectTool,
     listObjectsTool,
@@ -198,6 +201,8 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
       return handleCreateObject(repository, args);
     case "update_object":
       return handleUpdateObject(repository, args);
+    case "replace_object_body_regex":
+      return handleReplaceObjectBodyRegex(repository, args);
     case "get_object":
       return handleGetObject(repository, args);
     case "delete_object":

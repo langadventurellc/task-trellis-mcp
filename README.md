@@ -18,6 +18,11 @@ This MCP server provides comprehensive task management functionality through the
   - Validates status transitions and maintains object integrity
   - Parameters: id, priority, status, prerequisites, body, force
 
+- **replace_object_body_regex**: Performs targeted regex-based replacements within object body content
+  - Enables surgical text edits without recreating entire body content
+  - Safer and more efficient than wholesale body replacement for specific modifications
+  - Parameters: id, regex, replacement, allowMultipleOccurrences (optional)
+
 - **get_object**: Retrieves detailed information about a specific object by ID
   - Returns complete object data including metadata, relationships, and history
   - Parameters: id
