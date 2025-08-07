@@ -11,3 +11,7 @@ export { claimTaskTool, handleClaimTask } from "./claimTaskTool.js";
 export { completeTaskTool, handleCompleteTask } from "./completeTaskTool.js";
 export { pruneClosedTool, handlePruneClosed } from "./pruneClosedTool.js";
 export { activateTool, handleActivate } from "./activateTool.js";
+export {
+  replaceObjectBodyRegexTool,
+  handleReplaceObjectBodyRegex,
+} from "./replaceObjectBodyRegexTool.js";

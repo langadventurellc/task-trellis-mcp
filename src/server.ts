@@ -7,6 +7,7 @@ import {
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { Command } from "commander";
+import fs from "fs";
 import path from "path";
 import { ServerConfig } from "./configuration";
 import { LocalRepository, Repository } from "./repositories";
@@ -26,9 +27,11 @@ import {
   handleGetObject,
   handleListObjects,
   handlePruneClosed,
+  handleReplaceObjectBodyRegex,
   handleUpdateObject,
   listObjectsTool,
   pruneClosedTool,
+  replaceObjectBodyRegexTool,
   updateObjectTool,
 } from "./tools";
 
@@ -50,6 +53,25 @@ interface CliOptions {
 
 const options = program.opts<CliOptions>();
 
+// Read version from package.json
+function getPackageVersion(): string {
+  try {
+    const packageJsonPath = path.resolve(__dirname, "../package.json");
+    const packageJson = JSON.parse(
+      fs.readFileSync(packageJsonPath, "utf8"),
+    ) as { version: string };
+    return packageJson.version;
+  } catch (error) {
+    console.error(
+      "Could not read version from package.json:",
+      error instanceof Error ? error.message : String(error),
+    );
+    return "1.0.0"; // fallback version
+  }
+}
+
+const packageVersion = getPackageVersion();
+
 // Create server config - always create with at least mode set
 const serverConfig: ServerConfig = {
   mode: options.mode === "remote" ? "remote" : "local",
@@ -69,7 +91,24 @@ function getRepository(): Repository {
 const server = new Server(
   {
     name: "task-trellis-mcp",
-    version: "1.0.0",
+    version: packageVersion,
+    description: `An MCP server that provides structured task management and workflow orchestration for AI coding agents.
+
+Task Trellis helps AI agents break down complex software engineering work into manageable, hierarchical tasks that can be systematically executed. The system provides a structured approach to project management with support for hierarchical organization (project → epic → feature → task), prerequisite dependencies, priority management, and comprehensive task lifecycle tracking.
+
+Key capabilities:
+- Hierarchical task organization with flexible parent-child relationships
+- Prerequisite-based dependency management ensuring proper execution order
+- Priority-driven task claiming and execution workflows
+- Comprehensive object lifecycle management (draft → open → in-progress → done)
+- File change tracking and audit trails for completed work
+- Automatic task progression and dependency resolution
+- Flexible scope-based task filtering and claiming
+- System maintenance tools for pruning completed work
+
+The server supports both local file-based storage and configurable remote repositories, making it suitable for individual development workflows and team collaboration. Tasks are automatically validated for readiness based on prerequisites and status, enabling autonomous agent operation while maintaining work quality and proper sequencing.
+
+Essential for AI agents working on complex, multi-step software projects where systematic task breakdown, dependency management, and progress tracking are critical for successful completion.`,
   },
   {
     capabilities: {
@@ -79,20 +118,26 @@ const server = new Server(
 );
 
 server.setRequestHandler(ListToolsRequestSchema, () => {
-  return {
-    tools: [
-      createObjectTool,
-      updateObjectTool,
-      getObjectTool,
-      deleteObjectTool,
-      listObjectsTool,
-      appendObjectLogTool,
-      claimTaskTool,
-      completeTaskTool,
-      pruneClosedTool,
-      activateTool,
-    ],
-  };
+  const tools: unknown[] = [
+    createObjectTool,
+    updateObjectTool,
+    replaceObjectBodyRegexTool,
+    getObjectTool,
+    deleteObjectTool,
+    listObjectsTool,
+    appendObjectLogTool,
+    claimTaskTool,
+    completeTaskTool,
+    pruneClosedTool,
+  ];
+
+  // Only include activate tool if server is not properly configured from command line
+  // (i.e., local mode without projectRootFolder specified)
+  if (serverConfig.mode === "local" && !serverConfig.planningRootFolder) {
+    tools.push(activateTool);
+  }
+
+  return { tools };
 });
 
 // eslint-disable-next-line statement-count/function-statement-count-warn
@@ -156,6 +201,8 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
       return handleCreateObject(repository, args);
     case "update_object":
       return handleUpdateObject(repository, args);
+    case "replace_object_body_regex":
+      return handleReplaceObjectBodyRegex(repository, args);
     case "get_object":
       return handleGetObject(repository, args);
     case "delete_object":

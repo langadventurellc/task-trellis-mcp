@@ -57,7 +57,7 @@ async function scanFolderForChildren(folder: string): Promise<string[]> {
   } catch (error) {
     // Folder doesn't exist or can't be read, skip silently
     if (error instanceof Error && "code" in error && error.code !== "ENOENT") {
-      console.warn(`Warning: Could not read directory ${folder}:`, error);
+      console.error(`Warning: Could not read directory ${folder}:`, error);
     }
   }
 

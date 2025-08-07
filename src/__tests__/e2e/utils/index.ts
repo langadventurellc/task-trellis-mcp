@@ -16,6 +16,7 @@ export { pathExists } from "./pathExists";
 export { parseGetObjectResponse } from "./parseGetObjectResponse";
 export { parseUpdateObjectResponse } from "./parseUpdateObjectResponse";
 export { parseListObjectsResponse } from "./parseListObjectsResponse";
+export { parseReplaceObjectBodyRegexResponse } from "./parseReplaceObjectBodyRegexResponse";
 
 // Existing utilities
 export { McpTestClient } from "./mcpTestClient";

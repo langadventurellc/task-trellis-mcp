@@ -7,7 +7,43 @@ import { Repository } from "../repositories";
 
 export const listObjectsTool = {
   name: "list_objects",
-  description: "Lists objects from the task trellis system",
+  description: `Lists objects from the task trellis system
+
+Use this tool to retrieve and filter objects based on various criteria. Essential for discovering existing work items, understanding project structure, and finding objects that need attention.
+
+Available object types:
+- 'project': Top-level containers
+- 'epic': Large features within projects  
+- 'feature': Specific functionality within epics
+- 'task': Individual work items
+
+Available status values:
+- 'draft': Initial state for new objects
+- 'open': Ready to begin work
+- 'in-progress': Currently being worked on
+- 'done': Completed successfully
+- 'wont-do': Cancelled or decided against
+
+Available priority values:
+- 'high': Critical or urgent work
+- 'medium': Standard priority
+- 'low': Nice-to-have or future work
+
+Key filtering options:
+- 'type': Filter by object category (project, epic, feature, task)
+- 'scope': Limit results to a specific project or area of work
+- 'status': Find objects in particular states (draft, open, in-progress, done, wont-do)
+- 'priority': Filter by importance level (high, medium, low)
+- 'includeClosed': Whether to show completed/archived objects (defaults to false)
+
+Usage patterns:
+- List all tasks in progress: type='task', status='in-progress'
+- Find high priority work: priority='high', includeClosed=false
+- Review project scope: type='project', scope='specific-project'
+- Audit completed work: includeClosed=true, status='done'
+- Find cancelled items: status='wont-do', includeClosed=true
+
+The results provide object metadata including IDs, titles, relationships, and current status to help navigate the work hierarchy effectively.`,
   inputSchema: {
     type: "object",
     properties: {

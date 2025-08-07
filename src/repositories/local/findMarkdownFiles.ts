@@ -49,7 +49,7 @@ export async function findMarkdownFiles(
         "code" in error &&
         error.code !== "ENOENT"
       ) {
-        console.warn(
+        console.error(
           `Warning: Could not read directory ${currentPath}:`,
           error,
         );

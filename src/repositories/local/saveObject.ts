@@ -77,7 +77,7 @@ export async function saveObject(
       await unlink(oldFilePath);
     } catch (error) {
       // Log warning but don't fail the save operation
-      console.warn(
+      console.error(
         `Warning: Could not delete old task file ${oldFilePath}:`,
         error,
       );

@@ -2,7 +2,27 @@ import { Repository } from "../repositories";
 
 export const getObjectTool = {
   name: "get_object",
-  description: "Gets an object from the task trellis system",
+  description: `Gets an object from the task trellis system
+
+Use this tool to retrieve detailed information about a specific object by its unique ID. Returns the complete object data including metadata, relationships, content, and activity history.
+
+Key information retrieved:
+- Object metadata (type, title, status, priority, timestamps)
+- Hierarchical relationships (parent, children, prerequisites)
+- Content body and description
+- Activity log and change history
+- File associations and modifications
+- Current state and progress indicators
+
+Usage scenarios:
+- Review task details before starting work
+- Check object status and dependencies
+- Examine change history and activity logs
+- Understand parent-child relationships
+- Verify prerequisite completion
+- Access associated file changes
+
+Essential for understanding the full context of a work item before making modifications or planning next steps.`,
   inputSchema: {
     type: "object",
     properties: {
