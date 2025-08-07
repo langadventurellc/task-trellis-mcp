@@ -29,7 +29,7 @@ async function findObjectById(
         return { filePath, object: trellisObject };
       }
     } catch (error) {
-      console.warn(`Warning: Could not deserialize file ${filePath}:`, error);
+      console.error(`Warning: Could not deserialize file ${filePath}:`, error);
       continue;
     }
   }
@@ -73,7 +73,7 @@ async function deleteAssociatedFolder(
   try {
     await rm(associatedFolderPath, { recursive: true, force: true });
   } catch (error) {
-    console.warn(
+    console.error(
       `Warning: Could not delete associated folder ${associatedFolderPath}:`,
       error,
     );

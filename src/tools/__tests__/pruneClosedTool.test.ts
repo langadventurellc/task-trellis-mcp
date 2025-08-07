@@ -214,8 +214,8 @@ describe("pruneClosedTool", () => {
         .mockRejectedValueOnce(new Error("Permission denied"))
         .mockResolvedValueOnce(undefined);
 
-      // Mock console.warn to check error logging
-      const consoleSpy = jest.spyOn(console, "warn").mockImplementation();
+      // Mock console.error to check error logging
+      const consoleSpy = jest.spyOn(console, "error").mockImplementation();
 
       const result = await handlePruneClosed(mockRepository, { age: 60 });
 

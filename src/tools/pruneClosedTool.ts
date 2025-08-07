@@ -80,7 +80,7 @@ export async function handlePruneClosed(repository: Repository, args: unknown) {
         deletedIds.push(obj.id);
       } catch (error) {
         // Continue with other objects even if one fails
-        console.warn(`Failed to delete object ${obj.id}:`, error);
+        console.error(`Failed to delete object ${obj.id}:`, error);
       }
     }
 

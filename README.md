@@ -1,6 +1,6 @@
 # Task Trellis MCP
 
-An MCP (Model Context Protocol) server for Task Trellis, a task management application for AI coding agents.
+An MCP (Model Context Protocol) server for Task Trellis, a tool to help AI coding agents break down complex work into manageable tasks that allow it to work effectively. This server provides a structured task hierarchy and workflow management system, enabling AI agents to claim, complete, and manage tasks efficiently.
 
 ## Available Tools
 

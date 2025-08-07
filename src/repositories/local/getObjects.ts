@@ -40,7 +40,7 @@ export async function getObjects(
       objects.push(trellisObject);
     } catch (error) {
       // Skip files that can't be deserialized (might not be valid Trellis objects)
-      console.warn(`Warning: Could not deserialize file ${filePath}:`, error);
+      console.error(`Warning: Could not deserialize file ${filePath}:`, error);
       continue;
     }
   }
