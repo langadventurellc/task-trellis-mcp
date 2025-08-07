@@ -10,7 +10,45 @@ import { validateObjectCreation } from "../validation/validateObjectCreation.js"
 
 export const createObjectTool = {
   name: "create_object",
-  description: "Creates a new object in the task trellis system",
+  description: `Creates a new object in the task trellis system
+
+Use this tool to create new objects such as tasks, projects, or other work items within the task management hierarchy. Objects can have parent-child relationships and dependencies through prerequisites.
+
+Available object types and hierarchy requirements:
+- 'project': Top-level containers, cannot have a parent
+- 'epic': Must have a project as a parent
+- 'feature': Can have no parent or an epic as a parent
+- 'task': Can have no parent or a feature as a parent
+
+Supported hierarchy structures:
+- Full hierarchy: project → epic → feature → task
+- Simplified: feature → task  
+- Standalone: task
+
+Available status values:
+- 'draft': Initial state for new objects (default)
+- 'open': Ready to begin work
+- 'in-progress': Currently being worked on
+- 'done': Completed successfully
+- 'wont-do': Cancelled or decided against
+
+Available priority values:
+- 'high': Critical or urgent work
+- 'medium': Standard priority (default)
+- 'low': Nice-to-have or future work
+
+Key aspects:
+- Objects support hierarchical organization via parent relationships
+- Prerequisites define execution order dependencies between objects
+- Parent-child relationships must follow the hierarchy rules above
+- The system validates parent types during creation
+
+Best practices:
+- Use descriptive titles that clearly indicate the work to be done
+- Follow the hierarchy constraints for proper organization
+- Set appropriate status based on current work state
+- Define prerequisites to ensure proper task ordering
+- Include detailed descriptions to provide context for the work`,
   inputSchema: {
     type: "object",
     properties: {
