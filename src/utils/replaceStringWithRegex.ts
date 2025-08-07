@@ -63,16 +63,25 @@ export function replaceStringWithRegex(
     throw new Error(`Invalid regex pattern: ${errorMessage}`);
   }
 
-  // First, check how many matches we have
-  const matches = Array.from(input.matchAll(regexObj));
+  // Efficiently check for matches without creating full array
+  const matchIterator = input.matchAll(regexObj);
+  const firstMatch = matchIterator.next();
 
-  if (matches.length === 0) {
+  if (firstMatch.done) {
     // No matches, return original string
     return input;
   }
 
-  if (matches.length > 1 && !allowMultipleOccurrences) {
-    throw new MultipleMatchesError(matches.length, regex);
+  // If we don't allow multiple occurrences, check if there's a second match
+  if (!allowMultipleOccurrences) {
+    const secondMatch = matchIterator.next();
+    if (!secondMatch.done) {
+      // We have at least 2 matches, need to count them all for the error
+      // Reset and count all matches for accurate error reporting
+      regexObj.lastIndex = 0;
+      const allMatches = Array.from(input.matchAll(regexObj));
+      throw new MultipleMatchesError(allMatches.length, regex);
+    }
   }
 
   // Perform the replacement

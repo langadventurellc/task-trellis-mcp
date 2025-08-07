@@ -137,6 +137,27 @@ describe("replaceStringWithRegex", () => {
       expect(result1).toBe("special pattern");
       expect(result2).toBe("special pattern");
     });
+
+    it("should efficiently detect multiple matches in large strings without creating full array upfront", () => {
+      // Create a large string with many matches to test performance optimization
+      const pattern = "match";
+      const largeString = Array(1000).fill(`${pattern} text`).join(" ");
+
+      expect(() => {
+        replaceStringWithRegex(largeString, {
+          regex: pattern,
+          replacement: "replaced",
+        });
+      }).toThrow(MultipleMatchesError);
+
+      // Verify the error message still contains correct count despite optimization
+      expect(() => {
+        replaceStringWithRegex(largeString, {
+          regex: pattern,
+          replacement: "replaced",
+        });
+      }).toThrow(/Found 1000 matches for pattern/);
+    });
   });
 
   describe("error handling", () => {
