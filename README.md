@@ -3,11 +3,9 @@
 [![npm version](https://badge.fury.io/js/%40langadventurellc%2Ftask-trellis-mcp.svg)](https://www.npmjs.com/package/@langadventurellc/task-trellis-mcp)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-An MCP (Model Context Protocol) server that greatly improves how AI coding agents handle complex projects. Task Trellis helps track requirements for projects, breaks them down into smaller manageable parts until you have trackable and assignable tasks with built-in workflow management, dependency handling, and progress tracking.
+Greatly improve how AI coding agents handle complex projects. Task Trellis helps track requirements for projects, breaks them down into smaller manageable parts until you have trackable and assignable tasks with built-in workflow management, dependency handling, and progress tracking. Basically, it's like Jira for coding agents.
 
 Primarily built as an alternative to managing the creation and use of agent-created requirements, specifications and checklists. This tool will help make that more organized and less chaotic.
-
-Basically, it's like Jira for coding agents.
 
 ## Table of Contents
 
