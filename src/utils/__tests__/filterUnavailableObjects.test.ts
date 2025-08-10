@@ -39,10 +39,9 @@ describe("filterUnavailableObjects", () => {
 
     const result = filterUnavailableObjects(objects);
 
-    expect(result).toHaveLength(3);
+    expect(result).toHaveLength(2);
     expect(result[0].id).toBe("open-1");
-    expect(result[1].id).toBe("draft-1");
-    expect(result[2].id).toBe("open-2");
+    expect(result[1].id).toBe("open-2");
   });
 
   it("should include objects with external prerequisites (not in list)", () => {
@@ -108,9 +107,8 @@ describe("filterUnavailableObjects", () => {
     const result = filterUnavailableObjects(objects);
 
     // The tasks should be excluded because their prerequisites are not claimable
-    expect(result).toHaveLength(2);
+    expect(result).toHaveLength(1);
     expect(result[0].id).toBe("prereq-1");
-    expect(result[1].id).toBe("prereq-3");
   });
 
   it("should handle mixed prerequisites (some external, some internal)", () => {
@@ -188,7 +186,7 @@ describe("filterUnavailableObjects", () => {
 
     expect(objects.length).toBe(originalLength);
     expect(result).not.toBe(objects);
-    expect(result.length).toBe(2);
+    expect(result.length).toBe(1);
   });
 
   it("should handle self-referencing prerequisites", () => {

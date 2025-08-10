@@ -13,6 +13,7 @@ interface FoundObject {
   object: TrellisObject;
 }
 
+// Should this be replaced by getObjectById?
 async function findObjectById(
   id: string,
   planningRoot: string,

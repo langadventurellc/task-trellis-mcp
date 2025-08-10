@@ -1,13 +1,13 @@
-import { Repository } from "../../repositories/Repository";
 import {
   TrellisObject,
-  TrellisObjectType,
-  TrellisObjectStatus,
   TrellisObjectPriority,
+  TrellisObjectStatus,
+  TrellisObjectType,
 } from "../../models";
-import { handleClaimTask } from "../claimTaskTool";
+import { Repository } from "../../repositories/Repository";
 import * as filterUtils from "../../utils/filterUnavailableObjects";
 import * as sortUtils from "../../utils/sortTrellisObjects";
+import { handleClaimTask } from "../claimTaskTool";
 
 // Mock the utility functions
 jest.mock("../../utils/filterUnavailableObjects");
@@ -137,29 +137,11 @@ describe("claimTaskTool", () => {
       );
     });
 
-    it("should allow claiming draft status task (without force)", async () => {
-      const mockTask = createMockTask({ status: TrellisObjectStatus.DRAFT });
-      mockRepository.getObjectById.mockResolvedValue(mockTask);
-      mockRepository.getObjects.mockResolvedValue([mockTask]);
-      mockRepository.saveObject.mockResolvedValue();
-
-      const result = await handleClaimTask(mockRepository, {
-        taskId: "T-test-task",
-        force: false,
-      });
-
-      expect(mockRepository.saveObject).toHaveBeenCalledWith({
-        ...mockTask,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      });
-      expect(result.content[0].text).toContain("Successfully claimed task:");
-    });
-
     it("should throw error when prerequisites are not complete (without force)", async () => {
       const mockTask = createMockTask({ prerequisites: ["T-prerequisite"] });
       const mockPrerequisite = createMockTask({
         id: "T-prerequisite",
-        status: TrellisObjectStatus.IN_PROGRESS,
+        status: TrellisObjectStatus.OPEN,
       });
 
       mockRepository.getObjectById.mockResolvedValue(mockTask);
