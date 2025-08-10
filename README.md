@@ -63,10 +63,10 @@ See sample prompts (written as Claude Code slash commands): [Sample Prompts](doc
 
 1. **Create Tasks**
    - For large projects
-   - Create a project
-   - Create epics to group features
-   - Create features to break down epics
-   - Create tasks for specific work items
+     - Create a project  
+     - Create epics to group features
+     - Create features to break down epics
+     - Create tasks for specific work items
    - For medium-sized projects
      - Create standalone feature
      - Create tasks directly under the feature
