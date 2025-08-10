@@ -5,10 +5,11 @@
 [![npm version](https://badge.fury.io/js/%40langadventurellc%2Ftask-trellis-mcp.svg)](https://www.npmjs.com/package/@langadventurellc/task-trellis-mcp)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-An MCP (Model Context Protocol) server that greatly improves how AI coding agents handle complex projects. Task Trellis breaks down large development efforts into manageable, trackable work items with built-in workflow management, dependency handling, and progress tracking.
+An MCP (Model Context Protocol) server that greatly improves how AI coding agents handle complex projects. Task Trellis helps track requirements for projects, breaks them down into smaller manageable parts until you have trackable and assignable tasks with built-in workflow management, dependency handling, and progress tracking.
 
 ## Table of Contents
 
+- [At a glance?](#at-a-glance)
 - [Why Task Trellis?](#why-task-trellis)
 - [Core Benefits](#core-benefits)
 - [Usage](#usage)
@@ -20,6 +21,31 @@ An MCP (Model Context Protocol) server that greatly improves how AI coding agent
 - [Quick Test](#quick-test)
 - [Configuration Options](#configuration-options)
 - [Troubleshooting](#troubleshooting)
+
+## At a Glance
+
+**Moderate sized tasks (most use cases - a feature that gets broken down into a number of workable tasks)**
+
+> **user:** /create-features-trellis add posthog analytics to existing web pages  
+> _(system adds feature requirements document to Task Trellis)_  
+> **user:** /create-tasks-trellis (feature-id)  
+> _(system adds the individual tasks that the agent will work on later)_
+
+**Large projects (when there's a lot involved that benefits from several layers of refinement)**
+
+> **user:** /create-project-trellis add user authentication with registration and login pages, using supabase for authentication  
+> _(system adds project requirements document to Task Trellis)_  
+> **user:** /create-epics-trellis (project-id)  
+> _(system adds epics that break down the project into distinct, yet still large bodies of work)_  
+> **user:** /create-features-trellis (epic-id)  
+> _(system adds features that further add detail and context to smaller bodies of work)_  
+> **user:** /create-tasks-trellis (feature-id)  
+> _(system adds the individual tasks that the agent will work on later)_
+
+**Small tasks (one or several tasks that don't necessarily need the benefit of a unifying context)**
+
+> **user:** /create-tasks-trellis create some standalone tasks to remove the console.log usage from the app  
+> _(system adds the individual tasks that the agent will work on later)_
 
 ## Why Task Trellis?
 
