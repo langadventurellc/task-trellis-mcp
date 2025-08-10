@@ -7,7 +7,7 @@
 
 An MCP (Model Context Protocol) server that greatly improves how AI coding agents handle complex projects. Task Trellis helps track requirements for projects, breaks them down into smaller manageable parts until you have trackable and assignable tasks with built-in workflow management, dependency handling, and progress tracking.
 
-Primarily built as an alternative to managing creating and working with agent-created requirements, specifications and checklists. This tool will help make that more organized and less chaotic.
+Primarily built as an alternative to managing the creation and use of agent-created requirements, specifications and checklists. This tool will help make that more organized and less chaotic.
 
 ## Table of Contents
 
