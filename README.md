@@ -27,25 +27,25 @@ An MCP (Model Context Protocol) server that greatly improves how AI coding agent
 **Moderate sized tasks (most use cases - a feature that gets broken down into a number of workable tasks)**
 
 > **user:** /create-features-trellis add posthog analytics to existing web pages  
-> _(system adds feature requirements document to Task Trellis)_  
+> _(agent creates and adds feature requirements document to Task Trellis)_  
 > **user:** /create-tasks-trellis (feature-id)  
-> _(system adds the individual tasks that the agent will work on later)_
+> _(agent creates and adds the individual tasks that the agent will work on later)_
 
 **Large projects (when there's a lot involved that benefits from several layers of refinement)**
 
 > **user:** /create-project-trellis add user authentication with registration and login pages, using supabase for authentication  
-> _(system adds project requirements document to Task Trellis)_  
+> _(agent creates and adds project requirements document to Task Trellis)_  
 > **user:** /create-epics-trellis (project-id)  
-> _(system adds epics that break down the project into distinct, yet still large bodies of work)_  
+> _(agent creates and adds epics that break down the project into distinct, yet still large bodies of work)_  
 > **user:** /create-features-trellis (epic-id)  
-> _(system adds features that further add detail and context to smaller bodies of work)_  
+> _(agent creates and adds features that further add detail and context to smaller bodies of work)_  
 > **user:** /create-tasks-trellis (feature-id)  
-> _(system adds the individual tasks that the agent will work on later)_
+> _(agent creates and adds the individual tasks that the agent will work on later)_
 
 **Small tasks (one or several tasks that don't necessarily need the benefit of a unifying context)**
 
 > **user:** /create-tasks-trellis create some standalone tasks to remove the console.log usage from the app  
-> _(system adds the individual tasks that the agent will work on later)_
+> _(agent creates and adds the individual tasks that the agent will work on later)_
 
 ## Why Task Trellis?
 
