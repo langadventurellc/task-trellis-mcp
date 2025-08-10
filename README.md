@@ -9,6 +9,8 @@ An MCP (Model Context Protocol) server that greatly improves how AI coding agent
 
 Primarily built as an alternative to managing the creation and use of agent-created requirements, specifications and checklists. This tool will help make that more organized and less chaotic.
 
+Basically, it's like Jira for coding agents.
+
 ## Table of Contents
 
 - [At a glance?](#at-a-glance)
