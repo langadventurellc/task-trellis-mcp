@@ -29,6 +29,16 @@ Basically, it's like Jira for coding agents.
 ## At a Glance
 
 ```
+// Simple tasks
+Task: Auth endpoint
+Task: Token refresh
+
+// Moderate sized feature
+Feature: API
+ ├── Task: Auth endpoint
+ └── Task: Token refresh
+
+// Large project
 Project
  ├── Epic: Login
  │    ├── Feature: UI
