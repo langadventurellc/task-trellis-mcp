@@ -28,6 +28,22 @@ Basically, it's like Jira for coding agents.
 
 ## At a Glance
 
+```
+Project
+ ├── Epic: Login
+ │    ├── Feature: UI
+ │    │     ├── Task: Email form validation
+ │    │     └── Task: Error handling
+ │    └── Feature: API
+ │          ├── Task: Auth endpoint
+ │          └── Task: Token refresh
+```
+
+**Small tasks (one or several tasks that don't necessarily need the benefit of a unifying context)**
+
+> **user:** /create-tasks-trellis create some standalone tasks to remove the console.log usage from the app  
+> _(agent creates and adds the individual tasks that the agent will work on later)_
+
 **Moderate sized tasks (most use cases - a feature that gets broken down into a number of workable tasks)**
 
 > **user:** /create-features-trellis add posthog analytics to existing web pages  
@@ -44,11 +60,6 @@ Basically, it's like Jira for coding agents.
 > **user:** /create-features-trellis (epic-id)  
 > _(agent creates and adds features that further add detail and context to smaller bodies of work)_  
 > **user:** /create-tasks-trellis (feature-id)  
-> _(agent creates and adds the individual tasks that the agent will work on later)_
-
-**Small tasks (one or several tasks that don't necessarily need the benefit of a unifying context)**
-
-> **user:** /create-tasks-trellis create some standalone tasks to remove the console.log usage from the app  
 > _(agent creates and adds the individual tasks that the agent will work on later)_
 
 **Now do the thing**
