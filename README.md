@@ -51,6 +51,11 @@ Basically, it's like Jira for coding agents.
 > **user:** /create-tasks-trellis create some standalone tasks to remove the console.log usage from the app  
 > _(agent creates and adds the individual tasks that the agent will work on later)_
 
+**Now do the thing**
+  
+> **user:** /implement-task-trellis  
+> _(agent grabs the next available task and does it)_
+
 ## Why Task Trellis?
 
 ### Without Task Trellis
