@@ -73,7 +73,7 @@ Project
 > _(agent creates and adds the individual tasks that the agent will work on later)_
 
 **Now do the thing**
-  
+
 > **user:** /implement-task-trellis  
 > _(agent grabs the next available task and does it)_
 
@@ -119,7 +119,7 @@ See sample prompts (written as Claude Code slash commands): [Sample Prompts](doc
 
 1. **Create Tasks**
    - For large projects
-     - Create a project  
+     - Create a project
      - Create epics to group features
      - Create features to break down epics
      - Create tasks for specific work items
@@ -146,7 +146,7 @@ See sample prompts (written as Claude Code slash commands): [Sample Prompts](doc
 - **create_object** - Create projects, epics, features, or tasks with hierarchical relationships
 - **update_object** - Modify object properties, status, priority, or prerequisites
 - **get_object** - Retrieve detailed object information with history and relationships
-- **list_objects** - Query and filter objects by type, status, priority, or scope
+- **list_objects** - Query and filter objects by type, status, priority, or scope (returns object IDs)
 - **delete_object** - Remove objects (with dependency validation)
 - **replace_object_body_regex** - Make targeted content edits using regex patterns
 

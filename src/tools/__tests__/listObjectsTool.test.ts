@@ -75,7 +75,11 @@ describe("listObjectsTool", () => {
         content: [
           {
             type: "text",
-            text: JSON.stringify(mockObjects, null, 2),
+            text: JSON.stringify(
+              mockObjects.map((obj) => obj.id),
+              null,
+              2,
+            ),
           },
         ],
       });
@@ -103,7 +107,11 @@ describe("listObjectsTool", () => {
         content: [
           {
             type: "text",
-            text: JSON.stringify(mockObjects, null, 2),
+            text: JSON.stringify(
+              mockObjects.map((obj) => obj.id),
+              null,
+              2,
+            ),
           },
         ],
       });
@@ -382,7 +390,11 @@ describe("listObjectsTool", () => {
         content: [
           {
             type: "text",
-            text: JSON.stringify(filteredObjects, null, 2),
+            text: JSON.stringify(
+              filteredObjects.map((obj) => obj.id),
+              null,
+              2,
+            ),
           },
         ],
       });

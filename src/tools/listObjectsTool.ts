@@ -43,7 +43,7 @@ Usage patterns:
 - Audit completed work: includeClosed=true, status='done'
 - Find cancelled items: status='wont-do', includeClosed=true
 
-The results provide object metadata including IDs, titles, relationships, and current status to help navigate the work hierarchy effectively.`,
+The results provide only object IDs to enable efficient filtering and selection of objects for further operations.`,
   inputSchema: {
     type: "object",
     properties: {
@@ -137,11 +137,13 @@ export async function handleListObjects(repository: Repository, args: unknown) {
       priorityEnum,
     );
 
+    const objectIds = objects.map((obj) => obj.id);
+
     return {
       content: [
         {
           type: "text",
-          text: JSON.stringify(objects, null, 2),
+          text: JSON.stringify(objectIds, null, 2),
         },
       ],
     };

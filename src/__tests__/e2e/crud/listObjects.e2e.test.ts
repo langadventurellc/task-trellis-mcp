@@ -91,8 +91,7 @@ describe("E2E CRUD - listObjects", () => {
         result.content[0].text as string,
       );
       expect(objects).toHaveLength(1);
-      expect(objects[0].id).toBe("P-test-project");
-      expect(objects[0].type).toBe("project");
+      expect(objects[0]).toBe("P-test-project");
     });
 
     it("should list only tasks when type=task", async () => {
@@ -104,8 +103,7 @@ describe("E2E CRUD - listObjects", () => {
         result.content[0].text as string,
       );
       expect(objects).toHaveLength(1);
-      expect(objects[0].id).toBe("T-test-task");
-      expect(objects[0].type).toBe("task");
+      expect(objects[0]).toBe("T-test-task");
     });
 
     it("should list only epics when type=epic", async () => {
@@ -117,8 +115,7 @@ describe("E2E CRUD - listObjects", () => {
         result.content[0].text as string,
       );
       expect(objects).toHaveLength(1);
-      expect(objects[0].id).toBe("E-test-epic");
-      expect(objects[0].type).toBe("epic");
+      expect(objects[0]).toBe("E-test-epic");
     });
 
     it("should list only features when type=feature", async () => {
@@ -130,8 +127,7 @@ describe("E2E CRUD - listObjects", () => {
         result.content[0].text as string,
       );
       expect(objects).toHaveLength(1);
-      expect(objects[0].id).toBe("F-test-feature");
-      expect(objects[0].type).toBe("feature");
+      expect(objects[0]).toBe("F-test-feature");
     });
 
     it("should return empty array when no objects of specified type exist", async () => {
@@ -181,7 +177,6 @@ describe("E2E CRUD - listObjects", () => {
         result.content[0].text as string,
       );
       expect(objects).toHaveLength(1);
-      expect(objects[0].status).toBe("in-progress");
     });
 
     it("should exclude closed tasks by default", async () => {
@@ -192,10 +187,9 @@ describe("E2E CRUD - listObjects", () => {
       const objects = parseListObjectsResponse(
         result.content[0].text as string,
       );
-      const closedTasks = objects.filter(
-        (o) => o.status === "done" || o.status === "wont-do",
-      );
-      expect(closedTasks).toHaveLength(0);
+      // Note: Can't filter by status since only IDs are returned
+      // Expect only open objects to be returned by default (3 in this case)
+      expect(objects).toHaveLength(3);
     });
 
     it("should include closed tasks when includeClosed=true", async () => {
@@ -208,10 +202,7 @@ describe("E2E CRUD - listObjects", () => {
         result.content[0].text as string,
       );
       expect(objects).toHaveLength(5);
-      const closedTasks = objects.filter(
-        (o) => o.status === "done" || o.status === "wont-do",
-      );
-      expect(closedTasks).toHaveLength(2);
+      // Note: Can't test individual object status since only IDs are returned
     });
 
     it("should filter open tasks correctly", async () => {
@@ -224,8 +215,7 @@ describe("E2E CRUD - listObjects", () => {
         result.content[0].text as string,
       );
       expect(objects).toHaveLength(1);
-      expect(objects[0].status).toBe("open");
-      expect(objects[0].id).toBe("T-open-task");
+      expect(objects[0]).toBe("T-open-task");
     });
   });
 
@@ -257,8 +247,7 @@ describe("E2E CRUD - listObjects", () => {
         result.content[0].text as string,
       );
       expect(objects).toHaveLength(1);
-      expect(objects[0].priority).toBe("high");
-      expect(objects[0].id).toBe("F-high-priority");
+      expect(objects[0]).toBe("F-high-priority");
     });
 
     it("should filter objects by medium priority", async () => {
@@ -271,8 +260,7 @@ describe("E2E CRUD - listObjects", () => {
         result.content[0].text as string,
       );
       expect(objects).toHaveLength(1);
-      expect(objects[0].priority).toBe("medium");
-      expect(objects[0].id).toBe("F-medium-priority");
+      expect(objects[0]).toBe("F-medium-priority");
     });
 
     it("should filter objects by low priority", async () => {
@@ -285,8 +273,7 @@ describe("E2E CRUD - listObjects", () => {
         result.content[0].text as string,
       );
       expect(objects).toHaveLength(1);
-      expect(objects[0].priority).toBe("low");
-      expect(objects[0].id).toBe("F-low-priority");
+      expect(objects[0]).toBe("F-low-priority");
     });
 
     it("should return all priorities when no filter specified", async () => {
@@ -298,10 +285,11 @@ describe("E2E CRUD - listObjects", () => {
         result.content[0].text as string,
       );
       expect(objects).toHaveLength(3);
-      const priorities = objects.map((o) => o.priority);
-      expect(priorities).toContain("high");
-      expect(priorities).toContain("medium");
-      expect(priorities).toContain("low");
+      // Note: Can't test individual priorities since only IDs are returned
+      // Just verify we have all the expected feature IDs
+      expect(objects).toContain("F-high-priority");
+      expect(objects).toContain("F-medium-priority");
+      expect(objects).toContain("F-low-priority");
     });
   });
 
@@ -378,8 +366,8 @@ describe("E2E CRUD - listObjects", () => {
         result.content[0].text as string,
       );
       expect(objects).toHaveLength(2);
-      expect(objects.map((o) => o.id)).toContain("E-child-1");
-      expect(objects.map((o) => o.id)).toContain("E-child-2");
+      expect(objects).toContain("E-child-1");
+      expect(objects).toContain("E-child-2");
     });
 
     it("should list objects within epic scope", async () => {
@@ -392,7 +380,7 @@ describe("E2E CRUD - listObjects", () => {
         result.content[0].text as string,
       );
       expect(objects).toHaveLength(1);
-      expect(objects[0].id).toBe("F-grandchild-1");
+      expect(objects[0]).toBe("F-grandchild-1");
     });
 
     it("should not include objects outside of scope", async () => {
@@ -404,8 +392,8 @@ describe("E2E CRUD - listObjects", () => {
       const objects = parseListObjectsResponse(
         result.content[0].text as string,
       );
-      expect(objects.map((o) => o.id)).toContain("F-grandchild-1");
-      expect(objects.map((o) => o.id)).not.toContain("F-standalone");
+      expect(objects).toContain("F-grandchild-1");
+      expect(objects).not.toContain("F-standalone");
     });
 
     it("should return empty array for non-existent scope", async () => {
@@ -522,7 +510,7 @@ describe("E2E CRUD - listObjects", () => {
         result.content[0].text as string,
       );
       expect(objects).toHaveLength(1);
-      expect(objects[0].id).toBe("T-high-open");
+      expect(objects[0]).toBe("T-high-open");
     });
 
     it("should combine includeClosed with other filters", async () => {
@@ -537,8 +525,8 @@ describe("E2E CRUD - listObjects", () => {
         result.content[0].text as string,
       );
       expect(objects).toHaveLength(2);
-      expect(objects.map((o) => o.id)).toContain("T-high-open");
-      expect(objects.map((o) => o.id)).toContain("T-high-done");
+      expect(objects).toContain("T-high-open");
+      expect(objects).toContain("T-high-done");
     });
 
     it("should return empty when combined filters match nothing", async () => {
@@ -567,7 +555,7 @@ describe("E2E CRUD - listObjects", () => {
         result.content[0].text as string,
       );
       expect(objects).toHaveLength(1);
-      expect(objects[0].id).toBe("T-medium-progress");
+      expect(objects[0]).toBe("T-medium-progress");
     });
   });
 
@@ -613,22 +601,8 @@ describe("E2E CRUD - listObjects", () => {
       );
       expect(objects).toHaveLength(1);
 
-      const project = objects[0];
-      expect(project).toMatchObject({
-        id: "P-detailed",
-        type: "project",
-        title: "Detailed Project",
-        status: "open",
-        priority: "high",
-        prerequisites: ["P-dep1", "P-dep2"],
-        log: ["Created", "Updated"],
-        schema: "1.1",
-        childrenIds: ["E-child"],
-        body: "Project description",
-      });
-
-      // Verify no parent field for projects
-      expect(project.parent).toBeUndefined();
+      // Note: Only object IDs are returned, not full objects
+      expect(objects[0]).toBe("P-detailed");
     });
 
     it("should handle objects with minimal fields", async () => {
@@ -650,14 +624,9 @@ describe("E2E CRUD - listObjects", () => {
       const objects = parseListObjectsResponse(
         result.content[0].text as string,
       );
-      const task = objects[0];
-
-      expect(task.id).toBe("T-minimal");
-      expect(task.title).toBe("Minimal Task");
-      expect(task.status).toBe("open");
-      expect(task.priority).toBe("medium");
-      expect(task.prerequisites).toEqual([]);
-      expect(task.body).toBe("");
+      // Note: Only object IDs are returned, not full objects
+      expect(objects[0]).toBe("T-minimal");
+      // Note: Only IDs returned, cannot test object properties
     });
 
     it("should preserve object hierarchy relationships", async () => {
@@ -721,7 +690,7 @@ describe("E2E CRUD - listObjects", () => {
         result.content[0].text as string,
       );
       expect(objects).toHaveLength(1);
-      expect(objects[0].parent).toBe("F-hierarchy");
+      // Note: Only object IDs are returned, not full objects with parent property
     });
   });
 
@@ -765,10 +734,9 @@ describe("E2E CRUD - listObjects", () => {
       expect(duration).toBeLessThan(3000);
 
       // Verify all objects have correct structure
-      objects.forEach((obj) => {
-        expect(obj.id).toMatch(/^T-bulk-\d{3}$/);
-        expect(obj.type).toBe("task");
-        expect(obj.title).toMatch(/^Bulk Task \d+$/);
+      // Note: Only IDs returned, cannot test object properties
+      objects.forEach((id) => {
+        expect(id).toMatch(/^T-bulk-\d{3}$/);
       });
     });
 
@@ -798,8 +766,8 @@ describe("E2E CRUD - listObjects", () => {
       const objects = parseListObjectsResponse(
         result.content[0].text as string,
       );
+      // Note: Only IDs returned, cannot test object properties - just verify count
       expect(objects).toHaveLength(5);
-      expect(objects.every((o) => o.priority === "high")).toBe(true);
     });
   });
 
