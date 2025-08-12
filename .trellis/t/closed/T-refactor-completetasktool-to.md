@@ -1,11 +1,31 @@
 ---
 id: T-refactor-completetasktool-to
 title: Refactor completeTaskTool to use TaskTrellisService
-status: open
+status: done
 priority: medium
 prerequisites: []
-affectedFiles: {}
-log: []
+affectedFiles:
+  src/tools/completeTaskTool.ts: Updated handleCompleteTask function to accept
+    TaskTrellisService as first parameter and delegate to service.completeTask
+    method. Removed autoCompleteParentHierarchy and getChildTypeName functions
+    as they are now handled by the service.
+  src/server.ts: Modified complete_task case to pass TaskTrellisService as first
+    parameter to handleCompleteTask
+  src/services/TaskTrellisService.ts: Added ServerConfig import and updated
+    completeTask method signature to include optional serverConfig parameter
+  src/services/local/__tests__/completeTask.test.ts: Created comprehensive test
+    suite for the completeTask service function covering all business logic
+    scenarios including normal completion, error handling, auto-complete parent
+    functionality, and edge cases
+  src/tools/__tests__/completeTaskTool.test.ts: Completely rewrote tool tests to
+    focus on service integration rather than business logic. Tests now mock
+    TaskTrellisService and verify correct parameter passing and delegation.
+log:
+  - Successfully refactored completeTaskTool to use TaskTrellisService instead
+    of direct Repository access. The tool now properly delegates all business
+    logic to the service layer while maintaining clean separation of concerns.
+    All existing functionality is preserved and comprehensive test coverage has
+    been maintained.
 schema: v1.0
 childrenIds: []
 created: 2025-08-12T16:50:45.881Z

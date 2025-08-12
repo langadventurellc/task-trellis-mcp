@@ -1,3 +1,4 @@
+import { ServerConfig } from "../configuration";
 import { Repository } from "../repositories";
 import {
   TrellisObjectPriority,
@@ -51,6 +52,7 @@ export interface TaskTrellisService {
     taskId: string,
     summary: string,
     filesChanged: Record<string, string>,
+    serverConfig?: ServerConfig,
   ): Promise<{ content: Array<{ type: string; text: string }> }>;
 
   /**

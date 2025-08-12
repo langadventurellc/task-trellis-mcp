@@ -230,7 +230,7 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
     case "claim_task":
       return handleClaimTask(_getService(), repository, args);
     case "complete_task":
-      return handleCompleteTask(repository, args, serverConfig);
+      return handleCompleteTask(_getService(), repository, args, serverConfig);
     case "prune_closed":
       return handlePruneClosed(repository, args);
     case "activate":
