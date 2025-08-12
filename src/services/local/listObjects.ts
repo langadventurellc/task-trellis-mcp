@@ -1,9 +1,26 @@
 import {
+  TrellisObject,
   TrellisObjectPriority,
   TrellisObjectStatus,
+  TrellisObjectSummary,
   TrellisObjectType,
 } from "../../models";
 import { Repository } from "../../repositories";
+
+function convertToSummary(obj: TrellisObject): TrellisObjectSummary {
+  return {
+    id: obj.id,
+    type: obj.type,
+    title: obj.title,
+    status: obj.status,
+    priority: obj.priority,
+    parent: obj.parent,
+    prerequisites: obj.prerequisites,
+    childrenIds: obj.childrenIds,
+    created: obj.created,
+    updated: obj.updated,
+  };
+}
 
 export async function listObjects(
   repository: Repository,
@@ -23,13 +40,13 @@ export async function listObjects(
       priority,
     );
 
-    const objectIds = objects.map((obj) => obj.id);
+    const objectSummaries = objects.map(convertToSummary);
 
     return {
       content: [
         {
           type: "text",
-          text: JSON.stringify(objectIds, null, 2),
+          text: JSON.stringify(objectSummaries, null, 2),
         },
       ],
     };

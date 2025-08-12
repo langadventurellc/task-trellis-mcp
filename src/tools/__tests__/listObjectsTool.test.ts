@@ -35,11 +35,37 @@ describe("listObjectsTool", () => {
   });
 
   describe("handleListObjects", () => {
+    const mockSummaries = [
+      {
+        id: "P-project-1",
+        type: "project",
+        title: "Project 1",
+        status: "open",
+        priority: "high",
+        prerequisites: [],
+        childrenIds: [],
+        created: "2025-01-15T10:00:00Z",
+        updated: "2025-01-15T10:00:00Z",
+      },
+      {
+        id: "T-task-1",
+        type: "task",
+        title: "Task 1",
+        status: "in-progress",
+        priority: "medium",
+        parent: "F-feature-1",
+        prerequisites: [],
+        childrenIds: [],
+        created: "2025-01-15T10:00:00Z",
+        updated: "2025-01-15T10:00:00Z",
+      },
+    ];
+
     const mockResponse = {
       content: [
         {
           type: "text",
-          text: JSON.stringify(["P-project-1", "T-task-1"], null, 2),
+          text: JSON.stringify(mockSummaries, null, 2),
         },
       ],
     };

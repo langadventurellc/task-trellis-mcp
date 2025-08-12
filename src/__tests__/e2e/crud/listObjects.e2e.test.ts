@@ -3,7 +3,7 @@ import {
   TestEnvironment,
   createObjectContent,
   createObjectFile,
-  parseListObjectsResponse,
+  extractObjectIds,
 } from "../utils";
 
 describe("E2E CRUD - listObjects", () => {
@@ -87,9 +87,7 @@ describe("E2E CRUD - listObjects", () => {
         type: "project",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
       expect(objects[0]).toBe("P-test-project");
     });
@@ -99,9 +97,7 @@ describe("E2E CRUD - listObjects", () => {
         type: "task",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
       expect(objects[0]).toBe("T-test-task");
     });
@@ -111,9 +107,7 @@ describe("E2E CRUD - listObjects", () => {
         type: "epic",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
       expect(objects[0]).toBe("E-test-epic");
     });
@@ -123,9 +117,7 @@ describe("E2E CRUD - listObjects", () => {
         type: "feature",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
       expect(objects[0]).toBe("F-test-feature");
     });
@@ -137,9 +129,7 @@ describe("E2E CRUD - listObjects", () => {
         scope: "E-nonexistent-epic",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toEqual([]);
     });
   });
@@ -173,9 +163,7 @@ describe("E2E CRUD - listObjects", () => {
         status: "in-progress",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
     });
 
@@ -184,9 +172,7 @@ describe("E2E CRUD - listObjects", () => {
         type: "task",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       // Note: Can't filter by status since only IDs are returned
       // Expect only open objects to be returned by default (3 in this case)
       expect(objects).toHaveLength(3);
@@ -198,9 +184,7 @@ describe("E2E CRUD - listObjects", () => {
         includeClosed: true,
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(5);
       // Note: Can't test individual object status since only IDs are returned
     });
@@ -211,9 +195,7 @@ describe("E2E CRUD - listObjects", () => {
         status: "open",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
       expect(objects[0]).toBe("T-open-task");
     });
@@ -338,9 +320,7 @@ describe("E2E CRUD - listObjects", () => {
         type: "project",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       // Filter to only the objects we created in this test (excluding the epic container)
       const testObjects = objects.filter(
         (id) => id.includes("-project") && !id.includes("epic-container"),
@@ -357,9 +337,7 @@ describe("E2E CRUD - listObjects", () => {
         includeClosed: true,
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       // Filter to only the objects we created in this test (excluding the epic container)
       const testObjects = objects.filter(
         (id) => id.includes("-project") && !id.includes("epic-container"),
@@ -375,9 +353,7 @@ describe("E2E CRUD - listObjects", () => {
         type: "epic",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(2);
       expect(objects).toContain("E-open-epic");
       expect(objects).toContain("E-in-progress-epic");
@@ -391,9 +367,7 @@ describe("E2E CRUD - listObjects", () => {
         includeClosed: true,
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(4);
       expect(objects).toContain("E-open-epic");
       expect(objects).toContain("E-in-progress-epic");
@@ -406,9 +380,7 @@ describe("E2E CRUD - listObjects", () => {
         type: "feature",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(2);
       expect(objects).toContain("F-draft-feature");
       expect(objects).toContain("F-open-feature");
@@ -422,9 +394,7 @@ describe("E2E CRUD - listObjects", () => {
         includeClosed: true,
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(4);
       expect(objects).toContain("F-draft-feature");
       expect(objects).toContain("F-open-feature");
@@ -437,9 +407,7 @@ describe("E2E CRUD - listObjects", () => {
         type: "task",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       // Filter to only the objects we created in this test
       const testObjects = objects.filter((id) => id.includes("includeclosed"));
       expect(testObjects).toHaveLength(3);
@@ -456,9 +424,7 @@ describe("E2E CRUD - listObjects", () => {
         includeClosed: true,
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       // Filter to only the objects we created in this test
       const testObjects = objects.filter((id) => id.includes("includeclosed"));
       expect(testObjects).toHaveLength(5);
@@ -476,9 +442,7 @@ describe("E2E CRUD - listObjects", () => {
         includeClosed: true,
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
       expect(objects).toContain("P-done-project");
     });
@@ -490,9 +454,7 @@ describe("E2E CRUD - listObjects", () => {
         includeClosed: true,
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
       expect(objects).toContain("E-wont-do-epic");
     });
@@ -504,9 +466,7 @@ describe("E2E CRUD - listObjects", () => {
         includeClosed: false,
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toEqual([]);
     });
   });
@@ -535,9 +495,7 @@ describe("E2E CRUD - listObjects", () => {
         priority: "high",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
       expect(objects[0]).toBe("F-high-priority");
     });
@@ -548,9 +506,7 @@ describe("E2E CRUD - listObjects", () => {
         priority: "medium",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
       expect(objects[0]).toBe("F-medium-priority");
     });
@@ -561,9 +517,7 @@ describe("E2E CRUD - listObjects", () => {
         priority: "low",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
       expect(objects[0]).toBe("F-low-priority");
     });
@@ -573,9 +527,7 @@ describe("E2E CRUD - listObjects", () => {
         type: "feature",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(3);
       // Note: Can't test individual priorities since only IDs are returned
       // Just verify we have all the expected feature IDs
@@ -654,9 +606,7 @@ describe("E2E CRUD - listObjects", () => {
         scope: "P-parent",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(2);
       expect(objects).toContain("E-child-1");
       expect(objects).toContain("E-child-2");
@@ -668,9 +618,7 @@ describe("E2E CRUD - listObjects", () => {
         scope: "E-child-1",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
       expect(objects[0]).toBe("F-grandchild-1");
     });
@@ -681,9 +629,7 @@ describe("E2E CRUD - listObjects", () => {
         scope: "P-parent",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toContain("F-grandchild-1");
       expect(objects).not.toContain("F-standalone");
     });
@@ -694,9 +640,7 @@ describe("E2E CRUD - listObjects", () => {
         scope: "P-nonexistent",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toEqual([]);
     });
   });
@@ -798,9 +742,7 @@ describe("E2E CRUD - listObjects", () => {
         scope: "P-complex",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
       expect(objects[0]).toBe("T-high-open");
     });
@@ -813,9 +755,7 @@ describe("E2E CRUD - listObjects", () => {
         includeClosed: true,
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(2);
       expect(objects).toContain("T-high-open");
       expect(objects).toContain("T-high-done");
@@ -829,9 +769,7 @@ describe("E2E CRUD - listObjects", () => {
         scope: "P-complex",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toEqual([]);
     });
 
@@ -843,9 +781,7 @@ describe("E2E CRUD - listObjects", () => {
         scope: "P-complex",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
       expect(objects[0]).toBe("T-medium-progress");
     });
@@ -888,9 +824,7 @@ describe("E2E CRUD - listObjects", () => {
         type: "project",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
 
       // Note: Only object IDs are returned, not full objects
@@ -913,9 +847,7 @@ describe("E2E CRUD - listObjects", () => {
         type: "task",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       // Note: Only object IDs are returned, not full objects
       expect(objects[0]).toBe("T-minimal");
       // Note: Only IDs returned, cannot test object properties
@@ -978,9 +910,7 @@ describe("E2E CRUD - listObjects", () => {
         scope: "P-hierarchy",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
       // Note: Only object IDs are returned, not full objects with parent property
     });
@@ -1017,9 +947,7 @@ describe("E2E CRUD - listObjects", () => {
       });
       const duration = Date.now() - startTime;
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(NUM_OBJECTS);
 
       // Performance check - should complete within reasonable time
@@ -1055,9 +983,7 @@ describe("E2E CRUD - listObjects", () => {
         priority: "high",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       // Note: Only IDs returned, cannot test object properties - just verify count
       expect(objects).toHaveLength(5);
     });
@@ -1122,9 +1048,7 @@ describe("E2E CRUD - listObjects", () => {
         type: "task",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       // Should return empty array or only valid objects
       expect(Array.isArray(objects)).toBe(true);
     });
@@ -1134,9 +1058,7 @@ describe("E2E CRUD - listObjects", () => {
         type: "task",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(Array.isArray(objects)).toBe(true);
       expect(objects).toEqual([]);
     });

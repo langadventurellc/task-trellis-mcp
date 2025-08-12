@@ -1,8 +1,12 @@
+import { TrellisObjectSummary } from "../../../models/TrellisObjectSummary";
+
 /**
  * Parses the JSON response from list_objects MCP tool calls
- * Note: Returns an array of object IDs (strings) instead of full objects
+ * Note: Returns an array of TrellisObjectSummary instances
  */
-export function parseListObjectsResponse(responseText: string): string[] {
+export function parseListObjectsResponse(
+  responseText: string,
+): TrellisObjectSummary[] {
   try {
     return JSON.parse(responseText);
   } catch {

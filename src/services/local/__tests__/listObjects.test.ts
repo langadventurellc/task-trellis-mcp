@@ -2,6 +2,7 @@ import {
   TrellisObject,
   TrellisObjectPriority,
   TrellisObjectStatus,
+  TrellisObjectSummary,
   TrellisObjectType,
 } from "../../../models";
 import { Repository } from "../../../repositories/Repository";
@@ -71,15 +72,27 @@ describe("listObjects", () => {
         undefined,
         undefined,
       );
+
+      const expectedSummaries: TrellisObjectSummary[] = mockObjects.map(
+        (obj) => ({
+          id: obj.id,
+          type: obj.type,
+          title: obj.title,
+          status: obj.status,
+          priority: obj.priority,
+          parent: obj.parent,
+          prerequisites: obj.prerequisites,
+          childrenIds: obj.childrenIds,
+          created: obj.created,
+          updated: obj.updated,
+        }),
+      );
+
       expect(result).toEqual({
         content: [
           {
             type: "text",
-            text: JSON.stringify(
-              mockObjects.map((obj) => obj.id),
-              null,
-              2,
-            ),
+            text: JSON.stringify(expectedSummaries, null, 2),
           },
         ],
       });
@@ -194,15 +207,27 @@ describe("listObjects", () => {
         TrellisObjectStatus.IN_PROGRESS,
         TrellisObjectPriority.MEDIUM,
       );
+
+      const expectedSummaries: TrellisObjectSummary[] = filteredObjects.map(
+        (obj) => ({
+          id: obj.id,
+          type: obj.type,
+          title: obj.title,
+          status: obj.status,
+          priority: obj.priority,
+          parent: obj.parent,
+          prerequisites: obj.prerequisites,
+          childrenIds: obj.childrenIds,
+          created: obj.created,
+          updated: obj.updated,
+        }),
+      );
+
       expect(result).toEqual({
         content: [
           {
             type: "text",
-            text: JSON.stringify(
-              filteredObjects.map((obj) => obj.id),
-              null,
-              2,
-            ),
+            text: JSON.stringify(expectedSummaries, null, 2),
           },
         ],
       });
@@ -210,7 +235,7 @@ describe("listObjects", () => {
   });
 
   describe("result formatting", () => {
-    it("should return object IDs as JSON array", async () => {
+    it("should return object summaries as JSON array", async () => {
       mockRepository.getObjects.mockResolvedValue(mockObjects);
 
       const result = await listObjects(
@@ -218,15 +243,26 @@ describe("listObjects", () => {
         TrellisObjectType.PROJECT,
       );
 
+      const expectedSummaries: TrellisObjectSummary[] = mockObjects.map(
+        (obj) => ({
+          id: obj.id,
+          type: obj.type,
+          title: obj.title,
+          status: obj.status,
+          priority: obj.priority,
+          parent: obj.parent,
+          prerequisites: obj.prerequisites,
+          childrenIds: obj.childrenIds,
+          created: obj.created,
+          updated: obj.updated,
+        }),
+      );
+
       expect(result).toEqual({
         content: [
           {
             type: "text",
-            text: JSON.stringify(
-              mockObjects.map((obj) => obj.id),
-              null,
-              2,
-            ),
+            text: JSON.stringify(expectedSummaries, null, 2),
           },
         ],
       });

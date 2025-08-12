@@ -44,7 +44,7 @@ Usage patterns:
 - Audit completed work: includeClosed=true, status='done'
 - Find cancelled items: status='wont-do', includeClosed=true
 
-The results provide only object IDs to enable efficient filtering and selection of objects for further operations.`,
+The results provide object summaries (TrellisObjectSummary instances) containing id, type, title, status, priority, parent, prerequisites, childrenIds, created, and updated fields to enable efficient filtering and further operations.`,
   inputSchema: {
     type: "object",
     properties: {
