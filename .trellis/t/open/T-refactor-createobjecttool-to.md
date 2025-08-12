@@ -16,7 +16,7 @@ updated: 2025-08-12T16:48:58.878Z
 
 ## Context
 
-The createObjectTool currently uses Repository directly. Need to refactor it to use TaskTrellisService dependency injection pattern like server.ts already sets up.
+The createObjectTool currently uses Repository directly. Need to refactor it to use TaskTrellisService dependency injection pattern like server.ts already sets up, and migrate business logic tests to service tests.
 
 ## Implementation Requirements
 
@@ -29,18 +29,22 @@ The createObjectTool currently uses Repository directly. Need to refactor it to 
 2. **Update server.ts**:
    - Modify createObject case to pass service as first parameter to handleCreateObject
 
-3. **Update tool tests** (`src/tools/__tests__/createObjectTool.test.ts`):
-   - Mock TaskTrellisService instead of Repository methods
-   - Test only that handleCreateObject calls service.createObject with correct parameters
-   - Remove detailed business logic tests (these belong in service tests now)
-   - Keep argument validation tests
+3. **Migrate and update tests**:
+   - **Move business logic tests**: Extract detailed business logic tests from `src/tools/__tests__/createObjectTool.test.ts` and move them to `src/services/local/__tests__/LocalTaskTrellisService.test.ts`
+   - **Update tool tests**: Refactor `src/tools/__tests__/createObjectTool.test.ts` to:
+     - Mock TaskTrellisService instead of Repository methods
+     - Test only that handleCreateObject calls service.createObject with correct parameters
+     - Keep argument validation tests
+   - **Add service tests**: Ensure `LocalTaskTrellisService.createObject` has comprehensive test coverage including object creation, validation, hierarchy rules, and error handling
 
 ## Acceptance Criteria
 
 - [ ] handleCreateObject function signature updated to accept TaskTrellisService
 - [ ] Function delegates to service.createObject with proper parameters
 - [ ] server.ts passes service to handleCreateObject
-- [ ] Unit tests mock service and verify correct service method calls
+- [ ] Business logic tests moved from tool tests to service tests
+- [ ] Tool tests updated to mock service and verify correct service method calls
+- [ ] Service tests cover all object creation scenarios
 - [ ] All existing functionality preserved
 - [ ] TypeScript compilation passes
 
