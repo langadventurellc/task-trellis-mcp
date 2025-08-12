@@ -232,7 +232,7 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
     case "complete_task":
       return handleCompleteTask(_getService(), repository, args, serverConfig);
     case "prune_closed":
-      return handlePruneClosed(repository, args);
+      return handlePruneClosed(_getService(), repository, args);
     case "activate":
     default:
       throw new Error(`Unknown tool: ${toolName}`);

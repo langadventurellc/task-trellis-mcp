@@ -1,11 +1,29 @@
 ---
 id: T-refactor-pruneclosedtool-to
 title: Refactor pruneClosedTool to use TaskTrellisService
-status: open
+status: done
 priority: medium
 prerequisites: []
-affectedFiles: {}
-log: []
+affectedFiles:
+  src/tools/pruneClosedTool.ts: Updated handlePruneClosed function to accept
+    TaskTrellisService as first parameter and delegate to service.pruneClosed
+    method
+  src/server.ts:
+    Modified prune_closed case to pass service as first parameter to
+    handlePruneClosed
+  src/services/local/__tests__/pruneClosed.test.ts: Created comprehensive test
+    suite for pruneClosed service function with all business logic scenarios
+    including error handling, edge cases, and performance testing
+  src/tools/__tests__/pruneClosedTool.test.ts: Refactored to mock
+    TaskTrellisService and test only integration, argument parsing, and service
+    method invocation
+log:
+  - Successfully refactored pruneClosedTool to use TaskTrellisService instead of
+    Repository directly. Updated function signature to accept service as first
+    parameter and delegate all business logic to service.pruneClosed method.
+    Migrated comprehensive business logic tests from tool tests to dedicated
+    service tests, and updated tool tests to mock service and verify integration
+    only. All 806 tests pass, confirming functionality is preserved.
 schema: v1.0
 childrenIds: []
 created: 2025-08-12T16:51:06.342Z
