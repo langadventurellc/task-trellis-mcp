@@ -4,6 +4,7 @@ import {
   TrellisObjectPriority,
 } from "../models";
 import { Repository } from "../repositories";
+import { TaskTrellisService } from "../services/TaskTrellisService";
 
 export const listObjectsTool = {
   name: "list_objects",
@@ -73,7 +74,11 @@ The results provide only object IDs to enable efficient filtering and selection 
   },
 } as const;
 
-export async function handleListObjects(repository: Repository, args: unknown) {
+export async function handleListObjects(
+  service: TaskTrellisService,
+  repository: Repository,
+  args: unknown,
+) {
   const {
     type,
     scope,
@@ -128,25 +133,15 @@ export async function handleListObjects(repository: Repository, args: unknown) {
     const statusEnum = status ? toStatus(status) : undefined;
     const priorityEnum = priority ? toPriority(priority) : undefined;
 
-    // Get objects from repository
-    const objects = await repository.getObjects(
-      includeClosed,
-      scope,
+    // Delegate to service
+    return await service.listObjects(
+      repository,
       typeEnum,
+      scope,
       statusEnum,
       priorityEnum,
+      includeClosed,
     );
-
-    const objectIds = objects.map((obj) => obj.id);
-
-    return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(objectIds, null, 2),
-        },
-      ],
-    };
   } catch (error) {
     return {
       content: [

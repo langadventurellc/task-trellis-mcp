@@ -1,11 +1,27 @@
 ---
 id: T-refactor-listobjectstool-to
 title: Refactor listObjectsTool to use TaskTrellisService
-status: open
+status: done
 priority: medium
 prerequisites: []
-affectedFiles: {}
-log: []
+affectedFiles:
+  src/tools/listObjectsTool.ts: Updated handleListObjects function to accept
+    TaskTrellisService parameter and delegate to service.listObjects method
+  src/server.ts:
+    Modified list_objects case to pass service as first parameter to
+    handleListObjects
+  src/services/local/__tests__/listObjects.test.ts: Created comprehensive test
+    suite for listObjects service function with filtering, error handling, and
+    enum validation tests
+  src/tools/__tests__/listObjectsTool.test.ts: Completely refactored to mock
+    TaskTrellisService and test integration only, removed business logic tests
+log:
+  - Successfully refactored listObjectsTool to use TaskTrellisService instead of
+    direct Repository access. Updated function signature to accept service
+    parameter, modified server.ts integration, created comprehensive service
+    tests with business logic coverage, and updated tool tests to mock service
+    and focus on integration testing only. All 798 tests pass, maintaining full
+    functionality while improving code architecture and separation of concerns.
 schema: v1.0
 childrenIds: []
 created: 2025-08-12T16:49:18.835Z

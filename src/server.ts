@@ -224,7 +224,7 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
     case "delete_object":
       return handleDeleteObject(repository, args);
     case "list_objects":
-      return handleListObjects(repository, args);
+      return handleListObjects(_getService(), repository, args);
     case "append_object_log":
       return handleAppendObjectLog(_getService(), repository, args);
     case "claim_task":
