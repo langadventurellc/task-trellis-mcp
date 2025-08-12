@@ -6,7 +6,8 @@
       "args": [
         "dist/server.js",
         "--projectRootFolder",
-        "/Users/zach/code/task-trellis-mcp"
+        "/Users/zach/code/task-trellis-mcp",
+        "--auto-complete-parent"
       ],
       "env": {}
     },

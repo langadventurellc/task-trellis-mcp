@@ -1,0 +1,96 @@
+import { Repository } from "../repositories";
+import {
+  TrellisObjectPriority,
+  TrellisObjectStatus,
+  TrellisObjectType,
+} from "../models";
+
+export interface TaskTrellisService {
+  /**
+   * Creates a new object in the task trellis system
+   */
+  createObject(
+    repository: Repository,
+    type: TrellisObjectType,
+    title: string,
+    parent?: string,
+    priority?: TrellisObjectPriority,
+    status?: TrellisObjectStatus,
+    prerequisites?: string[],
+    description?: string,
+  ): Promise<{ content: Array<{ type: string; text: string }> }>;
+
+  /**
+   * Updates an existing object in the task trellis system
+   */
+  updateObject(
+    repository: Repository,
+    id: string,
+    priority?: TrellisObjectPriority,
+    prerequisites?: string[],
+    body?: string,
+    status?: TrellisObjectStatus,
+    force?: boolean,
+  ): Promise<{ content: Array<{ type: string; text: string }> }>;
+
+  /**
+   * Claims a task in the task trellis system
+   */
+  claimTask(
+    repository: Repository,
+    scope?: string,
+    taskId?: string,
+    force?: boolean,
+  ): Promise<{ content: Array<{ type: string; text: string }> }>;
+
+  /**
+   * Completes a task in the task trellis system
+   */
+  completeTask(
+    repository: Repository,
+    taskId: string,
+    summary: string,
+    filesChanged: Record<string, string>,
+  ): Promise<{ content: Array<{ type: string; text: string }> }>;
+
+  /**
+   * Lists objects from the task trellis system
+   */
+  listObjects(
+    repository: Repository,
+    type: TrellisObjectType,
+    scope?: string,
+    status?: TrellisObjectStatus,
+    priority?: TrellisObjectPriority,
+    includeClosed?: boolean,
+  ): Promise<{ content: Array<{ type: string; text: string }> }>;
+
+  /**
+   * Appends content to an object's log in the task trellis system
+   */
+  appendObjectLog(
+    repository: Repository,
+    id: string,
+    contents: string,
+  ): Promise<{ content: Array<{ type: string; text: string }> }>;
+
+  /**
+   * Prunes closed objects from the task trellis system
+   */
+  pruneClosed(
+    repository: Repository,
+    age: number,
+    scope?: string,
+  ): Promise<{ content: Array<{ type: string; text: string }> }>;
+
+  /**
+   * Replaces portions of an object's body using regular expressions
+   */
+  replaceObjectBodyRegex(
+    repository: Repository,
+    id: string,
+    regex: string,
+    replacement: string,
+    allowMultipleOccurrences?: boolean,
+  ): Promise<{ content: Array<{ type: string; text: string }> }>;
+}
