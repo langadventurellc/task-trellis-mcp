@@ -258,6 +258,7 @@ describe("E2E Workflow - claimTask", () => {
         "task",
         "T-hierarchy-task",
         createObjectContent(taskData),
+        { featureId: "F-test-feature" },
       );
 
       // Claim task
@@ -270,14 +271,14 @@ describe("E2E Workflow - claimTask", () => {
       // Verify task status
       const taskFile = await readObjectFile(
         testEnv.projectRoot,
-        "t/open/T-hierarchy-task.md",
+        "f/F-test-feature/t/open/T-hierarchy-task.md",
       );
       expect(taskFile.yaml.status).toBe("in-progress");
 
       // Verify feature parent status
       const featureFile = await readObjectFile(
         testEnv.projectRoot,
-        "f/open/F-test-feature.md",
+        "f/F-test-feature/F-test-feature.md",
       );
       expect(featureFile.yaml.status).toBe("in-progress");
     });
@@ -310,6 +311,7 @@ describe("E2E Workflow - claimTask", () => {
         "epic",
         "E-test-epic",
         createObjectContent(epicData),
+        { projectId: "P-test-project" },
       );
 
       // Create feature with epic parent
@@ -325,6 +327,7 @@ describe("E2E Workflow - claimTask", () => {
         "feature",
         "F-full-hierarchy",
         createObjectContent(featureData),
+        { epicId: "E-test-epic", projectId: "P-test-project" },
       );
 
       // Create task with feature parent
@@ -340,6 +343,11 @@ describe("E2E Workflow - claimTask", () => {
         "task",
         "T-full-hierarchy",
         createObjectContent(taskData),
+        {
+          featureId: "F-full-hierarchy",
+          epicId: "E-test-epic",
+          projectId: "P-test-project",
+        },
       );
 
       // Claim task
@@ -352,25 +360,25 @@ describe("E2E Workflow - claimTask", () => {
       // Verify all levels are in-progress
       const taskFile = await readObjectFile(
         testEnv.projectRoot,
-        "t/open/T-full-hierarchy.md",
+        "p/P-test-project/e/E-test-epic/f/F-full-hierarchy/t/open/T-full-hierarchy.md",
       );
       expect(taskFile.yaml.status).toBe("in-progress");
 
       const featureFile = await readObjectFile(
         testEnv.projectRoot,
-        "f/open/F-full-hierarchy.md",
+        "p/P-test-project/e/E-test-epic/f/F-full-hierarchy/F-full-hierarchy.md",
       );
       expect(featureFile.yaml.status).toBe("in-progress");
 
       const epicFile = await readObjectFile(
         testEnv.projectRoot,
-        "e/open/E-test-epic.md",
+        "p/P-test-project/e/E-test-epic/E-test-epic.md",
       );
       expect(epicFile.yaml.status).toBe("in-progress");
 
       const projectFile = await readObjectFile(
         testEnv.projectRoot,
-        "p/open/P-test-project.md",
+        "p/P-test-project/P-test-project.md",
       );
       expect(projectFile.yaml.status).toBe("in-progress");
     });
@@ -390,19 +398,36 @@ describe("E2E Workflow - claimTask", () => {
         createObjectContent(projectData),
       );
 
-      // Create feature with project parent (open)
-      const featureData: ObjectData = {
-        id: "F-stopping-hierarchy",
-        title: "Stopping Hierarchy Feature",
+      // Create epic with project parent
+      const epicData: ObjectData = {
+        id: "E-stopping-hierarchy",
+        title: "Stopping Hierarchy Epic",
         status: "open",
         priority: "medium",
         parent: "P-active-project",
       };
       await createObjectFile(
         testEnv.projectRoot,
+        "epic",
+        "E-stopping-hierarchy",
+        createObjectContent(epicData),
+        { projectId: "P-active-project" },
+      );
+
+      // Create feature with epic parent (open)
+      const featureData: ObjectData = {
+        id: "F-stopping-hierarchy",
+        title: "Stopping Hierarchy Feature",
+        status: "open",
+        priority: "medium",
+        parent: "E-stopping-hierarchy",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
         "feature",
         "F-stopping-hierarchy",
         createObjectContent(featureData),
+        { epicId: "E-stopping-hierarchy", projectId: "P-active-project" },
       );
 
       // Create task with feature parent
@@ -418,6 +443,11 @@ describe("E2E Workflow - claimTask", () => {
         "task",
         "T-stopping-hierarchy",
         createObjectContent(taskData),
+        {
+          featureId: "F-stopping-hierarchy",
+          epicId: "E-stopping-hierarchy",
+          projectId: "P-active-project",
+        },
       );
 
       // Claim task
@@ -430,20 +460,26 @@ describe("E2E Workflow - claimTask", () => {
       // Verify task and feature are in-progress
       const taskFile = await readObjectFile(
         testEnv.projectRoot,
-        "t/open/T-stopping-hierarchy.md",
+        "p/P-active-project/e/E-stopping-hierarchy/f/F-stopping-hierarchy/t/open/T-stopping-hierarchy.md",
       );
       expect(taskFile.yaml.status).toBe("in-progress");
 
       const featureFile = await readObjectFile(
         testEnv.projectRoot,
-        "f/open/F-stopping-hierarchy.md",
+        "p/P-active-project/e/E-stopping-hierarchy/f/F-stopping-hierarchy/F-stopping-hierarchy.md",
       );
       expect(featureFile.yaml.status).toBe("in-progress");
+
+      const epicFile = await readObjectFile(
+        testEnv.projectRoot,
+        "p/P-active-project/e/E-stopping-hierarchy/E-stopping-hierarchy.md",
+      );
+      expect(epicFile.yaml.status).toBe("in-progress");
 
       // Project should remain unchanged (still in-progress, not updated)
       const projectFile = await readObjectFile(
         testEnv.projectRoot,
-        "p/open/P-active-project.md",
+        "p/P-active-project/P-active-project.md",
       );
       expect(projectFile.yaml.status).toBe("in-progress");
     });
@@ -506,6 +542,7 @@ describe("E2E Workflow - claimTask", () => {
         "task",
         "T-force-hierarchy",
         createObjectContent(taskData),
+        { featureId: "F-force-feature" },
       );
 
       // Force claim task
@@ -519,7 +556,7 @@ describe("E2E Workflow - claimTask", () => {
       // Verify feature parent was still updated
       const featureFile = await readObjectFile(
         testEnv.projectRoot,
-        "f/open/F-force-feature.md",
+        "f/F-force-feature/F-force-feature.md",
       );
       expect(featureFile.yaml.status).toBe("in-progress");
     });
