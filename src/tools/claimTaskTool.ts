@@ -183,8 +183,13 @@ async function updateTaskStatus(
 
   await repository.saveObject(updatedTask);
 
-  // Update parent hierarchy to in-progress
-  await updateParentHierarchy(task.parent, repository);
+  // Update parent hierarchy to in-progress (don't let errors fail the task claim)
+  try {
+    await updateParentHierarchy(task.parent, repository);
+  } catch (error) {
+    // Log but don't propagate parent hierarchy update errors
+    console.warn("Failed to update parent hierarchy:", error);
+  }
 
   return updatedTask;
 }
@@ -192,10 +197,17 @@ async function updateTaskStatus(
 async function updateParentHierarchy(
   parentId: string | undefined,
   repository: Repository,
+  visitedIds: Set<string> = new Set(),
 ): Promise<void> {
   if (!parentId) {
     return;
   }
+
+  // Prevent infinite recursion by checking if we've already visited this ID
+  if (visitedIds.has(parentId)) {
+    return;
+  }
+  visitedIds.add(parentId);
 
   const parent = await repository.getObjectById(parentId);
   if (!parent) {
@@ -217,5 +229,5 @@ async function updateParentHierarchy(
   await repository.saveObject(updatedParent);
 
   // Continue up the hierarchy
-  await updateParentHierarchy(parent.parent, repository);
+  await updateParentHierarchy(parent.parent, repository, visitedIds);
 }

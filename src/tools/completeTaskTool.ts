@@ -1,4 +1,9 @@
-import { TrellisObjectStatus } from "../models";
+import { ServerConfig } from "../configuration";
+import {
+  TrellisObject,
+  TrellisObjectStatus,
+  TrellisObjectType,
+} from "../models";
 import { Repository } from "../repositories";
 
 export const completeTaskTool = {
@@ -59,6 +64,7 @@ Task completion automatically notifies dependent tasks and may trigger workflow 
 export async function handleCompleteTask(
   repository: Repository,
   args: unknown,
+  serverConfig?: ServerConfig,
 ) {
   const { taskId, summary, filesChanged } = args as {
     taskId: string;
@@ -93,6 +99,11 @@ export async function handleCompleteTask(
   // Save the updated task
   await repository.saveObject(task);
 
+  // If auto-complete parent is enabled, check if we should complete parent objects
+  if (serverConfig?.autoCompleteParent) {
+    await autoCompleteParentHierarchy(repository, task);
+  }
+
   return {
     content: [
       {
@@ -101,4 +112,60 @@ export async function handleCompleteTask(
       },
     ],
   };
+}
+
+async function autoCompleteParentHierarchy(
+  repository: Repository,
+  completedObject: TrellisObject,
+) {
+  // If the completed object has no parent, nothing to do
+  if (!completedObject.parent) {
+    return;
+  }
+
+  // Get the parent object
+  const parent = await repository.getObjectById(completedObject.parent);
+  if (!parent) {
+    return;
+  }
+
+  // Check if all children of the parent are done
+  const siblings = await Promise.all(
+    parent.childrenIds.map((id) => repository.getObjectById(id)),
+  );
+
+  // Filter out null results and check if all are done
+  const validSiblings = siblings.filter(
+    (sibling): sibling is TrellisObject => sibling !== null,
+  );
+  const allChildrenDone = validSiblings.every(
+    (sibling) =>
+      sibling.status === TrellisObjectStatus.DONE ||
+      sibling.status === TrellisObjectStatus.WONT_DO,
+  );
+
+  // If all children are done, mark the parent as done and recurse up the hierarchy
+  if (allChildrenDone && parent.status !== TrellisObjectStatus.DONE) {
+    parent.status = TrellisObjectStatus.DONE;
+    parent.log.push(
+      `Auto-completed: All child ${getChildTypeName(parent.type)} are complete`,
+    );
+    await repository.saveObject(parent);
+
+    // Recursively check the parent's parent
+    await autoCompleteParentHierarchy(repository, parent);
+  }
+}
+
+function getChildTypeName(parentType: TrellisObjectType): string {
+  switch (parentType) {
+    case TrellisObjectType.PROJECT:
+      return "epics";
+    case TrellisObjectType.EPIC:
+      return "features";
+    case TrellisObjectType.FEATURE:
+      return "tasks";
+    default:
+      return "children";
+  }
 }

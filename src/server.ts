@@ -42,13 +42,18 @@ program
   .description("Task Trellis MCP Server")
   .version("1.0.0")
   .option("--mode <mode>", "Server mode", "local")
-  .option("--projectRootFolder <path>", "Project root folder path");
+  .option("--projectRootFolder <path>", "Project root folder path")
+  .option(
+    "--auto-complete-parent",
+    "Enable automatic completion of parent tasks",
+  );
 
 program.parse();
 
 interface CliOptions {
   mode?: string;
   projectRootFolder?: string;
+  autoCompleteParent: boolean;
 }
 
 const options = program.opts<CliOptions>();
@@ -75,6 +80,7 @@ const packageVersion = getPackageVersion();
 // Create server config - always create with at least mode set
 const serverConfig: ServerConfig = {
   mode: options.mode === "remote" ? "remote" : "local",
+  autoCompleteParent: options.autoCompleteParent || false,
   ...(options.projectRootFolder && typeof options.projectRootFolder === "string"
     ? { planningRootFolder: path.join(options.projectRootFolder, ".trellis") }
     : {}),
@@ -214,7 +220,7 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
     case "claim_task":
       return handleClaimTask(repository, args);
     case "complete_task":
-      return handleCompleteTask(repository, args);
+      return handleCompleteTask(repository, args, serverConfig);
     case "prune_closed":
       return handlePruneClosed(repository, args);
     case "activate":

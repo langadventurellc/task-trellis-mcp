@@ -6,6 +6,7 @@ import {
   TrellisObjectPriority,
 } from "../../models";
 import { handleCompleteTask } from "../completeTaskTool";
+import { ServerConfig } from "../../configuration";
 
 describe("completeTaskTool", () => {
   let mockRepository: jest.Mocked<Repository>;
@@ -292,6 +293,405 @@ describe("completeTaskTool", () => {
         affectedFiles: expectedMap,
         log: ["Multiple files changed"],
       });
+    });
+  });
+
+  describe("auto-complete parent functionality", () => {
+    const createMockFeature = (
+      id: string,
+      childrenIds: string[] = [],
+      status: TrellisObjectStatus = TrellisObjectStatus.OPEN,
+    ): TrellisObject => ({
+      id,
+      type: TrellisObjectType.FEATURE,
+      title: "Test Feature",
+      status,
+      priority: TrellisObjectPriority.MEDIUM,
+      parent: "E-test-epic",
+      prerequisites: [],
+      affectedFiles: new Map(),
+      log: [],
+      schema: "1.0",
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
+      childrenIds,
+      body: "This is a test feature",
+    });
+
+    const createMockEpic = (
+      id: string,
+      childrenIds: string[] = [],
+      status: TrellisObjectStatus = TrellisObjectStatus.OPEN,
+    ): TrellisObject => ({
+      id,
+      type: TrellisObjectType.EPIC,
+      title: "Test Epic",
+      status,
+      priority: TrellisObjectPriority.MEDIUM,
+      parent: "P-test-project",
+      prerequisites: [],
+      affectedFiles: new Map(),
+      log: [],
+      schema: "1.0",
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
+      childrenIds,
+      body: "This is a test epic",
+    });
+
+    const createMockProject = (
+      id: string,
+      childrenIds: string[] = [],
+      status: TrellisObjectStatus = TrellisObjectStatus.OPEN,
+    ): TrellisObject => ({
+      id,
+      type: TrellisObjectType.PROJECT,
+      title: "Test Project",
+      status,
+      priority: TrellisObjectPriority.MEDIUM,
+      prerequisites: [],
+      affectedFiles: new Map(),
+      log: [],
+      schema: "1.0",
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
+      childrenIds,
+      body: "This is a test project",
+    });
+
+    const serverConfigWithAutoComplete: ServerConfig = {
+      mode: "local",
+      planningRootFolder: "/test",
+      autoCompleteParent: true,
+    };
+
+    const serverConfigWithoutAutoComplete: ServerConfig = {
+      mode: "local",
+      planningRootFolder: "/test",
+      autoCompleteParent: false,
+    };
+
+    it("should not auto-complete parents when autoCompleteParent is false", async () => {
+      const mockTask = createMockTask();
+      const mockFeature = createMockFeature("F-test-feature", ["T-test-task"]);
+
+      mockRepository.getObjectById
+        .mockResolvedValueOnce(mockTask)
+        .mockResolvedValueOnce(mockFeature);
+      mockRepository.saveObject.mockResolvedValue();
+
+      await handleCompleteTask(
+        mockRepository,
+        {
+          taskId: "T-test-task",
+          summary: "Task completed",
+          filesChanged: {},
+        },
+        serverConfigWithoutAutoComplete,
+      );
+
+      expect(mockRepository.saveObject).toHaveBeenCalledTimes(1);
+      expect(mockRepository.saveObject).toHaveBeenCalledWith({
+        ...mockTask,
+        status: TrellisObjectStatus.DONE,
+        affectedFiles: new Map(),
+        log: ["Task completed"],
+      });
+    });
+
+    it("should not auto-complete parents when serverConfig is undefined", async () => {
+      const mockTask = createMockTask();
+
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      await handleCompleteTask(mockRepository, {
+        taskId: "T-test-task",
+        summary: "Task completed",
+        filesChanged: {},
+      });
+
+      expect(mockRepository.saveObject).toHaveBeenCalledTimes(1);
+    });
+
+    it("should auto-complete feature when all tasks are done", async () => {
+      const mockTask1 = createMockTask({ id: "T-task-1" });
+      const mockTask2 = createMockTask({
+        id: "T-task-2",
+        status: TrellisObjectStatus.DONE,
+      });
+      const mockFeature = createMockFeature("F-test-feature", [
+        "T-task-1",
+        "T-task-2",
+      ]);
+
+      mockRepository.getObjectById
+        .mockResolvedValueOnce(mockTask1)
+        .mockResolvedValueOnce(mockFeature)
+        .mockResolvedValueOnce(mockTask1)
+        .mockResolvedValueOnce(mockTask2);
+      mockRepository.saveObject.mockResolvedValue();
+
+      await handleCompleteTask(
+        mockRepository,
+        {
+          taskId: "T-task-1",
+          summary: "Task completed",
+          filesChanged: {},
+        },
+        serverConfigWithAutoComplete,
+      );
+
+      expect(mockRepository.saveObject).toHaveBeenCalledTimes(2);
+      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(2, {
+        ...mockFeature,
+        status: TrellisObjectStatus.DONE,
+        log: ["Auto-completed: All child tasks are complete"],
+      });
+    });
+
+    it("should not auto-complete feature when some tasks are still in progress", async () => {
+      const mockTask1 = createMockTask({ id: "T-task-1" });
+      const mockTask2 = createMockTask({
+        id: "T-task-2",
+        status: TrellisObjectStatus.IN_PROGRESS,
+      });
+      const mockFeature = createMockFeature("F-test-feature", [
+        "T-task-1",
+        "T-task-2",
+      ]);
+
+      mockRepository.getObjectById
+        .mockResolvedValueOnce(mockTask1)
+        .mockResolvedValueOnce(mockFeature)
+        .mockResolvedValueOnce(mockTask1)
+        .mockResolvedValueOnce(mockTask2);
+      mockRepository.saveObject.mockResolvedValue();
+
+      await handleCompleteTask(
+        mockRepository,
+        {
+          taskId: "T-task-1",
+          summary: "Task completed",
+          filesChanged: {},
+        },
+        serverConfigWithAutoComplete,
+      );
+
+      expect(mockRepository.saveObject).toHaveBeenCalledTimes(1);
+    });
+
+    it("should auto-complete feature when all tasks are done or wont-do", async () => {
+      const mockTask1 = createMockTask({ id: "T-task-1" });
+      const mockTask2 = createMockTask({
+        id: "T-task-2",
+        status: TrellisObjectStatus.WONT_DO,
+      });
+      const mockFeature = createMockFeature("F-test-feature", [
+        "T-task-1",
+        "T-task-2",
+      ]);
+
+      mockRepository.getObjectById
+        .mockResolvedValueOnce(mockTask1)
+        .mockResolvedValueOnce(mockFeature)
+        .mockResolvedValueOnce(mockTask1)
+        .mockResolvedValueOnce(mockTask2);
+      mockRepository.saveObject.mockResolvedValue();
+
+      await handleCompleteTask(
+        mockRepository,
+        {
+          taskId: "T-task-1",
+          summary: "Task completed",
+          filesChanged: {},
+        },
+        serverConfigWithAutoComplete,
+      );
+
+      expect(mockRepository.saveObject).toHaveBeenCalledTimes(2);
+      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(2, {
+        ...mockFeature,
+        status: TrellisObjectStatus.DONE,
+        log: ["Auto-completed: All child tasks are complete"],
+      });
+    });
+
+    it("should auto-complete epic when all features are done", async () => {
+      const mockTask = createMockTask();
+      const mockFeature1 = createMockFeature("F-feature-1", ["T-test-task"]);
+      const mockFeature2 = createMockFeature(
+        "F-feature-2",
+        [],
+        TrellisObjectStatus.DONE,
+      );
+      const mockEpic = createMockEpic("E-test-epic", [
+        "F-feature-1",
+        "F-feature-2",
+      ]);
+
+      mockRepository.getObjectById
+        .mockResolvedValueOnce(mockTask)
+        .mockResolvedValueOnce(mockFeature1)
+        .mockResolvedValueOnce(mockTask)
+        .mockResolvedValueOnce(mockEpic)
+        .mockResolvedValueOnce(mockFeature1)
+        .mockResolvedValueOnce(mockFeature2);
+      mockRepository.saveObject.mockResolvedValue();
+
+      await handleCompleteTask(
+        mockRepository,
+        {
+          taskId: "T-test-task",
+          summary: "Task completed",
+          filesChanged: {},
+        },
+        serverConfigWithAutoComplete,
+      );
+
+      expect(mockRepository.saveObject).toHaveBeenCalledTimes(3);
+      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(3, {
+        ...mockEpic,
+        status: TrellisObjectStatus.DONE,
+        log: ["Auto-completed: All child features are complete"],
+      });
+    });
+
+    it("should auto-complete project when all epics are done", async () => {
+      const mockTask = createMockTask();
+      const mockFeature = createMockFeature("F-test-feature", ["T-test-task"]);
+      const mockEpic1 = createMockEpic("E-epic-1", ["F-test-feature"]);
+      const mockEpic2 = createMockEpic(
+        "E-epic-2",
+        [],
+        TrellisObjectStatus.DONE,
+      );
+      const mockProject = createMockProject("P-test-project", [
+        "E-epic-1",
+        "E-epic-2",
+      ]);
+
+      mockRepository.getObjectById
+        .mockResolvedValueOnce(mockTask)
+        .mockResolvedValueOnce(mockFeature)
+        .mockResolvedValueOnce(mockTask)
+        .mockResolvedValueOnce(mockEpic1)
+        .mockResolvedValueOnce(mockFeature)
+        .mockResolvedValueOnce(mockProject)
+        .mockResolvedValueOnce(mockEpic1)
+        .mockResolvedValueOnce(mockEpic2);
+      mockRepository.saveObject.mockResolvedValue();
+
+      await handleCompleteTask(
+        mockRepository,
+        {
+          taskId: "T-test-task",
+          summary: "Task completed",
+          filesChanged: {},
+        },
+        serverConfigWithAutoComplete,
+      );
+
+      expect(mockRepository.saveObject).toHaveBeenCalledTimes(4);
+      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(4, {
+        ...mockProject,
+        status: TrellisObjectStatus.DONE,
+        log: ["Auto-completed: All child epics are complete"],
+      });
+    });
+
+    it("should handle task with no parent", async () => {
+      const mockTask = createMockTask({ parent: undefined });
+
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      await handleCompleteTask(
+        mockRepository,
+        {
+          taskId: "T-test-task",
+          summary: "Task completed",
+          filesChanged: {},
+        },
+        serverConfigWithAutoComplete,
+      );
+
+      expect(mockRepository.saveObject).toHaveBeenCalledTimes(1);
+    });
+
+    it("should handle parent not found", async () => {
+      const mockTask = createMockTask();
+
+      mockRepository.getObjectById
+        .mockResolvedValueOnce(mockTask)
+        .mockResolvedValueOnce(null);
+      mockRepository.saveObject.mockResolvedValue();
+
+      await handleCompleteTask(
+        mockRepository,
+        {
+          taskId: "T-test-task",
+          summary: "Task completed",
+          filesChanged: {},
+        },
+        serverConfigWithAutoComplete,
+      );
+
+      expect(mockRepository.saveObject).toHaveBeenCalledTimes(1);
+    });
+
+    it("should not auto-complete parent if already done", async () => {
+      const mockTask = createMockTask();
+      const mockFeature = createMockFeature(
+        "F-test-feature",
+        ["T-test-task"],
+        TrellisObjectStatus.DONE,
+      );
+
+      mockRepository.getObjectById
+        .mockResolvedValueOnce(mockTask)
+        .mockResolvedValueOnce(mockFeature)
+        .mockResolvedValueOnce(mockTask); // Additional call for checking children
+      mockRepository.saveObject.mockResolvedValue();
+
+      await handleCompleteTask(
+        mockRepository,
+        {
+          taskId: "T-test-task",
+          summary: "Task completed",
+          filesChanged: {},
+        },
+        serverConfigWithAutoComplete,
+      );
+
+      expect(mockRepository.saveObject).toHaveBeenCalledTimes(1);
+    });
+
+    it("should handle null siblings gracefully", async () => {
+      const mockTask = createMockTask();
+      const mockFeature = createMockFeature("F-test-feature", [
+        "T-test-task",
+        "T-missing-task",
+      ]);
+
+      mockRepository.getObjectById
+        .mockResolvedValueOnce(mockTask)
+        .mockResolvedValueOnce(mockFeature)
+        .mockResolvedValueOnce(mockTask)
+        .mockResolvedValueOnce(null);
+      mockRepository.saveObject.mockResolvedValue();
+
+      await handleCompleteTask(
+        mockRepository,
+        {
+          taskId: "T-test-task",
+          summary: "Task completed",
+          filesChanged: {},
+        },
+        serverConfigWithAutoComplete,
+      );
+
+      expect(mockRepository.saveObject).toHaveBeenCalledTimes(2);
     });
   });
 });

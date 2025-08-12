@@ -124,7 +124,16 @@ describe("claimTaskTool", () => {
   describe("handleClaimTask with taskId specified", () => {
     it("should successfully claim a valid task", async () => {
       const mockTask = createMockTask();
-      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      const mockFeature = createMockFeature();
+      const mockEpic = createMockEpic();
+      const mockProject = createMockProject();
+
+      mockRepository.getObjectById
+        .mockResolvedValueOnce(mockTask) // First call for the task
+        .mockResolvedValueOnce(mockFeature) // Second call for feature parent
+        .mockResolvedValueOnce(mockEpic) // Third call for epic parent
+        .mockResolvedValueOnce(mockProject); // Fourth call for project parent
+
       mockRepository.getObjects.mockResolvedValue([mockTask]);
       mockRepository.saveObject.mockResolvedValue();
 
