@@ -1,11 +1,31 @@
 ---
 id: T-refactor-claimtasktool-to-use
 title: Refactor claimTaskTool to use TaskTrellisService
-status: open
+status: done
 priority: medium
 prerequisites: []
-affectedFiles: {}
-log: []
+affectedFiles:
+  src/tools/claimTaskTool.ts:
+    Updated handleClaimTask function signature to accept
+    TaskTrellisService parameter and delegate to service.claimTask method.
+    Removed all business logic and helper functions.
+  src/server.ts: Updated claimTask case to pass service as first parameter to
+    handleClaimTask function.
+  src/services/local/__tests__/claimTask.test.ts:
+    Created comprehensive test suite
+    for claimTask service function with all business logic scenarios including
+    task claiming, validation, error handling, and parent hierarchy updates.
+  src/tools/__tests__/claimTaskTool.test.ts:
+    Refactored to mock TaskTrellisService
+    and test only integration between tool and service. Simplified from 656
+    lines to 184 lines focused on parameter handling and service delegation.
+log:
+  - Successfully refactored claimTaskTool to use TaskTrellisService. Updated
+    handleClaimTask function to accept TaskTrellisService as first parameter and
+    delegate all business logic to service.claimTask method. Created
+    comprehensive test coverage for the service function and updated tool tests
+    to only verify integration. All business logic is now properly encapsulated
+    in the service layer with dedicated test coverage.
 schema: v1.0
 childrenIds: []
 created: 2025-08-12T16:50:39.587Z
