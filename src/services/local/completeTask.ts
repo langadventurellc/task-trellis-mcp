@@ -5,6 +5,7 @@ import {
   TrellisObjectType,
 } from "../../models";
 import { Repository } from "../../repositories";
+import { appendAffectedFiles } from "./appendAffectedFiles.js";
 
 export async function completeTask(
   repository: Repository,
@@ -30,9 +31,7 @@ export async function completeTask(
   task.status = TrellisObjectStatus.DONE;
 
   // Append to affected files map
-  Object.entries(filesChanged).forEach(([filePath, description]) => {
-    task.affectedFiles.set(filePath, description);
-  });
+  appendAffectedFiles(task, filesChanged);
 
   // Append summary to log
   task.log.push(summary);

@@ -164,6 +164,39 @@ describe("completeTask service function", () => {
       });
     });
 
+    it("should merge descriptions for files that already exist in affected files", async () => {
+      const existingFiles = new Map([
+        ["existing.ts", "Previously changed"],
+        ["src/shared.ts", "Initial changes"],
+      ]);
+      const mockTask = createMockTask({ affectedFiles: existingFiles });
+      const filesChanged = {
+        "src/shared.ts": "Additional changes",
+        "src/new-file.ts": "Newly added file",
+      };
+
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      await completeTask(
+        mockRepository,
+        "T-test-task",
+        "Added new functionality",
+        filesChanged,
+      );
+
+      expect(mockRepository.saveObject).toHaveBeenCalledWith({
+        ...mockTask,
+        status: TrellisObjectStatus.DONE,
+        affectedFiles: new Map([
+          ["existing.ts", "Previously changed"],
+          ["src/shared.ts", "Initial changes; Additional changes"],
+          ["src/new-file.ts", "Newly added file"],
+        ]),
+        log: ["Added new functionality"],
+      });
+    });
+
     it("should append to existing log entries", async () => {
       const mockTask = createMockTask({ log: ["Previous log entry"] });
       const filesChanged = { "file.ts": "Description" };
