@@ -1,12 +1,10 @@
 import {
-  TrellisObject,
   TrellisObjectPriority,
   TrellisObjectStatus,
   TrellisObjectType,
 } from "../models";
 import { Repository } from "../repositories";
-import { generateUniqueId } from "../utils";
-import { validateObjectCreation } from "../validation/validateObjectCreation.js";
+import { TaskTrellisService } from "../services/TaskTrellisService";
 
 export const createObjectTool = {
   name: "create_object",
@@ -96,6 +94,7 @@ Best practices:
 } as const;
 
 export async function handleCreateObject(
+  service: TaskTrellisService,
   repository: Repository,
   args: unknown,
 ) {
@@ -117,45 +116,15 @@ export async function handleCreateObject(
     description?: string;
   };
 
-  // Get existing objects to generate unique ID
-  const existingObjects = await repository.getObjects(true);
-  const existingIds = existingObjects.map((obj) => obj.id);
-
-  // Generate unique ID
-  const objectType = type as TrellisObjectType;
-  const id = generateUniqueId(title, objectType, existingIds);
-
-  // Create TrellisObject with current timestamp
-  const now = new Date().toISOString();
-  const trellisObject: TrellisObject = {
-    id,
-    type: objectType,
+  // Delegate to service layer
+  return service.createObject(
+    repository,
+    type as TrellisObjectType,
     title,
-    status: status as TrellisObjectStatus,
-    priority: priority as TrellisObjectPriority,
     parent,
+    priority as TrellisObjectPriority,
+    status as TrellisObjectStatus,
     prerequisites,
-    affectedFiles: new Map(),
-    log: [],
-    schema: "v1.0",
-    childrenIds: [],
-    created: now,
-    updated: now,
-    body: description,
-  };
-
-  // Validate object before saving
-  await validateObjectCreation(trellisObject, repository);
-
-  // Save through repository
-  await repository.saveObject(trellisObject);
-
-  return {
-    content: [
-      {
-        type: "text",
-        text: `Created object with ID: ${id}`,
-      },
-    ],
-  };
+    description,
+  );
 }

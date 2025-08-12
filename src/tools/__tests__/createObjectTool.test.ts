@@ -1,23 +1,21 @@
 import {
-  TrellisObject,
   TrellisObjectPriority,
   TrellisObjectStatus,
   TrellisObjectType,
 } from "../../models";
 import { Repository } from "../../repositories/Repository";
-import { generateUniqueId } from "../../utils/generateUniqueId";
+import { TaskTrellisService } from "../../services/TaskTrellisService";
 import { handleCreateObject } from "../createObjectTool";
 
-// Mock the generateUniqueId utility
-jest.mock("../../utils/generateUniqueId");
-const mockGenerateUniqueId = generateUniqueId as jest.MockedFunction<
-  typeof generateUniqueId
->;
-
 describe("createObjectTool", () => {
+  let mockService: jest.Mocked<TaskTrellisService>;
   let mockRepository: jest.Mocked<Repository>;
 
   beforeEach(() => {
+    mockService = {
+      createObject: jest.fn(),
+    } as unknown as jest.Mocked<TaskTrellisService>;
+
     mockRepository = {
       getObjectById: jest.fn(),
       getObjects: jest.fn(),
@@ -25,417 +23,131 @@ describe("createObjectTool", () => {
       deleteObject: jest.fn(),
     };
 
-    // Reset mocks
     jest.clearAllMocks();
   });
 
   describe("handleCreateObject", () => {
-    const existingObjects: TrellisObject[] = [
-      {
-        id: "P-existing-project",
-        type: TrellisObjectType.PROJECT,
-        title: "Existing Project",
-        status: TrellisObjectStatus.OPEN,
-        priority: TrellisObjectPriority.MEDIUM,
-        prerequisites: [],
-        affectedFiles: new Map(),
-        log: [],
-        schema: "v1.0",
-        childrenIds: [],
-        body: "Existing project body",
-        created: "2025-01-15T10:00:00Z",
-        updated: "2025-01-15T10:00:00Z",
-      },
-    ];
+    const mockResult = {
+      content: [
+        {
+          type: "text",
+          text: "Created object with ID: T-generated-id",
+        },
+      ],
+    };
 
     beforeEach(() => {
-      mockRepository.getObjects.mockResolvedValue(existingObjects);
-      mockGenerateUniqueId.mockReturnValue("T-generated-id");
+      mockService.createObject.mockResolvedValue(mockResult);
     });
 
-    it("should create a task with minimal required parameters", async () => {
+    it("should delegate to service.createObject with minimal required parameters", async () => {
       const args = {
         type: "task",
         title: "Test Task",
       };
 
-      const result = await handleCreateObject(mockRepository, args);
-
-      expect(mockRepository.getObjects).toHaveBeenCalledWith(true);
-      expect(mockGenerateUniqueId).toHaveBeenCalledWith(
-        "Test Task",
-        TrellisObjectType.TASK,
-        ["P-existing-project"],
+      const result = await handleCreateObject(
+        mockService,
+        mockRepository,
+        args,
       );
-      expect(mockRepository.saveObject).toHaveBeenCalledWith({
-        id: "T-generated-id",
-        type: TrellisObjectType.TASK,
-        title: "Test Task",
-        status: TrellisObjectStatus.OPEN,
-        priority: TrellisObjectPriority.MEDIUM,
-        parent: undefined,
-        prerequisites: [],
-        affectedFiles: new Map(),
-        log: [],
-        schema: "v1.0",
-        childrenIds: [],
-        body: "",
-        created: expect.any(String),
-        updated: expect.any(String),
-      });
-      expect(result).toEqual({
-        content: [
-          {
-            type: "text",
-            text: "Created object with ID: T-generated-id",
-          },
-        ],
-      });
+
+      expect(mockService.createObject).toHaveBeenCalledWith(
+        mockRepository,
+        TrellisObjectType.TASK,
+        "Test Task",
+        undefined,
+        TrellisObjectPriority.MEDIUM,
+        TrellisObjectStatus.OPEN,
+        [],
+        "",
+      );
+      expect(result).toEqual(mockResult);
     });
 
-    it("should create a project with all parameters specified", async () => {
-      mockGenerateUniqueId.mockReturnValue("P-new-project");
-
+    it("should delegate to service.createObject with all parameters specified", async () => {
       const args = {
         type: "project",
         title: "New Project",
+        parent: "P-parent",
         priority: "high",
-        status: "open",
+        status: "in-progress",
         prerequisites: ["P-dependency1", "P-dependency2"],
         description: "This is a new project description",
       };
 
-      const result = await handleCreateObject(mockRepository, args);
-
-      expect(mockGenerateUniqueId).toHaveBeenCalledWith(
-        "New Project",
-        TrellisObjectType.PROJECT,
-        ["P-existing-project"],
+      const result = await handleCreateObject(
+        mockService,
+        mockRepository,
+        args,
       );
-      expect(mockRepository.saveObject).toHaveBeenCalledWith({
-        id: "P-new-project",
-        type: TrellisObjectType.PROJECT,
-        title: "New Project",
-        status: TrellisObjectStatus.OPEN,
-        priority: TrellisObjectPriority.HIGH,
-        parent: undefined,
-        prerequisites: ["P-dependency1", "P-dependency2"],
-        affectedFiles: new Map(),
-        log: [],
-        schema: "v1.0",
-        childrenIds: [],
-        body: "This is a new project description",
-        created: expect.any(String),
-        updated: expect.any(String),
-      });
-      expect(result).toEqual({
-        content: [
-          {
-            type: "text",
-            text: "Created object with ID: P-new-project",
-          },
-        ],
-      });
+
+      expect(mockService.createObject).toHaveBeenCalledWith(
+        mockRepository,
+        TrellisObjectType.PROJECT,
+        "New Project",
+        "P-parent",
+        TrellisObjectPriority.HIGH,
+        TrellisObjectStatus.IN_PROGRESS,
+        ["P-dependency1", "P-dependency2"],
+        "This is a new project description",
+      );
+      expect(result).toEqual(mockResult);
     });
 
-    it("should create an epic with default values", async () => {
-      mockGenerateUniqueId.mockReturnValue("E-epic-id");
-
-      // Mock parent object to exist for validation
-      const mockParentObject: TrellisObject = {
-        id: "P-project",
-        type: TrellisObjectType.PROJECT,
-        title: "Parent Project",
-        status: TrellisObjectStatus.OPEN,
-        priority: TrellisObjectPriority.MEDIUM,
-        prerequisites: [],
-        affectedFiles: new Map(),
-        log: [],
-        schema: "v1.0",
-        childrenIds: [],
-        body: "Parent project description",
-        created: "2025-01-15T10:00:00Z",
-        updated: "2025-01-15T10:00:00Z",
-      };
-      mockRepository.getObjectById.mockResolvedValue(mockParentObject);
-
+    it("should handle default values correctly", async () => {
       const args = {
         type: "epic",
         title: "Epic Title",
         parent: "P-project",
       };
 
-      const result = await handleCreateObject(mockRepository, args);
+      await handleCreateObject(mockService, mockRepository, args);
 
-      expect(mockRepository.saveObject).toHaveBeenCalledWith({
-        id: "E-epic-id",
-        type: TrellisObjectType.EPIC,
-        title: "Epic Title",
-        status: TrellisObjectStatus.OPEN,
-        priority: TrellisObjectPriority.MEDIUM,
-        parent: "P-project",
-        prerequisites: [],
-        affectedFiles: new Map(),
-        log: [],
-        schema: "v1.0",
-        childrenIds: [],
-        body: "",
-        created: expect.any(String),
-        updated: expect.any(String),
-      });
-      expect(result).toEqual({
-        content: [
-          {
-            type: "text",
-            text: "Created object with ID: E-epic-id",
-          },
-        ],
-      });
-    });
-
-    it("should create a feature with low priority", async () => {
-      mockGenerateUniqueId.mockReturnValue("F-feature-id");
-
-      const args = {
-        type: "feature",
-        title: "Feature Title",
-        priority: "low",
-        status: "in-progress",
-        description: "Feature description",
-      };
-
-      const result = await handleCreateObject(mockRepository, args);
-
-      expect(mockRepository.saveObject).toHaveBeenCalledWith({
-        id: "F-feature-id",
-        type: TrellisObjectType.FEATURE,
-        title: "Feature Title",
-        status: TrellisObjectStatus.IN_PROGRESS,
-        priority: TrellisObjectPriority.LOW,
-        parent: undefined,
-        prerequisites: [],
-        affectedFiles: new Map(),
-        log: [],
-        schema: "v1.0",
-        childrenIds: [],
-        body: "Feature description",
-        created: expect.any(String),
-        updated: expect.any(String),
-      });
-      expect(result).toEqual({
-        content: [
-          {
-            type: "text",
-            text: "Created object with ID: F-feature-id",
-          },
-        ],
-      });
-    });
-
-    it("should handle objects with prerequisites", async () => {
-      mockGenerateUniqueId.mockReturnValue("T-task-with-prereqs");
-
-      const args = {
-        type: "task",
-        title: "Task with Prerequisites",
-        prerequisites: ["T-setup", "T-config", "F-auth"],
-      };
-
-      const result = await handleCreateObject(mockRepository, args);
-
-      expect(mockRepository.saveObject).toHaveBeenCalledWith(
-        expect.objectContaining({
-          prerequisites: ["T-setup", "T-config", "F-auth"],
-        }),
-      );
-      expect(result).toEqual({
-        content: [
-          {
-            type: "text",
-            text: "Created object with ID: T-task-with-prereqs",
-          },
-        ],
-      });
-    });
-
-    it("should pass existing IDs to generateUniqueId for uniqueness checking", async () => {
-      const multipleExistingObjects: TrellisObject[] = [
-        {
-          id: "T-task-1",
-          type: TrellisObjectType.TASK,
-          title: "Task 1",
-          status: TrellisObjectStatus.OPEN,
-          priority: TrellisObjectPriority.MEDIUM,
-          prerequisites: [],
-          affectedFiles: new Map(),
-          log: [],
-          schema: "v1.0",
-          childrenIds: [],
-          body: "",
-          created: "2025-01-15T10:00:00Z",
-          updated: "2025-01-15T10:00:00Z",
-        },
-        {
-          id: "F-feature-1",
-          type: TrellisObjectType.FEATURE,
-          title: "Feature 1",
-          status: TrellisObjectStatus.OPEN,
-          priority: TrellisObjectPriority.HIGH,
-          prerequisites: [],
-          affectedFiles: new Map(),
-          log: [],
-          schema: "v1.0",
-          childrenIds: [],
-          body: "",
-          created: "2025-01-15T10:00:00Z",
-          updated: "2025-01-15T10:00:00Z",
-        },
-      ];
-
-      mockRepository.getObjects.mockResolvedValue(multipleExistingObjects);
-      mockGenerateUniqueId.mockReturnValue("P-unique-project");
-
-      const args = {
-        type: "project",
-        title: "Unique Project",
-      };
-
-      await handleCreateObject(mockRepository, args);
-
-      expect(mockGenerateUniqueId).toHaveBeenCalledWith(
-        "Unique Project",
-        TrellisObjectType.PROJECT,
-        ["T-task-1", "F-feature-1"],
-      );
-    });
-
-    it("should handle repository getObjects error gracefully", async () => {
-      const errorMessage = "Failed to fetch existing objects";
-      mockRepository.getObjects.mockRejectedValue(new Error(errorMessage));
-
-      const args = {
-        type: "task",
-        title: "Test Task",
-      };
-
-      await expect(handleCreateObject(mockRepository, args)).rejects.toThrow(
-        errorMessage,
-      );
-
-      expect(mockRepository.getObjects).toHaveBeenCalledWith(true);
-      expect(mockRepository.saveObject).not.toHaveBeenCalled();
-    });
-
-    it("should handle repository saveObject error gracefully", async () => {
-      const errorMessage = "Failed to save object";
-      mockRepository.saveObject.mockRejectedValue(new Error(errorMessage));
-
-      const args = {
-        type: "task",
-        title: "Test Task",
-      };
-
-      await expect(handleCreateObject(mockRepository, args)).rejects.toThrow(
-        errorMessage,
-      );
-
-      expect(mockRepository.getObjects).toHaveBeenCalledWith(true);
-      expect(mockRepository.saveObject).toHaveBeenCalled();
-    });
-
-    it("should handle empty existing objects array", async () => {
-      mockRepository.getObjects.mockResolvedValue([]);
-      mockGenerateUniqueId.mockReturnValue("T-first-task");
-
-      const args = {
-        type: "task",
-        title: "First Task",
-      };
-
-      const result = await handleCreateObject(mockRepository, args);
-
-      expect(mockGenerateUniqueId).toHaveBeenCalledWith(
-        "First Task",
-        TrellisObjectType.TASK,
+      expect(mockService.createObject).toHaveBeenCalledWith(
+        mockRepository,
+        TrellisObjectType.EPIC,
+        "Epic Title",
+        "P-project",
+        TrellisObjectPriority.MEDIUM,
+        TrellisObjectStatus.OPEN,
         [],
+        "",
       );
-      expect(result).toEqual({
-        content: [
-          {
-            type: "text",
-            text: "Created object with ID: T-first-task",
-          },
-        ],
-      });
     });
 
-    it("should handle all object types correctly", async () => {
+    it("should convert all object types correctly", async () => {
       const testCases = [
-        {
-          type: "project",
-          expectedType: TrellisObjectType.PROJECT,
-          expectedId: "P-project",
-        },
-        {
-          type: "epic",
-          expectedType: TrellisObjectType.EPIC,
-          expectedId: "E-epic",
-          parent: "P-existing-project",
-        },
-        {
-          type: "feature",
-          expectedType: TrellisObjectType.FEATURE,
-          expectedId: "F-feature",
-        },
-        {
-          type: "task",
-          expectedType: TrellisObjectType.TASK,
-          expectedId: "T-task",
-        },
+        { type: "project", expectedType: TrellisObjectType.PROJECT },
+        { type: "epic", expectedType: TrellisObjectType.EPIC },
+        { type: "feature", expectedType: TrellisObjectType.FEATURE },
+        { type: "task", expectedType: TrellisObjectType.TASK },
       ];
 
       for (const testCase of testCases) {
-        mockRepository.saveObject.mockClear();
-        mockRepository.getObjectById.mockClear();
-        mockGenerateUniqueId.mockReturnValue(testCase.expectedId);
-
-        // Mock parent object if needed
-        if (testCase.parent) {
-          const mockParentObject: TrellisObject = {
-            id: testCase.parent,
-            type: TrellisObjectType.PROJECT,
-            title: "Parent Project",
-            status: TrellisObjectStatus.OPEN,
-            priority: TrellisObjectPriority.MEDIUM,
-            prerequisites: [],
-            affectedFiles: new Map(),
-            log: [],
-            schema: "v1.0",
-            childrenIds: [],
-            body: "Parent project description",
-            created: "2025-01-15T10:00:00Z",
-            updated: "2025-01-15T10:00:00Z",
-          };
-          mockRepository.getObjectById.mockResolvedValue(mockParentObject);
-        }
+        mockService.createObject.mockClear();
 
         const args = {
           type: testCase.type,
           title: `Test ${testCase.type}`,
-          ...(testCase.parent && { parent: testCase.parent }),
         };
 
-        await handleCreateObject(mockRepository, args);
+        await handleCreateObject(mockService, mockRepository, args);
 
-        expect(mockRepository.saveObject).toHaveBeenCalledWith(
-          expect.objectContaining({
-            type: testCase.expectedType,
-          }),
+        expect(mockService.createObject).toHaveBeenCalledWith(
+          mockRepository,
+          testCase.expectedType,
+          `Test ${testCase.type}`,
+          undefined,
+          TrellisObjectPriority.MEDIUM,
+          TrellisObjectStatus.OPEN,
+          [],
+          "",
         );
       }
     });
 
-    it("should handle all status types correctly", async () => {
+    it("should convert all status types correctly", async () => {
       const testCases = [
         { status: "draft", expectedStatus: TrellisObjectStatus.DRAFT },
         { status: "open", expectedStatus: TrellisObjectStatus.OPEN },
@@ -448,8 +160,7 @@ describe("createObjectTool", () => {
       ];
 
       for (const testCase of testCases) {
-        mockRepository.saveObject.mockClear();
-        mockGenerateUniqueId.mockReturnValue(`T-status-test`);
+        mockService.createObject.mockClear();
 
         const args = {
           type: "task",
@@ -457,17 +168,22 @@ describe("createObjectTool", () => {
           status: testCase.status,
         };
 
-        await handleCreateObject(mockRepository, args);
+        await handleCreateObject(mockService, mockRepository, args);
 
-        expect(mockRepository.saveObject).toHaveBeenCalledWith(
-          expect.objectContaining({
-            status: testCase.expectedStatus,
-          }),
+        expect(mockService.createObject).toHaveBeenCalledWith(
+          mockRepository,
+          TrellisObjectType.TASK,
+          "Status Test",
+          undefined,
+          TrellisObjectPriority.MEDIUM,
+          testCase.expectedStatus,
+          [],
+          "",
         );
       }
     });
 
-    it("should handle all priority types correctly", async () => {
+    it("should convert all priority types correctly", async () => {
       const testCases = [
         { priority: "high", expectedPriority: TrellisObjectPriority.HIGH },
         { priority: "medium", expectedPriority: TrellisObjectPriority.MEDIUM },
@@ -475,8 +191,7 @@ describe("createObjectTool", () => {
       ];
 
       for (const testCase of testCases) {
-        mockRepository.saveObject.mockClear();
-        mockGenerateUniqueId.mockReturnValue(`T-priority-test`);
+        mockService.createObject.mockClear();
 
         const args = {
           type: "task",
@@ -484,14 +199,65 @@ describe("createObjectTool", () => {
           priority: testCase.priority,
         };
 
-        await handleCreateObject(mockRepository, args);
+        await handleCreateObject(mockService, mockRepository, args);
 
-        expect(mockRepository.saveObject).toHaveBeenCalledWith(
-          expect.objectContaining({
-            priority: testCase.expectedPriority,
-          }),
+        expect(mockService.createObject).toHaveBeenCalledWith(
+          mockRepository,
+          TrellisObjectType.TASK,
+          "Priority Test",
+          undefined,
+          testCase.expectedPriority,
+          TrellisObjectStatus.OPEN,
+          [],
+          "",
         );
       }
+    });
+
+    it("should handle prerequisites array", async () => {
+      const args = {
+        type: "task",
+        title: "Task with Prerequisites",
+        prerequisites: ["T-setup", "T-config", "F-auth"],
+      };
+
+      await handleCreateObject(mockService, mockRepository, args);
+
+      expect(mockService.createObject).toHaveBeenCalledWith(
+        mockRepository,
+        TrellisObjectType.TASK,
+        "Task with Prerequisites",
+        undefined,
+        TrellisObjectPriority.MEDIUM,
+        TrellisObjectStatus.OPEN,
+        ["T-setup", "T-config", "F-auth"],
+        "",
+      );
+    });
+
+    it("should propagate service errors", async () => {
+      const errorMessage = "Service error occurred";
+      mockService.createObject.mockRejectedValue(new Error(errorMessage));
+
+      const args = {
+        type: "task",
+        title: "Test Task",
+      };
+
+      await expect(
+        handleCreateObject(mockService, mockRepository, args),
+      ).rejects.toThrow(errorMessage);
+
+      expect(mockService.createObject).toHaveBeenCalledWith(
+        mockRepository,
+        TrellisObjectType.TASK,
+        "Test Task",
+        undefined,
+        TrellisObjectPriority.MEDIUM,
+        TrellisObjectStatus.OPEN,
+        [],
+        "",
+      );
     });
   });
 });

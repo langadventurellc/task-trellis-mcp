@@ -214,7 +214,7 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
 
   switch (toolName) {
     case "create_object":
-      return handleCreateObject(repository, args);
+      return handleCreateObject(_getService(), repository, args);
     case "update_object":
       return handleUpdateObject(repository, args);
     case "replace_object_body_regex":
