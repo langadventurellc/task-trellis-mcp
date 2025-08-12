@@ -2,7 +2,7 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "mcp__task-trellis__completeTask",
+        "matcher": "mcp__task-trellis__complete_task",
         "hooks": [
           {
             "type": "command",

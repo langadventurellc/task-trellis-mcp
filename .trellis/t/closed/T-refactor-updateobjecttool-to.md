@@ -1,11 +1,32 @@
 ---
 id: T-refactor-updateobjecttool-to
 title: Refactor updateObjectTool to use TaskTrellisService
-status: open
+status: done
 priority: medium
 prerequisites: []
-affectedFiles: {}
-log: []
+affectedFiles:
+  src/tools/updateObjectTool.ts: Refactored handleUpdateObject to accept
+    TaskTrellisService parameter and delegate to service.updateObject method,
+    updated imports to remove unused dependencies
+  src/server.ts: Updated updateObject case to pass TaskTrellisService as first
+    parameter to handleUpdateObject
+  src/tools/__tests__/updateObjectTool.test.ts: Completely rewritten to mock
+    TaskTrellisService instead of Repository, focusing on integration testing
+    with simplified test cases
+  src/services/local/__tests__/updateObject.test.ts: Created comprehensive test
+    suite covering all business logic scenarios including priority updates,
+    prerequisite management, status transitions, validation rules, error
+    handling, and edge cases
+log:
+  - Successfully refactored updateObjectTool to use TaskTrellisService instead
+    of Repository directly. Updated handleUpdateObject function signature to
+    accept TaskTrellisService as first parameter and delegate all business logic
+    to service.updateObject method. Migrated comprehensive business logic tests
+    from tool tests to dedicated service tests, ensuring complete test coverage
+    for all update scenarios including priority changes, prerequisite updates,
+    status transitions, validation, and error handling. Updated tool tests to
+    focus solely on integration testing with mocked service. All 831 tests pass,
+    confirming functionality is preserved.
 schema: v1.0
 childrenIds: []
 created: 2025-08-12T16:50:32.852Z

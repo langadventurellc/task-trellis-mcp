@@ -1,298 +1,148 @@
+import { TrellisObjectPriority, TrellisObjectStatus } from "../../models";
 import { Repository } from "../../repositories/Repository";
-import {
-  TrellisObject,
-  TrellisObjectType,
-  TrellisObjectStatus,
-  TrellisObjectPriority,
-} from "../../models";
+import { TaskTrellisService } from "../../services/TaskTrellisService";
 import { handleUpdateObject } from "../updateObjectTool";
 
-// Mock the validateStatusTransition function
-jest.mock("../../validation/validateStatusTransition", () => ({
-  validateStatusTransition: jest.fn(),
-}));
-
-import { validateStatusTransition } from "../../validation/validateStatusTransition";
-
-const mockValidateStatusTransition =
-  validateStatusTransition as jest.MockedFunction<
-    typeof validateStatusTransition
-  >;
-
 describe("updateObjectTool", () => {
+  let mockService: jest.Mocked<TaskTrellisService>;
   let mockRepository: jest.Mocked<Repository>;
 
   beforeEach(() => {
+    mockService = {
+      updateObject: jest.fn(),
+    } as unknown as jest.Mocked<TaskTrellisService>;
+
     mockRepository = {
       getObjectById: jest.fn(),
       getObjects: jest.fn(),
       saveObject: jest.fn(),
       deleteObject: jest.fn(),
     };
+
     jest.clearAllMocks();
   });
 
   describe("handleUpdateObject", () => {
-    const mockTrellisObject: TrellisObject = {
-      id: "T-test-task",
-      type: TrellisObjectType.TASK,
-      title: "Test Task",
-      status: TrellisObjectStatus.OPEN,
-      priority: TrellisObjectPriority.MEDIUM,
-      parent: "F-test-feature",
-      prerequisites: [],
-      affectedFiles: new Map(),
-      log: [],
-      schema: "1.0",
-      childrenIds: [],
-      body: "This is a test task",
-      created: "2025-01-15T10:00:00Z",
-      updated: "2025-01-15T10:00:00Z",
+    const mockResult = {
+      content: [
+        {
+          type: "text",
+          text: "Successfully updated object: {...}",
+        },
+      ],
     };
 
-    it("should successfully update an object with all properties", async () => {
-      mockRepository.getObjectById.mockResolvedValue(mockTrellisObject);
-      mockRepository.saveObject.mockResolvedValue();
-      mockValidateStatusTransition.mockResolvedValue();
+    it("should call service.updateObject with correct parameters for all properties", async () => {
+      mockService.updateObject.mockResolvedValue(mockResult);
 
-      const result = await handleUpdateObject(mockRepository, {
+      const result = await handleUpdateObject(mockService, mockRepository, {
         id: "T-test-task",
         priority: "high",
         prerequisites: ["T-prereq-1", "T-prereq-2"],
         body: "Updated body content",
         status: "draft",
+        force: true,
       });
 
-      const expectedUpdatedObject = {
-        ...mockTrellisObject,
-        priority: "high",
-        prerequisites: ["T-prereq-1", "T-prereq-2"],
-        body: "Updated body content",
-        status: "draft",
-      };
-
-      expect(mockRepository.getObjectById).toHaveBeenCalledWith("T-test-task");
-      expect(mockValidateStatusTransition).toHaveBeenCalledWith(
-        expectedUpdatedObject,
+      expect(mockService.updateObject).toHaveBeenCalledWith(
         mockRepository,
+        "T-test-task",
+        "high" as TrellisObjectPriority,
+        ["T-prereq-1", "T-prereq-2"],
+        "Updated body content",
+        "draft" as TrellisObjectStatus,
+        true,
       );
-      expect(mockRepository.saveObject).toHaveBeenCalledWith(
-        expectedUpdatedObject,
-      );
-      expect(result.content[0].text).toContain("Successfully updated object:");
-      expect(result.content[0].text).toContain("T-test-task");
+      expect(result).toBe(mockResult);
     });
 
-    it("should successfully update only specified properties", async () => {
-      mockRepository.getObjectById.mockResolvedValue(mockTrellisObject);
-      mockRepository.saveObject.mockResolvedValue();
+    it("should call service.updateObject with only specified properties", async () => {
+      mockService.updateObject.mockResolvedValue(mockResult);
 
-      const result = await handleUpdateObject(mockRepository, {
+      const result = await handleUpdateObject(mockService, mockRepository, {
         id: "T-test-task",
         priority: "low",
       });
 
-      const expectedUpdatedObject = {
-        ...mockTrellisObject,
-        priority: "low",
-      };
-
-      expect(mockRepository.saveObject).toHaveBeenCalledWith(
-        expectedUpdatedObject,
+      expect(mockService.updateObject).toHaveBeenCalledWith(
+        mockRepository,
+        "T-test-task",
+        "low" as TrellisObjectPriority,
+        undefined,
+        undefined,
+        undefined,
+        false,
       );
-      expect(mockValidateStatusTransition).not.toHaveBeenCalled();
-      expect(result.content[0].text).toContain("Successfully updated object:");
+      expect(result).toBe(mockResult);
     });
 
-    it("should return error when object is not found", async () => {
-      mockRepository.getObjectById.mockResolvedValue(null);
+    it("should handle missing optional parameters correctly", async () => {
+      mockService.updateObject.mockResolvedValue(mockResult);
 
-      const result = await handleUpdateObject(mockRepository, {
+      const result = await handleUpdateObject(mockService, mockRepository, {
+        id: "T-test-task",
+        status: "in-progress",
+      });
+
+      expect(mockService.updateObject).toHaveBeenCalledWith(
+        mockRepository,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        "in-progress" as TrellisObjectStatus,
+        false,
+      );
+      expect(result).toBe(mockResult);
+    });
+
+    it("should default force to false when not provided", async () => {
+      mockService.updateObject.mockResolvedValue(mockResult);
+
+      await handleUpdateObject(mockService, mockRepository, {
+        id: "T-test-task",
+        status: "done",
+      });
+
+      expect(mockService.updateObject).toHaveBeenCalledWith(
+        mockRepository,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        "done" as TrellisObjectStatus,
+        false,
+      );
+    });
+
+    it("should pass through service errors", async () => {
+      const errorResult = {
+        content: [
+          {
+            type: "text",
+            text: "Error updating object: Object not found",
+          },
+        ],
+      };
+      mockService.updateObject.mockResolvedValue(errorResult);
+
+      const result = await handleUpdateObject(mockService, mockRepository, {
         id: "T-nonexistent",
         priority: "high",
       });
 
-      expect(mockRepository.getObjectById).toHaveBeenCalledWith(
-        "T-nonexistent",
-      );
-      expect(mockRepository.saveObject).not.toHaveBeenCalled();
-      expect(mockValidateStatusTransition).not.toHaveBeenCalled();
-      expect(result.content[0].text).toBe(
-        "Error: Object with ID 'T-nonexistent' not found",
-      );
+      expect(result).toBe(errorResult);
     });
 
-    it("should validate status transition when status changes to in-progress", async () => {
-      mockRepository.getObjectById.mockResolvedValue(mockTrellisObject);
-      mockRepository.saveObject.mockResolvedValue();
-      mockValidateStatusTransition.mockResolvedValue();
+    it("should handle service rejections", async () => {
+      mockService.updateObject.mockRejectedValue(new Error("Service error"));
 
-      const result = await handleUpdateObject(mockRepository, {
-        id: "T-test-task",
-        status: "in-progress",
-      });
-
-      expect(mockValidateStatusTransition).toHaveBeenCalledWith(
-        expect.objectContaining({
-          ...mockTrellisObject,
-          status: "in-progress",
-        }),
-        mockRepository,
-      );
-      expect(mockRepository.saveObject).toHaveBeenCalled();
-      expect(result.content[0].text).toContain("Successfully updated object:");
-    });
-
-    it("should validate status transition when status changes to done", async () => {
-      mockRepository.getObjectById.mockResolvedValue(mockTrellisObject);
-      mockRepository.saveObject.mockResolvedValue();
-      mockValidateStatusTransition.mockResolvedValue();
-
-      const result = await handleUpdateObject(mockRepository, {
-        id: "T-test-task",
-        status: "done",
-      });
-
-      expect(mockValidateStatusTransition).toHaveBeenCalledWith(
-        expect.objectContaining({
-          ...mockTrellisObject,
+      await expect(
+        handleUpdateObject(mockService, mockRepository, {
+          id: "T-test-task",
           status: "done",
         }),
-        mockRepository,
-      );
-      expect(mockRepository.saveObject).toHaveBeenCalled();
-      expect(result.content[0].text).toContain("Successfully updated object:");
-    });
-
-    it("should reject status change when validation fails", async () => {
-      mockRepository.getObjectById.mockResolvedValue(mockTrellisObject);
-      const validationError = new Error(
-        "Cannot update status to 'in-progress' - prerequisites are not complete. Use force=true to override.",
-      );
-      mockValidateStatusTransition.mockRejectedValue(validationError);
-
-      const result = await handleUpdateObject(mockRepository, {
-        id: "T-test-task",
-        status: "in-progress",
-      });
-
-      expect(mockValidateStatusTransition).toHaveBeenCalled();
-      expect(mockRepository.saveObject).not.toHaveBeenCalled();
-      expect(result.content[0].text).toBe(
-        "Error updating object: Cannot update status to 'in-progress' - prerequisites are not complete. Use force=true to override.",
-      );
-    });
-
-    it("should bypass validation when force is true", async () => {
-      mockRepository.getObjectById.mockResolvedValue(mockTrellisObject);
-      mockRepository.saveObject.mockResolvedValue();
-
-      const result = await handleUpdateObject(mockRepository, {
-        id: "T-test-task",
-        status: "in-progress",
-        force: true,
-      });
-
-      expect(mockValidateStatusTransition).not.toHaveBeenCalled();
-      expect(mockRepository.saveObject).toHaveBeenCalled();
-      expect(result.content[0].text).toContain("Successfully updated object:");
-    });
-
-    it("should not validate status transitions for non-status updates", async () => {
-      mockRepository.getObjectById.mockResolvedValue(mockTrellisObject);
-      mockRepository.saveObject.mockResolvedValue();
-
-      const result = await handleUpdateObject(mockRepository, {
-        id: "T-test-task",
-        priority: "high",
-        body: "Updated body",
-      });
-
-      expect(mockValidateStatusTransition).not.toHaveBeenCalled();
-      expect(mockRepository.saveObject).toHaveBeenCalled();
-      expect(result.content[0].text).toContain("Successfully updated object:");
-    });
-
-    it("should handle repository errors gracefully", async () => {
-      mockRepository.getObjectById.mockRejectedValue(
-        new Error("Database connection failed"),
-      );
-
-      const result = await handleUpdateObject(mockRepository, {
-        id: "T-test-task",
-        status: "done",
-      });
-
-      expect(result.content[0].text).toBe(
-        "Error updating object: Database connection failed",
-      );
-    });
-
-    it("should handle saveObject errors gracefully", async () => {
-      mockRepository.getObjectById.mockResolvedValue(mockTrellisObject);
-      mockRepository.saveObject.mockRejectedValue(new Error("Failed to save"));
-      mockValidateStatusTransition.mockResolvedValue();
-
-      const result = await handleUpdateObject(mockRepository, {
-        id: "T-test-task",
-        status: "done",
-      });
-
-      expect(result.content[0].text).toBe(
-        "Error updating object: Failed to save",
-      );
-    });
-
-    it("should handle validation errors gracefully", async () => {
-      mockRepository.getObjectById.mockResolvedValue(mockTrellisObject);
-      mockValidateStatusTransition.mockRejectedValue(
-        new Error("Validation failed"),
-      );
-
-      const result = await handleUpdateObject(mockRepository, {
-        id: "T-test-task",
-        status: "in-progress",
-      });
-
-      expect(result.content[0].text).toBe(
-        "Error updating object: Validation failed",
-      );
-    });
-
-    it("should handle complex update with multiple properties and status validation", async () => {
-      const objectWithPrereqs = {
-        ...mockTrellisObject,
-        prerequisites: ["T-prereq-1"],
-      };
-
-      mockRepository.getObjectById.mockResolvedValue(objectWithPrereqs);
-      mockRepository.saveObject.mockResolvedValue();
-      mockValidateStatusTransition.mockResolvedValue();
-
-      const result = await handleUpdateObject(mockRepository, {
-        id: "T-test-task",
-        priority: "high",
-        prerequisites: ["T-prereq-1", "T-prereq-2", "T-prereq-3"],
-        body: "Updated body with new requirements",
-        status: "in-progress",
-      });
-
-      const expectedUpdatedObject = {
-        ...objectWithPrereqs,
-        priority: "high",
-        prerequisites: ["T-prereq-1", "T-prereq-2", "T-prereq-3"],
-        body: "Updated body with new requirements",
-        status: "in-progress",
-      };
-
-      expect(mockValidateStatusTransition).toHaveBeenCalledWith(
-        expectedUpdatedObject,
-        mockRepository,
-      );
-      expect(mockRepository.saveObject).toHaveBeenCalledWith(
-        expectedUpdatedObject,
-      );
-      expect(result.content[0].text).toContain("Successfully updated object:");
+      ).rejects.toThrow("Service error");
     });
   });
 });
