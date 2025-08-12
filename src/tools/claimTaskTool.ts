@@ -182,5 +182,40 @@ async function updateTaskStatus(
   };
 
   await repository.saveObject(updatedTask);
+
+  // Update parent hierarchy to in-progress
+  await updateParentHierarchy(task.parent, repository);
+
   return updatedTask;
+}
+
+async function updateParentHierarchy(
+  parentId: string | undefined,
+  repository: Repository,
+): Promise<void> {
+  if (!parentId) {
+    return;
+  }
+
+  const parent = await repository.getObjectById(parentId);
+  if (!parent) {
+    return;
+  }
+
+  // If parent is already in progress, we can stop here since we assume
+  // its parent is already in progress too
+  if (parent.status === TrellisObjectStatus.IN_PROGRESS) {
+    return;
+  }
+
+  // Update parent to in-progress
+  const updatedParent = {
+    ...parent,
+    status: TrellisObjectStatus.IN_PROGRESS,
+  };
+
+  await repository.saveObject(updatedParent);
+
+  // Continue up the hierarchy
+  await updateParentHierarchy(parent.parent, repository);
 }

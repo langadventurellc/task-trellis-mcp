@@ -64,6 +64,46 @@ describe("claimTaskTool", () => {
     ...overrides,
   });
 
+  const createMockFeature = (
+    overrides?: Partial<TrellisObject>,
+  ): TrellisObject => ({
+    id: "F-test-feature",
+    type: TrellisObjectType.FEATURE,
+    title: "Test Feature",
+    status: TrellisObjectStatus.OPEN,
+    priority: TrellisObjectPriority.MEDIUM,
+    parent: "E-test-epic",
+    prerequisites: [],
+    affectedFiles: new Map(),
+    log: [],
+    schema: "1.0",
+    childrenIds: [],
+    body: "This is a test feature",
+    created: "2025-01-15T10:00:00Z",
+    updated: "2025-01-15T10:00:00Z",
+    ...overrides,
+  });
+
+  const createMockEpic = (
+    overrides?: Partial<TrellisObject>,
+  ): TrellisObject => ({
+    id: "E-test-epic",
+    type: TrellisObjectType.EPIC,
+    title: "Test Epic",
+    status: TrellisObjectStatus.OPEN,
+    priority: TrellisObjectPriority.HIGH,
+    parent: "P-test-project",
+    prerequisites: [],
+    affectedFiles: new Map(),
+    log: [],
+    schema: "1.0",
+    childrenIds: [],
+    body: "This is a test epic",
+    created: "2025-01-15T10:00:00Z",
+    updated: "2025-01-15T10:00:00Z",
+    ...overrides,
+  });
+
   beforeEach(() => {
     mockRepository = {
       getObjectById: jest.fn(),
@@ -75,6 +115,10 @@ describe("claimTaskTool", () => {
     // Reset mocks
     mockFilterUnavailableObjects.mockReset();
     mockSortTrellisObjects.mockReset();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   describe("handleClaimTask with taskId specified", () => {
@@ -415,6 +459,189 @@ describe("claimTaskTool", () => {
       expect(result.content[0].text).toContain(
         "cannot be claimed (status: in-progress)",
       );
+    });
+  });
+
+  describe("parent hierarchy updates", () => {
+    it("should update feature parent to in-progress when claiming task", async () => {
+      const mockFeature = createMockFeature({
+        status: TrellisObjectStatus.OPEN,
+      });
+      const mockTask = createMockTask({ parent: "F-test-feature" });
+
+      mockRepository.getObjectById
+        .mockResolvedValueOnce(mockTask) // First call for the task
+        .mockResolvedValueOnce(mockFeature); // Second call for the parent feature
+      mockRepository.saveObject.mockResolvedValue();
+
+      const result = await handleClaimTask(mockRepository, {
+        taskId: "T-test-task",
+      });
+
+      expect(mockRepository.saveObject).toHaveBeenCalledTimes(2);
+      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(1, {
+        ...mockTask,
+        status: TrellisObjectStatus.IN_PROGRESS,
+      });
+      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(2, {
+        ...mockFeature,
+        status: TrellisObjectStatus.IN_PROGRESS,
+      });
+      expect(result.content[0].text).toContain("Successfully claimed task:");
+    });
+
+    it("should update full hierarchy (feature → epic → project) when claiming task", async () => {
+      const mockProject = createMockProject({
+        status: TrellisObjectStatus.OPEN,
+      });
+      const mockEpic = createMockEpic({ status: TrellisObjectStatus.OPEN });
+      const mockFeature = createMockFeature({
+        status: TrellisObjectStatus.OPEN,
+      });
+      const mockTask = createMockTask({ parent: "F-test-feature" });
+
+      mockRepository.getObjectById
+        .mockResolvedValueOnce(mockTask) // Task
+        .mockResolvedValueOnce(mockFeature) // Feature
+        .mockResolvedValueOnce(mockEpic) // Epic
+        .mockResolvedValueOnce(mockProject); // Project
+      mockRepository.saveObject.mockResolvedValue();
+
+      const result = await handleClaimTask(mockRepository, {
+        taskId: "T-test-task",
+      });
+
+      expect(mockRepository.saveObject).toHaveBeenCalledTimes(4);
+      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(1, {
+        ...mockTask,
+        status: TrellisObjectStatus.IN_PROGRESS,
+      });
+      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(2, {
+        ...mockFeature,
+        status: TrellisObjectStatus.IN_PROGRESS,
+      });
+      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(3, {
+        ...mockEpic,
+        status: TrellisObjectStatus.IN_PROGRESS,
+      });
+      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(4, {
+        ...mockProject,
+        status: TrellisObjectStatus.IN_PROGRESS,
+      });
+      expect(result.content[0].text).toContain("Successfully claimed task:");
+    });
+
+    it("should stop updating hierarchy when parent is already in-progress", async () => {
+      const mockEpic = createMockEpic({
+        status: TrellisObjectStatus.IN_PROGRESS,
+      });
+      const mockFeature = createMockFeature({
+        status: TrellisObjectStatus.OPEN,
+      });
+      const mockTask = createMockTask({ parent: "F-test-feature" });
+
+      mockRepository.getObjectById
+        .mockResolvedValueOnce(mockTask) // Task
+        .mockResolvedValueOnce(mockFeature) // Feature
+        .mockResolvedValueOnce(mockEpic); // Epic (already in progress)
+      mockRepository.saveObject.mockResolvedValue();
+
+      const result = await handleClaimTask(mockRepository, {
+        taskId: "T-test-task",
+      });
+
+      expect(mockRepository.saveObject).toHaveBeenCalledTimes(2);
+      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(1, {
+        ...mockTask,
+        status: TrellisObjectStatus.IN_PROGRESS,
+      });
+      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(2, {
+        ...mockFeature,
+        status: TrellisObjectStatus.IN_PROGRESS,
+      });
+      // Should not save the epic since it's already in progress
+      expect(result.content[0].text).toContain("Successfully claimed task:");
+    });
+
+    it("should handle task with no parent gracefully", async () => {
+      const mockTask = createMockTask({ parent: undefined });
+
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      const result = await handleClaimTask(mockRepository, {
+        taskId: "T-test-task",
+      });
+
+      expect(mockRepository.saveObject).toHaveBeenCalledTimes(1);
+      expect(mockRepository.saveObject).toHaveBeenCalledWith({
+        ...mockTask,
+        status: TrellisObjectStatus.IN_PROGRESS,
+      });
+      expect(result.content[0].text).toContain("Successfully claimed task:");
+    });
+
+    it("should handle non-existent parent gracefully", async () => {
+      const mockTask = createMockTask({ parent: "F-nonexistent" });
+
+      mockRepository.getObjectById
+        .mockResolvedValueOnce(mockTask) // Task exists
+        .mockResolvedValueOnce(null); // Parent doesn't exist
+      mockRepository.saveObject.mockResolvedValue();
+
+      const result = await handleClaimTask(mockRepository, {
+        taskId: "T-test-task",
+      });
+
+      expect(mockRepository.saveObject).toHaveBeenCalledTimes(1);
+      expect(mockRepository.saveObject).toHaveBeenCalledWith({
+        ...mockTask,
+        status: TrellisObjectStatus.IN_PROGRESS,
+      });
+      expect(result.content[0].text).toContain("Successfully claimed task:");
+    });
+
+    it("should handle parent hierarchy update errors without failing task claim", async () => {
+      const mockTask = createMockTask({ parent: "F-test-feature" });
+
+      mockRepository.getObjectById
+        .mockResolvedValueOnce(mockTask) // Task lookup succeeds
+        .mockRejectedValueOnce(new Error("Parent lookup failed")); // Parent lookup fails
+      mockRepository.saveObject.mockResolvedValue();
+
+      const result = await handleClaimTask(mockRepository, {
+        taskId: "T-test-task",
+      });
+
+      expect(mockRepository.saveObject).toHaveBeenCalledTimes(1);
+      expect(result.content[0].text).toContain("Successfully claimed task:");
+    });
+
+    it("should update parents even when using force flag", async () => {
+      const mockFeature = createMockFeature({
+        status: TrellisObjectStatus.OPEN,
+      });
+      const mockTask = createMockTask({
+        parent: "F-test-feature",
+        status: TrellisObjectStatus.IN_PROGRESS, // Already in progress
+      });
+
+      mockRepository.getObjectById
+        .mockResolvedValueOnce(mockTask)
+        .mockResolvedValueOnce(mockFeature);
+      mockRepository.saveObject.mockResolvedValue();
+
+      const result = await handleClaimTask(mockRepository, {
+        taskId: "T-test-task",
+        force: true,
+      });
+
+      expect(mockRepository.saveObject).toHaveBeenCalledTimes(2);
+      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(2, {
+        ...mockFeature,
+        status: TrellisObjectStatus.IN_PROGRESS,
+      });
+      expect(result.content[0].text).toContain("Successfully claimed task:");
     });
   });
 });
