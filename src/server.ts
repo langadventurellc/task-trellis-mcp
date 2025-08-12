@@ -11,6 +11,8 @@ import fs from "fs";
 import path from "path";
 import { ServerConfig } from "./configuration";
 import { LocalRepository, Repository } from "./repositories";
+import { TaskTrellisService } from "./services/TaskTrellisService";
+import { LocalTaskTrellisService } from "./services/local/LocalTaskTrellisService";
 import {
   activateTool,
   appendObjectLogTool,
@@ -91,6 +93,14 @@ function getRepository(): Repository {
     return new LocalRepository(serverConfig);
   } else {
     throw new Error("Remote repository not yet implemented");
+  }
+}
+
+function _getService(): TaskTrellisService {
+  if (serverConfig.mode === "local") {
+    return new LocalTaskTrellisService();
+  } else {
+    throw new Error("Remote task service not yet implemented");
   }
 }
 
