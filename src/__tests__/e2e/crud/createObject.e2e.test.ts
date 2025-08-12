@@ -121,18 +121,24 @@ describe("E2E CRUD - createObject", () => {
       expect(file.body).toBe("Epic description");
     });
 
-    it("should reject epic without parent", async () => {
-      try {
-        await client.callTool("create_object", {
-          type: "epic",
-          title: "Orphan Epic",
-        });
-        fail("Expected error to be thrown");
-      } catch (error: any) {
-        expect(error.message).toContain(
-          "Epics must have a project as a parent",
-        );
-      }
+    it("should create standalone epic", async () => {
+      const result = await client.callTool("create_object", {
+        type: "epic",
+        title: "Standalone Epic",
+        priority: "high",
+        description: "Epic without parent project",
+      });
+
+      expect(result.content[0].text).toContain("E-standalone-epic");
+
+      const file = await readObjectFile(
+        testEnv.projectRoot,
+        "e/E-standalone-epic/E-standalone-epic.md",
+      );
+      expect(file.yaml.id).toBe("E-standalone-epic");
+      expect(file.yaml.parent).toBeUndefined();
+      expect(file.yaml.priority).toBe("high");
+      expect(file.body).toBe("Epic without parent project");
     });
 
     it("should reject epic with non-project parent", async () => {
@@ -232,6 +238,87 @@ describe("E2E CRUD - createObject", () => {
           "Features can only have an epic as a parent",
         );
       }
+    });
+  });
+
+  describe("Standalone Epic Hierarchy", () => {
+    it("should create epic → feature → task hierarchy in e/ folder", async () => {
+      // Create standalone epic
+      const epicResult = await client.callTool("create_object", {
+        type: "epic",
+        title: "Standalone Epic for Hierarchy",
+        description: "Testing epic without project parent",
+      });
+      const epicId = epicResult.content[0].text.match(/ID: (E-[a-z-]+)/)![1];
+
+      // Create feature under standalone epic
+      const featureResult = await client.callTool("create_object", {
+        type: "feature",
+        title: "Feature Under Standalone Epic",
+        parent: epicId,
+        status: "in-progress",
+      });
+      const featureId =
+        featureResult.content[0].text.match(/ID: (F-[a-z-]+)/)![1];
+
+      // Create task under feature
+      const taskResult = await client.callTool("create_object", {
+        type: "task",
+        title: "Task in Epic Hierarchy",
+        parent: featureId,
+        status: "open",
+        priority: "high",
+        prerequisites: [epicId],
+        description: "Task under feature under standalone epic",
+      });
+      const taskId = taskResult.content[0].text.match(/ID: (T-[a-z-]+)/)![1];
+
+      // Verify epic file in e/ directory
+      expect(
+        await fileExists(testEnv.projectRoot, `e/${epicId}/${epicId}.md`),
+      ).toBe(true);
+
+      // Verify feature file under epic
+      expect(
+        await fileExists(
+          testEnv.projectRoot,
+          `e/${epicId}/f/${featureId}/${featureId}.md`,
+        ),
+      ).toBe(true);
+
+      // Verify task file under feature
+      expect(
+        await fileExists(
+          testEnv.projectRoot,
+          `e/${epicId}/f/${featureId}/t/open/${taskId}.md`,
+        ),
+      ).toBe(true);
+
+      // Verify epic content
+      const epicFile = await readObjectFile(
+        testEnv.projectRoot,
+        `e/${epicId}/${epicId}.md`,
+      );
+      expect(epicFile.yaml.parent).toBeUndefined();
+      expect(epicFile.body).toBe("Testing epic without project parent");
+
+      // Verify feature content
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        `e/${epicId}/f/${featureId}/${featureId}.md`,
+      );
+      expect(featureFile.yaml.parent).toBe(epicId);
+      expect(featureFile.yaml.status).toBe("in-progress");
+
+      // Verify task content
+      const taskFile = await readObjectFile(
+        testEnv.projectRoot,
+        `e/${epicId}/f/${featureId}/t/open/${taskId}.md`,
+      );
+      expect(taskFile.yaml.parent).toBe(featureId);
+      expect(taskFile.yaml.prerequisites).toEqual([epicId]);
+      expect(taskFile.yaml.priority).toBe("high");
+      expect(taskFile.body).toBe("Task under feature under standalone epic");
     });
   });
 

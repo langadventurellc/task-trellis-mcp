@@ -6,7 +6,7 @@ import { inferObjectType } from "../utils/inferObjectType.js";
  *
  * Business rules:
  * - Projects cannot have parents
- * - Epics must have a project as a parent
+ * - Epics can either have a project as a parent or have no parent
  * - Features can either have an epic as a parent or have no parent
  * - Tasks can have a feature as a parent or have no parent
  *
@@ -19,10 +19,7 @@ export function validateParentType(
   parentId: string | null | undefined,
 ): void {
   if (!parentId) {
-    // No parent - only allowed for projects, features, and tasks
-    if (objectType === TrellisObjectType.EPIC) {
-      throw new Error("Epics must have a project as a parent");
-    }
+    // No parent - allowed for projects, epics, features, and tasks
     return;
   }
 

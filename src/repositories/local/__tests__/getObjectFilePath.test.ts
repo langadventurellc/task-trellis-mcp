@@ -78,11 +78,13 @@ describe("getObjectFilePath", () => {
       );
     });
 
-    it("should throw error for epic without parent", async () => {
+    it("should return correct path for standalone epic", async () => {
       const epic = createMockObject("E-test-epic", TrellisObjectType.EPIC);
 
-      await expect(getObjectFilePath(epic, testPlanningRoot)).rejects.toThrow(
-        "Epic E-test-epic must have a parent project",
+      const result = await getObjectFilePath(epic, testPlanningRoot);
+
+      expect(result).toBe(
+        join(testPlanningRoot, "e", "E-test-epic", "E-test-epic.md"),
       );
     });
   });
@@ -135,7 +137,7 @@ describe("getObjectFilePath", () => {
       );
     });
 
-    it("should throw error when epic parent has no project", async () => {
+    it("should return correct path for feature under standalone epic", async () => {
       const feature = createMockObject(
         "F-test-feature",
         TrellisObjectType.FEATURE,
@@ -145,9 +147,18 @@ describe("getObjectFilePath", () => {
 
       mockGetObjectById.mockResolvedValueOnce(mockEpic);
 
-      await expect(
-        getObjectFilePath(feature, testPlanningRoot),
-      ).rejects.toThrow("Epic E-test-epic must have a parent project");
+      const result = await getObjectFilePath(feature, testPlanningRoot);
+
+      expect(result).toBe(
+        join(
+          testPlanningRoot,
+          "e",
+          "E-test-epic",
+          "f",
+          "F-test-feature",
+          "F-test-feature.md",
+        ),
+      );
     });
 
     it("should throw error when feature parent is not epic", async () => {
@@ -325,7 +336,7 @@ describe("getObjectFilePath", () => {
       );
     });
 
-    it("should throw error when epic has no parent project", async () => {
+    it("should return correct path for task under feature under standalone epic", async () => {
       const task = createMockObject(
         "T-test-task",
         TrellisObjectType.TASK,
@@ -341,8 +352,19 @@ describe("getObjectFilePath", () => {
       mockGetObjectById.mockResolvedValueOnce(mockFeature);
       mockGetObjectById.mockResolvedValueOnce(mockEpic);
 
-      await expect(getObjectFilePath(task, testPlanningRoot)).rejects.toThrow(
-        "Epic E-test-epic must have a parent project",
+      const result = await getObjectFilePath(task, testPlanningRoot);
+
+      expect(result).toBe(
+        join(
+          testPlanningRoot,
+          "e",
+          "E-test-epic",
+          "f",
+          "F-test-feature",
+          "t",
+          "open",
+          "T-test-task.md",
+        ),
       );
     });
   });

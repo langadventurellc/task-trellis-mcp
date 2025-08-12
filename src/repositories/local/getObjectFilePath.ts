@@ -20,7 +20,8 @@ export async function getObjectFilePath(
 
     case TrellisObjectType.EPIC:
       if (!parent) {
-        throw new Error(`Epic ${id} must have a parent project`);
+        // Epic without parent - standalone epic
+        return join(planningRoot, "e", id, `${id}.md`);
       }
       return join(planningRoot, "p", parent, "e", id, `${id}.md`);
 
@@ -38,10 +39,12 @@ export async function getObjectFilePath(
       }
 
       if (parentObject.type === TrellisObjectType.EPIC) {
-        // Feature under epic - need to get the project ID from the epic
+        // Feature under epic
         if (!parentObject.parent) {
-          throw new Error(`Epic ${parent} must have a parent project`);
+          // Epic has no parent - standalone epic
+          return join(planningRoot, "e", parent, "f", id, `${id}.md`);
         }
+        // Epic has parent project
         return join(
           planningRoot,
           "p",
@@ -110,7 +113,17 @@ async function getTaskFilePath(
     }
 
     if (!epicObject.parent) {
-      throw new Error(`Epic ${epicObject.id} must have a parent project`);
+      // Epic has no parent - standalone epic
+      return join(
+        planningRoot,
+        "e",
+        epicObject.id,
+        "f",
+        parent,
+        "t",
+        statusFolder,
+        `${id}.md`,
+      );
     }
 
     // Task under feature under epic under project

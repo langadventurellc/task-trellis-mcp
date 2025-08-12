@@ -16,13 +16,15 @@ Use this tool to create new objects such as tasks, projects, or other work items
 
 Available object types and hierarchy requirements:
 - 'project': Top-level containers, cannot have a parent
-- 'epic': Must have a project as a parent
+- 'epic': Can have no parent or a project as a parent
 - 'feature': Can have no parent or an epic as a parent
 - 'task': Can have no parent or a feature as a parent
 
 Supported hierarchy structures:
 - Full hierarchy: project → epic → feature → task
+- Simplified: epic → feature → task
 - Simplified: feature → task  
+- Standalone: epic
 - Standalone: task
 
 Available status values:
