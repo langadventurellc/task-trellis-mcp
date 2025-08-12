@@ -219,6 +219,298 @@ describe("E2E CRUD - listObjects", () => {
     });
   });
 
+  describe("includeClosed Flag with Different Object Types", () => {
+    beforeEach(async () => {
+      // Create projects with different statuses
+      const projectStatuses: Array<{
+        status: string;
+        folder: "open" | "closed";
+      }> = [
+        { status: "open", folder: "open" },
+        { status: "done", folder: "closed" },
+        { status: "wont-do", folder: "closed" },
+      ];
+
+      for (const config of projectStatuses) {
+        await createObjectFile(
+          testEnv.projectRoot,
+          "project",
+          `P-${config.status}-project`,
+          createObjectContent({
+            id: `P-${config.status}-project`,
+            title: `${config.status} Project`,
+            status: config.status,
+          }),
+        );
+      }
+
+      // Create a project first for epics to belong to
+      await createObjectFile(
+        testEnv.projectRoot,
+        "project",
+        "P-epic-container",
+        createObjectContent({
+          id: "P-epic-container",
+          title: "Epic Container Project",
+          status: "open",
+        }),
+      );
+
+      // Create epics with different statuses within the project
+      const epicStatuses: Array<{
+        status: string;
+        folder: "open" | "closed";
+      }> = [
+        { status: "open", folder: "open" },
+        { status: "in-progress", folder: "open" },
+        { status: "done", folder: "closed" },
+        { status: "wont-do", folder: "closed" },
+      ];
+
+      for (const config of epicStatuses) {
+        await createObjectFile(
+          testEnv.projectRoot,
+          "epic",
+          `E-${config.status}-epic`,
+          createObjectContent({
+            id: `E-${config.status}-epic`,
+            title: `${config.status} Epic`,
+            status: config.status,
+            parent: "P-epic-container",
+          }),
+          { projectId: "P-epic-container" },
+        );
+      }
+
+      // Create features with different statuses
+      const featureStatuses: Array<{
+        status: string;
+        folder: "open" | "closed";
+      }> = [
+        { status: "draft", folder: "open" },
+        { status: "open", folder: "open" },
+        { status: "done", folder: "closed" },
+        { status: "wont-do", folder: "closed" },
+      ];
+
+      for (const config of featureStatuses) {
+        await createObjectFile(
+          testEnv.projectRoot,
+          "feature",
+          `F-${config.status}-feature`,
+          createObjectContent({
+            id: `F-${config.status}-feature`,
+            title: `${config.status} Feature`,
+            status: config.status,
+          }),
+        );
+      }
+
+      // Create tasks with different statuses (already covered in other tests, but adding for completeness)
+      const taskStatuses: Array<{
+        status: string;
+        folder: "open" | "closed";
+      }> = [
+        { status: "draft", folder: "open" },
+        { status: "open", folder: "open" },
+        { status: "in-progress", folder: "open" },
+        { status: "done", folder: "closed" },
+        { status: "wont-do", folder: "closed" },
+      ];
+
+      for (const config of taskStatuses) {
+        await createObjectFile(
+          testEnv.projectRoot,
+          "task",
+          `T-${config.status}-includeclosed`,
+          createObjectContent({
+            id: `T-${config.status}-includeclosed`,
+            title: `${config.status} Task`,
+            status: config.status,
+          }),
+          { status: config.folder },
+        );
+      }
+    });
+
+    it("should exclude closed projects by default", async () => {
+      const result = await client.callTool("list_objects", {
+        type: "project",
+      });
+
+      const objects = parseListObjectsResponse(
+        result.content[0].text as string,
+      );
+      // Filter to only the objects we created in this test (excluding the epic container)
+      const testObjects = objects.filter(
+        (id) => id.includes("-project") && !id.includes("epic-container"),
+      );
+      expect(testObjects).toHaveLength(1);
+      expect(testObjects).toContain("P-open-project");
+      expect(testObjects).not.toContain("P-done-project");
+      expect(testObjects).not.toContain("P-wont-do-project");
+    });
+
+    it("should include closed projects when includeClosed=true", async () => {
+      const result = await client.callTool("list_objects", {
+        type: "project",
+        includeClosed: true,
+      });
+
+      const objects = parseListObjectsResponse(
+        result.content[0].text as string,
+      );
+      // Filter to only the objects we created in this test (excluding the epic container)
+      const testObjects = objects.filter(
+        (id) => id.includes("-project") && !id.includes("epic-container"),
+      );
+      expect(testObjects).toHaveLength(3);
+      expect(testObjects).toContain("P-open-project");
+      expect(testObjects).toContain("P-done-project");
+      expect(testObjects).toContain("P-wont-do-project");
+    });
+
+    it("should exclude closed epics by default", async () => {
+      const result = await client.callTool("list_objects", {
+        type: "epic",
+      });
+
+      const objects = parseListObjectsResponse(
+        result.content[0].text as string,
+      );
+      expect(objects).toHaveLength(2);
+      expect(objects).toContain("E-open-epic");
+      expect(objects).toContain("E-in-progress-epic");
+      expect(objects).not.toContain("E-done-epic");
+      expect(objects).not.toContain("E-wont-do-epic");
+    });
+
+    it("should include closed epics when includeClosed=true", async () => {
+      const result = await client.callTool("list_objects", {
+        type: "epic",
+        includeClosed: true,
+      });
+
+      const objects = parseListObjectsResponse(
+        result.content[0].text as string,
+      );
+      expect(objects).toHaveLength(4);
+      expect(objects).toContain("E-open-epic");
+      expect(objects).toContain("E-in-progress-epic");
+      expect(objects).toContain("E-done-epic");
+      expect(objects).toContain("E-wont-do-epic");
+    });
+
+    it("should exclude closed features by default", async () => {
+      const result = await client.callTool("list_objects", {
+        type: "feature",
+      });
+
+      const objects = parseListObjectsResponse(
+        result.content[0].text as string,
+      );
+      expect(objects).toHaveLength(2);
+      expect(objects).toContain("F-draft-feature");
+      expect(objects).toContain("F-open-feature");
+      expect(objects).not.toContain("F-done-feature");
+      expect(objects).not.toContain("F-wont-do-feature");
+    });
+
+    it("should include closed features when includeClosed=true", async () => {
+      const result = await client.callTool("list_objects", {
+        type: "feature",
+        includeClosed: true,
+      });
+
+      const objects = parseListObjectsResponse(
+        result.content[0].text as string,
+      );
+      expect(objects).toHaveLength(4);
+      expect(objects).toContain("F-draft-feature");
+      expect(objects).toContain("F-open-feature");
+      expect(objects).toContain("F-done-feature");
+      expect(objects).toContain("F-wont-do-feature");
+    });
+
+    it("should exclude closed tasks by default", async () => {
+      const result = await client.callTool("list_objects", {
+        type: "task",
+      });
+
+      const objects = parseListObjectsResponse(
+        result.content[0].text as string,
+      );
+      // Filter to only the objects we created in this test
+      const testObjects = objects.filter((id) => id.includes("includeclosed"));
+      expect(testObjects).toHaveLength(3);
+      expect(testObjects).toContain("T-draft-includeclosed");
+      expect(testObjects).toContain("T-open-includeclosed");
+      expect(testObjects).toContain("T-in-progress-includeclosed");
+      expect(testObjects).not.toContain("T-done-includeclosed");
+      expect(testObjects).not.toContain("T-wont-do-includeclosed");
+    });
+
+    it("should include closed tasks when includeClosed=true", async () => {
+      const result = await client.callTool("list_objects", {
+        type: "task",
+        includeClosed: true,
+      });
+
+      const objects = parseListObjectsResponse(
+        result.content[0].text as string,
+      );
+      // Filter to only the objects we created in this test
+      const testObjects = objects.filter((id) => id.includes("includeclosed"));
+      expect(testObjects).toHaveLength(5);
+      expect(testObjects).toContain("T-draft-includeclosed");
+      expect(testObjects).toContain("T-open-includeclosed");
+      expect(testObjects).toContain("T-in-progress-includeclosed");
+      expect(testObjects).toContain("T-done-includeclosed");
+      expect(testObjects).toContain("T-wont-do-includeclosed");
+    });
+
+    it("should work with includeClosed and status filters for projects", async () => {
+      const result = await client.callTool("list_objects", {
+        type: "project",
+        status: "done",
+        includeClosed: true,
+      });
+
+      const objects = parseListObjectsResponse(
+        result.content[0].text as string,
+      );
+      expect(objects).toHaveLength(1);
+      expect(objects).toContain("P-done-project");
+    });
+
+    it("should work with includeClosed and status filters for epics", async () => {
+      const result = await client.callTool("list_objects", {
+        type: "epic",
+        status: "wont-do",
+        includeClosed: true,
+      });
+
+      const objects = parseListObjectsResponse(
+        result.content[0].text as string,
+      );
+      expect(objects).toHaveLength(1);
+      expect(objects).toContain("E-wont-do-epic");
+    });
+
+    it("should return empty array when status filter requires closed objects but includeClosed=false", async () => {
+      const result = await client.callTool("list_objects", {
+        type: "feature",
+        status: "done",
+        includeClosed: false,
+      });
+
+      const objects = parseListObjectsResponse(
+        result.content[0].text as string,
+      );
+      expect(objects).toEqual([]);
+    });
+  });
+
   describe("Priority Filtering", () => {
     beforeEach(async () => {
       const priorities = ["high", "medium", "low"];
