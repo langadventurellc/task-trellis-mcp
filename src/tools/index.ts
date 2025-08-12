@@ -15,3 +15,7 @@ export {
   replaceObjectBodyRegexTool,
   handleReplaceObjectBodyRegex,
 } from "./replaceObjectBodyRegexTool.js";
+export {
+  appendModifiedFilesTool,
+  handleAppendModifiedFiles,
+} from "./appendModifiedFilesTool.js";

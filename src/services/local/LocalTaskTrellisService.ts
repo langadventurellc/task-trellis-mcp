@@ -132,4 +132,13 @@ export class LocalTaskTrellisService implements TaskTrellisService {
       allowMultipleOccurrences,
     );
   }
+
+  async appendModifiedFiles(
+    repository: Repository,
+    id: string,
+    filesChanged: Record<string, string>,
+  ): Promise<{ content: Array<{ type: string; text: string }> }> {
+    const { appendModifiedFiles } = await import("./appendModifiedFiles");
+    return appendModifiedFiles(repository, id, filesChanged);
+  }
 }

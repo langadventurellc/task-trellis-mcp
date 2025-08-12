@@ -95,4 +95,13 @@ export interface TaskTrellisService {
     replacement: string,
     allowMultipleOccurrences?: boolean,
   ): Promise<{ content: Array<{ type: string; text: string }> }>;
+
+  /**
+   * Appends modified files information to a trellis object
+   */
+  appendModifiedFiles(
+    repository: Repository,
+    id: string,
+    filesChanged: Record<string, string>,
+  ): Promise<{ content: Array<{ type: string; text: string }> }>;
 }

@@ -15,12 +15,14 @@ import { TaskTrellisService } from "./services/TaskTrellisService";
 import { LocalTaskTrellisService } from "./services/local/LocalTaskTrellisService";
 import {
   activateTool,
+  appendModifiedFilesTool,
   appendObjectLogTool,
   claimTaskTool,
   completeTaskTool,
   createObjectTool,
   deleteObjectTool,
   getObjectTool,
+  handleAppendModifiedFiles,
   handleAppendObjectLog,
   handleClaimTask,
   handleCompleteTask,
@@ -142,6 +144,7 @@ server.setRequestHandler(ListToolsRequestSchema, () => {
     deleteObjectTool,
     listObjectsTool,
     appendObjectLogTool,
+    appendModifiedFilesTool,
     claimTaskTool,
     completeTaskTool,
     pruneClosedTool,
@@ -227,6 +230,8 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
       return handleListObjects(_getService(), repository, args);
     case "append_object_log":
       return handleAppendObjectLog(_getService(), repository, args);
+    case "append_modified_files":
+      return handleAppendModifiedFiles(_getService(), repository, args);
     case "claim_task":
       return handleClaimTask(_getService(), repository, args);
     case "complete_task":

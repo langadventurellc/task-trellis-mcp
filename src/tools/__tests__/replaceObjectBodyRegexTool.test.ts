@@ -16,6 +16,7 @@ describe("replaceObjectBodyRegexTool", () => {
       appendObjectLog: jest.fn(),
       pruneClosed: jest.fn(),
       replaceObjectBodyRegex: jest.fn(),
+      appendModifiedFiles: jest.fn(),
     };
 
     mockRepository = {
