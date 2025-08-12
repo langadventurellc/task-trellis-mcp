@@ -30,6 +30,16 @@ The pruneClosedTool currently uses Repository directly. Need to refactor it to u
 
 3. **Migrate and update tests**:
    - **Move business logic tests**: Extract detailed pruning logic tests from `src/tools/__tests__/pruneClosedTool.test.ts` and move them to `src/services/local/__tests__/LocalTaskTrellisService.test.ts`
+   - **Create dedicated service function tests**: Create `src/services/local/__tests__/pruneClosed.test.ts` with comprehensive test coverage for the `pruneClosed` function, including:
+     - Normal pruning scenarios with various age thresholds
+     - Scope-based filtering during pruning
+     - Closed object identification and removal
+     - Dependency checking before removal
+     - Error handling (invalid age, repository errors, etc.)
+     - Edge cases (no objects to prune, all objects recently closed, etc.)
+     - File system cleanup operations
+     - Safety mechanisms and validation
+     - All business logic scenarios
    - **Update tool tests**: Refactor `src/tools/__tests__/pruneClosedTool.test.ts` to:
      - Mock TaskTrellisService instead of Repository
      - Test only that service.pruneClosed is called with correct parameters
@@ -42,6 +52,7 @@ The pruneClosedTool currently uses Repository directly. Need to refactor it to u
 - [ ] Function delegates to service.pruneClosed with all parameters
 - [ ] server.ts integration updated
 - [ ] Business logic tests moved from tool tests to service tests
+- [ ] Dedicated `src/services/local/__tests__/pruneClosed.test.ts` created with comprehensive coverage
 - [ ] Tool tests updated to mock service and verify integration only
 - [ ] Service tests cover all pruning logic scenarios
 - [ ] TypeScript compilation passes

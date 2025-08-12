@@ -30,6 +30,14 @@ The completeTaskTool currently uses Repository directly. Need to refactor it to 
 
 3. **Migrate and update tests**:
    - **Move business logic tests**: Extract detailed completion logic tests from `src/tools/__tests__/completeTaskTool.test.ts` and move them to `src/services/local/__tests__/LocalTaskTrellisService.test.ts`
+   - **Create dedicated service function tests**: Create `src/services/local/__tests__/completeTask.test.ts` with comprehensive test coverage for the `completeTask` function, including:
+     - Normal task completion scenarios
+     - File change tracking
+     - Status validation
+     - Error handling (object not found, invalid status, etc.)
+     - Task hierarchy updates
+     - Auto-completion of parent tasks
+     - All edge cases and business logic
    - **Update tool tests**: Refactor `src/tools/__tests__/completeTaskTool.test.ts` to:
      - Mock TaskTrellisService instead of Repository
      - Test only that service.completeTask is called with correct parameters
@@ -42,6 +50,7 @@ The completeTaskTool currently uses Repository directly. Need to refactor it to 
 - [ ] Function delegates to service.completeTask with all parameters
 - [ ] server.ts integration updated
 - [ ] Business logic tests moved from tool tests to service tests
+- [ ] Dedicated `src/services/local/__tests__/completeTask.test.ts` created with comprehensive coverage
 - [ ] Tool tests updated to mock service and verify integration only
 - [ ] Service tests cover all completion logic scenarios
 - [ ] TypeScript compilation passes

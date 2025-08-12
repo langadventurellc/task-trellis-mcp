@@ -30,6 +30,16 @@ The replaceObjectBodyRegexTool currently uses Repository directly. Need to refac
 
 3. **Migrate and update tests**:
    - **Move business logic tests**: Extract detailed regex replacement logic tests from `src/tools/__tests__/replaceObjectBodyRegexTool.test.ts` and move them to `src/services/local/__tests__/LocalTaskTrellisService.test.ts`
+   - **Create dedicated service function tests**: Create `src/services/local/__tests__/replaceObjectBodyRegex.test.ts` with comprehensive test coverage for the `replaceObjectBodyRegex` function, including:
+     - Normal regex replacement scenarios
+     - Single vs multiple occurrence handling
+     - allowMultipleOccurrences parameter behavior
+     - Complex regex patterns and edge cases
+     - Error handling (object not found, invalid regex, etc.)
+     - Empty string and null value handling
+     - Large text body performance
+     - Regex match validation and safety
+     - All business logic scenarios
    - **Update tool tests**: Refactor `src/tools/__tests__/replaceObjectBodyRegexTool.test.ts` to:
      - Mock TaskTrellisService instead of Repository
      - Test only that service.replaceObjectBodyRegex is called with correct parameters
@@ -42,6 +52,7 @@ The replaceObjectBodyRegexTool currently uses Repository directly. Need to refac
 - [ ] Function delegates to service.replaceObjectBodyRegex with all parameters
 - [ ] server.ts integration updated
 - [ ] Business logic tests moved from tool tests to service tests
+- [ ] Dedicated `src/services/local/__tests__/replaceObjectBodyRegex.test.ts` created with comprehensive coverage
 - [ ] Tool tests updated to mock service and verify integration only
 - [ ] Service tests cover all regex replacement scenarios
 - [ ] TypeScript compilation passes

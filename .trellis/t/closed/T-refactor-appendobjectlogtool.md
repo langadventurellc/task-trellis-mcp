@@ -1,11 +1,27 @@
 ---
 id: T-refactor-appendobjectlogtool
 title: Refactor appendObjectLogTool to use TaskTrellisService
-status: open
+status: done
 priority: medium
 prerequisites: []
-affectedFiles: {}
-log: []
+affectedFiles:
+  src/tools/appendObjectLogTool.ts: Updated handleAppendObjectLog function
+    signature to accept TaskTrellisService as first parameter and delegate to
+    service.appendObjectLog method, added TaskTrellisService import
+  src/server.ts: Modified appendObjectLog case to pass _getService() as first
+    parameter to handleAppendObjectLog function
+  src/tools/__tests__/appendObjectLogTool.test.ts:
+    Completely refactored tests to
+    mock TaskTrellisService instead of Repository, focus on testing service
+    integration and argument parsing rather than business logic
+log:
+  - Successfully refactored appendObjectLogTool to use TaskTrellisService
+    instead of Repository directly. Updated function signature to accept
+    TaskTrellisService as first parameter and delegate to
+    service.appendObjectLog method. Updated server.ts integration to pass
+    service instance. Migrated tool tests to focus on service integration
+    testing rather than business logic testing, using proper mocking of
+    TaskTrellisService. All quality checks pass and 478 tests pass successfully.
 schema: v1.0
 childrenIds: []
 created: 2025-08-12T16:50:52.617Z

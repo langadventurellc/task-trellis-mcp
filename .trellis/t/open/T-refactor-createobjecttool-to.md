@@ -31,6 +31,15 @@ The createObjectTool currently uses Repository directly. Need to refactor it to 
 
 3. **Migrate and update tests**:
    - **Move business logic tests**: Extract detailed business logic tests from `src/tools/__tests__/createObjectTool.test.ts` and move them to `src/services/local/__tests__/LocalTaskTrellisService.test.ts`
+   - **Create dedicated service function tests**: Create `src/services/local/__tests__/createObject.test.ts` with comprehensive test coverage for the `createObject` function, including:
+     - Normal object creation scenarios for all types (project, epic, feature, task)
+     - Parent-child hierarchy validation
+     - Prerequisites handling
+     - Status and priority validation
+     - Error handling (validation errors, parent not found, etc.)
+     - Unique ID generation
+     - File system operations
+     - All edge cases and business logic
    - **Update tool tests**: Refactor `src/tools/__tests__/createObjectTool.test.ts` to:
      - Mock TaskTrellisService instead of Repository methods
      - Test only that handleCreateObject calls service.createObject with correct parameters
@@ -43,6 +52,7 @@ The createObjectTool currently uses Repository directly. Need to refactor it to 
 - [ ] Function delegates to service.createObject with proper parameters
 - [ ] server.ts passes service to handleCreateObject
 - [ ] Business logic tests moved from tool tests to service tests
+- [ ] Dedicated `src/services/local/__tests__/createObject.test.ts` created with comprehensive coverage
 - [ ] Tool tests updated to mock service and verify correct service method calls
 - [ ] Service tests cover all object creation scenarios
 - [ ] All existing functionality preserved

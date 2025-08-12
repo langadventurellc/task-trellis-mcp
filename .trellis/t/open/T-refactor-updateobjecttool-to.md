@@ -30,6 +30,17 @@ The updateObjectTool currently uses Repository directly. Need to refactor it to 
 
 3. **Migrate and update tests**:
    - **Move business logic tests**: Extract detailed update logic tests from `src/tools/__tests__/updateObjectTool.test.ts` and move them to `src/services/local/__tests__/LocalTaskTrellisService.test.ts`
+   - **Create dedicated service function tests**: Create `src/services/local/__tests__/updateObject.test.ts` with comprehensive test coverage for the `updateObject` function, including:
+     - Normal update scenarios for all object types
+     - Priority updates (high, medium, low)
+     - Prerequisites array updates (add, remove, clear)
+     - Body content updates
+     - Status transitions and validation
+     - Force parameter behavior
+     - Error handling (object not found, invalid transitions, etc.)
+     - Validation of status transition rules
+     - Prerequisite dependency checking
+     - Edge cases and business logic
    - **Update tool tests**: Refactor `src/tools/__tests__/updateObjectTool.test.ts` to:
      - Mock TaskTrellisService instead of Repository
      - Test only that service.updateObject is called with correct parameters
@@ -42,6 +53,7 @@ The updateObjectTool currently uses Repository directly. Need to refactor it to 
 - [ ] Function delegates to service.updateObject with all parameters
 - [ ] server.ts integration updated
 - [ ] Business logic tests moved from tool tests to service tests
+- [ ] Dedicated `src/services/local/__tests__/updateObject.test.ts` created with comprehensive coverage
 - [ ] Tool tests updated to mock service and verify integration only
 - [ ] Service tests cover all update logic scenarios
 - [ ] TypeScript compilation passes

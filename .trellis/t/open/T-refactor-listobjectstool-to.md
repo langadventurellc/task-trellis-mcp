@@ -30,6 +30,16 @@ The listObjectsTool currently uses Repository directly. Need to refactor it to u
 
 3. **Migrate and update tests**:
    - **Move business logic tests**: Extract detailed filtering and listing logic tests from `src/tools/__tests__/listObjectsTool.test.ts` and move them to `src/services/local/__tests__/LocalTaskTrellisService.test.ts`
+   - **Create dedicated service function tests**: Create `src/services/local/__tests__/listObjects.test.ts` with comprehensive test coverage for the `listObjects` function, including:
+     - Object type filtering (project, epic, feature, task)
+     - Scope-based filtering
+     - Status filtering (open, in-progress, done, etc.)
+     - Priority filtering (high, medium, low)
+     - includeClosed parameter handling
+     - Sorting logic
+     - Error handling (invalid parameters, repository errors, etc.)
+     - Empty result scenarios
+     - All edge cases and business logic
    - **Update tool tests**: Refactor `src/tools/__tests__/listObjectsTool.test.ts` to:
      - Mock TaskTrellisService instead of Repository
      - Test only that service.listObjects is called with correct parameters
@@ -42,6 +52,7 @@ The listObjectsTool currently uses Repository directly. Need to refactor it to u
 - [ ] Function delegates to service.listObjects with all filter parameters
 - [ ] server.ts integration updated
 - [ ] Business logic tests moved from tool tests to service tests
+- [ ] Dedicated `src/services/local/__tests__/listObjects.test.ts` created with comprehensive coverage
 - [ ] Tool tests updated to mock service and verify integration only
 - [ ] Service tests cover all filtering and listing scenarios
 - [ ] TypeScript compilation passes
