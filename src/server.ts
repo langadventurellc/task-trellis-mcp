@@ -218,7 +218,7 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
     case "update_object":
       return handleUpdateObject(repository, args);
     case "replace_object_body_regex":
-      return handleReplaceObjectBodyRegex(repository, args);
+      return handleReplaceObjectBodyRegex(_getService(), repository, args);
     case "get_object":
       return handleGetObject(repository, args);
     case "delete_object":

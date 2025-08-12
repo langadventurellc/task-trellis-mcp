@@ -1,11 +1,30 @@
 ---
 id: T-refactor-replaceobjectbodyrege
 title: Refactor replaceObjectBodyRegexTool to use TaskTrellisService
-status: open
+status: done
 priority: medium
 prerequisites: []
-affectedFiles: {}
-log: []
+affectedFiles:
+  src/tools/replaceObjectBodyRegexTool.ts: Updated handleReplaceObjectBodyRegex
+    function to accept TaskTrellisService as first parameter and delegate to
+    service.replaceObjectBodyRegex method
+  src/server.ts: Modified replaceObjectBodyRegex case to pass _getService() as
+    first parameter to handleReplaceObjectBodyRegex
+  src/services/local/__tests__/replaceObjectBodyRegex.test.ts:
+    Created comprehensive service test file with detailed coverage of regex
+    replacement logic, error handling, multiple occurrences, and edge cases
+  src/tools/__tests__/replaceObjectBodyRegexTool.test.ts:
+    Refactored tool tests to
+    mock TaskTrellisService instead of Repository, focusing on parameter parsing
+    and service integration verification
+log:
+  - Successfully refactored replaceObjectBodyRegexTool to use TaskTrellisService
+    instead of Repository directly. Updated function signature to accept
+    TaskTrellisService as first parameter and delegate all business logic to
+    service.replaceObjectBodyRegex. Migrated comprehensive business logic tests
+    from tool tests to dedicated service tests, and updated tool tests to mock
+    service integration only. All 816 tests pass, confirming functionality
+    remains intact.
 schema: v1.0
 childrenIds: []
 created: 2025-08-12T16:51:13.035Z
