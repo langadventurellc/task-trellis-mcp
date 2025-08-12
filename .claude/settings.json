@@ -20,14 +20,6 @@
             "command": "bash -c 'cd \"$(git rev-parse --show-toplevel)\" && .claude/hooks/post-edit-task.sh'"
           }
         ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash -c 'ORIG_PWD=\"$(pwd)\" && cd \"$CLAUDE_PROJECT_DIR\" && .claude/hooks/post-complete-task.sh \"$ORIG_PWD\"'"
-          }
-        ]
       }
     ]
   }
