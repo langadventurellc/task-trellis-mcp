@@ -14,7 +14,7 @@ Use this tool to modify properties of existing objects such as changing status, 
 
 Available status values:
 - 'draft': Initial state for new objects
-- 'open': Ready to begin work
+- 'open': Ready to begin work (default for new objects)
 - 'in-progress': Currently being worked on
 - 'done': Completed successfully
 - 'wont-do': Cancelled or decided against

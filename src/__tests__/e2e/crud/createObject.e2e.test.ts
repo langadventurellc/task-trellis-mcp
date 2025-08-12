@@ -46,7 +46,7 @@ describe("E2E CRUD - createObject", () => {
       );
       expect(file.yaml.id).toBe("P-test-project");
       expect(file.yaml.title).toBe("Test Project");
-      expect(file.yaml.status).toBe("draft");
+      expect(file.yaml.status).toBe("open");
       expect(file.yaml.priority).toBe("medium");
       expect(file.yaml.parent).toBeUndefined();
       expect(file.yaml.prerequisites).toEqual([]);

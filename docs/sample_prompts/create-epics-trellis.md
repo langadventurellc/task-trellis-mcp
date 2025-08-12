@@ -141,7 +141,7 @@ For each epic, call the Task Trellis MCP `create_object` tool:
 - `type`: Set to `"epic"`
 - `parent`: The project ID
 - `title`: Generated epic title
-- `status`: Set to `"open"` (ready to begin work) or `"draft"` (default) unless specified
+- `status`: Set to `"open"` (default, ready to begin work) or `"draft"` unless specified
 - `prerequisites`: List of epic IDs that must complete first
 - `description`: Comprehensive epic description with all elements from step 4
 

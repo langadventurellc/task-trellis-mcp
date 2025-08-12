@@ -26,7 +26,8 @@ Supported hierarchy structures:
 - Standalone: task
 
 Available status values:
-- 'draft': Initial state for new objects (default)
+- 'draft': Initial state for new objects
+- 'open': Ready to begin work (default)
 - 'open': Ready to begin work
 - 'in-progress': Currently being worked on
 - 'done': Completed successfully
@@ -71,8 +72,8 @@ Best practices:
       },
       status: {
         type: "string",
-        description: "Status of the object (defaults to 'draft')",
-        default: "draft",
+        description: "Status of the object (defaults to 'open')",
+        default: "open",
       },
       prerequisites: {
         type: "array",
@@ -101,7 +102,7 @@ export async function handleCreateObject(
     title,
     parent,
     priority = "medium",
-    status = "draft",
+    status = "open",
     prerequisites = [],
     description = "",
   } = args as {

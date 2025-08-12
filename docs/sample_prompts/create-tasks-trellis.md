@@ -186,7 +186,7 @@ For each task, call the Task Trellis MCP `create_object` tool:
 - `type`: Set to `"task"`
 - `parent`: The feature ID (optional - omit for standalone tasks)
 - `title`: Generated task title
-- `status`: Set to `"open"` (ready to claim) or `"draft"` (default)
+- `status`: Set to `"open"` (default, ready to claim) or `"draft"`
 - `priority`: Based on criticality and dependencies (`"high"`, `"medium"`, or `"low"`)
 - `prerequisites`: List of task IDs that must complete first
 - `description`: Comprehensive task description
