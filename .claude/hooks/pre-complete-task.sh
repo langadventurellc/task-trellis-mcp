@@ -9,7 +9,7 @@ echo "🔧 Running pre-completion checks for Trellis task..."
 cd "$(git rev-parse --show-toplevel)"
 
 echo "📝 Running quality checks..."
-if ! pnpm quality; then
+if ! npm run quality; then
     echo "❌ Quality checks failed - fix issues before completing task" >&2
     exit 2
 fi
@@ -17,7 +17,7 @@ fi
 echo "✅ Quality checks passed"
 
 echo "🧪 Running tests..."
-if ! pnpm test; then
+if ! npm run test:all; then
     echo "❌ Tests failed - fix issues before completing task" >&2
     exit 2
 fi

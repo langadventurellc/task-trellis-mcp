@@ -32,18 +32,14 @@ describe("E2E Workflow - Task Lifecycle", () => {
       const taskId =
         createResult.content[0].text.match(/ID: (T-[a-z0-9-]+)/)![1];
 
-      // Verify initial state (tasks start as draft by default)
+      // Verify initial state (tasks start as open by default)
       let file = await readObjectFile(
         testEnv.projectRoot,
         `t/open/${taskId}.md`,
       );
-      expect(file.yaml.status).toBe("draft");
+      expect(file.yaml.status).toBe("open");
 
-      // Update to open so it can be claimed
-      await client.callTool("update_object", {
-        id: taskId,
-        status: "open",
-      });
+      // Task is already open and ready to be claimed
 
       // Step 2: Claim task
       const claimResult = await client.callTool("claim_task", {

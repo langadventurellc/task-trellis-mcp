@@ -1,10 +1,6 @@
-import {
-  TrellisObject,
-  TrellisObjectPriority,
-  TrellisObjectStatus,
-} from "../models";
+import { TrellisObjectPriority, TrellisObjectStatus } from "../models";
 import { Repository } from "../repositories";
-import { validateStatusTransition } from "../validation/validateStatusTransition";
+import { TaskTrellisService } from "../services/TaskTrellisService";
 
 export const updateObjectTool = {
   name: "update_object",
@@ -14,7 +10,7 @@ Use this tool to modify properties of existing objects such as changing status, 
 
 Available status values:
 - 'draft': Initial state for new objects
-- 'open': Ready to begin work
+- 'open': Ready to begin work (default for new objects)
 - 'in-progress': Currently being worked on
 - 'done': Completed successfully
 - 'wont-do': Cancelled or decided against
@@ -80,6 +76,7 @@ Updates automatically refresh the 'updated' timestamp while preserving creation 
 } as const;
 
 export async function handleUpdateObject(
+  service: TaskTrellisService,
   repository: Repository,
   args: unknown,
 ) {
@@ -99,57 +96,13 @@ export async function handleUpdateObject(
     force?: boolean;
   };
 
-  try {
-    // Load the existing object
-    const existingObject = await repository.getObjectById(id);
-    if (!existingObject) {
-      return {
-        content: [
-          {
-            type: "text",
-            text: `Error: Object with ID '${id}' not found`,
-          },
-        ],
-      };
-    }
-
-    // Create updated object with new properties, ensuring proper typing
-    const updatedObject: TrellisObject = {
-      ...existingObject,
-      ...(priority && { priority: priority as TrellisObjectPriority }),
-      ...(prerequisites && { prerequisites }),
-      ...(body && { body }),
-      ...(status && { status: status as TrellisObjectStatus }),
-    };
-
-    // Validate status transition
-    if (status && !force) {
-      await validateStatusTransition(updatedObject, repository);
-    }
-
-    // Save the updated object
-    await repository.saveObject(updatedObject);
-
-    return {
-      content: [
-        {
-          type: "text",
-          text: `Successfully updated object: ${JSON.stringify(
-            updatedObject,
-            null,
-            2,
-          )}`,
-        },
-      ],
-    };
-  } catch (error) {
-    return {
-      content: [
-        {
-          type: "text",
-          text: `Error updating object: ${error instanceof Error ? error.message : String(error)}`,
-        },
-      ],
-    };
-  }
+  return service.updateObject(
+    repository,
+    id,
+    priority as TrellisObjectPriority,
+    prerequisites,
+    body,
+    status as TrellisObjectStatus,
+    force,
+  );
 }

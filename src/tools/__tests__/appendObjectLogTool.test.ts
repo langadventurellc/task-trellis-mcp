@@ -1,182 +1,83 @@
-import {
-  TrellisObject,
-  TrellisObjectPriority,
-  TrellisObjectStatus,
-  TrellisObjectType,
-} from "../../models";
 import { Repository } from "../../repositories/Repository";
+import { TaskTrellisService } from "../../services/TaskTrellisService";
 import { handleAppendObjectLog } from "../appendObjectLogTool";
 
 describe("appendObjectLogTool", () => {
+  let mockService: TaskTrellisService;
   let mockRepository: jest.Mocked<Repository>;
+  let appendObjectLogSpy: jest.Mock;
 
   beforeEach(() => {
+    appendObjectLogSpy = jest.fn();
+    mockService = {
+      appendObjectLog: appendObjectLogSpy,
+    } as unknown as TaskTrellisService;
+
     mockRepository = {
       getObjectById: jest.fn(),
       getObjects: jest.fn(),
       saveObject: jest.fn(),
       deleteObject: jest.fn(),
     };
+
     jest.clearAllMocks();
   });
 
   describe("handleAppendObjectLog", () => {
-    const mockTrellisObject: TrellisObject = {
-      id: "T-test-task",
-      type: TrellisObjectType.TASK,
-      title: "Test Task",
-      status: TrellisObjectStatus.OPEN,
-      priority: TrellisObjectPriority.MEDIUM,
-      parent: "F-test-feature",
-      prerequisites: [],
-      affectedFiles: new Map(),
-      log: ["Initial log entry", "Second log entry"],
-      schema: "1.0",
-      childrenIds: [],
-      body: "This is a test task",
-      created: "2025-01-15T10:00:00Z",
-      updated: "2025-01-15T10:00:00Z",
-    };
+    it("should call service.appendObjectLog with correct parameters", async () => {
+      const mockResult = {
+        content: [
+          {
+            type: "text",
+            text: "Successfully appended to object log",
+          },
+        ],
+      };
 
-    it("should successfully append to object log", async () => {
-      mockRepository.getObjectById.mockResolvedValue(mockTrellisObject);
-      mockRepository.saveObject.mockResolvedValue();
+      appendObjectLogSpy.mockResolvedValue(mockResult);
 
-      const result = await handleAppendObjectLog(mockRepository, {
+      const args = {
         id: "T-test-task",
         contents: "New log entry",
-      });
-
-      const expectedUpdatedObject = {
-        ...mockTrellisObject,
-        log: ["Initial log entry", "Second log entry", "New log entry"],
       };
 
-      expect(mockRepository.getObjectById).toHaveBeenCalledWith("T-test-task");
-      expect(mockRepository.saveObject).toHaveBeenCalledWith(
-        expectedUpdatedObject,
+      const result = await handleAppendObjectLog(
+        mockService,
+        mockRepository,
+        args,
       );
-      expect(result.content[0].text).toContain(
-        "Successfully appended to object log:",
+
+      expect(appendObjectLogSpy).toHaveBeenCalledWith(
+        mockRepository,
+        "T-test-task",
+        "New log entry",
       );
-      expect(result.content[0].text).toContain("T-test-task");
-      expect(result.content[0].text).toContain("New log entry");
-      expect(result.content[0].text).toContain('totalLogEntries": 3');
+      expect(result).toBe(mockResult);
     });
 
-    it("should append to empty log", async () => {
-      const objectWithEmptyLog = {
-        ...mockTrellisObject,
-        log: [],
-      };
-      mockRepository.getObjectById.mockResolvedValue(objectWithEmptyLog);
-      mockRepository.saveObject.mockResolvedValue();
-
-      const result = await handleAppendObjectLog(mockRepository, {
-        id: "T-test-task",
-        contents: "First log entry",
-      });
-
-      const expectedUpdatedObject = {
-        ...objectWithEmptyLog,
-        log: ["First log entry"],
+    it("should handle argument parsing", async () => {
+      const mockResult = {
+        content: [
+          {
+            type: "text",
+            text: "Success",
+          },
+        ],
       };
 
-      expect(mockRepository.saveObject).toHaveBeenCalledWith(
-        expectedUpdatedObject,
-      );
-      expect(result.content[0].text).toContain('totalLogEntries": 1');
-    });
+      appendObjectLogSpy.mockResolvedValue(mockResult);
 
-    it("should return error when object is not found", async () => {
-      mockRepository.getObjectById.mockResolvedValue(null);
-
-      const result = await handleAppendObjectLog(mockRepository, {
-        id: "T-nonexistent",
+      const args = {
+        id: "T-example",
         contents: "Test content",
-      });
-
-      expect(mockRepository.getObjectById).toHaveBeenCalledWith(
-        "T-nonexistent",
-      );
-      expect(mockRepository.saveObject).not.toHaveBeenCalled();
-      expect(result.content[0].text).toBe(
-        "Error: Object with ID 'T-nonexistent' not found",
-      );
-    });
-
-    it("should handle getObjectById errors gracefully", async () => {
-      mockRepository.getObjectById.mockRejectedValue(
-        new Error("Database connection failed"),
-      );
-
-      const result = await handleAppendObjectLog(mockRepository, {
-        id: "T-test-task",
-        contents: "Test content",
-      });
-
-      expect(result.content[0].text).toBe(
-        "Error appending to object log: Database connection failed",
-      );
-    });
-
-    it("should handle saveObject errors gracefully", async () => {
-      mockRepository.getObjectById.mockResolvedValue(mockTrellisObject);
-      mockRepository.saveObject.mockRejectedValue(new Error("Failed to save"));
-
-      const result = await handleAppendObjectLog(mockRepository, {
-        id: "T-test-task",
-        contents: "Test content",
-      });
-
-      expect(result.content[0].text).toBe(
-        "Error appending to object log: Failed to save",
-      );
-    });
-
-    it("should handle empty contents string", async () => {
-      mockRepository.getObjectById.mockResolvedValue(mockTrellisObject);
-      mockRepository.saveObject.mockResolvedValue();
-
-      const result = await handleAppendObjectLog(mockRepository, {
-        id: "T-test-task",
-        contents: "",
-      });
-
-      const expectedUpdatedObject = {
-        ...mockTrellisObject,
-        log: ["Initial log entry", "Second log entry", ""],
       };
 
-      expect(mockRepository.saveObject).toHaveBeenCalledWith(
-        expectedUpdatedObject,
-      );
-      expect(result.content[0].text).toContain(
-        "Successfully appended to object log:",
-      );
-    });
+      await handleAppendObjectLog(mockService, mockRepository, args);
 
-    it("should handle multiline contents", async () => {
-      mockRepository.getObjectById.mockResolvedValue(mockTrellisObject);
-      mockRepository.saveObject.mockResolvedValue();
-
-      const multilineContent = "Line 1\nLine 2\nLine 3";
-
-      const result = await handleAppendObjectLog(mockRepository, {
-        id: "T-test-task",
-        contents: multilineContent,
-      });
-
-      const expectedUpdatedObject = {
-        ...mockTrellisObject,
-        log: ["Initial log entry", "Second log entry", multilineContent],
-      };
-
-      expect(mockRepository.saveObject).toHaveBeenCalledWith(
-        expectedUpdatedObject,
-      );
-      expect(result.content[0].text).toContain(
-        "Successfully appended to object log:",
+      expect(appendObjectLogSpy).toHaveBeenCalledWith(
+        mockRepository,
+        "T-example",
+        "Test content",
       );
     });
   });

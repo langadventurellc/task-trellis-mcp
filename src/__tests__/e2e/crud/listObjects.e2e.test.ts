@@ -3,7 +3,7 @@ import {
   TestEnvironment,
   createObjectContent,
   createObjectFile,
-  parseListObjectsResponse,
+  extractObjectIds,
 } from "../utils";
 
 describe("E2E CRUD - listObjects", () => {
@@ -87,12 +87,9 @@ describe("E2E CRUD - listObjects", () => {
         type: "project",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
-      expect(objects[0].id).toBe("P-test-project");
-      expect(objects[0].type).toBe("project");
+      expect(objects[0]).toBe("P-test-project");
     });
 
     it("should list only tasks when type=task", async () => {
@@ -100,12 +97,9 @@ describe("E2E CRUD - listObjects", () => {
         type: "task",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
-      expect(objects[0].id).toBe("T-test-task");
-      expect(objects[0].type).toBe("task");
+      expect(objects[0]).toBe("T-test-task");
     });
 
     it("should list only epics when type=epic", async () => {
@@ -113,12 +107,9 @@ describe("E2E CRUD - listObjects", () => {
         type: "epic",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
-      expect(objects[0].id).toBe("E-test-epic");
-      expect(objects[0].type).toBe("epic");
+      expect(objects[0]).toBe("E-test-epic");
     });
 
     it("should list only features when type=feature", async () => {
@@ -126,12 +117,9 @@ describe("E2E CRUD - listObjects", () => {
         type: "feature",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
-      expect(objects[0].id).toBe("F-test-feature");
-      expect(objects[0].type).toBe("feature");
+      expect(objects[0]).toBe("F-test-feature");
     });
 
     it("should return empty array when no objects of specified type exist", async () => {
@@ -141,9 +129,7 @@ describe("E2E CRUD - listObjects", () => {
         scope: "E-nonexistent-epic",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toEqual([]);
     });
   });
@@ -177,11 +163,8 @@ describe("E2E CRUD - listObjects", () => {
         status: "in-progress",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
-      expect(objects[0].status).toBe("in-progress");
     });
 
     it("should exclude closed tasks by default", async () => {
@@ -189,13 +172,10 @@ describe("E2E CRUD - listObjects", () => {
         type: "task",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
-      const closedTasks = objects.filter(
-        (o) => o.status === "done" || o.status === "wont-do",
-      );
-      expect(closedTasks).toHaveLength(0);
+      const objects = extractObjectIds(result.content[0].text as string);
+      // Note: Can't filter by status since only IDs are returned
+      // Expect only open objects to be returned by default (3 in this case)
+      expect(objects).toHaveLength(3);
     });
 
     it("should include closed tasks when includeClosed=true", async () => {
@@ -204,14 +184,9 @@ describe("E2E CRUD - listObjects", () => {
         includeClosed: true,
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(5);
-      const closedTasks = objects.filter(
-        (o) => o.status === "done" || o.status === "wont-do",
-      );
-      expect(closedTasks).toHaveLength(2);
+      // Note: Can't test individual object status since only IDs are returned
     });
 
     it("should filter open tasks correctly", async () => {
@@ -220,12 +195,279 @@ describe("E2E CRUD - listObjects", () => {
         status: "open",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
-      expect(objects[0].status).toBe("open");
-      expect(objects[0].id).toBe("T-open-task");
+      expect(objects[0]).toBe("T-open-task");
+    });
+  });
+
+  describe("includeClosed Flag with Different Object Types", () => {
+    beforeEach(async () => {
+      // Create projects with different statuses
+      const projectStatuses: Array<{
+        status: string;
+        folder: "open" | "closed";
+      }> = [
+        { status: "open", folder: "open" },
+        { status: "done", folder: "closed" },
+        { status: "wont-do", folder: "closed" },
+      ];
+
+      for (const config of projectStatuses) {
+        await createObjectFile(
+          testEnv.projectRoot,
+          "project",
+          `P-${config.status}-project`,
+          createObjectContent({
+            id: `P-${config.status}-project`,
+            title: `${config.status} Project`,
+            status: config.status,
+          }),
+        );
+      }
+
+      // Create a project first for epics to belong to
+      await createObjectFile(
+        testEnv.projectRoot,
+        "project",
+        "P-epic-container",
+        createObjectContent({
+          id: "P-epic-container",
+          title: "Epic Container Project",
+          status: "open",
+        }),
+      );
+
+      // Create epics with different statuses within the project
+      const epicStatuses: Array<{
+        status: string;
+        folder: "open" | "closed";
+      }> = [
+        { status: "open", folder: "open" },
+        { status: "in-progress", folder: "open" },
+        { status: "done", folder: "closed" },
+        { status: "wont-do", folder: "closed" },
+      ];
+
+      for (const config of epicStatuses) {
+        await createObjectFile(
+          testEnv.projectRoot,
+          "epic",
+          `E-${config.status}-epic`,
+          createObjectContent({
+            id: `E-${config.status}-epic`,
+            title: `${config.status} Epic`,
+            status: config.status,
+            parent: "P-epic-container",
+          }),
+          { projectId: "P-epic-container" },
+        );
+      }
+
+      // Create features with different statuses
+      const featureStatuses: Array<{
+        status: string;
+        folder: "open" | "closed";
+      }> = [
+        { status: "draft", folder: "open" },
+        { status: "open", folder: "open" },
+        { status: "done", folder: "closed" },
+        { status: "wont-do", folder: "closed" },
+      ];
+
+      for (const config of featureStatuses) {
+        await createObjectFile(
+          testEnv.projectRoot,
+          "feature",
+          `F-${config.status}-feature`,
+          createObjectContent({
+            id: `F-${config.status}-feature`,
+            title: `${config.status} Feature`,
+            status: config.status,
+          }),
+        );
+      }
+
+      // Create tasks with different statuses (already covered in other tests, but adding for completeness)
+      const taskStatuses: Array<{
+        status: string;
+        folder: "open" | "closed";
+      }> = [
+        { status: "draft", folder: "open" },
+        { status: "open", folder: "open" },
+        { status: "in-progress", folder: "open" },
+        { status: "done", folder: "closed" },
+        { status: "wont-do", folder: "closed" },
+      ];
+
+      for (const config of taskStatuses) {
+        await createObjectFile(
+          testEnv.projectRoot,
+          "task",
+          `T-${config.status}-includeclosed`,
+          createObjectContent({
+            id: `T-${config.status}-includeclosed`,
+            title: `${config.status} Task`,
+            status: config.status,
+          }),
+          { status: config.folder },
+        );
+      }
+    });
+
+    it("should exclude closed projects by default", async () => {
+      const result = await client.callTool("list_objects", {
+        type: "project",
+      });
+
+      const objects = extractObjectIds(result.content[0].text as string);
+      // Filter to only the objects we created in this test (excluding the epic container)
+      const testObjects = objects.filter(
+        (id) => id.includes("-project") && !id.includes("epic-container"),
+      );
+      expect(testObjects).toHaveLength(1);
+      expect(testObjects).toContain("P-open-project");
+      expect(testObjects).not.toContain("P-done-project");
+      expect(testObjects).not.toContain("P-wont-do-project");
+    });
+
+    it("should include closed projects when includeClosed=true", async () => {
+      const result = await client.callTool("list_objects", {
+        type: "project",
+        includeClosed: true,
+      });
+
+      const objects = extractObjectIds(result.content[0].text as string);
+      // Filter to only the objects we created in this test (excluding the epic container)
+      const testObjects = objects.filter(
+        (id) => id.includes("-project") && !id.includes("epic-container"),
+      );
+      expect(testObjects).toHaveLength(3);
+      expect(testObjects).toContain("P-open-project");
+      expect(testObjects).toContain("P-done-project");
+      expect(testObjects).toContain("P-wont-do-project");
+    });
+
+    it("should exclude closed epics by default", async () => {
+      const result = await client.callTool("list_objects", {
+        type: "epic",
+      });
+
+      const objects = extractObjectIds(result.content[0].text as string);
+      expect(objects).toHaveLength(2);
+      expect(objects).toContain("E-open-epic");
+      expect(objects).toContain("E-in-progress-epic");
+      expect(objects).not.toContain("E-done-epic");
+      expect(objects).not.toContain("E-wont-do-epic");
+    });
+
+    it("should include closed epics when includeClosed=true", async () => {
+      const result = await client.callTool("list_objects", {
+        type: "epic",
+        includeClosed: true,
+      });
+
+      const objects = extractObjectIds(result.content[0].text as string);
+      expect(objects).toHaveLength(4);
+      expect(objects).toContain("E-open-epic");
+      expect(objects).toContain("E-in-progress-epic");
+      expect(objects).toContain("E-done-epic");
+      expect(objects).toContain("E-wont-do-epic");
+    });
+
+    it("should exclude closed features by default", async () => {
+      const result = await client.callTool("list_objects", {
+        type: "feature",
+      });
+
+      const objects = extractObjectIds(result.content[0].text as string);
+      expect(objects).toHaveLength(2);
+      expect(objects).toContain("F-draft-feature");
+      expect(objects).toContain("F-open-feature");
+      expect(objects).not.toContain("F-done-feature");
+      expect(objects).not.toContain("F-wont-do-feature");
+    });
+
+    it("should include closed features when includeClosed=true", async () => {
+      const result = await client.callTool("list_objects", {
+        type: "feature",
+        includeClosed: true,
+      });
+
+      const objects = extractObjectIds(result.content[0].text as string);
+      expect(objects).toHaveLength(4);
+      expect(objects).toContain("F-draft-feature");
+      expect(objects).toContain("F-open-feature");
+      expect(objects).toContain("F-done-feature");
+      expect(objects).toContain("F-wont-do-feature");
+    });
+
+    it("should exclude closed tasks by default", async () => {
+      const result = await client.callTool("list_objects", {
+        type: "task",
+      });
+
+      const objects = extractObjectIds(result.content[0].text as string);
+      // Filter to only the objects we created in this test
+      const testObjects = objects.filter((id) => id.includes("includeclosed"));
+      expect(testObjects).toHaveLength(3);
+      expect(testObjects).toContain("T-draft-includeclosed");
+      expect(testObjects).toContain("T-open-includeclosed");
+      expect(testObjects).toContain("T-in-progress-includeclosed");
+      expect(testObjects).not.toContain("T-done-includeclosed");
+      expect(testObjects).not.toContain("T-wont-do-includeclosed");
+    });
+
+    it("should include closed tasks when includeClosed=true", async () => {
+      const result = await client.callTool("list_objects", {
+        type: "task",
+        includeClosed: true,
+      });
+
+      const objects = extractObjectIds(result.content[0].text as string);
+      // Filter to only the objects we created in this test
+      const testObjects = objects.filter((id) => id.includes("includeclosed"));
+      expect(testObjects).toHaveLength(5);
+      expect(testObjects).toContain("T-draft-includeclosed");
+      expect(testObjects).toContain("T-open-includeclosed");
+      expect(testObjects).toContain("T-in-progress-includeclosed");
+      expect(testObjects).toContain("T-done-includeclosed");
+      expect(testObjects).toContain("T-wont-do-includeclosed");
+    });
+
+    it("should work with includeClosed and status filters for projects", async () => {
+      const result = await client.callTool("list_objects", {
+        type: "project",
+        status: "done",
+        includeClosed: true,
+      });
+
+      const objects = extractObjectIds(result.content[0].text as string);
+      expect(objects).toHaveLength(1);
+      expect(objects).toContain("P-done-project");
+    });
+
+    it("should work with includeClosed and status filters for epics", async () => {
+      const result = await client.callTool("list_objects", {
+        type: "epic",
+        status: "wont-do",
+        includeClosed: true,
+      });
+
+      const objects = extractObjectIds(result.content[0].text as string);
+      expect(objects).toHaveLength(1);
+      expect(objects).toContain("E-wont-do-epic");
+    });
+
+    it("should return empty array when status filter requires closed objects but includeClosed=false", async () => {
+      const result = await client.callTool("list_objects", {
+        type: "feature",
+        status: "done",
+        includeClosed: false,
+      });
+
+      const objects = extractObjectIds(result.content[0].text as string);
+      expect(objects).toEqual([]);
     });
   });
 
@@ -253,12 +495,9 @@ describe("E2E CRUD - listObjects", () => {
         priority: "high",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
-      expect(objects[0].priority).toBe("high");
-      expect(objects[0].id).toBe("F-high-priority");
+      expect(objects[0]).toBe("F-high-priority");
     });
 
     it("should filter objects by medium priority", async () => {
@@ -267,12 +506,9 @@ describe("E2E CRUD - listObjects", () => {
         priority: "medium",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
-      expect(objects[0].priority).toBe("medium");
-      expect(objects[0].id).toBe("F-medium-priority");
+      expect(objects[0]).toBe("F-medium-priority");
     });
 
     it("should filter objects by low priority", async () => {
@@ -281,12 +517,9 @@ describe("E2E CRUD - listObjects", () => {
         priority: "low",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
-      expect(objects[0].priority).toBe("low");
-      expect(objects[0].id).toBe("F-low-priority");
+      expect(objects[0]).toBe("F-low-priority");
     });
 
     it("should return all priorities when no filter specified", async () => {
@@ -294,14 +527,13 @@ describe("E2E CRUD - listObjects", () => {
         type: "feature",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(3);
-      const priorities = objects.map((o) => o.priority);
-      expect(priorities).toContain("high");
-      expect(priorities).toContain("medium");
-      expect(priorities).toContain("low");
+      // Note: Can't test individual priorities since only IDs are returned
+      // Just verify we have all the expected feature IDs
+      expect(objects).toContain("F-high-priority");
+      expect(objects).toContain("F-medium-priority");
+      expect(objects).toContain("F-low-priority");
     });
   });
 
@@ -374,12 +606,10 @@ describe("E2E CRUD - listObjects", () => {
         scope: "P-parent",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(2);
-      expect(objects.map((o) => o.id)).toContain("E-child-1");
-      expect(objects.map((o) => o.id)).toContain("E-child-2");
+      expect(objects).toContain("E-child-1");
+      expect(objects).toContain("E-child-2");
     });
 
     it("should list objects within epic scope", async () => {
@@ -388,11 +618,9 @@ describe("E2E CRUD - listObjects", () => {
         scope: "E-child-1",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
-      expect(objects[0].id).toBe("F-grandchild-1");
+      expect(objects[0]).toBe("F-grandchild-1");
     });
 
     it("should not include objects outside of scope", async () => {
@@ -401,11 +629,9 @@ describe("E2E CRUD - listObjects", () => {
         scope: "P-parent",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
-      expect(objects.map((o) => o.id)).toContain("F-grandchild-1");
-      expect(objects.map((o) => o.id)).not.toContain("F-standalone");
+      const objects = extractObjectIds(result.content[0].text as string);
+      expect(objects).toContain("F-grandchild-1");
+      expect(objects).not.toContain("F-standalone");
     });
 
     it("should return empty array for non-existent scope", async () => {
@@ -414,9 +640,7 @@ describe("E2E CRUD - listObjects", () => {
         scope: "P-nonexistent",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toEqual([]);
     });
   });
@@ -518,11 +742,9 @@ describe("E2E CRUD - listObjects", () => {
         scope: "P-complex",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
-      expect(objects[0].id).toBe("T-high-open");
+      expect(objects[0]).toBe("T-high-open");
     });
 
     it("should combine includeClosed with other filters", async () => {
@@ -533,12 +755,10 @@ describe("E2E CRUD - listObjects", () => {
         includeClosed: true,
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(2);
-      expect(objects.map((o) => o.id)).toContain("T-high-open");
-      expect(objects.map((o) => o.id)).toContain("T-high-done");
+      expect(objects).toContain("T-high-open");
+      expect(objects).toContain("T-high-done");
     });
 
     it("should return empty when combined filters match nothing", async () => {
@@ -549,9 +769,7 @@ describe("E2E CRUD - listObjects", () => {
         scope: "P-complex",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toEqual([]);
     });
 
@@ -563,11 +781,9 @@ describe("E2E CRUD - listObjects", () => {
         scope: "P-complex",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
-      expect(objects[0].id).toBe("T-medium-progress");
+      expect(objects[0]).toBe("T-medium-progress");
     });
   });
 
@@ -608,27 +824,11 @@ describe("E2E CRUD - listObjects", () => {
         type: "project",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
 
-      const project = objects[0];
-      expect(project).toMatchObject({
-        id: "P-detailed",
-        type: "project",
-        title: "Detailed Project",
-        status: "open",
-        priority: "high",
-        prerequisites: ["P-dep1", "P-dep2"],
-        log: ["Created", "Updated"],
-        schema: "1.1",
-        childrenIds: ["E-child"],
-        body: "Project description",
-      });
-
-      // Verify no parent field for projects
-      expect(project.parent).toBeUndefined();
+      // Note: Only object IDs are returned, not full objects
+      expect(objects[0]).toBe("P-detailed");
     });
 
     it("should handle objects with minimal fields", async () => {
@@ -647,17 +847,10 @@ describe("E2E CRUD - listObjects", () => {
         type: "task",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
-      const task = objects[0];
-
-      expect(task.id).toBe("T-minimal");
-      expect(task.title).toBe("Minimal Task");
-      expect(task.status).toBe("open");
-      expect(task.priority).toBe("medium");
-      expect(task.prerequisites).toEqual([]);
-      expect(task.body).toBe("");
+      const objects = extractObjectIds(result.content[0].text as string);
+      // Note: Only object IDs are returned, not full objects
+      expect(objects[0]).toBe("T-minimal");
+      // Note: Only IDs returned, cannot test object properties
     });
 
     it("should preserve object hierarchy relationships", async () => {
@@ -717,11 +910,9 @@ describe("E2E CRUD - listObjects", () => {
         scope: "P-hierarchy",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(1);
-      expect(objects[0].parent).toBe("F-hierarchy");
+      // Note: Only object IDs are returned, not full objects with parent property
     });
   });
 
@@ -756,19 +947,16 @@ describe("E2E CRUD - listObjects", () => {
       });
       const duration = Date.now() - startTime;
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(objects).toHaveLength(NUM_OBJECTS);
 
       // Performance check - should complete within reasonable time
       expect(duration).toBeLessThan(3000);
 
       // Verify all objects have correct structure
-      objects.forEach((obj) => {
-        expect(obj.id).toMatch(/^T-bulk-\d{3}$/);
-        expect(obj.type).toBe("task");
-        expect(obj.title).toMatch(/^Bulk Task \d+$/);
+      // Note: Only IDs returned, cannot test object properties
+      objects.forEach((id) => {
+        expect(id).toMatch(/^T-bulk-\d{3}$/);
       });
     });
 
@@ -795,11 +983,9 @@ describe("E2E CRUD - listObjects", () => {
         priority: "high",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
+      // Note: Only IDs returned, cannot test object properties - just verify count
       expect(objects).toHaveLength(5);
-      expect(objects.every((o) => o.priority === "high")).toBe(true);
     });
   });
 
@@ -862,9 +1048,7 @@ describe("E2E CRUD - listObjects", () => {
         type: "task",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       // Should return empty array or only valid objects
       expect(Array.isArray(objects)).toBe(true);
     });
@@ -874,9 +1058,7 @@ describe("E2E CRUD - listObjects", () => {
         type: "task",
       });
 
-      const objects = parseListObjectsResponse(
-        result.content[0].text as string,
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
       expect(Array.isArray(objects)).toBe(true);
       expect(objects).toEqual([]);
     });

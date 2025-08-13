@@ -4,6 +4,7 @@ import {
   TrellisObjectPriority,
 } from "../models";
 import { Repository } from "../repositories";
+import { TaskTrellisService } from "../services/TaskTrellisService";
 
 export const listObjectsTool = {
   name: "list_objects",
@@ -19,7 +20,7 @@ Available object types:
 
 Available status values:
 - 'draft': Initial state for new objects
-- 'open': Ready to begin work
+- 'open': Ready to begin work (default for new objects)
 - 'in-progress': Currently being worked on
 - 'done': Completed successfully
 - 'wont-do': Cancelled or decided against
@@ -43,7 +44,7 @@ Usage patterns:
 - Audit completed work: includeClosed=true, status='done'
 - Find cancelled items: status='wont-do', includeClosed=true
 
-The results provide object metadata including IDs, titles, relationships, and current status to help navigate the work hierarchy effectively.`,
+The results provide object summaries (TrellisObjectSummary instances) containing id, type, title, status, priority, parent, prerequisites, childrenIds, created, and updated fields to enable efficient filtering and further operations.`,
   inputSchema: {
     type: "object",
     properties: {
@@ -73,7 +74,11 @@ The results provide object metadata including IDs, titles, relationships, and cu
   },
 } as const;
 
-export async function handleListObjects(repository: Repository, args: unknown) {
+export async function handleListObjects(
+  service: TaskTrellisService,
+  repository: Repository,
+  args: unknown,
+) {
   const {
     type,
     scope,
@@ -128,23 +133,15 @@ export async function handleListObjects(repository: Repository, args: unknown) {
     const statusEnum = status ? toStatus(status) : undefined;
     const priorityEnum = priority ? toPriority(priority) : undefined;
 
-    // Get objects from repository
-    const objects = await repository.getObjects(
-      includeClosed,
-      scope,
+    // Delegate to service
+    return await service.listObjects(
+      repository,
       typeEnum,
+      scope,
       statusEnum,
       priorityEnum,
+      includeClosed,
     );
-
-    return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(objects, null, 2),
-        },
-      ],
-    };
   } catch (error) {
     return {
       content: [

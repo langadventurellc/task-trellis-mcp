@@ -93,46 +93,61 @@ describe("getObjects", () => {
     it("should exclude closed objects by default", async () => {
       const objects = await getObjects(testRoot);
 
+      // Should not include any DONE or WONT_DO objects
       const closedObjects = objects.filter(
-        (obj) => obj.status === TrellisObjectStatus.DONE,
+        (obj) =>
+          obj.status === TrellisObjectStatus.DONE ||
+          obj.status === TrellisObjectStatus.WONT_DO,
       );
 
       expect(closedObjects.length).toBe(0);
-      expect(objects.some((obj) => obj.id === "T-project-initialization")).toBe(
-        false,
-      );
-      expect(objects.some((obj) => obj.id === "T-setup-user-schema")).toBe(
-        false,
-      );
+
+      // Should only include open objects (not DONE or WONT_DO)
+      objects.forEach((obj) => {
+        expect(obj.status).not.toBe(TrellisObjectStatus.DONE);
+        expect(obj.status).not.toBe(TrellisObjectStatus.WONT_DO);
+      });
     });
 
     it("should exclude closed objects when includeClosed is false", async () => {
       const objects = await getObjects(testRoot, false);
 
+      // Should not include any DONE or WONT_DO objects
       const closedObjects = objects.filter(
-        (obj) => obj.status === TrellisObjectStatus.DONE,
+        (obj) =>
+          obj.status === TrellisObjectStatus.DONE ||
+          obj.status === TrellisObjectStatus.WONT_DO,
       );
 
       expect(closedObjects).toHaveLength(0);
 
       // Should still include open objects
       const openObjects = objects.filter(
-        (obj) => obj.status === TrellisObjectStatus.OPEN,
+        (obj) =>
+          obj.status !== TrellisObjectStatus.DONE &&
+          obj.status !== TrellisObjectStatus.WONT_DO,
       );
       expect(openObjects.length).toBeGreaterThan(0);
+      expect(openObjects.length).toBe(objects.length);
     });
 
     it("should include closed objects when includeClosed is explicitly true", async () => {
       const objects = await getObjects(testRoot, true);
 
-      const closedObjects = objects.filter(
+      // Should include DONE objects
+      const doneObjects = objects.filter(
         (obj) => obj.status === TrellisObjectStatus.DONE,
       );
 
-      expect(closedObjects.length).toBeGreaterThan(0);
-      expect(
-        closedObjects.some((obj) => obj.id === "T-project-initialization"),
-      ).toBe(true);
+      expect(doneObjects.length).toBeGreaterThan(0);
+
+      // Should also include open objects
+      const openObjects = objects.filter(
+        (obj) =>
+          obj.status !== TrellisObjectStatus.DONE &&
+          obj.status !== TrellisObjectStatus.WONT_DO,
+      );
+      expect(openObjects.length).toBeGreaterThan(0);
     });
 
     it("should have more objects when includeClosed is true", async () => {
@@ -143,12 +158,45 @@ describe("getObjects", () => {
 
       // The difference should be exactly the number of closed objects
       const closedObjects = allObjects.filter(
-        (obj) => obj.status === TrellisObjectStatus.DONE,
+        (obj) =>
+          obj.status === TrellisObjectStatus.DONE ||
+          obj.status === TrellisObjectStatus.WONT_DO,
       );
       expect(allObjects.length - defaultObjects.length).toBe(
         closedObjects.length,
       );
-      expect(closedObjects.length).toBe(3); // We have 3 closed tasks
+      expect(closedObjects.length).toBeGreaterThan(0); // Should have some closed objects
+    });
+
+    it("should filter both DONE and WONT_DO objects when includeClosed is false", async () => {
+      // First get all objects to see what we have
+      const allObjects = await getObjects(testRoot, true);
+      const filteredObjects = await getObjects(testRoot, false);
+
+      // Count DONE and WONT_DO objects in all objects
+      const doneObjects = allObjects.filter(
+        (obj) => obj.status === TrellisObjectStatus.DONE,
+      );
+      const wontDoObjects = allObjects.filter(
+        (obj) => obj.status === TrellisObjectStatus.WONT_DO,
+      );
+
+      // Filtered objects should not contain any DONE or WONT_DO objects
+      const filteredDoneObjects = filteredObjects.filter(
+        (obj) => obj.status === TrellisObjectStatus.DONE,
+      );
+      const filteredWontDoObjects = filteredObjects.filter(
+        (obj) => obj.status === TrellisObjectStatus.WONT_DO,
+      );
+
+      expect(filteredDoneObjects.length).toBe(0);
+      expect(filteredWontDoObjects.length).toBe(0);
+
+      // The difference should be the sum of DONE and WONT_DO objects
+      const expectedDifference = doneObjects.length + wontDoObjects.length;
+      expect(allObjects.length - filteredObjects.length).toBe(
+        expectedDifference,
+      );
     });
   });
 

@@ -11,14 +11,18 @@ import fs from "fs";
 import path from "path";
 import { ServerConfig } from "./configuration";
 import { LocalRepository, Repository } from "./repositories";
+import { TaskTrellisService } from "./services/TaskTrellisService";
+import { LocalTaskTrellisService } from "./services/local/LocalTaskTrellisService";
 import {
   activateTool,
+  appendModifiedFilesTool,
   appendObjectLogTool,
   claimTaskTool,
   completeTaskTool,
   createObjectTool,
   deleteObjectTool,
   getObjectTool,
+  handleAppendModifiedFiles,
   handleAppendObjectLog,
   handleClaimTask,
   handleCompleteTask,
@@ -42,13 +46,18 @@ program
   .description("Task Trellis MCP Server")
   .version("1.0.0")
   .option("--mode <mode>", "Server mode", "local")
-  .option("--projectRootFolder <path>", "Project root folder path");
+  .option("--projectRootFolder <path>", "Project root folder path")
+  .option(
+    "--auto-complete-parent",
+    "Enable automatic completion of parent tasks",
+  );
 
 program.parse();
 
 interface CliOptions {
   mode?: string;
   projectRootFolder?: string;
+  autoCompleteParent: boolean;
 }
 
 const options = program.opts<CliOptions>();
@@ -75,6 +84,7 @@ const packageVersion = getPackageVersion();
 // Create server config - always create with at least mode set
 const serverConfig: ServerConfig = {
   mode: options.mode === "remote" ? "remote" : "local",
+  autoCompleteParent: options.autoCompleteParent || false,
   ...(options.projectRootFolder && typeof options.projectRootFolder === "string"
     ? { planningRootFolder: path.join(options.projectRootFolder, ".trellis") }
     : {}),
@@ -85,6 +95,14 @@ function getRepository(): Repository {
     return new LocalRepository(serverConfig);
   } else {
     throw new Error("Remote repository not yet implemented");
+  }
+}
+
+function _getService(): TaskTrellisService {
+  if (serverConfig.mode === "local") {
+    return new LocalTaskTrellisService();
+  } else {
+    throw new Error("Remote task service not yet implemented");
   }
 }
 
@@ -126,6 +144,7 @@ server.setRequestHandler(ListToolsRequestSchema, () => {
     deleteObjectTool,
     listObjectsTool,
     appendObjectLogTool,
+    appendModifiedFilesTool,
     claimTaskTool,
     completeTaskTool,
     pruneClosedTool,
@@ -198,25 +217,27 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
 
   switch (toolName) {
     case "create_object":
-      return handleCreateObject(repository, args);
+      return handleCreateObject(_getService(), repository, args);
     case "update_object":
-      return handleUpdateObject(repository, args);
+      return handleUpdateObject(_getService(), repository, args);
     case "replace_object_body_regex":
-      return handleReplaceObjectBodyRegex(repository, args);
+      return handleReplaceObjectBodyRegex(_getService(), repository, args);
     case "get_object":
       return handleGetObject(repository, args);
     case "delete_object":
       return handleDeleteObject(repository, args);
     case "list_objects":
-      return handleListObjects(repository, args);
+      return handleListObjects(_getService(), repository, args);
     case "append_object_log":
-      return handleAppendObjectLog(repository, args);
+      return handleAppendObjectLog(_getService(), repository, args);
+    case "append_modified_files":
+      return handleAppendModifiedFiles(_getService(), repository, args);
     case "claim_task":
-      return handleClaimTask(repository, args);
+      return handleClaimTask(_getService(), repository, args);
     case "complete_task":
-      return handleCompleteTask(repository, args);
+      return handleCompleteTask(_getService(), repository, args, serverConfig);
     case "prune_closed":
-      return handlePruneClosed(repository, args);
+      return handlePruneClosed(_getService(), repository, args);
     case "activate":
     default:
       throw new Error(`Unknown tool: ${toolName}`);

@@ -170,7 +170,7 @@ For each feature, call the Task Trellis MCP `create_object` tool:
 - `type`: Set to `"feature"`
 - `parent`: The epic ID (optional - omit for standalone features)
 - `title`: Generated feature title
-- `status`: Set to `"open"` (ready to begin work) or `"draft"` (default) unless specified
+- `status`: Set to `"open"` (default, ready to begin work) or `"draft"` unless specified
 - `prerequisites`: List of feature IDs that must complete first
 - `description`: Comprehensive feature description with all elements from step 4
 

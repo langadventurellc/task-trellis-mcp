@@ -3,13 +3,14 @@
 [![npm version](https://badge.fury.io/js/%40langadventurellc%2Ftask-trellis-mcp.svg)](https://www.npmjs.com/package/@langadventurellc/task-trellis-mcp)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-Greatly improve how AI coding agents handle complex projects. Task Trellis helps track requirements for projects, breaks them down into smaller manageable parts until you have trackable and assignable tasks with built-in workflow management, dependency handling, and progress tracking. Basically, it's like Jira for coding agents.
+An MCP server that helps you manage developing with AI coding agents, by breaking down complex projects and tracking its progress with built-in task management, complete with progress tracking, dependency management, and workflow automation.
 
-Primarily built as an alternative to managing the creation and use of agent-created requirements, specifications and checklists. This tool will help make that more organized and less chaotic.
+Primarily built as a much better alternative to managing markdown checklists. Task Trellis will make it easier to define requirements, specifications, and tasks in a structured way that the agent can actually use directly.
+
+It's kinda like Jira specifically for coding agents.
 
 ## Table of Contents
 
-- [At a glance?](#at-a-glance)
 - [Why Task Trellis?](#why-task-trellis)
 - [Core Benefits](#core-benefits)
 - [Usage](#usage)
@@ -24,54 +25,19 @@ Primarily built as an alternative to managing the creation and use of agent-crea
 
 ## At a Glance
 
-```
-// Simple tasks
-Task: Auth endpoint
-Task: Token refresh
+Task Trellis works with "objects" that are projects, epics, features or tasks.
 
-// Moderate sized feature
-Feature: API
- ├── Task: Auth endpoint
- └── Task: Token refresh
+**Tasks** are the most important type of object. This is where the actual work gets done. Each task is a specific piece of work that needs to be completed in order to achieve the project's goals. The other object types are too big to be a task and they exist to help organize and manage multiple tasks to accomplish a particular goal. Tasks can be standalone or part of a larger feature.
 
-// Large project
-Project
- ├── Epic: Login
- │    ├── Feature: UI
- │    │     ├── Task: Email form validation
- │    │     └── Task: Error handling
- │    └── Feature: API
- │          ├── Task: Auth endpoint
- │          └── Task: Token refresh
-```
+**Features** are the next level up from tasks. They represent the requirements and functionality needed to deliver a specific aspect of the project. Features can be standalone or a part of a larger epic.
 
-**Small tasks (one or several tasks that don't necessarily need the benefit of a unifying context)**
+**Epics** are next after features. They represent a significant deliverable or a large body of work that can be broken down into multiple features and tasks. Epics can be standalone or a part of a larger project.
 
-> **user:** /create-tasks-trellis create some standalone tasks to remove the console.log usage from the app  
-> _(agent creates and adds the individual tasks that the agent will work on later)_
+**Projects** are the highest level of organization. They represent the overall initiative or goal that encompasses multiple epics, features, and tasks. Projects provide a way to group related work and track progress at a high level.
 
-**Moderate sized tasks (most use cases - a feature that gets broken down into a number of workable tasks)**
+Depending on the size of the effort, you can choose to create a project with epics, features, and tasks, or you can create standalone tasks as needed. Once you have your tasks defined, you can easily manage and track their progress through the Task Trellis MCP tools.
 
-> **user:** /create-features-trellis add posthog analytics to existing web pages  
-> _(agent creates and adds feature requirements document to Task Trellis)_  
-> **user:** /create-tasks-trellis (feature-id)  
-> _(agent creates and adds the individual tasks that the agent will work on later)_
-
-**Large projects (when there's a lot involved that benefits from several layers of refinement)**
-
-> **user:** /create-project-trellis add user authentication with registration and login pages, using supabase for authentication  
-> _(agent creates and adds project requirements document to Task Trellis)_  
-> **user:** /create-epics-trellis (project-id)  
-> _(agent creates and adds epics that break down the project into distinct, yet still large bodies of work)_  
-> **user:** /create-features-trellis (epic-id)  
-> _(agent creates and adds features that further add detail and context to smaller bodies of work)_  
-> **user:** /create-tasks-trellis (feature-id)  
-> _(agent creates and adds the individual tasks that the agent will work on later)_
-
-**Now do the thing**
-  
-> **user:** /implement-task-trellis  
-> _(agent grabs the next available task and does it)_
+Currently, all Task Trellis objects are stored as markdown files in the `.trellis` folder in the root of your project. This makes it unsuitable for projects with multiple developers, but a remote option is in development now and should be available soon.
 
 ## Why Task Trellis?
 
@@ -114,21 +80,22 @@ Project
 See sample prompts (written as Claude Code slash commands): [Sample Prompts](docs/sample_prompts/index.md)
 
 1. **Create Tasks**
-   - For large projects
-     - Create a project  
-     - Create epics to group features
-     - Create features to break down epics
-     - Create tasks for specific work items
-   - For medium-sized projects
-     - Create standalone feature
-     - Create tasks directly under the feature
-   - For small tasks
-     - Create standalone tasks
+   - Determine your starting point based on the expected size of your project
+     - **Project** - For sprawling initiatives with many moving parts
+     - **Epic** - For large feature groupings
+     - **Feature** - For specific functionality
+     - **Task** - For individual work items
 
 2. **Claim & Work on Tasks**
    - AI agent claims next available task
+     - Excludes tasks that have incomplete prerequisites
+     - Grabs the next highest priority available task
+     - Mark a task as `draft` if you don't want it to be worked on yet - it won't be claimed when the tool looks for the next available task
    - Works on the specific task requirements
    - Marks task complete with file changes documented
+     - Automatically tracks which files were modified
+     - Logs summary of changes made
+     - Work done in the future could reference this to better understand the current state of the project
 
 3. **Track Progress**
    - View completed vs. pending work
@@ -142,15 +109,16 @@ See sample prompts (written as Claude Code slash commands): [Sample Prompts](doc
 - **create_object** - Create projects, epics, features, or tasks with hierarchical relationships
 - **update_object** - Modify object properties, status, priority, or prerequisites
 - **get_object** - Retrieve detailed object information with history and relationships
-- **list_objects** - Query and filter objects by type, status, priority, or scope
+- **list_objects** - Query and filter objects by type, status, priority, or scope (returns object summaries)
 - **delete_object** - Remove objects (with dependency validation)
-- **replace_object_body_regex** - Make targeted content edits using regex patterns
+- **replace_object_body_regex** - Make targeted body content edits using regex patterns
 
 ### Task Workflow Management
 
 - **claim_task** - Claim available tasks for execution with automatic priority ordering
 - **complete_task** - Mark tasks complete with file change documentation
-- **append_object_log** - Add progress notes and status updates to task history
+- **append_object_log** - Add progress notes and status updates to task history (occurs automatically on task completion)
+- **append_modified_files** - Record files modified during task execution with change descriptions (occurs automatically on task completion)
 
 ### System Management
 
@@ -167,12 +135,6 @@ Project (Top-level container)
     └── Feature (Specific functionality)
         └── Task (Individual work items)
 ```
-
-**Supported Patterns:**
-
-- Full hierarchy: `Project → Epic → Feature → Task`
-- Simplified: `Feature → Task`
-- Standalone: `Task` only
 
 ## Prerequisites & Dependencies
 
@@ -208,6 +170,22 @@ your-project/
                                     └── T-completed-task-id.md
 ```
 
+### Epic-Only Hierarchy
+
+```
+your-project/
+└── .trellis/
+    └── e/
+        └── E-epic-id/
+            └── f/
+                └── F-feature-id/
+                    └── t/
+                        ├── open/
+                        │   └── T-task-id.md
+                        └── closed/
+                            └── T-completed-task-id.md
+```
+
 ### Feature-Only Hierarchy
 
 ```
@@ -237,6 +215,12 @@ your-project/
 Each object is stored as a Markdown file with YAML frontmatter metadata and content body.
 
 ## Installation
+
+### CLI Arguments
+
+- **--mode <mode>**: Server mode. `local` or `remote` (default: `local`) (`remote` not yet supported)
+- **--projectRootFolder <path>**: Project root folder path (typically, the root of your repository, but can be in a shared folder for collaboration)
+- **--auto-complete-parent**: Enable automatic completion of parent tasks when the last task of a feature is completed
 
 ### Claude Code
 

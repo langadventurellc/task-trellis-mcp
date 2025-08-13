@@ -228,4 +228,337 @@ describe("E2E Workflow - claimTask", () => {
       expect(result.content[0].text).toContain("T-high");
     });
   });
+
+  describe("Parent Hierarchy Updates", () => {
+    it("should update feature parent to in-progress when claiming task", async () => {
+      // Create feature parent
+      const featureData: ObjectData = {
+        id: "F-test-feature",
+        title: "Test Feature",
+        status: "open",
+        priority: "medium",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        "F-test-feature",
+        createObjectContent(featureData),
+      );
+
+      // Create task with parent
+      const taskData: ObjectData = {
+        id: "T-hierarchy-task",
+        title: "Hierarchy Task",
+        status: "open",
+        priority: "high",
+        parent: "F-test-feature",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-hierarchy-task",
+        createObjectContent(taskData),
+        { featureId: "F-test-feature" },
+      );
+
+      // Claim task
+      const result = await client.callTool("claim_task", {
+        taskId: "T-hierarchy-task",
+      });
+
+      expect(result.content[0].text).toContain("Successfully claimed task");
+
+      // Verify task status
+      const taskFile = await readObjectFile(
+        testEnv.projectRoot,
+        "f/F-test-feature/t/open/T-hierarchy-task.md",
+      );
+      expect(taskFile.yaml.status).toBe("in-progress");
+
+      // Verify feature parent status
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        "f/F-test-feature/F-test-feature.md",
+      );
+      expect(featureFile.yaml.status).toBe("in-progress");
+    });
+
+    it("should update full hierarchy (project → epic → feature → task)", async () => {
+      // Create project
+      const projectData: ObjectData = {
+        id: "P-test-project",
+        title: "Test Project",
+        status: "open",
+        priority: "high",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "project",
+        "P-test-project",
+        createObjectContent(projectData),
+      );
+
+      // Create epic with project parent
+      const epicData: ObjectData = {
+        id: "E-test-epic",
+        title: "Test Epic",
+        status: "open",
+        priority: "high",
+        parent: "P-test-project",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "epic",
+        "E-test-epic",
+        createObjectContent(epicData),
+        { projectId: "P-test-project" },
+      );
+
+      // Create feature with epic parent
+      const featureData: ObjectData = {
+        id: "F-full-hierarchy",
+        title: "Full Hierarchy Feature",
+        status: "open",
+        priority: "medium",
+        parent: "E-test-epic",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        "F-full-hierarchy",
+        createObjectContent(featureData),
+        { epicId: "E-test-epic", projectId: "P-test-project" },
+      );
+
+      // Create task with feature parent
+      const taskData: ObjectData = {
+        id: "T-full-hierarchy",
+        title: "Full Hierarchy Task",
+        status: "open",
+        priority: "high",
+        parent: "F-full-hierarchy",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-full-hierarchy",
+        createObjectContent(taskData),
+        {
+          featureId: "F-full-hierarchy",
+          epicId: "E-test-epic",
+          projectId: "P-test-project",
+        },
+      );
+
+      // Claim task
+      const result = await client.callTool("claim_task", {
+        taskId: "T-full-hierarchy",
+      });
+
+      expect(result.content[0].text).toContain("Successfully claimed task");
+
+      // Verify all levels are in-progress
+      const taskFile = await readObjectFile(
+        testEnv.projectRoot,
+        "p/P-test-project/e/E-test-epic/f/F-full-hierarchy/t/open/T-full-hierarchy.md",
+      );
+      expect(taskFile.yaml.status).toBe("in-progress");
+
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        "p/P-test-project/e/E-test-epic/f/F-full-hierarchy/F-full-hierarchy.md",
+      );
+      expect(featureFile.yaml.status).toBe("in-progress");
+
+      const epicFile = await readObjectFile(
+        testEnv.projectRoot,
+        "p/P-test-project/e/E-test-epic/E-test-epic.md",
+      );
+      expect(epicFile.yaml.status).toBe("in-progress");
+
+      const projectFile = await readObjectFile(
+        testEnv.projectRoot,
+        "p/P-test-project/P-test-project.md",
+      );
+      expect(projectFile.yaml.status).toBe("in-progress");
+    });
+
+    it("should stop updating hierarchy when parent is already in-progress", async () => {
+      // Create project (already in progress)
+      const projectData: ObjectData = {
+        id: "P-active-project",
+        title: "Active Project",
+        status: "in-progress",
+        priority: "high",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "project",
+        "P-active-project",
+        createObjectContent(projectData),
+      );
+
+      // Create epic with project parent
+      const epicData: ObjectData = {
+        id: "E-stopping-hierarchy",
+        title: "Stopping Hierarchy Epic",
+        status: "open",
+        priority: "medium",
+        parent: "P-active-project",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "epic",
+        "E-stopping-hierarchy",
+        createObjectContent(epicData),
+        { projectId: "P-active-project" },
+      );
+
+      // Create feature with epic parent (open)
+      const featureData: ObjectData = {
+        id: "F-stopping-hierarchy",
+        title: "Stopping Hierarchy Feature",
+        status: "open",
+        priority: "medium",
+        parent: "E-stopping-hierarchy",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        "F-stopping-hierarchy",
+        createObjectContent(featureData),
+        { epicId: "E-stopping-hierarchy", projectId: "P-active-project" },
+      );
+
+      // Create task with feature parent
+      const taskData: ObjectData = {
+        id: "T-stopping-hierarchy",
+        title: "Stopping Hierarchy Task",
+        status: "open",
+        priority: "high",
+        parent: "F-stopping-hierarchy",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-stopping-hierarchy",
+        createObjectContent(taskData),
+        {
+          featureId: "F-stopping-hierarchy",
+          epicId: "E-stopping-hierarchy",
+          projectId: "P-active-project",
+        },
+      );
+
+      // Claim task
+      const result = await client.callTool("claim_task", {
+        taskId: "T-stopping-hierarchy",
+      });
+
+      expect(result.content[0].text).toContain("Successfully claimed task");
+
+      // Verify task and feature are in-progress
+      const taskFile = await readObjectFile(
+        testEnv.projectRoot,
+        "p/P-active-project/e/E-stopping-hierarchy/f/F-stopping-hierarchy/t/open/T-stopping-hierarchy.md",
+      );
+      expect(taskFile.yaml.status).toBe("in-progress");
+
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        "p/P-active-project/e/E-stopping-hierarchy/f/F-stopping-hierarchy/F-stopping-hierarchy.md",
+      );
+      expect(featureFile.yaml.status).toBe("in-progress");
+
+      const epicFile = await readObjectFile(
+        testEnv.projectRoot,
+        "p/P-active-project/e/E-stopping-hierarchy/E-stopping-hierarchy.md",
+      );
+      expect(epicFile.yaml.status).toBe("in-progress");
+
+      // Project should remain unchanged (still in-progress, not updated)
+      const projectFile = await readObjectFile(
+        testEnv.projectRoot,
+        "p/P-active-project/P-active-project.md",
+      );
+      expect(projectFile.yaml.status).toBe("in-progress");
+    });
+
+    it("should handle task with no parent gracefully", async () => {
+      // Create task without parent
+      const taskData: ObjectData = {
+        id: "T-orphan-task",
+        title: "Orphan Task",
+        status: "open",
+        priority: "medium",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-orphan-task",
+        createObjectContent(taskData),
+      );
+
+      // Claim task
+      const result = await client.callTool("claim_task", {
+        taskId: "T-orphan-task",
+      });
+
+      expect(result.content[0].text).toContain("Successfully claimed task");
+
+      // Verify only task status changed
+      const taskFile = await readObjectFile(
+        testEnv.projectRoot,
+        "t/open/T-orphan-task.md",
+      );
+      expect(taskFile.yaml.status).toBe("in-progress");
+    });
+
+    it("should update parents even with force claiming", async () => {
+      // Create feature parent
+      const featureData: ObjectData = {
+        id: "F-force-feature",
+        title: "Force Feature",
+        status: "open",
+        priority: "medium",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        "F-force-feature",
+        createObjectContent(featureData),
+      );
+
+      // Create task that's already in progress with parent
+      const taskData: ObjectData = {
+        id: "T-force-hierarchy",
+        title: "Force Hierarchy Task",
+        status: "in-progress",
+        priority: "high",
+        parent: "F-force-feature",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-force-hierarchy",
+        createObjectContent(taskData),
+        { featureId: "F-force-feature" },
+      );
+
+      // Force claim task
+      const result = await client.callTool("claim_task", {
+        taskId: "T-force-hierarchy",
+        force: true,
+      });
+
+      expect(result.content[0].text).toContain("Successfully claimed task");
+
+      // Verify feature parent was still updated
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        "f/F-force-feature/F-force-feature.md",
+      );
+      expect(featureFile.yaml.status).toBe("in-progress");
+    });
+  });
 });

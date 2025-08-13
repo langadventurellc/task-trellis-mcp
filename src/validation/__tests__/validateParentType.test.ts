@@ -33,20 +33,20 @@ describe("validateParentType", () => {
   });
 
   describe("Epics", () => {
-    it("should require epics to have a project parent", () => {
+    it("should allow epics with project parent", () => {
       expect(() => {
         validateParentType(TrellisObjectType.EPIC, "P-project");
       }).not.toThrow();
     });
 
-    it("should reject epics with no parent", () => {
+    it("should allow epics with no parent", () => {
       expect(() => {
         validateParentType(TrellisObjectType.EPIC, null);
-      }).toThrow("Epics must have a project as a parent");
+      }).not.toThrow();
 
       expect(() => {
         validateParentType(TrellisObjectType.EPIC, undefined);
-      }).toThrow("Epics must have a project as a parent");
+      }).not.toThrow();
     });
 
     it("should reject epics with non-project parents", () => {
@@ -144,7 +144,7 @@ describe("validateParentType", () => {
 
       expect(() => {
         validateParentType(TrellisObjectType.EPIC, "");
-      }).toThrow("Epics must have a project as a parent");
+      }).not.toThrow();
     });
   });
 });

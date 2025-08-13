@@ -1,12 +1,10 @@
 import {
-  TrellisObject,
   TrellisObjectPriority,
   TrellisObjectStatus,
   TrellisObjectType,
 } from "../models";
 import { Repository } from "../repositories";
-import { generateUniqueId } from "../utils";
-import { validateObjectCreation } from "../validation/validateObjectCreation.js";
+import { TaskTrellisService } from "../services/TaskTrellisService";
 
 export const createObjectTool = {
   name: "create_object",
@@ -16,17 +14,20 @@ Use this tool to create new objects such as tasks, projects, or other work items
 
 Available object types and hierarchy requirements:
 - 'project': Top-level containers, cannot have a parent
-- 'epic': Must have a project as a parent
+- 'epic': Can have no parent or a project as a parent
 - 'feature': Can have no parent or an epic as a parent
 - 'task': Can have no parent or a feature as a parent
 
 Supported hierarchy structures:
 - Full hierarchy: project → epic → feature → task
+- Simplified: epic → feature → task
 - Simplified: feature → task  
+- Standalone: epic
 - Standalone: task
 
 Available status values:
-- 'draft': Initial state for new objects (default)
+- 'draft': Initial state for new objects
+- 'open': Ready to begin work (default)
 - 'open': Ready to begin work
 - 'in-progress': Currently being worked on
 - 'done': Completed successfully
@@ -71,8 +72,8 @@ Best practices:
       },
       status: {
         type: "string",
-        description: "Status of the object (defaults to 'draft')",
-        default: "draft",
+        description: "Status of the object (defaults to 'open')",
+        default: "open",
       },
       prerequisites: {
         type: "array",
@@ -93,6 +94,7 @@ Best practices:
 } as const;
 
 export async function handleCreateObject(
+  service: TaskTrellisService,
   repository: Repository,
   args: unknown,
 ) {
@@ -101,7 +103,7 @@ export async function handleCreateObject(
     title,
     parent,
     priority = "medium",
-    status = "draft",
+    status = "open",
     prerequisites = [],
     description = "",
   } = args as {
@@ -114,45 +116,15 @@ export async function handleCreateObject(
     description?: string;
   };
 
-  // Get existing objects to generate unique ID
-  const existingObjects = await repository.getObjects(true);
-  const existingIds = existingObjects.map((obj) => obj.id);
-
-  // Generate unique ID
-  const objectType = type as TrellisObjectType;
-  const id = generateUniqueId(title, objectType, existingIds);
-
-  // Create TrellisObject with current timestamp
-  const now = new Date().toISOString();
-  const trellisObject: TrellisObject = {
-    id,
-    type: objectType,
+  // Delegate to service layer
+  return service.createObject(
+    repository,
+    type as TrellisObjectType,
     title,
-    status: status as TrellisObjectStatus,
-    priority: priority as TrellisObjectPriority,
     parent,
+    priority as TrellisObjectPriority,
+    status as TrellisObjectStatus,
     prerequisites,
-    affectedFiles: new Map(),
-    log: [],
-    schema: "v1.0",
-    childrenIds: [],
-    created: now,
-    updated: now,
-    body: description,
-  };
-
-  // Validate object before saving
-  await validateObjectCreation(trellisObject, repository);
-
-  // Save through repository
-  await repository.saveObject(trellisObject);
-
-  return {
-    content: [
-      {
-        type: "text",
-        text: `Created object with ID: ${id}`,
-      },
-    ],
-  };
+    description,
+  );
 }

@@ -137,7 +137,7 @@ Call the Task Trellis MCP `create_object` tool to create the project with the fo
 
 - `type`: Set to `"project"`
 - `title`: The generated project title
-- `status`: Set to `"open"` (ready to begin work) or `"draft"` (default) unless specified
+- `status`: Set to `"open"` (default, ready to begin work) or `"draft"` unless specified
 - `description`: The comprehensive project description generated in the previous step
 
 ### 6. Output Format

@@ -4,6 +4,7 @@ import {
   TrellisObjectStatus,
   TrellisObjectType,
 } from "../../models";
+import { isOpen } from "../../models/isOpen";
 
 export async function getObjects(
   planningRootFolder: string,
@@ -18,7 +19,7 @@ export async function getObjects(
 
   const markdownFiles = await findMarkdownFiles(
     planningRootFolder,
-    includeClosed,
+    true, // Always include closed files, we'll filter by status later
     scope,
   );
 
@@ -35,6 +36,9 @@ export async function getObjects(
       }
       if (priority && trellisObject.priority !== priority) {
         continue; // Skip if priority filter is applied and doesn't match
+      }
+      if (!includeClosed && !isOpen(trellisObject)) {
+        continue; // Skip closed objects if includeClosed is false
       }
 
       objects.push(trellisObject);

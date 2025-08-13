@@ -170,4 +170,717 @@ describe("E2E Workflow - completeTask", () => {
       expect(file.yaml.log).toContain("Added new files");
     });
   });
+
+  describe("Auto-Complete Parent Hierarchy", () => {
+    let autoCompleteClient: McpTestClient;
+
+    beforeEach(async () => {
+      // Create a separate client with auto-complete enabled
+      autoCompleteClient = new McpTestClient(testEnv.projectRoot, true);
+      await autoCompleteClient.connect();
+      await autoCompleteClient.callTool("activate", {
+        mode: "local",
+        projectRoot: testEnv.projectRoot,
+      });
+    }, 30000);
+
+    afterEach(async () => {
+      await autoCompleteClient?.disconnect();
+    });
+
+    it("should auto-complete feature when all tasks are done", async () => {
+      // Create project
+      const projectData: ObjectData = {
+        id: "P-auto-test",
+        title: "Auto Complete Test Project",
+        status: "open",
+        priority: "high",
+        childrenIds: ["E-auto-epic"],
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "project",
+        "P-auto-test",
+        createObjectContent(projectData),
+      );
+
+      // Create epic
+      const epicData: ObjectData = {
+        id: "E-auto-epic",
+        title: "Auto Complete Epic",
+        status: "open",
+        priority: "high",
+        parent: "P-auto-test",
+        childrenIds: ["F-auto-feature"],
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "epic",
+        "E-auto-epic",
+        createObjectContent(epicData),
+        { projectId: "P-auto-test" },
+      );
+
+      // Create feature
+      const featureData: ObjectData = {
+        id: "F-auto-feature",
+        title: "Auto Complete Feature",
+        status: "open",
+        priority: "high",
+        parent: "E-auto-epic",
+        childrenIds: ["T-auto-task1", "T-auto-task2"],
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        "F-auto-feature",
+        createObjectContent(featureData),
+        { projectId: "P-auto-test", epicId: "E-auto-epic" },
+      );
+
+      // Create first task (in progress)
+      const task1Data: ObjectData = {
+        id: "T-auto-task1",
+        title: "Auto Complete Task 1",
+        status: "in-progress",
+        priority: "high",
+        parent: "F-auto-feature",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-auto-task1",
+        createObjectContent(task1Data),
+        {
+          projectId: "P-auto-test",
+          epicId: "E-auto-epic",
+          featureId: "F-auto-feature",
+          status: "open",
+        },
+      );
+
+      // Create second task (already done)
+      const task2Data: ObjectData = {
+        id: "T-auto-task2",
+        title: "Auto Complete Task 2",
+        status: "done",
+        priority: "high",
+        parent: "F-auto-feature",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-auto-task2",
+        createObjectContent(task2Data),
+        {
+          projectId: "P-auto-test",
+          epicId: "E-auto-epic",
+          featureId: "F-auto-feature",
+          status: "closed",
+        },
+      );
+
+      // Complete the first task, which should trigger auto-completion
+      await autoCompleteClient.callTool("complete_task", {
+        taskId: "T-auto-task1",
+        summary: "Completed the final task",
+        filesChanged: {
+          "src/final.ts": "Final implementation",
+        },
+      });
+
+      // Verify task was completed
+      const taskFile = await readObjectFile(
+        testEnv.projectRoot,
+        "p/P-auto-test/e/E-auto-epic/f/F-auto-feature/t/closed/T-auto-task1.md",
+      );
+      expect(taskFile.yaml.status).toBe("done");
+
+      // Verify feature was auto-completed
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        "p/P-auto-test/e/E-auto-epic/f/F-auto-feature/F-auto-feature.md",
+      );
+      expect(featureFile.yaml.status).toBe("done");
+      expect(featureFile.yaml.log).toContain(
+        "Auto-completed: All child tasks are complete",
+      );
+
+      // Verify epic was auto-completed
+      const epicFile = await readObjectFile(
+        testEnv.projectRoot,
+        "p/P-auto-test/e/E-auto-epic/E-auto-epic.md",
+      );
+      expect(epicFile.yaml.status).toBe("done");
+      expect(epicFile.yaml.log).toContain(
+        "Auto-completed: All child features are complete",
+      );
+
+      // Verify project was auto-completed
+      const projectFile = await readObjectFile(
+        testEnv.projectRoot,
+        "p/P-auto-test/P-auto-test.md",
+      );
+      expect(projectFile.yaml.status).toBe("done");
+      expect(projectFile.yaml.log).toContain(
+        "Auto-completed: All child epics are complete",
+      );
+    });
+
+    it("should not auto-complete feature when some tasks are still pending", async () => {
+      // Create feature
+      const featureData: ObjectData = {
+        id: "F-partial-feature",
+        title: "Partial Complete Feature",
+        status: "open",
+        priority: "medium",
+        childrenIds: ["T-partial-task1", "T-partial-task2"],
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        "F-partial-feature",
+        createObjectContent(featureData),
+      );
+
+      // Create first task (in progress)
+      const task1Data: ObjectData = {
+        id: "T-partial-task1",
+        title: "Partial Task 1",
+        status: "in-progress",
+        priority: "medium",
+        parent: "F-partial-feature",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-partial-task1",
+        createObjectContent(task1Data),
+        { featureId: "F-partial-feature", status: "open" },
+      );
+
+      // Create second task (still open)
+      const task2Data: ObjectData = {
+        id: "T-partial-task2",
+        title: "Partial Task 2",
+        status: "open",
+        priority: "medium",
+        parent: "F-partial-feature",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-partial-task2",
+        createObjectContent(task2Data),
+        { featureId: "F-partial-feature", status: "open" },
+      );
+
+      // Complete only the first task
+      await autoCompleteClient.callTool("complete_task", {
+        taskId: "T-partial-task1",
+        summary: "Completed first task only",
+        filesChanged: {},
+      });
+
+      // Verify task was completed
+      const taskFile = await readObjectFile(
+        testEnv.projectRoot,
+        "f/F-partial-feature/t/closed/T-partial-task1.md",
+      );
+      expect(taskFile.yaml.status).toBe("done");
+
+      // Verify feature was NOT auto-completed
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        "f/F-partial-feature/F-partial-feature.md",
+      );
+      expect(featureFile.yaml.status).toBe("open");
+      expect(featureFile.yaml.log || []).not.toContain("Auto-completed");
+    });
+
+    it("should auto-complete with mixed done and wont-do tasks", async () => {
+      // Create feature
+      const featureData: ObjectData = {
+        id: "F-mixed-feature",
+        title: "Mixed Status Feature",
+        status: "open",
+        priority: "low",
+        childrenIds: ["T-mixed-task1", "T-mixed-task2"],
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        "F-mixed-feature",
+        createObjectContent(featureData),
+      );
+
+      // Create first task (in progress)
+      const task1Data: ObjectData = {
+        id: "T-mixed-task1",
+        title: "Mixed Task 1",
+        status: "in-progress",
+        priority: "low",
+        parent: "F-mixed-feature",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-mixed-task1",
+        createObjectContent(task1Data),
+        { featureId: "F-mixed-feature", status: "open" },
+      );
+
+      // Create second task (wont-do)
+      const task2Data: ObjectData = {
+        id: "T-mixed-task2",
+        title: "Mixed Task 2",
+        status: "wont-do",
+        priority: "low",
+        parent: "F-mixed-feature",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-mixed-task2",
+        createObjectContent(task2Data),
+        { featureId: "F-mixed-feature", status: "closed" },
+      );
+
+      // Complete the first task
+      await autoCompleteClient.callTool("complete_task", {
+        taskId: "T-mixed-task1",
+        summary: "Completed while other was cancelled",
+        filesChanged: {},
+      });
+
+      // Verify task was completed
+      const taskFile = await readObjectFile(
+        testEnv.projectRoot,
+        "f/F-mixed-feature/t/closed/T-mixed-task1.md",
+      );
+      expect(taskFile.yaml.status).toBe("done");
+
+      // Verify feature was auto-completed (since both tasks are in final states)
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        "f/F-mixed-feature/F-mixed-feature.md",
+      );
+      expect(featureFile.yaml.status).toBe("done");
+      expect(featureFile.yaml.log).toContain(
+        "Auto-completed: All child tasks are complete",
+      );
+    });
+
+    it("should handle standalone feature completion without epic/project", async () => {
+      // Create standalone feature
+      const featureData: ObjectData = {
+        id: "F-standalone",
+        title: "Standalone Feature",
+        status: "open",
+        priority: "medium",
+        childrenIds: ["T-standalone-task"],
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        "F-standalone",
+        createObjectContent(featureData),
+      );
+
+      // Create task
+      const taskData: ObjectData = {
+        id: "T-standalone-task",
+        title: "Standalone Task",
+        status: "in-progress",
+        priority: "medium",
+        parent: "F-standalone",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-standalone-task",
+        createObjectContent(taskData),
+        { featureId: "F-standalone", status: "open" },
+      );
+
+      // Complete the task
+      await autoCompleteClient.callTool("complete_task", {
+        taskId: "T-standalone-task",
+        summary: "Completed standalone task",
+        filesChanged: {},
+      });
+
+      // Verify task was completed
+      const taskFile = await readObjectFile(
+        testEnv.projectRoot,
+        "f/F-standalone/t/closed/T-standalone-task.md",
+      );
+      expect(taskFile.yaml.status).toBe("done");
+
+      // Verify feature was auto-completed
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        "f/F-standalone/F-standalone.md",
+      );
+      expect(featureFile.yaml.status).toBe("done");
+      expect(featureFile.yaml.log).toContain(
+        "Auto-completed: All child tasks are complete",
+      );
+    });
+
+    it("should not auto-complete when auto-complete-parent is disabled", async () => {
+      // Use the regular client without auto-complete enabled
+      const featureData: ObjectData = {
+        id: "F-no-auto",
+        title: "No Auto Complete Feature",
+        status: "open",
+        priority: "medium",
+        childrenIds: ["T-no-auto-task"],
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        "F-no-auto",
+        createObjectContent(featureData),
+      );
+
+      const taskData: ObjectData = {
+        id: "T-no-auto-task",
+        title: "No Auto Task",
+        status: "in-progress",
+        priority: "medium",
+        parent: "F-no-auto",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-no-auto-task",
+        createObjectContent(taskData),
+        { featureId: "F-no-auto", status: "open" },
+      );
+
+      // Complete the task using the regular client (without auto-complete)
+      await client.callTool("complete_task", {
+        taskId: "T-no-auto-task",
+        summary: "Completed without auto-complete",
+        filesChanged: {},
+      });
+
+      // Verify task was completed
+      const taskFile = await readObjectFile(
+        testEnv.projectRoot,
+        "f/F-no-auto/t/closed/T-no-auto-task.md",
+      );
+      expect(taskFile.yaml.status).toBe("done");
+
+      // Verify feature was NOT auto-completed
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        "f/F-no-auto/F-no-auto.md",
+      );
+      expect(featureFile.yaml.status).toBe("open");
+      expect(featureFile.yaml.log || []).not.toContain("Auto-completed");
+    });
+  });
+
+  describe("Recursive Parent File Updates", () => {
+    it("should recursively update parent objects with affected files", async () => {
+      // Create project
+      const projectData: ObjectData = {
+        id: "P-parent-files-test",
+        title: "Parent Files Test Project",
+        status: "open",
+        priority: "high",
+        childrenIds: ["E-parent-files-epic"],
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "project",
+        "P-parent-files-test",
+        createObjectContent(projectData),
+      );
+
+      // Create epic
+      const epicData: ObjectData = {
+        id: "E-parent-files-epic",
+        title: "Parent Files Epic",
+        status: "open",
+        priority: "high",
+        parent: "P-parent-files-test",
+        childrenIds: ["F-parent-files-feature"],
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "epic",
+        "E-parent-files-epic",
+        createObjectContent(epicData),
+        { projectId: "P-parent-files-test" },
+      );
+
+      // Create feature
+      const featureData: ObjectData = {
+        id: "F-parent-files-feature",
+        title: "Parent Files Feature",
+        status: "open",
+        priority: "high",
+        parent: "E-parent-files-epic",
+        childrenIds: ["T-parent-files-task"],
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        "F-parent-files-feature",
+        createObjectContent(featureData),
+        { projectId: "P-parent-files-test", epicId: "E-parent-files-epic" },
+      );
+
+      // Create task
+      const taskData: ObjectData = {
+        id: "T-parent-files-task",
+        title: "Parent Files Task",
+        status: "in-progress",
+        priority: "high",
+        parent: "F-parent-files-feature",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-parent-files-task",
+        createObjectContent(taskData),
+        {
+          projectId: "P-parent-files-test",
+          epicId: "E-parent-files-epic",
+          featureId: "F-parent-files-feature",
+          status: "open",
+        },
+      );
+
+      // Complete the task with modified files
+      await client.callTool("complete_task", {
+        taskId: "T-parent-files-task",
+        summary: "Implemented feature with multiple file changes",
+        filesChanged: {
+          "src/components/NewFeature.tsx": "Implemented new feature component",
+          "src/hooks/useNewFeature.ts": "Custom hook for new feature",
+          "tests/NewFeature.test.tsx": "Unit tests for new feature",
+        },
+      });
+
+      // Verify task was completed and has affected files
+      const taskFile = await readObjectFile(
+        testEnv.projectRoot,
+        "p/P-parent-files-test/e/E-parent-files-epic/f/F-parent-files-feature/t/closed/T-parent-files-task.md",
+      );
+      expect(taskFile.yaml.status).toBe("done");
+      expect(taskFile.yaml.affectedFiles).toEqual({
+        "src/components/NewFeature.tsx": "Implemented new feature component",
+        "src/hooks/useNewFeature.ts": "Custom hook for new feature",
+        "tests/NewFeature.test.tsx": "Unit tests for new feature",
+      });
+
+      // Verify feature inherited the same affected files
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        "p/P-parent-files-test/e/E-parent-files-epic/f/F-parent-files-feature/F-parent-files-feature.md",
+      );
+      expect(featureFile.yaml.affectedFiles).toEqual({
+        "src/components/NewFeature.tsx": "Implemented new feature component",
+        "src/hooks/useNewFeature.ts": "Custom hook for new feature",
+        "tests/NewFeature.test.tsx": "Unit tests for new feature",
+      });
+
+      // Verify epic inherited the same affected files
+      const epicFile = await readObjectFile(
+        testEnv.projectRoot,
+        "p/P-parent-files-test/e/E-parent-files-epic/E-parent-files-epic.md",
+      );
+      expect(epicFile.yaml.affectedFiles).toEqual({
+        "src/components/NewFeature.tsx": "Implemented new feature component",
+        "src/hooks/useNewFeature.ts": "Custom hook for new feature",
+        "tests/NewFeature.test.tsx": "Unit tests for new feature",
+      });
+
+      // Verify project inherited the same affected files
+      const projectFile = await readObjectFile(
+        testEnv.projectRoot,
+        "p/P-parent-files-test/P-parent-files-test.md",
+      );
+      expect(projectFile.yaml.affectedFiles).toEqual({
+        "src/components/NewFeature.tsx": "Implemented new feature component",
+        "src/hooks/useNewFeature.ts": "Custom hook for new feature",
+        "tests/NewFeature.test.tsx": "Unit tests for new feature",
+      });
+    });
+
+    it("should merge affected files with existing parent files", async () => {
+      // Create feature with existing affected files
+      const featureData: ObjectData = {
+        id: "F-merge-files-feature",
+        title: "Merge Files Feature",
+        status: "open",
+        priority: "medium",
+        childrenIds: ["T-merge-files-task"],
+        affectedFiles: {
+          "src/existing.ts": "Existing feature implementation",
+          "docs/feature.md": "Feature documentation",
+        },
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        "F-merge-files-feature",
+        createObjectContent(featureData),
+      );
+
+      // Create task
+      const taskData: ObjectData = {
+        id: "T-merge-files-task",
+        title: "Merge Files Task",
+        status: "in-progress",
+        priority: "medium",
+        parent: "F-merge-files-feature",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-merge-files-task",
+        createObjectContent(taskData),
+        { featureId: "F-merge-files-feature", status: "open" },
+      );
+
+      // Complete task with some overlapping and new files
+      await client.callTool("complete_task", {
+        taskId: "T-merge-files-task",
+        summary: "Enhanced existing feature and added new components",
+        filesChanged: {
+          "src/existing.ts": "Enhanced with new functionality",
+          "src/components/Widget.tsx": "New widget component",
+          "tests/Widget.test.tsx": "Widget unit tests",
+        },
+      });
+
+      // Verify task has its affected files
+      const taskFile = await readObjectFile(
+        testEnv.projectRoot,
+        "f/F-merge-files-feature/t/closed/T-merge-files-task.md",
+      );
+      expect(taskFile.yaml.affectedFiles).toEqual({
+        "src/existing.ts": "Enhanced with new functionality",
+        "src/components/Widget.tsx": "New widget component",
+        "tests/Widget.test.tsx": "Widget unit tests",
+      });
+
+      // Verify feature has merged files (existing + new from task)
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        "f/F-merge-files-feature/F-merge-files-feature.md",
+      );
+      expect(featureFile.yaml.affectedFiles).toEqual({
+        "src/existing.ts":
+          "Existing feature implementation; Enhanced with new functionality",
+        "docs/feature.md": "Feature documentation",
+        "src/components/Widget.tsx": "New widget component",
+        "tests/Widget.test.tsx": "Widget unit tests",
+      });
+    });
+
+    it("should handle task with no parent gracefully", async () => {
+      // Create standalone task (no parent)
+      const taskData: ObjectData = {
+        id: "T-standalone-files",
+        title: "Standalone Files Task",
+        status: "in-progress",
+        priority: "low",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-standalone-files",
+        createObjectContent(taskData),
+      );
+
+      // Complete task with files - should work without errors
+      const result = await client.callTool("complete_task", {
+        taskId: "T-standalone-files",
+        summary: "Completed standalone task",
+        filesChanged: {
+          "src/standalone.ts": "Standalone implementation",
+        },
+      });
+
+      expect(result.content[0].text).toContain("completed successfully");
+
+      // Verify task has its affected files
+      const taskFile = await readObjectFile(
+        testEnv.projectRoot,
+        "t/closed/T-standalone-files.md",
+      );
+      expect(taskFile.yaml.status).toBe("done");
+      expect(taskFile.yaml.affectedFiles).toEqual({
+        "src/standalone.ts": "Standalone implementation",
+      });
+    });
+
+    it("should work with partial hierarchy (feature → task)", async () => {
+      // Create feature
+      const featureData: ObjectData = {
+        id: "F-partial-hierarchy",
+        title: "Partial Hierarchy Feature",
+        status: "open",
+        priority: "medium",
+        childrenIds: ["T-partial-task"],
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        "F-partial-hierarchy",
+        createObjectContent(featureData),
+      );
+
+      // Create task
+      const taskData: ObjectData = {
+        id: "T-partial-task",
+        title: "Partial Hierarchy Task",
+        status: "in-progress",
+        priority: "medium",
+        parent: "F-partial-hierarchy",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-partial-task",
+        createObjectContent(taskData),
+        { featureId: "F-partial-hierarchy", status: "open" },
+      );
+
+      // Complete task
+      await client.callTool("complete_task", {
+        taskId: "T-partial-task",
+        summary: "Completed partial hierarchy task",
+        filesChanged: {
+          "src/partial.ts": "Partial implementation",
+          "config/settings.json": "Configuration updates",
+        },
+      });
+
+      // Verify both task and feature have the files
+      const taskFile = await readObjectFile(
+        testEnv.projectRoot,
+        "f/F-partial-hierarchy/t/closed/T-partial-task.md",
+      );
+      expect(taskFile.yaml.affectedFiles).toEqual({
+        "src/partial.ts": "Partial implementation",
+        "config/settings.json": "Configuration updates",
+      });
+
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        "f/F-partial-hierarchy/F-partial-hierarchy.md",
+      );
+      expect(featureFile.yaml.affectedFiles).toEqual({
+        "src/partial.ts": "Partial implementation",
+        "config/settings.json": "Configuration updates",
+      });
+    });
+  });
 });

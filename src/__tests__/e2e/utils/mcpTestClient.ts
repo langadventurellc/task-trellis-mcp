@@ -10,24 +10,32 @@ export class McpTestClient {
   private transport: StdioClientTransport | null = null;
   private connected: boolean = false;
   private projectRoot: string;
+  private autoCompleteParent?: boolean;
 
-  constructor(projectRoot: string) {
+  constructor(projectRoot: string, autoCompleteParent?: boolean) {
     this.projectRoot = projectRoot;
+    this.autoCompleteParent = autoCompleteParent;
   }
 
   async connect(): Promise<void> {
     if (this.connected) return;
 
     // Create transport that will spawn the server process
+    const args = [
+      "dist/server.js",
+      "--mode",
+      "local",
+      "--projectRootFolder",
+      this.projectRoot,
+    ];
+
+    if (this.autoCompleteParent) {
+      args.push("--auto-complete-parent");
+    }
+
     this.transport = new StdioClientTransport({
       command: "node",
-      args: [
-        "dist/server.js",
-        "--mode",
-        "local",
-        "--projectRootFolder",
-        this.projectRoot,
-      ],
+      args,
     });
 
     // Create and connect client

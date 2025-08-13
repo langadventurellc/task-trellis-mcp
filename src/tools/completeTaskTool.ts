@@ -1,5 +1,6 @@
-import { TrellisObjectStatus } from "../models";
+import { ServerConfig } from "../configuration";
 import { Repository } from "../repositories";
+import { TaskTrellisService } from "../services/TaskTrellisService";
 
 export const completeTaskTool = {
   name: "complete_task",
@@ -56,9 +57,11 @@ Task completion automatically notifies dependent tasks and may trigger workflow 
   },
 } as const;
 
-export async function handleCompleteTask(
+export function handleCompleteTask(
+  service: TaskTrellisService,
   repository: Repository,
   args: unknown,
+  serverConfig?: ServerConfig,
 ) {
   const { taskId, summary, filesChanged } = args as {
     taskId: string;
@@ -66,39 +69,12 @@ export async function handleCompleteTask(
     filesChanged: Record<string, string>;
   };
 
-  // Get the task object from repository
-  const task = await repository.getObjectById(taskId);
-  if (!task) {
-    throw new Error(`Task with ID "${taskId}" not found`);
-  }
-
-  // Check if task is in progress
-  if (task.status !== TrellisObjectStatus.IN_PROGRESS) {
-    throw new Error(
-      `Task "${taskId}" is not in progress (current status: ${task.status})`,
-    );
-  }
-
-  // Update task status to done
-  task.status = TrellisObjectStatus.DONE;
-
-  // Append to affected files map
-  Object.entries(filesChanged).forEach(([filePath, description]) => {
-    task.affectedFiles.set(filePath, description);
-  });
-
-  // Append summary to log
-  task.log.push(summary);
-
-  // Save the updated task
-  await repository.saveObject(task);
-
-  return {
-    content: [
-      {
-        type: "text",
-        text: `Task "${taskId}" completed successfully. Updated ${Object.keys(filesChanged).length} affected files.`,
-      },
-    ],
-  };
+  // Delegate to service.completeTask
+  return service.completeTask(
+    repository,
+    taskId,
+    summary,
+    filesChanged,
+    serverConfig,
+  );
 }

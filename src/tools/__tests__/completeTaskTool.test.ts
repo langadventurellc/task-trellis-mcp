@@ -1,36 +1,25 @@
 import { Repository } from "../../repositories/Repository";
-import {
-  TrellisObject,
-  TrellisObjectType,
-  TrellisObjectStatus,
-  TrellisObjectPriority,
-} from "../../models";
+import { TaskTrellisService } from "../../services/TaskTrellisService";
 import { handleCompleteTask } from "../completeTaskTool";
+import { ServerConfig } from "../../configuration";
 
 describe("completeTaskTool", () => {
+  let mockService: jest.Mocked<TaskTrellisService>;
   let mockRepository: jest.Mocked<Repository>;
 
-  const createMockTask = (
-    overrides?: Partial<TrellisObject>,
-  ): TrellisObject => ({
-    id: "T-test-task",
-    type: TrellisObjectType.TASK,
-    title: "Test Task",
-    status: TrellisObjectStatus.IN_PROGRESS,
-    priority: TrellisObjectPriority.MEDIUM,
-    parent: "F-test-feature",
-    prerequisites: [],
-    affectedFiles: new Map(),
-    log: [],
-    schema: "1.0",
-    created: "2025-01-15T10:00:00Z",
-    updated: "2025-01-15T10:00:00Z",
-    childrenIds: [],
-    body: "This is a test task",
-    ...overrides,
-  });
-
   beforeEach(() => {
+    mockService = {
+      completeTask: jest.fn(),
+      createObject: jest.fn(),
+      updateObject: jest.fn(),
+      claimTask: jest.fn(),
+      listObjects: jest.fn(),
+      appendObjectLog: jest.fn(),
+      pruneClosed: jest.fn(),
+      replaceObjectBodyRegex: jest.fn(),
+      appendModifiedFiles: jest.fn(),
+    };
+
     mockRepository = {
       getObjectById: jest.fn(),
       getObjects: jest.fn(),
@@ -40,258 +29,248 @@ describe("completeTaskTool", () => {
   });
 
   describe("handleCompleteTask", () => {
-    it("should successfully complete a task in progress", async () => {
-      const mockTask = createMockTask();
-      const filesChanged = {
-        "src/file1.ts": "Added new feature",
-        "src/file2.ts": "Fixed bug",
+    it("should call service.completeTask with correct parameters", async () => {
+      const expectedResult = {
+        content: [
+          {
+            type: "text",
+            text: 'Task "T-test-task" completed successfully. Updated 2 affected files.',
+          },
+        ],
       };
 
-      mockRepository.getObjectById.mockResolvedValue(mockTask);
-      mockRepository.saveObject.mockResolvedValue();
+      mockService.completeTask.mockResolvedValue(expectedResult);
 
-      const result = await handleCompleteTask(mockRepository, {
+      const args = {
         taskId: "T-test-task",
         summary: "Task completed successfully",
-        filesChanged,
-      });
-
-      expect(mockRepository.getObjectById).toHaveBeenCalledWith("T-test-task");
-      expect(mockRepository.saveObject).toHaveBeenCalledWith({
-        ...mockTask,
-        status: TrellisObjectStatus.DONE,
-        affectedFiles: new Map([
-          ["src/file1.ts", "Added new feature"],
-          ["src/file2.ts", "Fixed bug"],
-        ]),
-        log: ["Task completed successfully"],
-      });
-      expect(result.content[0].text).toContain(
-        'Task "T-test-task" completed successfully. Updated 2 affected files.',
-      );
-    });
-
-    it("should append to existing affected files", async () => {
-      const existingFiles = new Map([["existing.ts", "Previously changed"]]);
-      const mockTask = createMockTask({ affectedFiles: existingFiles });
-      const filesChanged = {
-        "src/new-file.ts": "Newly added file",
+        filesChanged: {
+          "src/file1.ts": "Added new feature",
+          "src/file2.ts": "Fixed bug",
+        },
       };
 
-      mockRepository.getObjectById.mockResolvedValue(mockTask);
-      mockRepository.saveObject.mockResolvedValue();
+      const result = await handleCompleteTask(
+        mockService,
+        mockRepository,
+        args,
+      );
 
-      await handleCompleteTask(mockRepository, {
-        taskId: "T-test-task",
-        summary: "Added new functionality",
-        filesChanged,
-      });
-
-      expect(mockRepository.saveObject).toHaveBeenCalledWith({
-        ...mockTask,
-        status: TrellisObjectStatus.DONE,
-        affectedFiles: new Map([
-          ["existing.ts", "Previously changed"],
-          ["src/new-file.ts", "Newly added file"],
-        ]),
-        log: ["Added new functionality"],
-      });
+      expect(mockService.completeTask).toHaveBeenCalledWith(
+        mockRepository,
+        "T-test-task",
+        "Task completed successfully",
+        {
+          "src/file1.ts": "Added new feature",
+          "src/file2.ts": "Fixed bug",
+        },
+        undefined,
+      );
+      expect(result).toBe(expectedResult);
     });
 
-    it("should append to existing log entries", async () => {
-      const mockTask = createMockTask({ log: ["Previous log entry"] });
-      const filesChanged = { "file.ts": "Description" };
+    it("should pass serverConfig to service.completeTask when provided", async () => {
+      const expectedResult = {
+        content: [
+          {
+            type: "text",
+            text: 'Task "T-test-task" completed successfully.',
+          },
+        ],
+      };
 
-      mockRepository.getObjectById.mockResolvedValue(mockTask);
-      mockRepository.saveObject.mockResolvedValue();
+      const serverConfig: ServerConfig = {
+        mode: "local",
+        planningRootFolder: "/test",
+        autoCompleteParent: true,
+      };
 
-      await handleCompleteTask(mockRepository, {
+      mockService.completeTask.mockResolvedValue(expectedResult);
+
+      const args = {
         taskId: "T-test-task",
-        summary: "New log entry",
-        filesChanged,
-      });
+        summary: "Task completed",
+        filesChanged: {},
+      };
 
-      expect(mockRepository.saveObject).toHaveBeenCalledWith({
-        ...mockTask,
-        status: TrellisObjectStatus.DONE,
-        log: ["Previous log entry", "New log entry"],
-        affectedFiles: new Map([["file.ts", "Description"]]),
-      });
+      const result = await handleCompleteTask(
+        mockService,
+        mockRepository,
+        args,
+        serverConfig,
+      );
+
+      expect(mockService.completeTask).toHaveBeenCalledWith(
+        mockRepository,
+        "T-test-task",
+        "Task completed",
+        {},
+        serverConfig,
+      );
+      expect(result).toBe(expectedResult);
     });
 
-    it("should handle empty files changed object", async () => {
-      const mockTask = createMockTask();
-      const filesChanged = {};
+    it("should handle empty filesChanged object", async () => {
+      const expectedResult = {
+        content: [
+          {
+            type: "text",
+            text: 'Task "T-test-task" completed successfully. Updated 0 affected files.',
+          },
+        ],
+      };
 
-      mockRepository.getObjectById.mockResolvedValue(mockTask);
-      mockRepository.saveObject.mockResolvedValue();
+      mockService.completeTask.mockResolvedValue(expectedResult);
 
-      const result = await handleCompleteTask(mockRepository, {
+      const args = {
         taskId: "T-test-task",
         summary: "Task completed with no file changes",
-        filesChanged,
-      });
+        filesChanged: {},
+      };
 
-      expect(mockRepository.saveObject).toHaveBeenCalledWith({
-        ...mockTask,
-        status: TrellisObjectStatus.DONE,
-        affectedFiles: new Map(),
-        log: ["Task completed with no file changes"],
-      });
-      expect(result.content[0].text).toContain("Updated 0 affected files");
+      const result = await handleCompleteTask(
+        mockService,
+        mockRepository,
+        args,
+      );
+
+      expect(mockService.completeTask).toHaveBeenCalledWith(
+        mockRepository,
+        "T-test-task",
+        "Task completed with no file changes",
+        {},
+        undefined,
+      );
+      expect(result).toBe(expectedResult);
     });
 
-    it("should throw error when task is not found", async () => {
-      mockRepository.getObjectById.mockResolvedValue(null);
+    it("should propagate service errors", async () => {
+      const errorMessage = "Task not found";
+      mockService.completeTask.mockRejectedValue(new Error(errorMessage));
+
+      const args = {
+        taskId: "T-nonexistent",
+        summary: "Summary",
+        filesChanged: {},
+      };
 
       await expect(
-        handleCompleteTask(mockRepository, {
-          taskId: "T-nonexistent",
-          summary: "Summary",
-          filesChanged: {},
-        }),
-      ).rejects.toThrow('Task with ID "T-nonexistent" not found');
+        handleCompleteTask(mockService, mockRepository, args),
+      ).rejects.toThrow(errorMessage);
 
-      expect(mockRepository.getObjectById).toHaveBeenCalledWith(
+      expect(mockService.completeTask).toHaveBeenCalledWith(
+        mockRepository,
         "T-nonexistent",
+        "Summary",
+        {},
+        undefined,
       );
-      expect(mockRepository.saveObject).not.toHaveBeenCalled();
     });
 
-    it("should throw error when task is not in progress", async () => {
-      const mockTask = createMockTask({ status: TrellisObjectStatus.OPEN });
-      mockRepository.getObjectById.mockResolvedValue(mockTask);
+    it("should handle complex filesChanged object", async () => {
+      const expectedResult = {
+        content: [
+          {
+            type: "text",
+            text: 'Task "T-test-task" completed successfully. Updated 3 affected files.',
+          },
+        ],
+      };
 
-      await expect(
-        handleCompleteTask(mockRepository, {
-          taskId: "T-test-task",
-          summary: "Summary",
-          filesChanged: {},
-        }),
-      ).rejects.toThrow(
-        'Task "T-test-task" is not in progress (current status: open)',
-      );
+      mockService.completeTask.mockResolvedValue(expectedResult);
 
-      expect(mockRepository.saveObject).not.toHaveBeenCalled();
-    });
+      const args = {
+        taskId: "T-test-task",
+        summary: "Multiple files changed",
+        filesChanged: {
+          "file1.ts": "First file",
+          "file2.js": "Second file",
+          "config.json": "Configuration file",
+        },
+      };
 
-    it("should throw error when task is already done", async () => {
-      const mockTask = createMockTask({ status: TrellisObjectStatus.DONE });
-      mockRepository.getObjectById.mockResolvedValue(mockTask);
-
-      await expect(
-        handleCompleteTask(mockRepository, {
-          taskId: "T-test-task",
-          summary: "Summary",
-          filesChanged: {},
-        }),
-      ).rejects.toThrow(
-        'Task "T-test-task" is not in progress (current status: done)',
-      );
-
-      expect(mockRepository.saveObject).not.toHaveBeenCalled();
-    });
-
-    it("should throw error when task is in draft status", async () => {
-      const mockTask = createMockTask({ status: TrellisObjectStatus.DRAFT });
-      mockRepository.getObjectById.mockResolvedValue(mockTask);
-
-      await expect(
-        handleCompleteTask(mockRepository, {
-          taskId: "T-test-task",
-          summary: "Summary",
-          filesChanged: {},
-        }),
-      ).rejects.toThrow(
-        'Task "T-test-task" is not in progress (current status: draft)',
+      const result = await handleCompleteTask(
+        mockService,
+        mockRepository,
+        args,
       );
 
-      expect(mockRepository.saveObject).not.toHaveBeenCalled();
+      expect(mockService.completeTask).toHaveBeenCalledWith(
+        mockRepository,
+        "T-test-task",
+        "Multiple files changed",
+        {
+          "file1.ts": "First file",
+          "file2.js": "Second file",
+          "config.json": "Configuration file",
+        },
+        undefined,
+      );
+      expect(result).toBe(expectedResult);
     });
 
-    it("should handle repository getObjectById errors", async () => {
-      const errorMessage = "Database connection failed";
-      mockRepository.getObjectById.mockRejectedValue(new Error(errorMessage));
+    it("should ignore extra properties in args object", async () => {
+      const expectedResult = {
+        content: [
+          {
+            type: "text",
+            text: 'Task "T-test-task" completed successfully.',
+          },
+        ],
+      };
 
-      await expect(
-        handleCompleteTask(mockRepository, {
-          taskId: "T-test-task",
-          summary: "Summary",
-          filesChanged: {},
-        }),
-      ).rejects.toThrow(errorMessage);
+      mockService.completeTask.mockResolvedValue(expectedResult);
 
-      expect(mockRepository.saveObject).not.toHaveBeenCalled();
-    });
+      const args = {
+        taskId: "T-test-task",
+        summary: "Test summary",
+        filesChanged: { "test.ts": "Test file" },
+        extraProperty: "should be ignored",
+        anotherExtra: 123,
+      };
 
-    it("should handle repository saveObject errors", async () => {
-      const mockTask = createMockTask();
-      const errorMessage = "Save operation failed";
+      const result = await handleCompleteTask(
+        mockService,
+        mockRepository,
+        args,
+      );
 
-      mockRepository.getObjectById.mockResolvedValue(mockTask);
-      mockRepository.saveObject.mockRejectedValue(new Error(errorMessage));
-
-      await expect(
-        handleCompleteTask(mockRepository, {
-          taskId: "T-test-task",
-          summary: "Summary",
-          filesChanged: { "file.ts": "Description" },
-        }),
-      ).rejects.toThrow(errorMessage);
-
-      expect(mockRepository.getObjectById).toHaveBeenCalledWith("T-test-task");
-      expect(mockRepository.saveObject).toHaveBeenCalled();
+      expect(mockService.completeTask).toHaveBeenCalledWith(
+        mockRepository,
+        "T-test-task",
+        "Test summary",
+        { "test.ts": "Test file" },
+        undefined,
+      );
+      expect(result).toBe(expectedResult);
     });
   });
 
-  describe("parameter handling", () => {
-    it("should handle args object correctly with all parameters", async () => {
-      const mockTask = createMockTask();
-      const filesChanged = { "test.ts": "Test file" };
-
-      mockRepository.getObjectById.mockResolvedValue(mockTask);
-      mockRepository.saveObject.mockResolvedValue();
-
-      const result = await handleCompleteTask(mockRepository, {
-        taskId: "T-test-task",
-        summary: "Test summary",
-        filesChanged,
-        extraProperty: "should be ignored",
-      });
-
-      expect(mockRepository.getObjectById).toHaveBeenCalledWith("T-test-task");
-      expect(result.content[0].text).toContain("completed successfully");
-    });
-
-    it("should properly type filesChanged as Record<string, string>", async () => {
-      const mockTask = createMockTask();
-      const filesChanged = {
-        "file1.ts": "First file",
-        "file2.js": "Second file",
-        "config.json": "Configuration file",
+  describe("parameter extraction", () => {
+    it("should correctly extract taskId, summary, and filesChanged from args", async () => {
+      const expectedResult = {
+        content: [{ type: "text", text: "Success" }],
       };
 
-      mockRepository.getObjectById.mockResolvedValue(mockTask);
-      mockRepository.saveObject.mockResolvedValue();
+      mockService.completeTask.mockResolvedValue(expectedResult);
 
-      await handleCompleteTask(mockRepository, {
-        taskId: "T-test-task",
-        summary: "Multiple files changed",
-        filesChanged,
-      });
+      const args = {
+        taskId: "T-extract-test",
+        summary: "Extraction test summary",
+        filesChanged: {
+          "extract.ts": "Extraction test",
+        },
+      };
 
-      const expectedMap = new Map([
-        ["file1.ts", "First file"],
-        ["file2.js", "Second file"],
-        ["config.json", "Configuration file"],
-      ]);
+      await handleCompleteTask(mockService, mockRepository, args);
 
-      expect(mockRepository.saveObject).toHaveBeenCalledWith({
-        ...mockTask,
-        status: TrellisObjectStatus.DONE,
-        affectedFiles: expectedMap,
-        log: ["Multiple files changed"],
-      });
+      expect(mockService.completeTask).toHaveBeenCalledWith(
+        mockRepository,
+        "T-extract-test",
+        "Extraction test summary",
+        { "extract.ts": "Extraction test" },
+        undefined,
+      );
     });
   });
 });

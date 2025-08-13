@@ -59,8 +59,8 @@ Claims are made against the current working directory's task trellis system (tas
 
 The research phase is critical for understanding the context and requirements before writing any code. During this phase:
 
-- **Read parent objects for context**: Use MCP `get_object` to read the parent feature, epic, and project for additional context, specifications, and requirements that may not be fully detailed in the task description. Do not continue with the research and implementation planner until you have claimed or loaded an already claimed task.
-- **Use research and implementation planner subagent**: Use the research and implementation planner subagent to perform the research and planning. Provide **ALL** relevant context, including the task ID, task description, parent feature, epic, and project details, and any other pertinent information. If the research and implementation planner subagent is not available, **STOP** and inform the user that you cannot proceed without it.
+- **Read parent objects for context**: Use MCP `get_object` to read the parent feature (if it has one) for additional context, specifications, and requirements that may not be fully detailed in the task description. Do not continue with the research and implementation planner until you have claimed or loaded an already claimed task.
+- **Use research and implementation planner subagent**: Use the research and implementation planner subagent to perform the research and planning. Provide **ALL** relevant context, including the task ID, task description, parent feature details, and any other pertinent information. If the research and implementation planner subagent is not available, **STOP** and inform the user that you cannot proceed without it.
 
 ```
 📚 Research Phase for T-create-user-model
