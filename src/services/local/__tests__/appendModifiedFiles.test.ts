@@ -1,8 +1,8 @@
 import {
   TrellisObject,
-  TrellisObjectType,
-  TrellisObjectStatus,
   TrellisObjectPriority,
+  TrellisObjectStatus,
+  TrellisObjectType,
 } from "../../../models";
 import { Repository } from "../../../repositories";
 import { appendModifiedFiles } from "../appendModifiedFiles";
@@ -18,7 +18,7 @@ describe("appendModifiedFiles service function", () => {
     title: "Test Task",
     status: TrellisObjectStatus.IN_PROGRESS,
     priority: TrellisObjectPriority.MEDIUM,
-    parent: "F-test-feature",
+    parent: undefined,
     prerequisites: [],
     affectedFiles: new Map(),
     log: [],

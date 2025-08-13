@@ -487,4 +487,349 @@ describe("E2E Workflow - appendModifiedFiles", () => {
       expect(file.yaml.log).toContain("Added initial implementation");
     });
   });
+
+  describe("Recursive Parent File Updates", () => {
+    it("should recursively update parent objects when appending files to a task", async () => {
+      // Create project
+      const projectResult = await client.callTool("create_object", {
+        type: "project",
+        title: "Recursive Files Test Project",
+      });
+      const projectId =
+        projectResult.content[0].text.match(/ID: (P-[a-z-]+)/)![1];
+
+      // Create epic
+      const epicResult = await client.callTool("create_object", {
+        type: "epic",
+        title: "Recursive Files Epic",
+        parent: projectId,
+      });
+      const epicId = epicResult.content[0].text.match(/ID: (E-[a-z-]+)/)![1];
+
+      // Create feature
+      const featureResult = await client.callTool("create_object", {
+        type: "feature",
+        title: "Recursive Files Feature",
+        parent: epicId,
+      });
+      const featureId =
+        featureResult.content[0].text.match(/ID: (F-[a-z-]+)/)![1];
+
+      // Create task
+      const taskResult = await client.callTool("create_object", {
+        type: "task",
+        title: "Recursive Files Task",
+        parent: featureId,
+      });
+      const taskId = taskResult.content[0].text.match(/ID: (T-[a-z-]+)/)![1];
+
+      // Append files to the task
+      const result = await client.callTool("append_modified_files", {
+        id: taskId,
+        filesChanged: {
+          "src/api/endpoints.ts": "Implemented REST API endpoints",
+          "src/models/User.ts": "User data model definition",
+          "tests/api.test.ts": "API integration tests",
+        },
+      });
+
+      expect(result.content[0].text).toContain("Successfully appended");
+      expect(result.content[0].text).toContain("3 modified files");
+
+      // Verify task has the affected files
+      const taskFile = await readObjectFile(
+        testEnv.projectRoot,
+        `p/${projectId}/e/${epicId}/f/${featureId}/t/open/${taskId}.md`,
+      );
+      expect(taskFile.yaml.affectedFiles).toEqual({
+        "src/api/endpoints.ts": "Implemented REST API endpoints",
+        "src/models/User.ts": "User data model definition",
+        "tests/api.test.ts": "API integration tests",
+      });
+
+      // Verify feature inherited the same affected files
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        `p/${projectId}/e/${epicId}/f/${featureId}/${featureId}.md`,
+      );
+      expect(featureFile.yaml.affectedFiles).toEqual({
+        "src/api/endpoints.ts": "Implemented REST API endpoints",
+        "src/models/User.ts": "User data model definition",
+        "tests/api.test.ts": "API integration tests",
+      });
+
+      // Verify epic inherited the same affected files
+      const epicFile = await readObjectFile(
+        testEnv.projectRoot,
+        `p/${projectId}/e/${epicId}/${epicId}.md`,
+      );
+      expect(epicFile.yaml.affectedFiles).toEqual({
+        "src/api/endpoints.ts": "Implemented REST API endpoints",
+        "src/models/User.ts": "User data model definition",
+        "tests/api.test.ts": "API integration tests",
+      });
+
+      // Verify project inherited the same affected files
+      const projectFile = await readObjectFile(
+        testEnv.projectRoot,
+        `p/${projectId}/${projectId}.md`,
+      );
+      expect(projectFile.yaml.affectedFiles).toEqual({
+        "src/api/endpoints.ts": "Implemented REST API endpoints",
+        "src/models/User.ts": "User data model definition",
+        "tests/api.test.ts": "API integration tests",
+      });
+    });
+
+    it("should merge files with existing parent affected files", async () => {
+      // Create feature with existing affected files
+      const featureData: ObjectData = {
+        id: "F-merge-parent-files",
+        title: "Merge Parent Files Feature",
+        status: "open",
+        priority: "medium",
+        childrenIds: ["T-merge-parent-task"],
+        affectedFiles: {
+          "src/core/engine.ts": "Core engine implementation",
+          "README.md": "Project documentation",
+        },
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        "F-merge-parent-files",
+        createObjectContent(featureData),
+      );
+
+      // Create task
+      const taskData: ObjectData = {
+        id: "T-merge-parent-task",
+        title: "Merge Parent Task",
+        status: "open",
+        priority: "medium",
+        parent: "F-merge-parent-files",
+      };
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-merge-parent-task",
+        createObjectContent(taskData),
+        { featureId: "F-merge-parent-files", status: "open" },
+      );
+
+      // Append files to task (including one that overlaps with feature)
+      await client.callTool("append_modified_files", {
+        id: "T-merge-parent-task",
+        filesChanged: {
+          "src/core/engine.ts": "Enhanced engine with new algorithms",
+          "src/utils/helpers.ts": "Utility helper functions",
+          "tests/engine.test.ts": "Engine unit tests",
+        },
+      });
+
+      // Verify task has its affected files
+      const taskFile = await readObjectFile(
+        testEnv.projectRoot,
+        "f/F-merge-parent-files/t/open/T-merge-parent-task.md",
+      );
+      expect(taskFile.yaml.affectedFiles).toEqual({
+        "src/core/engine.ts": "Enhanced engine with new algorithms",
+        "src/utils/helpers.ts": "Utility helper functions",
+        "tests/engine.test.ts": "Engine unit tests",
+      });
+
+      // Verify feature has merged files (original + task files, with overlap merged)
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        "f/F-merge-parent-files/F-merge-parent-files.md",
+      );
+      expect(featureFile.yaml.affectedFiles).toEqual({
+        "src/core/engine.ts":
+          "Core engine implementation; Enhanced engine with new algorithms",
+        "README.md": "Project documentation",
+        "src/utils/helpers.ts": "Utility helper functions",
+        "tests/engine.test.ts": "Engine unit tests",
+      });
+    });
+
+    it("should handle feature with no parent (partial hierarchy)", async () => {
+      // Create standalone feature
+      const featureResult = await client.callTool("create_object", {
+        type: "feature",
+        title: "Standalone Parent Test Feature",
+      });
+      const featureId =
+        featureResult.content[0].text.match(/ID: (F-[a-z-]+)/)![1];
+
+      // Create task under the feature
+      const taskResult = await client.callTool("create_object", {
+        type: "task",
+        title: "Standalone Parent Task",
+        parent: featureId,
+      });
+      const taskId = taskResult.content[0].text.match(/ID: (T-[a-z-]+)/)![1];
+
+      // Append files to task
+      await client.callTool("append_modified_files", {
+        id: taskId,
+        filesChanged: {
+          "src/standalone.ts": "Standalone feature implementation",
+          "docs/standalone.md": "Standalone feature documentation",
+        },
+      });
+
+      // Verify task has the files
+      const taskFile = await readObjectFile(
+        testEnv.projectRoot,
+        `f/${featureId}/t/open/${taskId}.md`,
+      );
+      expect(taskFile.yaml.affectedFiles).toEqual({
+        "src/standalone.ts": "Standalone feature implementation",
+        "docs/standalone.md": "Standalone feature documentation",
+      });
+
+      // Verify feature also has the files
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        `f/${featureId}/${featureId}.md`,
+      );
+      expect(featureFile.yaml.affectedFiles).toEqual({
+        "src/standalone.ts": "Standalone feature implementation",
+        "docs/standalone.md": "Standalone feature documentation",
+      });
+    });
+
+    it("should work when appending files to a feature (not just tasks)", async () => {
+      // Create epic
+      const epicResult = await client.callTool("create_object", {
+        type: "epic",
+        title: "Feature Parent Test Epic",
+      });
+      const epicId = epicResult.content[0].text.match(/ID: (E-[a-z-]+)/)![1];
+
+      // Create feature under epic
+      const featureResult = await client.callTool("create_object", {
+        type: "feature",
+        title: "Feature Parent Test Feature",
+        parent: epicId,
+      });
+      const featureId =
+        featureResult.content[0].text.match(/ID: (F-[a-z-]+)/)![1];
+
+      // Append files directly to the feature
+      await client.callTool("append_modified_files", {
+        id: featureId,
+        filesChanged: {
+          "src/feature/core.ts": "Feature core implementation",
+          "src/feature/utils.ts": "Feature utility functions",
+        },
+      });
+
+      // Verify feature has the files
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        `e/${epicId}/f/${featureId}/${featureId}.md`,
+      );
+      expect(featureFile.yaml.affectedFiles).toEqual({
+        "src/feature/core.ts": "Feature core implementation",
+        "src/feature/utils.ts": "Feature utility functions",
+      });
+
+      // Verify epic also inherited the files
+      const epicFile = await readObjectFile(
+        testEnv.projectRoot,
+        `e/${epicId}/${epicId}.md`,
+      );
+      expect(epicFile.yaml.affectedFiles).toEqual({
+        "src/feature/core.ts": "Feature core implementation",
+        "src/feature/utils.ts": "Feature utility functions",
+      });
+    });
+
+    it("should handle object with no parent gracefully", async () => {
+      // Create standalone task (no parent hierarchy)
+      const taskResult = await client.callTool("create_object", {
+        type: "task",
+        title: "Standalone No Parent Task",
+      });
+      const taskId = taskResult.content[0].text.match(/ID: (T-[a-z-]+)/)![1];
+
+      // Append files to standalone task
+      const result = await client.callTool("append_modified_files", {
+        id: taskId,
+        filesChanged: {
+          "src/isolated.ts": "Isolated functionality",
+        },
+      });
+
+      expect(result.content[0].text).toContain("Successfully appended");
+      expect(result.content[0].text).toContain("1 modified file");
+
+      // Verify task has the files (and no parent to propagate to)
+      const taskFile = await readObjectFile(
+        testEnv.projectRoot,
+        `t/open/${taskId}.md`,
+      );
+      expect(taskFile.yaml.affectedFiles).toEqual({
+        "src/isolated.ts": "Isolated functionality",
+      });
+    });
+
+    it("should handle multiple sequential append operations with parent propagation", async () => {
+      // Create feature and task
+      const featureResult = await client.callTool("create_object", {
+        type: "feature",
+        title: "Sequential Parent Updates Feature",
+      });
+      const featureId =
+        featureResult.content[0].text.match(/ID: (F-[a-z-]+)/)![1];
+
+      const taskResult = await client.callTool("create_object", {
+        type: "task",
+        title: "Sequential Parent Updates Task",
+        parent: featureId,
+      });
+      const taskId = taskResult.content[0].text.match(/ID: (T-[a-z-]+)/)![1];
+
+      // First append operation
+      await client.callTool("append_modified_files", {
+        id: taskId,
+        filesChanged: {
+          "src/module1.ts": "First module implementation",
+          "tests/module1.test.ts": "First module tests",
+        },
+      });
+
+      // Second append operation
+      await client.callTool("append_modified_files", {
+        id: taskId,
+        filesChanged: {
+          "src/module2.ts": "Second module implementation",
+          "src/module1.ts": "Enhanced first module",
+        },
+      });
+
+      // Verify task has merged results from both operations
+      const taskFile = await readObjectFile(
+        testEnv.projectRoot,
+        `f/${featureId}/t/open/${taskId}.md`,
+      );
+      expect(taskFile.yaml.affectedFiles).toEqual({
+        "src/module1.ts": "First module implementation; Enhanced first module",
+        "tests/module1.test.ts": "First module tests",
+        "src/module2.ts": "Second module implementation",
+      });
+
+      // Verify feature also has the merged results
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        `f/${featureId}/${featureId}.md`,
+      );
+      expect(featureFile.yaml.affectedFiles).toEqual({
+        "src/module1.ts": "First module implementation; Enhanced first module",
+        "tests/module1.test.ts": "First module tests",
+        "src/module2.ts": "Second module implementation",
+      });
+    });
+  });
 });

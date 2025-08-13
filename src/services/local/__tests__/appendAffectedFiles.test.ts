@@ -5,6 +5,7 @@ import {
   TrellisObjectPriority,
 } from "../../../models";
 import { appendAffectedFiles } from "../appendAffectedFiles";
+import { Repository } from "../../../repositories";
 
 describe("appendAffectedFiles service function", () => {
   const createMockTrellisObject = (
@@ -27,14 +28,21 @@ describe("appendAffectedFiles service function", () => {
     ...overrides,
   });
 
-  it("should add new files to empty affectedFiles map", () => {
-    const trellisObject = createMockTrellisObject();
+  const createMockRepository = (): jest.Mocked<Repository> =>
+    ({
+      getObjectById: jest.fn(),
+      saveObject: jest.fn(),
+    }) as unknown as jest.Mocked<Repository>;
+
+  it("should add new files to empty affectedFiles map", async () => {
+    const repository = createMockRepository();
+    const trellisObject = createMockTrellisObject({ parent: undefined });
     const filesChanged = {
       "src/components/Button.tsx": "Added new button component",
       "src/utils/helpers.ts": "Created utility functions",
     };
 
-    appendAffectedFiles(trellisObject, filesChanged);
+    await appendAffectedFiles(repository, trellisObject, filesChanged);
 
     expect(trellisObject.affectedFiles.size).toBe(2);
     expect(trellisObject.affectedFiles.get("src/components/Button.tsx")).toBe(
@@ -45,18 +53,20 @@ describe("appendAffectedFiles service function", () => {
     );
   });
 
-  it("should add new files to existing affectedFiles map", () => {
+  it("should add new files to existing affectedFiles map", async () => {
+    const repository = createMockRepository();
     const existingAffectedFiles = new Map([
       ["src/existing.ts", "Existing file"],
     ]);
     const trellisObject = createMockTrellisObject({
       affectedFiles: existingAffectedFiles,
+      parent: undefined,
     });
     const filesChanged = {
       "src/new.ts": "New file added",
     };
 
-    appendAffectedFiles(trellisObject, filesChanged);
+    await appendAffectedFiles(repository, trellisObject, filesChanged);
 
     expect(trellisObject.affectedFiles.size).toBe(2);
     expect(trellisObject.affectedFiles.get("src/existing.ts")).toBe(
@@ -67,20 +77,22 @@ describe("appendAffectedFiles service function", () => {
     );
   });
 
-  it("should merge descriptions for existing files", () => {
+  it("should merge descriptions for existing files", async () => {
+    const repository = createMockRepository();
     const existingAffectedFiles = new Map([
       ["src/components/Button.tsx", "Initial implementation"],
       ["src/utils/helpers.ts", "Basic utilities"],
     ]);
     const trellisObject = createMockTrellisObject({
       affectedFiles: existingAffectedFiles,
+      parent: undefined,
     });
     const filesChanged = {
       "src/components/Button.tsx": "Added click handler",
       "src/utils/helpers.ts": "Added validation functions",
     };
 
-    appendAffectedFiles(trellisObject, filesChanged);
+    await appendAffectedFiles(repository, trellisObject, filesChanged);
 
     expect(trellisObject.affectedFiles.size).toBe(2);
     expect(trellisObject.affectedFiles.get("src/components/Button.tsx")).toBe(
@@ -91,12 +103,14 @@ describe("appendAffectedFiles service function", () => {
     );
   });
 
-  it("should handle mix of new and existing files", () => {
+  it("should handle mix of new and existing files", async () => {
+    const repository = createMockRepository();
     const existingAffectedFiles = new Map([
       ["src/existing.ts", "Existing description"],
     ]);
     const trellisObject = createMockTrellisObject({
       affectedFiles: existingAffectedFiles,
+      parent: undefined,
     });
     const filesChanged = {
       "src/existing.ts": "Updated functionality",
@@ -104,7 +118,7 @@ describe("appendAffectedFiles service function", () => {
       "src/another.ts": "Another new file",
     };
 
-    appendAffectedFiles(trellisObject, filesChanged);
+    await appendAffectedFiles(repository, trellisObject, filesChanged);
 
     expect(trellisObject.affectedFiles.size).toBe(3);
     expect(trellisObject.affectedFiles.get("src/existing.ts")).toBe(
@@ -118,16 +132,18 @@ describe("appendAffectedFiles service function", () => {
     );
   });
 
-  it("should handle empty filesChanged object", () => {
+  it("should handle empty filesChanged object", async () => {
+    const repository = createMockRepository();
     const existingAffectedFiles = new Map([
       ["src/existing.ts", "Existing file"],
     ]);
     const trellisObject = createMockTrellisObject({
       affectedFiles: existingAffectedFiles,
+      parent: undefined,
     });
     const filesChanged = {};
 
-    appendAffectedFiles(trellisObject, filesChanged);
+    await appendAffectedFiles(repository, trellisObject, filesChanged);
 
     expect(trellisObject.affectedFiles.size).toBe(1);
     expect(trellisObject.affectedFiles.get("src/existing.ts")).toBe(
@@ -135,14 +151,15 @@ describe("appendAffectedFiles service function", () => {
     );
   });
 
-  it("should handle files with empty descriptions", () => {
-    const trellisObject = createMockTrellisObject();
+  it("should handle files with empty descriptions", async () => {
+    const repository = createMockRepository();
+    const trellisObject = createMockTrellisObject({ parent: undefined });
     const filesChanged = {
       "src/empty.ts": "",
       "src/normal.ts": "Normal description",
     };
 
-    appendAffectedFiles(trellisObject, filesChanged);
+    await appendAffectedFiles(repository, trellisObject, filesChanged);
 
     expect(trellisObject.affectedFiles.size).toBe(2);
     expect(trellisObject.affectedFiles.get("src/empty.ts")).toBe("");
@@ -151,22 +168,119 @@ describe("appendAffectedFiles service function", () => {
     );
   });
 
-  it("should merge empty description with existing description", () => {
+  it("should merge empty description with existing description", async () => {
+    const repository = createMockRepository();
     const existingAffectedFiles = new Map([
       ["src/test.ts", "Existing description"],
     ]);
     const trellisObject = createMockTrellisObject({
       affectedFiles: existingAffectedFiles,
+      parent: undefined,
     });
     const filesChanged = {
       "src/test.ts": "",
     };
 
-    appendAffectedFiles(trellisObject, filesChanged);
+    await appendAffectedFiles(repository, trellisObject, filesChanged);
 
     expect(trellisObject.affectedFiles.size).toBe(1);
     expect(trellisObject.affectedFiles.get("src/test.ts")).toBe(
       "Existing description; ",
+    );
+  });
+
+  it("should recursively update parent objects when they exist", async () => {
+    const repository = createMockRepository();
+    const parentObject = createMockTrellisObject({
+      id: "F-parent-feature",
+      parent: undefined,
+    });
+    const childObject = createMockTrellisObject({
+      id: "T-child-task",
+      parent: "F-parent-feature",
+    });
+
+    repository.getObjectById.mockResolvedValue(parentObject);
+
+    const filesChanged = {
+      "src/new-feature.ts": "Added new feature",
+    };
+
+    await appendAffectedFiles(repository, childObject, filesChanged);
+
+    expect(repository.getObjectById).toHaveBeenCalledWith("F-parent-feature");
+    expect(repository.saveObject).toHaveBeenCalledWith(parentObject);
+    expect(childObject.affectedFiles.get("src/new-feature.ts")).toBe(
+      "Added new feature",
+    );
+    expect(parentObject.affectedFiles.get("src/new-feature.ts")).toBe(
+      "Added new feature",
+    );
+  });
+
+  it("should recursively update multiple levels of parent hierarchy", async () => {
+    const repository = createMockRepository();
+    const grandparentObject = createMockTrellisObject({
+      id: "P-grandparent-project",
+      parent: undefined,
+    });
+    const parentObject = createMockTrellisObject({
+      id: "F-parent-feature",
+      parent: "P-grandparent-project",
+    });
+    const childObject = createMockTrellisObject({
+      id: "T-child-task",
+      parent: "F-parent-feature",
+    });
+
+    repository.getObjectById
+      .mockResolvedValueOnce(parentObject)
+      .mockResolvedValueOnce(grandparentObject);
+
+    const filesChanged = {
+      "src/deep-feature.ts": "Deep nested feature",
+    };
+
+    await appendAffectedFiles(repository, childObject, filesChanged);
+
+    expect(repository.getObjectById).toHaveBeenCalledWith("F-parent-feature");
+    expect(repository.getObjectById).toHaveBeenCalledWith(
+      "P-grandparent-project",
+    );
+    expect(repository.saveObject).toHaveBeenCalledWith(parentObject);
+    expect(repository.saveObject).toHaveBeenCalledWith(grandparentObject);
+    expect(childObject.affectedFiles.get("src/deep-feature.ts")).toBe(
+      "Deep nested feature",
+    );
+    expect(parentObject.affectedFiles.get("src/deep-feature.ts")).toBe(
+      "Deep nested feature",
+    );
+    expect(grandparentObject.affectedFiles.get("src/deep-feature.ts")).toBe(
+      "Deep nested feature",
+    );
+  });
+
+  it("should handle case when parent object is not found", async () => {
+    const repository = createMockRepository();
+    const childObject = createMockTrellisObject({
+      id: "T-child-task",
+      parent: "F-nonexistent-parent",
+    });
+
+    repository.getObjectById.mockResolvedValue(null);
+
+    const filesChanged = {
+      "src/orphan-feature.ts": "Orphaned feature",
+    };
+
+    await appendAffectedFiles(repository, childObject, filesChanged);
+
+    expect(repository.getObjectById).toHaveBeenCalledWith(
+      "F-nonexistent-parent",
+    );
+    expect(repository.saveObject).not.toHaveBeenCalled();
+    expect(childObject.affectedFiles.get("src/orphan-feature.ts")).toBe(
+      "Orphaned feature",
     );
   });
 });

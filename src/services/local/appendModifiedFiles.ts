@@ -27,7 +27,7 @@ export async function appendModifiedFiles(
   }
 
   // Append the affected files to the trellis object
-  appendAffectedFiles(trellisObject, filesChanged);
+  await appendAffectedFiles(repository, trellisObject, filesChanged);
 
   // Save the updated object
   await repository.saveObject(trellisObject);

@@ -31,7 +31,7 @@ export async function completeTask(
   task.status = TrellisObjectStatus.DONE;
 
   // Append to affected files map
-  appendAffectedFiles(task, filesChanged);
+  await appendAffectedFiles(repository, task, filesChanged);
 
   // Append summary to log
   task.log.push(summary);

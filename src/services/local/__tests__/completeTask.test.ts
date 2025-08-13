@@ -1,11 +1,11 @@
-import { Repository } from "../../../repositories/Repository";
+import { ServerConfig } from "../../../configuration";
 import {
   TrellisObject,
-  TrellisObjectType,
-  TrellisObjectStatus,
   TrellisObjectPriority,
+  TrellisObjectStatus,
+  TrellisObjectType,
 } from "../../../models";
-import { ServerConfig } from "../../../configuration";
+import { Repository } from "../../../repositories/Repository";
 import { completeTask } from "../completeTask";
 
 describe("completeTask service function", () => {
@@ -19,7 +19,7 @@ describe("completeTask service function", () => {
     title: "Test Task",
     status: TrellisObjectStatus.IN_PROGRESS,
     priority: TrellisObjectPriority.MEDIUM,
-    parent: "F-test-feature",
+    parent: undefined,
     prerequisites: [],
     affectedFiles: new Map(),
     log: [],
@@ -342,9 +342,11 @@ describe("completeTask service function", () => {
       const mockTask = createMockTask();
       const mockFeature = createMockFeature("F-test-feature", ["T-test-task"]);
 
-      mockRepository.getObjectById
-        .mockResolvedValueOnce(mockTask)
-        .mockResolvedValueOnce(mockFeature);
+      mockRepository.getObjectById.mockImplementation((id) => {
+        if (id === mockTask.id) return Promise.resolve(mockTask);
+        if (id === mockFeature.id) return Promise.resolve(mockFeature);
+        throw new Error("Not found");
+      });
       mockRepository.saveObject.mockResolvedValue();
 
       await completeTask(
@@ -376,127 +378,31 @@ describe("completeTask service function", () => {
     });
 
     it("should auto-complete feature when all tasks are done", async () => {
-      const mockTask1 = createMockTask({ id: "T-task-1" });
+      const mockTask1 = createMockTask({
+        id: "T-task-1",
+        parent: "F-test-feature",
+      });
       const mockTask2 = createMockTask({
         id: "T-task-2",
+        parent: "F-test-feature",
         status: TrellisObjectStatus.DONE,
       });
       const mockFeature = createMockFeature("F-test-feature", [
-        "T-task-1",
-        "T-task-2",
+        mockTask1.id,
+        mockTask2.id,
       ]);
 
-      mockRepository.getObjectById
-        .mockResolvedValueOnce(mockTask1)
-        .mockResolvedValueOnce(mockFeature)
-        .mockResolvedValueOnce(mockTask1)
-        .mockResolvedValueOnce(mockTask2);
+      mockRepository.getObjectById.mockImplementation((id) => {
+        if (id === mockTask1.id) return Promise.resolve(mockTask1);
+        if (id === mockTask2.id) return Promise.resolve(mockTask2);
+        if (id === mockFeature.id) return Promise.resolve(mockFeature);
+        return Promise.resolve(null);
+      });
       mockRepository.saveObject.mockResolvedValue();
 
       await completeTask(
         mockRepository,
-        "T-task-1",
-        "Task completed",
-        {},
-        serverConfigWithAutoComplete,
-      );
-
-      expect(mockRepository.saveObject).toHaveBeenCalledTimes(2);
-      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(2, {
-        ...mockFeature,
-        status: TrellisObjectStatus.DONE,
-        log: ["Auto-completed: All child tasks are complete"],
-      });
-    });
-
-    it("should not auto-complete feature when some tasks are still in progress", async () => {
-      const mockTask1 = createMockTask({ id: "T-task-1" });
-      const mockTask2 = createMockTask({
-        id: "T-task-2",
-        status: TrellisObjectStatus.IN_PROGRESS,
-      });
-      const mockFeature = createMockFeature("F-test-feature", [
-        "T-task-1",
-        "T-task-2",
-      ]);
-
-      mockRepository.getObjectById
-        .mockResolvedValueOnce(mockTask1)
-        .mockResolvedValueOnce(mockFeature)
-        .mockResolvedValueOnce(mockTask1)
-        .mockResolvedValueOnce(mockTask2);
-      mockRepository.saveObject.mockResolvedValue();
-
-      await completeTask(
-        mockRepository,
-        "T-task-1",
-        "Task completed",
-        {},
-        serverConfigWithAutoComplete,
-      );
-
-      expect(mockRepository.saveObject).toHaveBeenCalledTimes(1);
-    });
-
-    it("should auto-complete feature when all tasks are done or wont-do", async () => {
-      const mockTask1 = createMockTask({ id: "T-task-1" });
-      const mockTask2 = createMockTask({
-        id: "T-task-2",
-        status: TrellisObjectStatus.WONT_DO,
-      });
-      const mockFeature = createMockFeature("F-test-feature", [
-        "T-task-1",
-        "T-task-2",
-      ]);
-
-      mockRepository.getObjectById
-        .mockResolvedValueOnce(mockTask1)
-        .mockResolvedValueOnce(mockFeature)
-        .mockResolvedValueOnce(mockTask1)
-        .mockResolvedValueOnce(mockTask2);
-      mockRepository.saveObject.mockResolvedValue();
-
-      await completeTask(
-        mockRepository,
-        "T-task-1",
-        "Task completed",
-        {},
-        serverConfigWithAutoComplete,
-      );
-
-      expect(mockRepository.saveObject).toHaveBeenCalledTimes(2);
-      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(2, {
-        ...mockFeature,
-        status: TrellisObjectStatus.DONE,
-        log: ["Auto-completed: All child tasks are complete"],
-      });
-    });
-
-    it("should auto-complete epic when all features are done", async () => {
-      const mockTask = createMockTask();
-      const mockFeature1 = createMockFeature("F-feature-1", ["T-test-task"]);
-      const mockFeature2 = createMockFeature(
-        "F-feature-2",
-        [],
-        TrellisObjectStatus.DONE,
-      );
-      const mockEpic = createMockEpic("E-test-epic", [
-        "F-feature-1",
-        "F-feature-2",
-      ]);
-
-      mockRepository.getObjectById
-        .mockResolvedValueOnce(mockTask)
-        .mockResolvedValueOnce(mockFeature1)
-        .mockResolvedValueOnce(mockTask)
-        .mockResolvedValueOnce(mockEpic)
-        .mockResolvedValueOnce(mockFeature1)
-        .mockResolvedValueOnce(mockFeature2);
-      mockRepository.saveObject.mockResolvedValue();
-
-      await completeTask(
-        mockRepository,
-        "T-test-task",
+        mockTask1.id,
         "Task completed",
         {},
         serverConfigWithAutoComplete,
@@ -504,6 +410,120 @@ describe("completeTask service function", () => {
 
       expect(mockRepository.saveObject).toHaveBeenCalledTimes(3);
       expect(mockRepository.saveObject).toHaveBeenNthCalledWith(3, {
+        ...mockFeature,
+        status: TrellisObjectStatus.DONE,
+        log: ["Auto-completed: All child tasks are complete"],
+      });
+    });
+
+    it("should not auto-complete feature when some tasks are still in progress", async () => {
+      const mockTask1 = createMockTask({
+        id: "T-task-1",
+        parent: "F-test-feature",
+      });
+      const mockTask2 = createMockTask({
+        id: "T-task-2",
+        parent: "F-test-feature",
+        status: TrellisObjectStatus.IN_PROGRESS,
+      });
+      const mockFeature = createMockFeature("F-test-feature", [
+        mockTask1.id,
+        mockTask2.id,
+      ]);
+
+      mockRepository.getObjectById.mockImplementation((id) => {
+        if (id === mockTask1.id) return Promise.resolve(mockTask1);
+        if (id === mockTask2.id) return Promise.resolve(mockTask2);
+        if (id === mockFeature.id) return Promise.resolve(mockFeature);
+        return Promise.resolve(null);
+      });
+      mockRepository.saveObject.mockResolvedValue();
+
+      await completeTask(
+        mockRepository,
+        mockTask1.id,
+        "Task completed",
+        {},
+        serverConfigWithAutoComplete,
+      );
+
+      expect(mockRepository.saveObject).toHaveBeenCalledTimes(2);
+    });
+
+    it("should auto-complete feature when all tasks are done or wont-do", async () => {
+      const mockTask1 = createMockTask({
+        id: "T-task-1",
+        parent: "F-test-feature",
+      });
+      const mockTask2 = createMockTask({
+        id: "T-task-2",
+        parent: "F-test-feature",
+        status: TrellisObjectStatus.WONT_DO,
+      });
+      const mockFeature = createMockFeature("F-test-feature", [
+        mockTask1.id,
+        mockTask2.id,
+      ]);
+
+      mockRepository.getObjectById.mockImplementation((id) => {
+        if (id === mockTask1.id) return Promise.resolve(mockTask1);
+        if (id === mockTask2.id) return Promise.resolve(mockTask2);
+        if (id === mockFeature.id) return Promise.resolve(mockFeature);
+        return Promise.resolve(null);
+      });
+      mockRepository.saveObject.mockResolvedValue();
+
+      await completeTask(
+        mockRepository,
+        mockTask1.id,
+        "Task completed",
+        {},
+        serverConfigWithAutoComplete,
+      );
+
+      expect(mockRepository.saveObject).toHaveBeenCalledTimes(3);
+      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(3, {
+        ...mockFeature,
+        status: TrellisObjectStatus.DONE,
+        log: ["Auto-completed: All child tasks are complete"],
+      });
+    });
+
+    it("should auto-complete epic when all features are done", async () => {
+      const mockTask = createMockTask({
+        parent: "F-feature-1",
+      });
+      const mockFeature1 = createMockFeature("F-feature-1", [mockTask.id]);
+      const mockFeature2 = createMockFeature(
+        "F-feature-2",
+        [],
+        TrellisObjectStatus.DONE,
+      );
+      const mockEpic = createMockEpic("E-test-epic", [
+        mockFeature1.id,
+        mockFeature2.id,
+      ]);
+
+      mockRepository.getObjectById.mockImplementation((id) => {
+        if (id === mockTask.id) return Promise.resolve(mockTask);
+        if (id === mockFeature1.id) return Promise.resolve(mockFeature1);
+        if (id === mockFeature2.id) return Promise.resolve(mockFeature2);
+        if (id === mockEpic.id) return Promise.resolve(mockEpic);
+        return Promise.resolve(null);
+      });
+
+      mockRepository.saveObject.mockResolvedValue();
+
+      await completeTask(
+        mockRepository,
+        mockTask.id,
+        "Task completed",
+        {},
+        serverConfigWithAutoComplete,
+      );
+
+      expect(mockRepository.saveObject).toHaveBeenCalledTimes(5);
+      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(5, {
         ...mockEpic,
         status: TrellisObjectStatus.DONE,
         log: ["Auto-completed: All child features are complete"],
@@ -511,40 +531,40 @@ describe("completeTask service function", () => {
     });
 
     it("should auto-complete project when all epics are done", async () => {
-      const mockTask = createMockTask();
-      const mockFeature = createMockFeature("F-test-feature", ["T-test-task"]);
-      const mockEpic1 = createMockEpic("E-epic-1", ["F-test-feature"]);
+      const mockTask = createMockTask({ parent: "F-test-feature" });
+      const mockFeature = createMockFeature("F-test-feature", [mockTask.id]);
+      const mockEpic1 = createMockEpic("E-test-epic", [mockFeature.id]);
       const mockEpic2 = createMockEpic(
         "E-epic-2",
         [],
         TrellisObjectStatus.DONE,
       );
       const mockProject = createMockProject("P-test-project", [
-        "E-epic-1",
-        "E-epic-2",
+        mockEpic1.id,
+        mockEpic2.id,
       ]);
 
-      mockRepository.getObjectById
-        .mockResolvedValueOnce(mockTask)
-        .mockResolvedValueOnce(mockFeature)
-        .mockResolvedValueOnce(mockTask)
-        .mockResolvedValueOnce(mockEpic1)
-        .mockResolvedValueOnce(mockFeature)
-        .mockResolvedValueOnce(mockProject)
-        .mockResolvedValueOnce(mockEpic1)
-        .mockResolvedValueOnce(mockEpic2);
+      mockRepository.getObjectById.mockImplementation((id) => {
+        if (id === mockTask.id) return Promise.resolve(mockTask);
+        if (id === mockFeature.id) return Promise.resolve(mockFeature);
+        if (id === mockEpic1.id) return Promise.resolve(mockEpic1);
+        if (id === mockEpic2.id) return Promise.resolve(mockEpic2);
+        if (id === mockProject.id) return Promise.resolve(mockProject);
+        return Promise.resolve(null);
+      });
+
       mockRepository.saveObject.mockResolvedValue();
 
       await completeTask(
         mockRepository,
-        "T-test-task",
+        mockTask.id,
         "Task completed",
         {},
         serverConfigWithAutoComplete,
       );
 
-      expect(mockRepository.saveObject).toHaveBeenCalledTimes(4);
-      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(4, {
+      expect(mockRepository.saveObject).toHaveBeenCalledTimes(7);
+      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(7, {
         ...mockProject,
         status: TrellisObjectStatus.DONE,
         log: ["Auto-completed: All child epics are complete"],
@@ -554,12 +574,15 @@ describe("completeTask service function", () => {
     it("should handle task with no parent", async () => {
       const mockTask = createMockTask({ parent: undefined });
 
-      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.getObjectById.mockImplementation((id) => {
+        if (id === mockTask.id) return Promise.resolve(mockTask);
+        return Promise.resolve(null);
+      });
       mockRepository.saveObject.mockResolvedValue();
 
       await completeTask(
         mockRepository,
-        "T-test-task",
+        mockTask.id,
         "Task completed",
         {},
         serverConfigWithAutoComplete,
@@ -571,14 +594,15 @@ describe("completeTask service function", () => {
     it("should handle missing parent object", async () => {
       const mockTask = createMockTask();
 
-      mockRepository.getObjectById
-        .mockResolvedValueOnce(mockTask)
-        .mockResolvedValueOnce(null);
+      mockRepository.getObjectById.mockImplementation((id) => {
+        if (id === mockTask.id) return Promise.resolve(mockTask);
+        return Promise.resolve(null);
+      });
       mockRepository.saveObject.mockResolvedValue();
 
       await completeTask(
         mockRepository,
-        "T-test-task",
+        mockTask.id,
         "Task completed",
         {},
         serverConfigWithAutoComplete,
@@ -591,19 +615,20 @@ describe("completeTask service function", () => {
       const mockTask = createMockTask();
       const mockFeature = createMockFeature(
         "F-test-feature",
-        ["T-test-task"],
+        [mockTask.id],
         TrellisObjectStatus.DONE,
       );
 
-      mockRepository.getObjectById
-        .mockResolvedValueOnce(mockTask)
-        .mockResolvedValueOnce(mockFeature)
-        .mockResolvedValueOnce(mockTask);
+      mockRepository.getObjectById.mockImplementation((id) => {
+        if (id === mockTask.id) return Promise.resolve(mockTask);
+        if (id === mockFeature.id) return Promise.resolve(mockFeature);
+        return Promise.resolve(null);
+      });
       mockRepository.saveObject.mockResolvedValue();
 
       await completeTask(
         mockRepository,
-        "T-test-task",
+        mockTask.id,
         "Task completed",
         {},
         serverConfigWithAutoComplete,
