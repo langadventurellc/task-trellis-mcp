@@ -3,7 +3,7 @@
 [![npm version](https://badge.fury.io/js/%40langadventurellc%2Ftask-trellis-mcp.svg)](https://www.npmjs.com/package/@langadventurellc/task-trellis-mcp)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-An MCP server that helps you manage developing with AI coding agents, but breaking down complex projects and tracking its progress with built-in task management, complete with progress tracking, dependency management, and workflow automation.
+An MCP server that helps you manage developing with AI coding agents, by breaking down complex projects and tracking its progress with built-in task management, complete with progress tracking, dependency management, and workflow automation.
 
 Primarily built as a much better alternative to managing markdown checklists. Task Trellis will make it easier to define requirements, specifications, and tasks in a structured way that the agent can actually use directly.
 
