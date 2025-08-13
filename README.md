@@ -3,9 +3,11 @@
 [![npm version](https://badge.fury.io/js/%40langadventurellc%2Ftask-trellis-mcp.svg)](https://www.npmjs.com/package/@langadventurellc/task-trellis-mcp)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-An MCP server that helps you manage developing with AI coding agents, but breaking down complex projects and tracking its progress with built-in task management, complete with progress tracking, dependency management, and workflow automation. Primarily built as an alternative to managing the creation and use of agent-created requirements, specifications and checklists. This tool will help make that more organized and less chaotic.
+An MCP server that helps you manage developing with AI coding agents, but breaking down complex projects and tracking its progress with built-in task management, complete with progress tracking, dependency management, and workflow automation.
 
-Basically, it's like Jira for coding agents.
+Primarily built as a much better alternative to managing markdown checklists. Task Trellis will make it easier to define requirements, specifications, and tasks in a structured way that the agent can actually use directly.
+
+It's kinda like Jira specifically for coding agents.
 
 ## Table of Contents
 
@@ -107,15 +109,16 @@ See sample prompts (written as Claude Code slash commands): [Sample Prompts](doc
 - **create_object** - Create projects, epics, features, or tasks with hierarchical relationships
 - **update_object** - Modify object properties, status, priority, or prerequisites
 - **get_object** - Retrieve detailed object information with history and relationships
-- **list_objects** - Query and filter objects by type, status, priority, or scope (returns object IDs)
+- **list_objects** - Query and filter objects by type, status, priority, or scope (returns object summaries)
 - **delete_object** - Remove objects (with dependency validation)
-- **replace_object_body_regex** - Make targeted content edits using regex patterns
+- **replace_object_body_regex** - Make targeted body content edits using regex patterns
 
 ### Task Workflow Management
 
 - **claim_task** - Claim available tasks for execution with automatic priority ordering
 - **complete_task** - Mark tasks complete with file change documentation
-- **append_object_log** - Add progress notes and status updates to task history
+- **append_object_log** - Add progress notes and status updates to task history (occurs automatically on task completion)
+- **append_modified_files** - Record files modified during task execution with change descriptions (occurs automatically on task completion)
 
 ### System Management
 
