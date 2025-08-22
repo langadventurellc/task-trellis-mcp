@@ -1,13 +1,44 @@
 ---
 id: T-integrate-auto-prune-into
 title: Integrate auto-prune into server startup sequence
-status: open
+status: done
 priority: high
 prerequisites:
   - T-add-auto-prune-cli-argument
   - T-modify-pruneclosed-function
-affectedFiles: {}
-log: []
+affectedFiles:
+  src/server.ts: Added startServer function with auto-prune integration logic
+    before runServer call. Includes conditional execution (autoPrune > 0),
+    proper error handling, and logging using console.warn/error.
+  src/__tests__/serverStartup.test.ts:
+    Created comprehensive unit test suite with
+    9 test cases covering auto-prune disabled/enabled scenarios, error handling
+    (Error, non-Error, null), startup continuation, and repository/service
+    integration validation.
+log:
+  - >-
+    Successfully integrated auto-prune functionality into server startup
+    sequence in src/server.ts. The implementation:
+
+
+    1. **Added auto-prune startup logic**: Auto-prune runs before the main
+    server starts when autoPrune > 0, using existing repository and service
+    instances
+
+    2. **Comprehensive error handling**: Server continues startup even if
+    auto-prune fails, with clear error logging 
+
+    3. **Proper logging**: Uses console.warn for informational messages and
+    console.error for failures, following codebase conventions
+
+    4. **Complete test coverage**: Added 9 unit tests covering disabled/enabled
+    scenarios, error handling, and integration validation
+
+
+    The auto-prune integration executes during server startup only when
+    --auto-prune > 0, logs activity clearly, and gracefully handles failures
+    without preventing server startup. All quality checks pass and comprehensive
+    test coverage validates the implementation.
 schema: v1.0
 childrenIds: []
 created: 2025-08-22T18:23:13.266Z

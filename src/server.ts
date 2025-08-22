@@ -261,7 +261,33 @@ async function runServer() {
   await server.connect(transport);
 }
 
-runServer().catch((error) => {
+async function startServer() {
+  // Auto-prune closed objects if enabled
+  if (serverConfig.autoPrune > 0) {
+    try {
+      console.warn(
+        `Starting auto-prune for objects older than ${serverConfig.autoPrune} days...`,
+      );
+      const repository = getRepository();
+      const service = _getService();
+      const result = await service.pruneClosed(
+        repository,
+        serverConfig.autoPrune,
+      );
+      console.warn(`Auto-prune completed: ${result.content[0].text}`);
+    } catch (error) {
+      console.error(
+        `Auto-prune failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      // Don't exit - continue starting server even if prune fails
+    }
+  }
+
+  // Start the main server
+  await runServer();
+}
+
+startServer().catch((error) => {
   console.error("Server error:", error);
   process.exit(1);
 });

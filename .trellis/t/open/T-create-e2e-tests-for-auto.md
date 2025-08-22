@@ -4,7 +4,7 @@ title: Create E2E tests for auto-prune feature
 status: open
 priority: medium
 prerequisites:
-  - T-create-comprehensive-unit
+  - T-integrate-auto-prune-into
 affectedFiles: {}
 log: []
 schema: v1.0
