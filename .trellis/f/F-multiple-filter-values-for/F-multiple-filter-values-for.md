@@ -31,14 +31,24 @@ affectedFiles:
     single/multiple inputs, input normalization logic, and backward
     compatibility verification. Updated existing tests to expect normalized
     array format.
+  src/tools/listObjectsTool.ts: Updated tool schema to accept both strings and
+    arrays for type, status, and priority parameters. Made type parameter
+    optional. Enhanced handler function with array processing logic,
+    normalization helpers, and proper enum conversion while maintaining backward
+    compatibility.
+  src/tools/__tests__/listObjectsTool.test.ts:
+    Added comprehensive unit tests for
+    array input functionality including multiple value filtering, mixed
+    single/array parameters, optional type parameter, backward compatibility
+    verification, and error handling for invalid array contents.
 log: []
 schema: v1.0
 childrenIds:
   - T-add-e2e-tests-for-multiple
-  - T-update-service-layer-for
   - T-update-tool-handler-for-array
   - T-update-tool-schema-for
   - T-update-repository-layer-for
+  - T-update-service-layer-for
 created: 2025-08-22T04:21:12.029Z
 updated: 2025-08-22T04:21:12.029Z
 ---

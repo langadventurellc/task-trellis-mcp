@@ -31,10 +31,10 @@ Available priority values:
 - 'low': Nice-to-have or future work
 
 Key filtering options:
-- 'type': Filter by issue category (project, epic, feature, task)
+- 'type': Filter by issue category (project, epic, feature, task) - accepts single value or array
 - 'scope': Limit results to a specific project or area of work
-- 'status': Find issues in particular states (draft, open, in-progress, done, wont-do)
-- 'priority': Filter by importance level (high, medium, low)
+- 'status': Find issues in particular states (draft, open, in-progress, done, wont-do) - accepts single value or array
+- 'priority': Filter by importance level (high, medium, low) - accepts single value or array
 - 'includeClosed': Whether to show completed/archived issues (defaults to false)
 
 Usage patterns:
@@ -43,25 +43,32 @@ Usage patterns:
 - Review project scope: type='project', scope='specific-project'
 - Audit completed work: includeClosed=true, status='done'
 - Find cancelled items: status='wont-do', includeClosed=true
+- List features and tasks: type=['feature', 'task']
+- List all open objects: status='open' (no type filter)
+- Multiple statuses: status=['open', 'in-progress']
+- Multiple priorities: priority=['high', 'medium']
 
 The results provide issue summaries (TrellisObjectSummary instances) containing id, type, title, status, priority, parent, prerequisites, childrenIds, created, and updated fields to enable efficient filtering and further operations.`,
   inputSchema: {
     type: "object",
     properties: {
       type: {
-        type: "string",
-        description: "Type of issues to list",
+        type: ["string", "array"],
+        items: { type: "string" },
+        description: "Type of issues to list (optional)",
       },
       scope: {
         type: "string",
         description: "Scope to filter issues (optional)",
       },
       status: {
-        type: "string",
+        type: ["string", "array"],
+        items: { type: "string" },
         description: "Status to filter issues (optional)",
       },
       priority: {
-        type: "string",
+        type: ["string", "array"],
+        items: { type: "string" },
         description: "Priority to filter issues (optional)",
       },
       includeClosed: {
@@ -70,7 +77,7 @@ The results provide issue summaries (TrellisObjectSummary instances) containing 
         default: false,
       },
     },
-    required: ["type"],
+    required: [],
   },
 } as const;
 
@@ -86,11 +93,17 @@ export async function handleListObjects(
     priority,
     includeClosed = false,
   } = args as {
-    type: string;
+    type?: string | string[];
     scope?: string;
-    status?: string;
-    priority?: string;
+    status?: string | string[];
+    priority?: string | string[];
     includeClosed?: boolean;
+  };
+
+  // Helper function to normalize input to array
+  const normalizeToArray = <T>(input: T | T[] | undefined): T[] | undefined => {
+    if (input === undefined) return undefined;
+    return Array.isArray(input) ? input : [input];
   };
 
   // Helper function to convert type string to enum
@@ -127,19 +140,60 @@ export async function handleListObjects(
     throw new Error(`Invalid priority value: ${priorityString}`);
   };
 
+  // Helper function to convert array of type strings to array of enums
+  const toTypeArray = (typeStrings: string[]): TrellisObjectType[] => {
+    return typeStrings.map(toType);
+  };
+
+  // Helper function to convert array of status strings to array of enums
+  const toStatusArray = (statusStrings: string[]): TrellisObjectStatus[] => {
+    return statusStrings.map(toStatus);
+  };
+
+  // Helper function to convert array of priority strings to array of enums
+  const toPriorityArray = (
+    priorityStrings: string[],
+  ): TrellisObjectPriority[] => {
+    return priorityStrings.map(toPriority);
+  };
+
   try {
-    // Convert string parameters to enum types
-    const typeEnum = toType(type);
-    const statusEnum = status ? toStatus(status) : undefined;
-    const priorityEnum = priority ? toPriority(priority) : undefined;
+    // Normalize inputs to arrays
+    const typeArray = normalizeToArray(type);
+    const statusArray = normalizeToArray(status);
+    const priorityArray = normalizeToArray(priority);
+
+    // Convert string arrays to enum arrays
+    const typeEnums = typeArray ? toTypeArray(typeArray) : undefined;
+    const statusEnums = statusArray ? toStatusArray(statusArray) : undefined;
+    const priorityEnums = priorityArray
+      ? toPriorityArray(priorityArray)
+      : undefined;
+
+    // Convert arrays back to single values or keep as arrays based on original service signature
+    const typeParam = typeEnums
+      ? typeEnums.length === 1
+        ? typeEnums[0]
+        : typeEnums
+      : undefined;
+    const statusParam = statusEnums
+      ? statusEnums.length === 1
+        ? statusEnums[0]
+        : statusEnums
+      : undefined;
+    const priorityParam = priorityEnums
+      ? priorityEnums.length === 1
+        ? priorityEnums[0]
+        : priorityEnums
+      : undefined;
 
     // Delegate to service
     return await service.listObjects(
       repository,
-      typeEnum,
+      typeParam,
       scope,
-      statusEnum,
-      priorityEnum,
+      statusParam,
+      priorityParam,
       includeClosed,
     );
   } catch (error) {

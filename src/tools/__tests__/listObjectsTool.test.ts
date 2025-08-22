@@ -335,5 +335,220 @@ describe("listObjectsTool", () => {
       );
       expect(result).toEqual(mockResponse);
     });
+
+    describe("array input handling", () => {
+      it("should handle array of types", async () => {
+        mockService.listObjects.mockResolvedValue(mockResponse);
+
+        await handleListObjects(mockService, mockRepository, {
+          type: ["project", "epic"],
+        });
+
+        expect(mockService.listObjects).toHaveBeenCalledWith(
+          mockRepository,
+          [TrellisObjectType.PROJECT, TrellisObjectType.EPIC],
+          undefined,
+          undefined,
+          undefined,
+          false,
+        );
+      });
+
+      it("should handle array of statuses", async () => {
+        mockService.listObjects.mockResolvedValue(mockResponse);
+
+        await handleListObjects(mockService, mockRepository, {
+          type: "task",
+          status: ["open", "in-progress"],
+        });
+
+        expect(mockService.listObjects).toHaveBeenCalledWith(
+          mockRepository,
+          TrellisObjectType.TASK,
+          undefined,
+          [TrellisObjectStatus.OPEN, TrellisObjectStatus.IN_PROGRESS],
+          undefined,
+          false,
+        );
+      });
+
+      it("should handle array of priorities", async () => {
+        mockService.listObjects.mockResolvedValue(mockResponse);
+
+        await handleListObjects(mockService, mockRepository, {
+          type: "task",
+          priority: ["high", "medium"],
+        });
+
+        expect(mockService.listObjects).toHaveBeenCalledWith(
+          mockRepository,
+          TrellisObjectType.TASK,
+          undefined,
+          undefined,
+          [TrellisObjectPriority.HIGH, TrellisObjectPriority.MEDIUM],
+          false,
+        );
+      });
+
+      it("should handle single element arrays as single values", async () => {
+        mockService.listObjects.mockResolvedValue(mockResponse);
+
+        await handleListObjects(mockService, mockRepository, {
+          type: ["task"],
+          status: ["open"],
+          priority: ["high"],
+        });
+
+        expect(mockService.listObjects).toHaveBeenCalledWith(
+          mockRepository,
+          TrellisObjectType.TASK,
+          undefined,
+          TrellisObjectStatus.OPEN,
+          TrellisObjectPriority.HIGH,
+          false,
+        );
+      });
+
+      it("should handle mixed single and array parameters", async () => {
+        mockService.listObjects.mockResolvedValue(mockResponse);
+
+        await handleListObjects(mockService, mockRepository, {
+          type: "task",
+          status: ["open", "in-progress"],
+          priority: "high",
+        });
+
+        expect(mockService.listObjects).toHaveBeenCalledWith(
+          mockRepository,
+          TrellisObjectType.TASK,
+          undefined,
+          [TrellisObjectStatus.OPEN, TrellisObjectStatus.IN_PROGRESS],
+          TrellisObjectPriority.HIGH,
+          false,
+        );
+      });
+
+      it("should handle optional type parameter with other filters", async () => {
+        mockService.listObjects.mockResolvedValue(mockResponse);
+
+        await handleListObjects(mockService, mockRepository, {
+          status: "open",
+          priority: "high",
+        });
+
+        expect(mockService.listObjects).toHaveBeenCalledWith(
+          mockRepository,
+          undefined,
+          undefined,
+          TrellisObjectStatus.OPEN,
+          TrellisObjectPriority.HIGH,
+          false,
+        );
+      });
+
+      it("should handle all parameters as arrays", async () => {
+        mockService.listObjects.mockResolvedValue(mockResponse);
+
+        await handleListObjects(mockService, mockRepository, {
+          type: ["feature", "task"],
+          status: ["open", "in-progress"],
+          priority: ["high", "medium"],
+        });
+
+        expect(mockService.listObjects).toHaveBeenCalledWith(
+          mockRepository,
+          [TrellisObjectType.FEATURE, TrellisObjectType.TASK],
+          undefined,
+          [TrellisObjectStatus.OPEN, TrellisObjectStatus.IN_PROGRESS],
+          [TrellisObjectPriority.HIGH, TrellisObjectPriority.MEDIUM],
+          false,
+        );
+      });
+
+      it("should return error for invalid type in array", async () => {
+        const result = await handleListObjects(mockService, mockRepository, {
+          type: ["task", "invalid-type"],
+        });
+
+        expect(result).toEqual({
+          content: [
+            {
+              type: "text",
+              text: "Error listing objects: Invalid type value: invalid-type",
+            },
+          ],
+        });
+        expect(mockService.listObjects).not.toHaveBeenCalled();
+      });
+
+      it("should return error for invalid status in array", async () => {
+        const result = await handleListObjects(mockService, mockRepository, {
+          type: "task",
+          status: ["open", "invalid-status"],
+        });
+
+        expect(result).toEqual({
+          content: [
+            {
+              type: "text",
+              text: "Error listing objects: Invalid status value: invalid-status",
+            },
+          ],
+        });
+        expect(mockService.listObjects).not.toHaveBeenCalled();
+      });
+
+      it("should return error for invalid priority in array", async () => {
+        const result = await handleListObjects(mockService, mockRepository, {
+          type: "task",
+          priority: ["high", "invalid-priority"],
+        });
+
+        expect(result).toEqual({
+          content: [
+            {
+              type: "text",
+              text: "Error listing objects: Invalid priority value: invalid-priority",
+            },
+          ],
+        });
+        expect(mockService.listObjects).not.toHaveBeenCalled();
+      });
+
+      it("should handle empty parameter object gracefully", async () => {
+        mockService.listObjects.mockResolvedValue(mockResponse);
+
+        await handleListObjects(mockService, mockRepository, {});
+
+        expect(mockService.listObjects).toHaveBeenCalledWith(
+          mockRepository,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          false,
+        );
+      });
+
+      // Backward compatibility tests
+      it("should maintain backward compatibility with single string values", async () => {
+        mockService.listObjects.mockResolvedValue(mockResponse);
+
+        await handleListObjects(mockService, mockRepository, {
+          type: "task",
+          status: "open",
+          priority: "high",
+        });
+
+        expect(mockService.listObjects).toHaveBeenCalledWith(
+          mockRepository,
+          TrellisObjectType.TASK,
+          undefined,
+          TrellisObjectStatus.OPEN,
+          TrellisObjectPriority.HIGH,
+          false,
+        );
+      });
+    });
   });
 });

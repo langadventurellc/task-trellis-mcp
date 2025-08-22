@@ -1,13 +1,52 @@
 ---
 id: T-update-tool-schema-for
 title: Update Tool Schema for Multiple Values and Optional Type
-status: open
+status: done
 priority: high
 parent: F-multiple-filter-values-for
 prerequisites:
   - T-update-service-layer-for
-affectedFiles: {}
-log: []
+affectedFiles:
+  src/tools/listObjectsTool.ts: Updated tool schema to accept both strings and
+    arrays for type, status, and priority parameters. Made type parameter
+    optional. Enhanced handler function with array processing logic,
+    normalization helpers, and proper enum conversion while maintaining backward
+    compatibility.
+  src/tools/__tests__/listObjectsTool.test.ts:
+    Added comprehensive unit tests for
+    array input functionality including multiple value filtering, mixed
+    single/array parameters, optional type parameter, backward compatibility
+    verification, and error handling for invalid array contents.
+log:
+  - >-
+    Successfully updated the MCP tool schema to accept both single values and
+    arrays for type, status, and priority filters, and made the type parameter
+    optional. 
+
+
+    Key accomplishments:
+
+    - Updated input schema to accept both strings and arrays using JSON Schema
+    syntax
+
+    - Removed type from required array, making it optional for querying all
+    object types
+
+    - Enhanced handler function with array processing logic and proper enum
+    conversion
+
+    - Maintained full backward compatibility with existing single-value calls
+
+    - Updated tool description with comprehensive examples of multiple value
+    usage
+
+    - Added extensive unit tests covering array inputs, mixed parameters,
+    validation, and error handling
+
+
+    The tool now supports flexible filtering like type=['feature', 'task'],
+    status=['open', 'in-progress'], and maintains all existing functionality.
+    All quality checks and tests pass (562/562 tests passing).
 schema: v1.0
 childrenIds: []
 created: 2025-08-22T04:25:50.664Z
