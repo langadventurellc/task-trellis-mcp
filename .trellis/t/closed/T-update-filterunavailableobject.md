@@ -1,12 +1,26 @@
 ---
 id: T-update-filterunavailableobject
 title: Update filterUnavailableObjects to use hierarchical prerequisite checking
-status: open
+status: done
 priority: high
 prerequisites:
   - T-create-checkhierarchicalprereq
-affectedFiles: {}
-log: []
+affectedFiles:
+  src/utils/filterUnavailableObjects.ts: Updated function to use hierarchical
+    prerequisite checking with Repository parameter and async signature
+  src/utils/__tests__/filterUnavailableObjects.test.ts: Updated all tests to work with new async signature and Repository parameter
+  src/services/local/claimTask.ts: Updated to use await with
+    filterUnavailableObjects and pass repository parameter
+  src/services/local/__tests__/claimTask.test.ts: Updated mock expectations to account for new Repository parameter
+log:
+  - Successfully updated filterUnavailableObjects function to use hierarchical
+    prerequisite checking. The function now accepts a Repository parameter and
+    uses the checkHierarchicalPrerequisitesComplete utility to validate
+    prerequisites through the entire parent hierarchy. Updated function
+    signature to be async, updated all tests to work with new signature, and
+    fixed all callers including claimTask.ts. All 578 tests pass with
+    comprehensive coverage for both direct prerequisites and hierarchical parent
+    prerequisites.
 schema: v1.0
 childrenIds: []
 created: 2025-08-22T05:30:05.110Z

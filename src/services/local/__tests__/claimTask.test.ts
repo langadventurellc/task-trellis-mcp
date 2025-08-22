@@ -348,7 +348,7 @@ describe("claimTask service function", () => {
 
       mockRepository.getObjects.mockResolvedValue(mockTasks);
       mockRepository.getObjectById.mockResolvedValue(updatedTask); // Re-read after save
-      mockFilterUnavailableObjects.mockReturnValue(availableTasks);
+      mockFilterUnavailableObjects.mockResolvedValue(availableTasks);
       mockSortTrellisObjects.mockReturnValue(sortedTasks);
       mockRepository.saveObject.mockResolvedValue();
 
@@ -359,7 +359,10 @@ describe("claimTask service function", () => {
         undefined,
         TrellisObjectType.TASK,
       );
-      expect(mockFilterUnavailableObjects).toHaveBeenCalledWith(mockTasks);
+      expect(mockFilterUnavailableObjects).toHaveBeenCalledWith(
+        mockTasks,
+        mockRepository,
+      );
       expect(mockSortTrellisObjects).toHaveBeenCalledWith(availableTasks);
       expect(mockRepository.saveObject).toHaveBeenCalledWith({
         ...mockTasks[1],
@@ -371,7 +374,7 @@ describe("claimTask service function", () => {
     it("should use scope when provided", async () => {
       const mockTasks = [createMockTask()];
       mockRepository.getObjects.mockResolvedValue(mockTasks);
-      mockFilterUnavailableObjects.mockReturnValue(mockTasks);
+      mockFilterUnavailableObjects.mockResolvedValue(mockTasks);
       mockSortTrellisObjects.mockReturnValue(mockTasks);
       mockRepository.saveObject.mockResolvedValue();
 
@@ -386,7 +389,7 @@ describe("claimTask service function", () => {
 
     it("should throw error when no available tasks", async () => {
       mockRepository.getObjects.mockResolvedValue([]);
-      mockFilterUnavailableObjects.mockReturnValue([]);
+      mockFilterUnavailableObjects.mockResolvedValue([]);
 
       const result = await claimTask(mockRepository);
 
@@ -400,7 +403,7 @@ describe("claimTask service function", () => {
       ];
 
       mockRepository.getObjects.mockResolvedValue(mockTasks);
-      mockFilterUnavailableObjects.mockReturnValue([]);
+      mockFilterUnavailableObjects.mockResolvedValue([]);
 
       const result = await claimTask(mockRepository);
 

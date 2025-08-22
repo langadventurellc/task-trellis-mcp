@@ -79,7 +79,7 @@ async function findNextAvailableTask(
   );
 
   // Filter to get only available tasks
-  const availableTasks = filterUnavailableObjects(objects);
+  const availableTasks = await filterUnavailableObjects(objects, repository);
 
   if (availableTasks.length === 0) {
     throw new Error("No available tasks to claim");
