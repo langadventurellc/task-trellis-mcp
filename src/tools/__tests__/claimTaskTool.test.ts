@@ -12,6 +12,7 @@ describe("claimTaskTool", () => {
       getObjects: jest.fn(),
       saveObject: jest.fn(),
       deleteObject: jest.fn(),
+      getChildrenOf: jest.fn(),
     };
 
     mockService = {
@@ -22,7 +23,6 @@ describe("claimTaskTool", () => {
       listObjects: jest.fn(),
       appendObjectLog: jest.fn(),
       pruneClosed: jest.fn(),
-      replaceObjectBodyRegex: jest.fn(),
       appendModifiedFiles: jest.fn(),
     };
   });

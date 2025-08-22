@@ -7,8 +7,6 @@ argument-hint: [epic-id] [additional context or instructions]
 
 Break down an epic into specific features using the Trellis task management system by analyzing the epic specification and gathering additional requirements as needed. Do not attempt to create multiple features in parallel. Do them sequentially one at a time.
 
-Use ULTRATHINK.
-
 ## MCP Server Setup
 
 Ensure the Task Trellis MCP server is properly configured. The server can be activated with:
@@ -32,8 +30,6 @@ This hierarchy enables parallel development, clear dependencies, and manageable 
 ## Goal
 
 Analyze an epic's comprehensive specification to create well-structured features that represent implementable functionality, ensuring complete coverage of the epic's scope and enabling effective task decomposition.
-
-**Note**: Features can be created either as part of an epic hierarchy OR as standalone features. Both approaches are valid depending on your project structure and needs.
 
 **IMPORTANT**: Features must include actual changes, implementations, or deliverables. Do not create features that are purely research tasks or analysis tasks without any tangible output. Since all features and tasks are executed independently without context from other features or tasks, purely analytical work provides no value.
 
@@ -73,7 +69,7 @@ The input may contain:
 
 **For Hierarchical Features:**
 
-- Retrieve the epic using MCP `get_object` to access its comprehensive description, requirements, and parent project context
+- Retrieve the epic using MCP `get_issue` to access its comprehensive description, requirements, and parent project context
 
 **For Standalone Features:**
 
@@ -84,7 +80,6 @@ The input may contain:
 
 **Thoroughly analyze the requirements (epic description OR standalone requirements) to identify natural feature boundaries:**
 
-- **Use context7 MCP tool** to research technical approaches and best practices
 - **Search codebase** for similar feature patterns or implementations
 - Extract all deliverables and components from the epic description
 - Review architecture diagrams and technical specifications
@@ -158,14 +153,13 @@ For each feature, create:
 
 Each feature should be sized appropriately for task breakdown:
 
-- **6-20 tasks per feature** - Features should represent enough work to be meaningful but not overwhelming
 - **1-2 hours per task** - When broken down, each task should be completable in 1-2 hours
 - **Independent implementation** - Features should be implementable without blocking other features
 - **Testable boundaries** - Features should have clear success criteria and testing strategies
 
 ### 5. Create Features Using MCP
 
-For each feature, call the Task Trellis MCP `create_object` tool:
+For each feature, call the Task Trellis MCP `create_issue` tool:
 
 - `type`: Set to `"feature"`
 - `parent`: The epic ID (optional - omit for standalone features)
@@ -247,33 +241,6 @@ Use /create-tasks to break down features into implementable tasks
    - Dependencies: Data Access Layer
 ```
 
-## Simplicity Principles
-
-When creating features, follow these guidelines:
-
-### Keep It Simple:
-
-- **No over-engineering** - Create only the features needed for the epic
-- **No extra features** - Don't add functionality that wasn't requested
-- **Choose straightforward approaches** - Simple feature structure over complex designs
-- **Solve the actual problem** - Don't anticipate future requirements
-
-### Forbidden Patterns:
-
-- **NO premature optimization** - Don't optimize feature structure unless requested
-- **NO feature creep** - Stick to the specified epic requirements
-- **NO complex dependencies** - Keep feature relationships simple and clear
-- **NO unnecessary abstractions** - Choose direct, maintainable approaches
-- **NO pure research/analysis features** - Every feature must produce actual code, configuration, or tangible deliverables
-
-### Modular Architecture:
-
-- **Clear boundaries** - Each feature should have distinct, well-defined responsibilities
-- **Minimal coupling** - Features should interact through clean interfaces, not internal dependencies
-- **High cohesion** - Related functionality should be grouped within the same feature
-- **Avoid big ball of mud** - Prevent tangled cross-dependencies between features
-- **Clean interfaces** - Define clear contracts between features for data and functionality exchange
-
 ## Question Guidelines
 
 Ask questions that:
@@ -283,22 +250,11 @@ Ask questions that:
 - **Identify dependencies**: Build order and integration points?
 - **Consider testing**: How to verify feature completeness?
 
-## Error Handling
-
-- **Epic not found**: Provide clear error message
-- **Invalid dependencies**: Detect and prevent circular dependencies
-- **Missing epic description**: Request epic details be added first
-
 <rules>
-  <critical>Epic ID is required (from arguments or context)</critical>
-  <critical>Base feature breakdown primarily on epic description</critical>
   <critical>Never directly access `.trellis/` directory directly</critical>
-  <critical>Use MCP tools for all operations (create_object, get_object, etc.)</critical>
+  <critical>Use MCP tools for all operations (create_issue, get_issue, etc.)</critical>
   <critical>Ask one question at a time with specific options</critical>
   <critical>Continue asking questions until you have complete understanding of feature boundaries</critical>
-  <important>Use context7 MCP tool to research technical approaches and best practices</important>
   <important>Feature descriptions must be detailed enough for task creation</important>
   <important>Include implementation guidance and testing requirements</important>
-  <important>Configure dependencies to enable parallel work</important>
-  <important>Size features appropriately for 6-20 tasks of 1-2 hours each</important>
 </rules>

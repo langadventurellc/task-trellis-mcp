@@ -1,10 +1,10 @@
+import { parse, stringify } from "yaml";
 import {
   McpTestClient,
   TestEnvironment,
-  readObjectFile,
   fileExists,
+  readObjectFile,
 } from "../utils";
-import { parse, stringify } from "yaml";
 
 describe("E2E File Validation", () => {
   let testEnv: TestEnvironment;
@@ -29,7 +29,7 @@ describe("E2E File Validation", () => {
 
   describe("YAML Front-matter Structure Validation", () => {
     it("should validate required fields in project YAML", async () => {
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "project",
         title: "YAML Validation Project",
         description: "Testing YAML structure",
@@ -53,21 +53,21 @@ describe("E2E File Validation", () => {
 
     it("should validate all object types have correct YAML structure", async () => {
       // Create hierarchy: Project -> Epic -> Feature -> Task
-      const projectResult = await client.callTool("create_object", {
+      const projectResult = await client.callTool("create_issue", {
         type: "project",
         title: "Structure Test Project",
       });
       const projectId =
         projectResult.content[0].text.match(/ID: (P-[a-z-]+)/)![1];
 
-      const epicResult = await client.callTool("create_object", {
+      const epicResult = await client.callTool("create_issue", {
         type: "epic",
         title: "Structure Test Epic",
         parent: projectId,
       });
       const epicId = epicResult.content[0].text.match(/ID: (E-[a-z-]+)/)![1];
 
-      const featureResult = await client.callTool("create_object", {
+      const featureResult = await client.callTool("create_issue", {
         type: "feature",
         title: "Structure Test Feature",
         parent: epicId,
@@ -75,7 +75,7 @@ describe("E2E File Validation", () => {
       const featureId =
         featureResult.content[0].text.match(/ID: (F-[a-z-]+)/)![1];
 
-      const taskResult = await client.callTool("create_object", {
+      const taskResult = await client.callTool("create_issue", {
         type: "task",
         title: "Structure Test Task",
         parent: featureId,
@@ -105,7 +105,7 @@ describe("E2E File Validation", () => {
     });
 
     it("should handle empty and null values correctly", async () => {
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "task",
         title: "Empty Values Test",
         prerequisites: [],
@@ -126,7 +126,7 @@ describe("E2E File Validation", () => {
 
   describe("Special Characters Handling", () => {
     it("should handle quotes in YAML fields", async () => {
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "task",
         title: "Task with \"double quotes\" and 'single quotes'",
         description: 'Body with "quotes" and special chars',
@@ -149,7 +149,7 @@ describe("E2E File Validation", () => {
     });
 
     it("should handle colons and YAML special symbols", async () => {
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "feature",
         title: "Feature: with: colons: everywhere",
         description: "key: value pairs in body\nshould: not: break: parsing",
@@ -167,7 +167,7 @@ describe("E2E File Validation", () => {
 
     it("should handle multi-line content in arrays", async () => {
       // First create a task
-      const createResult = await client.callTool("create_object", {
+      const createResult = await client.callTool("create_issue", {
         type: "task",
         title: "Multi-line Log Test",
       });
@@ -199,7 +199,7 @@ describe("E2E File Validation", () => {
     });
 
     it("should handle unicode and emojis", async () => {
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "project",
         title: "Unicode Project 🚀 你好世界",
         description: "Testing émojis 😀 and spëcial çhars",
@@ -230,7 +230,7 @@ config:
 
 This should not confuse the parser.`;
 
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "task",
         title: "YAML in Body Test",
         description: yamlLikeBody,
@@ -249,21 +249,21 @@ This should not confuse the parser.`;
   describe("Directory Structure Validation", () => {
     it("should create correct directory hierarchy for nested objects", async () => {
       // Create complete hierarchy
-      const projectResult = await client.callTool("create_object", {
+      const projectResult = await client.callTool("create_issue", {
         type: "project",
         title: "Hierarchy Test",
       });
       const projectId =
         projectResult.content[0].text.match(/ID: (P-[a-z-]+)/)![1];
 
-      const epicResult = await client.callTool("create_object", {
+      const epicResult = await client.callTool("create_issue", {
         type: "epic",
         title: "Hierarchy Epic",
         parent: projectId,
       });
       const epicId = epicResult.content[0].text.match(/ID: (E-[a-z-]+)/)![1];
 
-      const featureResult = await client.callTool("create_object", {
+      const featureResult = await client.callTool("create_issue", {
         type: "feature",
         title: "Hierarchy Feature",
         parent: epicId,
@@ -271,7 +271,7 @@ This should not confuse the parser.`;
       const featureId =
         featureResult.content[0].text.match(/ID: (F-[a-z-]+)/)![1];
 
-      const taskResult = await client.callTool("create_object", {
+      const taskResult = await client.callTool("create_issue", {
         type: "task",
         title: "Hierarchy Task",
         parent: featureId,
@@ -311,7 +311,7 @@ This should not confuse the parser.`;
     });
 
     it("should handle standalone features correctly", async () => {
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "feature",
         title: "Standalone Feature",
       });
@@ -323,7 +323,7 @@ This should not confuse the parser.`;
     });
 
     it("should handle standalone tasks correctly", async () => {
-      const openResult = await client.callTool("create_object", {
+      const openResult = await client.callTool("create_issue", {
         type: "task",
         title: "Standalone Open Task",
         status: "open",
@@ -331,7 +331,7 @@ This should not confuse the parser.`;
       const openTaskId =
         openResult.content[0].text.match(/ID: (T-[a-z-]+)/)![1];
 
-      const closedResult = await client.callTool("create_object", {
+      const closedResult = await client.callTool("create_issue", {
         type: "task",
         title: "Standalone Closed Task",
         status: "done",
@@ -351,7 +351,7 @@ This should not confuse the parser.`;
   describe("Task Status Directory Transitions", () => {
     it("should move task file when status changes from open to closed", async () => {
       // Create task in open status
-      const createResult = await client.callTool("create_object", {
+      const createResult = await client.callTool("create_issue", {
         type: "task",
         title: "Status Transition Task",
         status: "open",
@@ -367,7 +367,7 @@ This should not confuse the parser.`;
       ).toBe(false);
 
       // Update status to done
-      await client.callTool("update_object", {
+      await client.callTool("update_issue", {
         id: taskId,
         status: "done",
         force: true,
@@ -384,7 +384,7 @@ This should not confuse the parser.`;
 
     it("should move task file when status changes from closed to open", async () => {
       // Create task in done status
-      const createResult = await client.callTool("create_object", {
+      const createResult = await client.callTool("create_issue", {
         type: "task",
         title: "Reopen Task",
         status: "done",
@@ -397,7 +397,7 @@ This should not confuse the parser.`;
       ).toBe(true);
 
       // Update status to in-progress
-      await client.callTool("update_object", {
+      await client.callTool("update_issue", {
         id: taskId,
         status: "in-progress",
         force: true,
@@ -414,14 +414,14 @@ This should not confuse the parser.`;
 
     it("should handle status transitions for tasks in hierarchy", async () => {
       // Create feature with task
-      const featureResult = await client.callTool("create_object", {
+      const featureResult = await client.callTool("create_issue", {
         type: "feature",
         title: "Parent Feature",
       });
       const featureId =
         featureResult.content[0].text.match(/ID: (F-[a-z-]+)/)![1];
 
-      const taskResult = await client.callTool("create_object", {
+      const taskResult = await client.callTool("create_issue", {
         type: "task",
         title: "Hierarchical Task",
         parent: featureId,
@@ -438,7 +438,7 @@ This should not confuse the parser.`;
       ).toBe(true);
 
       // First change status to in-progress
-      await client.callTool("update_object", {
+      await client.callTool("update_issue", {
         id: taskId,
         status: "in-progress",
         force: true,
@@ -505,7 +505,7 @@ Additional content after horizontal rule.
 ![Image description](image.png)
 [Link text](https://example.com)`;
 
-      const createResult = await client.callTool("create_object", {
+      const createResult = await client.callTool("create_issue", {
         type: "feature",
         title: "Complex Content Feature",
         description: complexBody,
@@ -521,7 +521,7 @@ Additional content after horizontal rule.
       expect(file.body).toBe(complexBody);
 
       // Update the feature and verify content still preserved
-      await client.callTool("update_object", {
+      await client.callTool("update_issue", {
         id: featureId,
         priority: "high",
       });
@@ -537,7 +537,7 @@ Additional content after horizontal rule.
     it("should handle file encoding and newlines correctly", async () => {
       const mixedNewlines = "Line 1\nLine 2\r\nLine 3\rLine 4";
 
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "task",
         title: "Newline Test",
         description: mixedNewlines,
@@ -566,14 +566,14 @@ Additional content after horizontal rule.
       };
 
       // Need to create project first for epic
-      const projectResult = await client.callTool("create_object", {
+      const projectResult = await client.callTool("create_issue", {
         type: "project",
         title: "Parent Project",
       });
       const projectId =
         projectResult.content[0].text.match(/ID: (P-[a-z-]+)/)![1];
 
-      const epicResult = await client.callTool("create_object", {
+      const epicResult = await client.callTool("create_issue", {
         type: "epic",
         parent: projectId,
         ...testData,
@@ -581,7 +581,7 @@ Additional content after horizontal rule.
       const epicId = epicResult.content[0].text.match(/ID: (E-[a-z-]+)/)![1];
 
       // Get the object through MCP
-      const getResult = await client.callTool("get_object", {
+      const getResult = await client.callTool("get_issue", {
         id: epicId,
       });
 

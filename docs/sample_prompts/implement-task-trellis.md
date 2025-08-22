@@ -1,13 +1,11 @@
 ---
 description: Claim and implement a task following Research and Plan → Implement workflow
-argument-hint: [task-id] --worktree [worktree-path] --scope [object-id] --force [additional context or instructions]
+argument-hint: [task-id] --worktree [worktree-path] --scope [issue-id] --force [additional context or instructions]
 ---
 
 # Implement Task Command
 
 Claim and implement the next available task from the backlog using the Trellis task management system with the Research and Plan → Implement workflow.
-
-Use ULTRATHINK.
 
 ## MCP Server Setup
 
@@ -45,7 +43,7 @@ Command: `claim_task`
 
 - Specific task ID to claim (e.g., "T-create-user-model")
 - `--worktree (worktree-path)` - Worktree identifier to stamp on claimed task (currently informational only)
-- `--scope (object-id)` - Hierarchical scope for task filtering (P-, E-, F- prefixed)
+- `--scope (issue-id)` - Hierarchical scope for task filtering (P-, E-, F- prefixed)
 - `--force` - Bypass validation when claiming specific task (only with `taskId`)
 - Additional context or preferences
 
@@ -59,14 +57,14 @@ Claims are made against the current working directory's task trellis system (tas
 
 The research phase is critical for understanding the context and requirements before writing any code. During this phase:
 
-- **Read parent objects for context**: Use MCP `get_object` to read the parent feature (if it has one) for additional context, specifications, and requirements that may not be fully detailed in the task description. Do not continue with the research and implementation planner until you have claimed or loaded an already claimed task.
-- **Use research and implementation planner subagent**: Use the research and implementation planner subagent to perform the research and planning. Provide **ALL** relevant context, including the task ID, task description, parent feature details, and any other pertinent information. If the research and implementation planner subagent is not available, **STOP** and inform the user that you cannot proceed without it.
+- **Read parent issues for context**: Use MCP `get_issue` to read the parent feature (if it has one) for additional context, specifications, and requirements that may not be fully detailed in the task description.
+- **Research**: Review the task requirements and related materials to identify key considerations, potential challenges, and relevant patterns or practices. Analyze the existing codebase for similar implementations or patterns. If necessary, perform external research via MCP tools or web searches.
 
 ```
 📚 Research Phase for T-create-user-model
 
-1️⃣ Reading parent objects for context...
-   - `get_object` for task's feature, epic, and project
+1️⃣ Reading parent issues for context...
+   - `get_issue` for task's feature, epic, and project
 
 2️⃣ Using research and implementation planner subagent for comprehensive research and planning...
 
@@ -79,12 +77,9 @@ The research phase is critical for understanding the context and requirements be
 
 The implementation phase is where the actual coding happens. During this phase:
 
-- **Use TodoWrite**: Use the `TodoWrite` tool to track progress
 - **Write clean code**: Follow project conventions and best practices
-- **Implement incrementally**: Build and test small pieces before moving to the next
 - **Run quality checks frequently**: Format, lint, and test after each major change
 - **Write tests alongside code**: Don't leave testing for the end
-- **Document as you go**: Add comments for complex logic or decisions
 - **Apply security measures**: Implement validation, sanitization, and protection as planned
 - **Handle errors gracefully**: Include proper error handling and user feedback
 
@@ -147,38 +142,6 @@ Note: Your completed task has unblocked dependent tasks!
 
 **STOP!** - Do not proceed. Complete one task and one task only. Do not implement another task.
 
-**Note**: It is okay to call the claim next task tool while in plan mode to gather task information for planning purposes, but do not proceed with implementation until explicitly instructed.
-
-## Error Handling
-
-## Problem-Solving Framework
-
-When you're stuck or confused:
-
-1. **Stop** - Don't spiral into complex solutions
-2. **Delegate** - Consider spawning agents for parallel investigation
-3. **Think Deeply** - For complex problems, say "I need to think through this challenge"
-4. **Step back** - Re-read the requirements and existing code
-5. **Simplify** - The simple solution is usually correct
-6. **Ask** - "I see two approaches: [A] vs [B]. Which do you prefer?"
-
-When facing architectural decisions:
-
-- Present options clearly with pros/cons
-- Recommend the simpler approach
-- Ask for guidance on trade-offs
-
-### Use Multiple Agents
-
-_Leverage tasks aggressively_ for better results:
-
-- Spawn tasks to explore different parts of the codebase in parallel
-- Use one task to write tests while another implements features
-- Delegate research tasks: "I'll have a task investigate the database schema while I analyze the API structure"
-- For complex refactors: One task identifies changes, another implements them
-
-Say: "I'll spawn tasks to tackle different aspects of this problem" whenever a task has multiple independent parts.
-
 ### During Research and Planning Phase
 
 ```
@@ -209,40 +172,11 @@ C) Use a different approach (raw SQL, different ORM)
 - **Least privilege** - Request minimum permissions needed
 - **Error handling** - Don't expose internal details
 
-### Measure First:
-
-- **No premature optimization** - Don't optimize unless specifically requested
-- **No over-engineering** - Build only what's needed for the task
-- **No extra features** - Don't add functionality that wasn't requested
-- **Keep it simple** - Choose the most straightforward approach that works
-- **Solve the actual problem** - Don't anticipate future requirements
-
-### Forbidden Patterns:
-
-- **NO "any" types** - Use specific, concrete types
-- **NO sleep/wait loops** - Use proper async patterns
-- **NO keeping old and new code together** - Delete replaced code immediately
-- **NO custom error hierarchies** - Keep errors simple
-- **NO hardcoded secrets or environment values**
-- **NO concatenating user input into queries** - Use parameterized queries
-
-### Modular Code Architecture:
-
-- **Clear boundaries** - Each module/class/function should have a single, well-defined responsibility
-- **Minimal coupling** - Components should interact through clean interfaces, not internal implementation details
-- **High cohesion** - Related functionality should be grouped together in the same module
-- **Dependency injection** - Use interfaces and dependency injection instead of tight coupling
-- **Avoid big ball of mud** - Prevent tangled cross-dependencies between modules
-- **Clean interfaces** - Define clear contracts (APIs) between components
-- **Separation of concerns** - Keep business logic, data access, and UI separate
-- **Avoid circular dependencies** - Structure code to have clear dependency flow
-
 ## Quality Standards
 
 During implementation, ensure:
 
 - **Research First**: Never skip research phase
-- **One Export Per File**: Enforced by linting
 - **Test Coverage**: Write tests in same task
 - **Security**: Validate all inputs
 - **Documentation**: Comment complex logic
@@ -269,8 +203,6 @@ Would you like me to [specific improvement]?"
   <critical>ALWAYS follow Research and Plan → Implement workflow</critical>
   <critical>NEVER skip quality checks before completing task</critical>
   <critical>All tests must pass before marking task complete</critical>
-  <critical>One export per file rule must be followed</critical>
-  <important>Use context7 for library documentation</important>
   <important>Search codebase for patterns before implementing</important>
   <important>Write tests in the same task as implementation</important>
   <important>Apply security best practices to all code</important>

@@ -3,7 +3,7 @@ import { TaskTrellisService } from "../services/TaskTrellisService";
 
 export const appendModifiedFilesTool = {
   name: "append_modified_files",
-  description: `Appends modified files information to a trellis object in the task trellis system
+  description: `Appends modified files information to a trellis issue in the task trellis system
 
 Use this tool to record files that have been modified during task execution, along with descriptions of the modifications made. This helps maintain a comprehensive record of changes associated with each work item for tracking and audit purposes.
 
@@ -15,7 +15,7 @@ File modification tracking purposes:
 - Enable impact analysis for future changes
 
 Input requirements:
-- Object ID: The unique identifier of the trellis object to update
+- Issue ID: The unique identifier of the trellis issue to update
 - Files Changed: A record mapping file paths to descriptions of modifications
 
 File path guidelines:
@@ -28,14 +28,14 @@ Description guidelines:
 - Focus on the purpose and impact of changes rather than implementation details
 - Use consistent terminology across related modifications
 
-The tool automatically merges descriptions for files that were previously modified, creating a comprehensive change history for each file within the context of the trellis object.`,
+The tool automatically merges descriptions for files that were previously modified, creating a comprehensive change history for each file within the context of the trellis issue.`,
   inputSchema: {
     type: "object",
     properties: {
       id: {
         type: "string",
         description:
-          "ID of the trellis object to update with modified files information",
+          "ID of the trellis issue to update with modified files information",
       },
       filesChanged: {
         type: "object",

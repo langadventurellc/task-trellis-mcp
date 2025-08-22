@@ -22,22 +22,32 @@ function convertToSummary(obj: TrellisObject): TrellisObjectSummary {
   };
 }
 
+const normalizeEnumInput = <T>(input: T | T[] | undefined): T[] | undefined => {
+  if (input === undefined) return undefined;
+  return Array.isArray(input) ? input : [input];
+};
+
 export async function listObjects(
   repository: Repository,
-  type: TrellisObjectType,
+  type?: TrellisObjectType | TrellisObjectType[],
   scope?: string,
-  status?: TrellisObjectStatus,
-  priority?: TrellisObjectPriority,
+  status?: TrellisObjectStatus | TrellisObjectStatus[],
+  priority?: TrellisObjectPriority | TrellisObjectPriority[],
   includeClosed: boolean = false,
 ): Promise<{ content: Array<{ type: string; text: string }> }> {
   try {
+    // Normalize inputs to arrays
+    const normalizedType = normalizeEnumInput(type);
+    const normalizedStatus = normalizeEnumInput(status);
+    const normalizedPriority = normalizeEnumInput(priority);
+
     // Get objects from repository
     const objects = await repository.getObjects(
       includeClosed,
       scope,
-      type,
-      status,
-      priority,
+      normalizedType,
+      normalizedStatus,
+      normalizedPriority,
     );
 
     const objectSummaries = objects.map(convertToSummary);

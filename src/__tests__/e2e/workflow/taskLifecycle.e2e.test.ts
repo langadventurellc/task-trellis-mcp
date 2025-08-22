@@ -23,7 +23,7 @@ describe("E2E Workflow - Task Lifecycle", () => {
   describe("Complete Task Workflow", () => {
     it("should complete full lifecycle: create -> claim -> work -> complete", async () => {
       // Step 1: Create task
-      const createResult = await client.callTool("create_object", {
+      const createResult = await client.callTool("create_issue", {
         type: "task",
         title: "Full Lifecycle Task",
         priority: "high",
@@ -89,7 +89,7 @@ describe("E2E Workflow - Task Lifecycle", () => {
 
     it("should handle workflow with prerequisites", async () => {
       // Create prerequisite task
-      const prereqResult = await client.callTool("create_object", {
+      const prereqResult = await client.callTool("create_issue", {
         type: "task",
         title: "Prerequisite Task",
         status: "open",
@@ -98,7 +98,7 @@ describe("E2E Workflow - Task Lifecycle", () => {
         prereqResult.content[0].text.match(/ID: (T-[a-z0-9-]+)/)![1];
 
       // Create dependent task
-      const dependentResult = await client.callTool("create_object", {
+      const dependentResult = await client.callTool("create_issue", {
         type: "task",
         title: "Dependent Task",
         prerequisites: [prereqId],
@@ -150,7 +150,7 @@ describe("E2E Workflow - Task Lifecycle", () => {
   describe("Complex Project Workflow", () => {
     it("should handle project -> epic -> feature -> task hierarchy", async () => {
       // Create project
-      const projectResult = await client.callTool("create_object", {
+      const projectResult = await client.callTool("create_issue", {
         type: "project",
         title: "Complex Project",
         status: "open",
@@ -159,7 +159,7 @@ describe("E2E Workflow - Task Lifecycle", () => {
         projectResult.content[0].text.match(/ID: (P-[a-z0-9-]+)/)![1];
 
       // Create epic
-      const epicResult = await client.callTool("create_object", {
+      const epicResult = await client.callTool("create_issue", {
         type: "epic",
         title: "Major Epic",
         parent: projectId,
@@ -168,7 +168,7 @@ describe("E2E Workflow - Task Lifecycle", () => {
       const epicId = epicResult.content[0].text.match(/ID: (E-[a-z0-9-]+)/)![1];
 
       // Create feature
-      const featureResult = await client.callTool("create_object", {
+      const featureResult = await client.callTool("create_issue", {
         type: "feature",
         title: "Core Feature",
         parent: epicId,
@@ -180,7 +180,7 @@ describe("E2E Workflow - Task Lifecycle", () => {
       // Create multiple tasks
       const taskIds: string[] = [];
       for (let i = 1; i <= 3; i++) {
-        const taskResult = await client.callTool("create_object", {
+        const taskResult = await client.callTool("create_issue", {
           type: "task",
           title: `Task ${i}`,
           parent: featureId,
@@ -217,7 +217,7 @@ describe("E2E Workflow - Task Lifecycle", () => {
       }
 
       // Update feature status
-      await client.callTool("update_object", {
+      await client.callTool("update_issue", {
         id: featureId,
         status: "done",
       });
@@ -234,7 +234,7 @@ describe("E2E Workflow - Task Lifecycle", () => {
   describe("Workflow Interruptions", () => {
     it("should handle task abandonment (wont-do)", async () => {
       // Create and claim task
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "task",
         title: "Task to Abandon",
         status: "open",
@@ -248,7 +248,7 @@ describe("E2E Workflow - Task Lifecycle", () => {
       });
 
       // Mark as wont-do instead of completing
-      await client.callTool("update_object", {
+      await client.callTool("update_issue", {
         id: taskId,
         status: "wont-do",
       });
@@ -263,7 +263,7 @@ describe("E2E Workflow - Task Lifecycle", () => {
 
     it("should handle task re-assignment", async () => {
       // Create task
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "task",
         title: "Task to Reassign",
         status: "open",
@@ -278,7 +278,7 @@ describe("E2E Workflow - Task Lifecycle", () => {
       });
 
       // Reset to open for reassignment
-      await client.callTool("update_object", {
+      await client.callTool("update_issue", {
         id: taskId,
         status: "open",
       });
@@ -314,7 +314,7 @@ describe("E2E Workflow - Task Lifecycle", () => {
 
   describe("Status Transition Validation", () => {
     it("should enforce valid status transitions", async () => {
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "task",
         title: "Status Transition Test",
         status: "open",
@@ -339,7 +339,7 @@ describe("E2E Workflow - Task Lifecycle", () => {
     });
 
     it("should prevent invalid status transitions", async () => {
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "task",
         title: "Invalid Transition Test",
         status: "open",
@@ -370,7 +370,7 @@ describe("E2E Workflow - Task Lifecycle", () => {
       ];
 
       for (const task of tasks) {
-        await client.callTool("create_object", {
+        await client.callTool("create_issue", {
           type: "task",
           title: task.title,
           priority: task.priority,
@@ -386,7 +386,7 @@ describe("E2E Workflow - Task Lifecycle", () => {
 
     it("should consider prerequisites when auto-claiming", async () => {
       // Create prerequisite task
-      const prereqResult = await client.callTool("create_object", {
+      const prereqResult = await client.callTool("create_issue", {
         type: "task",
         title: "Prerequisite for High Priority",
         status: "open",
@@ -395,7 +395,7 @@ describe("E2E Workflow - Task Lifecycle", () => {
         prereqResult.content[0].text.match(/ID: (T-[a-z0-9-]+)/)![1];
 
       // Create high priority task with prerequisite
-      await client.callTool("create_object", {
+      await client.callTool("create_issue", {
         type: "task",
         title: "High Priority with Prereq",
         priority: "high",
@@ -404,7 +404,7 @@ describe("E2E Workflow - Task Lifecycle", () => {
       });
 
       // Create medium priority task without prerequisite
-      await client.callTool("create_object", {
+      await client.callTool("create_issue", {
         type: "task",
         title: "Medium Priority Available",
         priority: "medium",
@@ -423,7 +423,7 @@ describe("E2E Workflow - Task Lifecycle", () => {
       // Create multiple tasks
       const taskIds: string[] = [];
       for (let i = 1; i <= 3; i++) {
-        const taskResult = await client.callTool("create_object", {
+        const taskResult = await client.callTool("create_issue", {
           type: "task",
           title: `Concurrent Task ${i}`,
           status: "open",

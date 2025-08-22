@@ -1,8 +1,8 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { CallToolResultSchema } from "@modelcontextprotocol/sdk/types.js";
-import { TestEnvironment, pathExists } from "../utils";
 import path from "path";
+import { TestEnvironment, pathExists } from "../utils";
 
 describe("E2E Configuration - Activation", () => {
   let testEnv: TestEnvironment;
@@ -69,7 +69,7 @@ describe("E2E Configuration - Activation", () => {
       expect(response.content[0].text).toContain("planningRootFolder");
 
       // Verify .trellis directory exists after creating an object
-      await callTool("create_object", {
+      await callTool("create_issue", {
         type: "project",
         title: "Test Project",
       });
@@ -82,7 +82,7 @@ describe("E2E Configuration - Activation", () => {
       await connectWithoutProjectRoot();
 
       // Try to use tool before activation - should fail
-      const errorResponse = await callTool("list_objects", {});
+      const errorResponse = await callTool("list_issues", {});
       expect(errorResponse.content[0].text).toContain(
         "Planning root folder is not configured",
       );
@@ -94,7 +94,7 @@ describe("E2E Configuration - Activation", () => {
       });
 
       // Should now work
-      const response = await callTool("list_objects", { type: "project" });
+      const response = await callTool("list_issues", { type: "project" });
       expect(response.content[0].text).not.toContain("not configured");
     });
 
@@ -108,7 +108,7 @@ describe("E2E Configuration - Activation", () => {
       });
 
       // Create an object
-      await callTool("create_object", {
+      await callTool("create_issue", {
         type: "project",
         title: "Test Project",
       });
@@ -121,7 +121,7 @@ describe("E2E Configuration - Activation", () => {
       });
 
       // Objects from first activation should not be visible
-      const response = await callTool("list_objects", { type: "project" });
+      const response = await callTool("list_issues", { type: "project" });
       expect(response.content[0].text).toBe("[]");
     });
   });

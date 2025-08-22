@@ -83,7 +83,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should list only projects when type=project", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "project",
       });
 
@@ -93,7 +93,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should list only tasks when type=task", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
       });
 
@@ -103,7 +103,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should list only epics when type=epic", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "epic",
       });
 
@@ -113,7 +113,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should list only features when type=feature", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "feature",
       });
 
@@ -124,7 +124,7 @@ describe("E2E CRUD - listObjects", () => {
 
     it("should return empty array when no objects of specified type exist", async () => {
       // Test with a scope that doesn't exist to get empty results
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         scope: "E-nonexistent-epic",
       });
@@ -158,7 +158,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should filter objects by status", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         status: "in-progress",
       });
@@ -168,7 +168,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should exclude closed tasks by default", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
       });
 
@@ -179,7 +179,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should include closed tasks when includeClosed=true", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         includeClosed: true,
       });
@@ -190,7 +190,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should filter open tasks correctly", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         status: "open",
       });
@@ -316,7 +316,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should exclude closed projects by default", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "project",
       });
 
@@ -332,7 +332,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should include closed projects when includeClosed=true", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "project",
         includeClosed: true,
       });
@@ -349,7 +349,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should exclude closed epics by default", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "epic",
       });
 
@@ -362,7 +362,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should include closed epics when includeClosed=true", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "epic",
         includeClosed: true,
       });
@@ -376,7 +376,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should exclude closed features by default", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "feature",
       });
 
@@ -389,7 +389,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should include closed features when includeClosed=true", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "feature",
         includeClosed: true,
       });
@@ -403,7 +403,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should exclude closed tasks by default", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
       });
 
@@ -419,7 +419,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should include closed tasks when includeClosed=true", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         includeClosed: true,
       });
@@ -436,7 +436,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should work with includeClosed and status filters for projects", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "project",
         status: "done",
         includeClosed: true,
@@ -448,7 +448,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should work with includeClosed and status filters for epics", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "epic",
         status: "wont-do",
         includeClosed: true,
@@ -460,7 +460,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should return empty array when status filter requires closed objects but includeClosed=false", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "feature",
         status: "done",
         includeClosed: false,
@@ -490,7 +490,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should filter objects by priority", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "feature",
         priority: "high",
       });
@@ -501,7 +501,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should filter objects by medium priority", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "feature",
         priority: "medium",
       });
@@ -512,7 +512,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should filter objects by low priority", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "feature",
         priority: "low",
       });
@@ -523,7 +523,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should return all priorities when no filter specified", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "feature",
       });
 
@@ -601,7 +601,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should list objects within project scope", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "epic",
         scope: "P-parent",
       });
@@ -613,7 +613,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should list objects within epic scope", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "feature",
         scope: "E-child-1",
       });
@@ -624,7 +624,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should not include objects outside of scope", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "feature",
         scope: "P-parent",
       });
@@ -635,7 +635,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should return empty array for non-existent scope", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         scope: "P-nonexistent",
       });
@@ -735,7 +735,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should apply multiple filters simultaneously", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         status: "open",
         priority: "high",
@@ -748,7 +748,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should combine includeClosed with other filters", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         priority: "high",
         scope: "P-complex",
@@ -762,7 +762,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should return empty when combined filters match nothing", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         status: "draft",
         priority: "high",
@@ -774,7 +774,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should combine status and priority filters", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         status: "in-progress",
         priority: "medium",
@@ -820,7 +820,7 @@ describe("E2E CRUD - listObjects", () => {
         { projectId: "P-detailed" },
       );
 
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "project",
       });
 
@@ -843,7 +843,7 @@ describe("E2E CRUD - listObjects", () => {
         { status: "open" },
       );
 
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
       });
 
@@ -905,7 +905,7 @@ describe("E2E CRUD - listObjects", () => {
         },
       );
 
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         scope: "P-hierarchy",
       });
@@ -941,7 +941,7 @@ describe("E2E CRUD - listObjects", () => {
       }
 
       const startTime = Date.now();
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         includeClosed: true,
       });
@@ -978,7 +978,7 @@ describe("E2E CRUD - listObjects", () => {
         );
       }
 
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "feature",
         priority: "high",
       });
@@ -991,7 +991,7 @@ describe("E2E CRUD - listObjects", () => {
 
   describe("Error Handling", () => {
     it("should handle invalid type parameter", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "invalid-type",
       });
 
@@ -1002,7 +1002,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should handle invalid status parameter", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         status: "invalid-status",
       });
@@ -1014,7 +1014,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should handle invalid priority parameter", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         priority: "critical",
       });
@@ -1044,7 +1044,7 @@ describe("E2E CRUD - listObjects", () => {
       );
 
       // Should skip invalid files and continue
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
       });
 
@@ -1054,13 +1054,776 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should handle empty directories gracefully", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
       });
 
       const objects = extractObjectIds(result.content[0].text as string);
       expect(Array.isArray(objects)).toBe(true);
       expect(objects).toEqual([]);
+    });
+  });
+
+  describe("Multiple Value Filtering", () => {
+    beforeEach(async () => {
+      // Create diverse test objects for comprehensive filtering validation
+
+      // Projects with different priorities
+      await createObjectFile(
+        testEnv.projectRoot,
+        "project",
+        "P-high-priority-multi",
+        createObjectContent({
+          id: "P-high-priority-multi",
+          title: "High Priority Project",
+          priority: "high",
+          status: "open",
+        }),
+      );
+
+      await createObjectFile(
+        testEnv.projectRoot,
+        "project",
+        "P-medium-priority-multi",
+        createObjectContent({
+          id: "P-medium-priority-multi",
+          title: "Medium Priority Project",
+          priority: "medium",
+          status: "in-progress",
+        }),
+      );
+
+      await createObjectFile(
+        testEnv.projectRoot,
+        "project",
+        "P-low-priority-multi",
+        createObjectContent({
+          id: "P-low-priority-multi",
+          title: "Low Priority Project",
+          priority: "low",
+          status: "done",
+        }),
+      );
+
+      // Epics with different statuses
+      await createObjectFile(
+        testEnv.projectRoot,
+        "epic",
+        "E-open-multi",
+        createObjectContent({
+          id: "E-open-multi",
+          title: "Open Epic",
+          status: "open",
+          priority: "high",
+          parent: "P-high-priority-multi",
+        }),
+        { projectId: "P-high-priority-multi" },
+      );
+
+      await createObjectFile(
+        testEnv.projectRoot,
+        "epic",
+        "E-progress-multi",
+        createObjectContent({
+          id: "E-progress-multi",
+          title: "In Progress Epic",
+          status: "in-progress",
+          priority: "medium",
+          parent: "P-medium-priority-multi",
+        }),
+        { projectId: "P-medium-priority-multi" },
+      );
+
+      await createObjectFile(
+        testEnv.projectRoot,
+        "epic",
+        "E-done-multi",
+        createObjectContent({
+          id: "E-done-multi",
+          title: "Done Epic",
+          status: "done",
+          priority: "low",
+          parent: "P-low-priority-multi",
+        }),
+        { projectId: "P-low-priority-multi" },
+      );
+
+      // Features with various combinations
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        "F-high-open-multi",
+        createObjectContent({
+          id: "F-high-open-multi",
+          title: "High Priority Open Feature",
+          status: "open",
+          priority: "high",
+        }),
+      );
+
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        "F-medium-progress-multi",
+        createObjectContent({
+          id: "F-medium-progress-multi",
+          title: "Medium Priority In Progress Feature",
+          status: "in-progress",
+          priority: "medium",
+        }),
+      );
+
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        "F-low-draft-multi",
+        createObjectContent({
+          id: "F-low-draft-multi",
+          title: "Low Priority Draft Feature",
+          status: "draft",
+          priority: "low",
+        }),
+      );
+
+      // Tasks with different combinations
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-open-high-multi",
+        createObjectContent({
+          id: "T-open-high-multi",
+          title: "Open High Priority Task",
+          status: "open",
+          priority: "high",
+        }),
+        { status: "open" },
+      );
+
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-progress-medium-multi",
+        createObjectContent({
+          id: "T-progress-medium-multi",
+          title: "In Progress Medium Priority Task",
+          status: "in-progress",
+          priority: "medium",
+        }),
+        { status: "open" },
+      );
+
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-done-low-multi",
+        createObjectContent({
+          id: "T-done-low-multi",
+          title: "Done Low Priority Task",
+          status: "done",
+          priority: "low",
+        }),
+        { status: "closed" },
+      );
+    });
+
+    describe("Multiple Type Filtering", () => {
+      it("should filter for multiple types using array", async () => {
+        const result = await client.callTool("list_issues", {
+          type: ["feature", "task"],
+          includeClosed: true,
+        });
+
+        const objects = extractObjectIds(result.content[0].text as string);
+        // Should include all features and tasks, but no projects or epics
+        const features = objects.filter((id) => id.startsWith("F-"));
+        const tasks = objects.filter((id) => id.startsWith("T-"));
+        const projects = objects.filter((id) => id.startsWith("P-"));
+        const epics = objects.filter((id) => id.startsWith("E-"));
+
+        expect(features.length).toBeGreaterThan(0);
+        expect(tasks.length).toBeGreaterThan(0);
+        expect(projects.length).toBe(0);
+        expect(epics.length).toBe(0);
+      });
+
+      it("should filter for project and epic types", async () => {
+        const result = await client.callTool("list_issues", {
+          type: ["project", "epic"],
+          includeClosed: true,
+        });
+
+        const objects = extractObjectIds(result.content[0].text as string);
+        const projects = objects.filter((id) => id.startsWith("P-"));
+        const epics = objects.filter((id) => id.startsWith("E-"));
+        const features = objects.filter((id) => id.startsWith("F-"));
+        const tasks = objects.filter((id) => id.startsWith("T-"));
+
+        expect(projects.length).toBeGreaterThan(0);
+        expect(epics.length).toBeGreaterThan(0);
+        expect(features.length).toBe(0);
+        expect(tasks.length).toBe(0);
+      });
+
+      it("should handle single type in array format", async () => {
+        const result = await client.callTool("list_issues", {
+          type: ["task"],
+          includeClosed: true,
+        });
+
+        const objects = extractObjectIds(result.content[0].text as string);
+        const tasks = objects.filter((id) => id.startsWith("T-"));
+        const nonTasks = objects.filter((id) => !id.startsWith("T-"));
+
+        expect(tasks.length).toBeGreaterThan(0);
+        expect(nonTasks.length).toBe(0);
+      });
+    });
+
+    describe("Multiple Status Filtering", () => {
+      it("should filter for multiple statuses using array", async () => {
+        const result = await client.callTool("list_issues", {
+          type: "task",
+          status: ["open", "in-progress"],
+        });
+
+        const objects = extractObjectIds(result.content[0].text as string);
+        // Should include T-open-high-multi and T-progress-medium-multi
+        expect(objects).toContain("T-open-high-multi");
+        expect(objects).toContain("T-progress-medium-multi");
+        expect(objects).not.toContain("T-done-low-multi");
+      });
+
+      it("should filter for draft and open statuses", async () => {
+        const result = await client.callTool("list_issues", {
+          type: "feature",
+          status: ["draft", "open"],
+        });
+
+        const objects = extractObjectIds(result.content[0].text as string);
+        expect(objects).toContain("F-high-open-multi");
+        expect(objects).toContain("F-low-draft-multi");
+        expect(objects).not.toContain("F-medium-progress-multi");
+      });
+
+      it("should handle closed statuses with includeClosed flag", async () => {
+        const result = await client.callTool("list_issues", {
+          type: "task",
+          status: ["done", "wont-do"],
+          includeClosed: true,
+        });
+
+        const objects = extractObjectIds(result.content[0].text as string);
+        expect(objects).toContain("T-done-low-multi");
+      });
+    });
+
+    describe("Multiple Priority Filtering", () => {
+      it("should filter for multiple priorities using array", async () => {
+        const result = await client.callTool("list_issues", {
+          type: "feature",
+          priority: ["high", "medium"],
+        });
+
+        const objects = extractObjectIds(result.content[0].text as string);
+        expect(objects).toContain("F-high-open-multi");
+        expect(objects).toContain("F-medium-progress-multi");
+        expect(objects).not.toContain("F-low-draft-multi");
+      });
+
+      it("should filter for low priority across all types", async () => {
+        const result = await client.callTool("list_issues", {
+          type: ["project", "epic", "feature", "task"],
+          priority: ["low"],
+          includeClosed: true,
+        });
+
+        const objects = extractObjectIds(result.content[0].text as string);
+        expect(objects).toContain("P-low-priority-multi");
+        expect(objects).toContain("E-done-multi");
+        expect(objects).toContain("F-low-draft-multi");
+        expect(objects).toContain("T-done-low-multi");
+      });
+
+      it("should handle high and low priorities", async () => {
+        const result = await client.callTool("list_issues", {
+          type: "task",
+          priority: ["high", "low"],
+          includeClosed: true,
+        });
+
+        const objects = extractObjectIds(result.content[0].text as string);
+        expect(objects).toContain("T-open-high-multi");
+        expect(objects).toContain("T-done-low-multi");
+        expect(objects).not.toContain("T-progress-medium-multi");
+      });
+    });
+
+    describe("Combined Multiple Filters", () => {
+      it("should combine multiple type and status filters", async () => {
+        const result = await client.callTool("list_issues", {
+          type: ["feature", "task"],
+          status: ["open", "in-progress"],
+        });
+
+        const objects = extractObjectIds(result.content[0].text as string);
+        expect(objects).toContain("F-high-open-multi");
+        expect(objects).toContain("F-medium-progress-multi");
+        expect(objects).toContain("T-open-high-multi");
+        expect(objects).toContain("T-progress-medium-multi");
+        expect(objects).not.toContain("F-low-draft-multi");
+        expect(objects).not.toContain("T-done-low-multi");
+      });
+
+      it("should combine multiple filters across all parameters", async () => {
+        const result = await client.callTool("list_issues", {
+          type: ["feature", "task"],
+          status: ["open", "in-progress"],
+          priority: ["high", "medium"],
+        });
+
+        const objects = extractObjectIds(result.content[0].text as string);
+        expect(objects).toContain("F-high-open-multi");
+        expect(objects).toContain("F-medium-progress-multi");
+        expect(objects).toContain("T-open-high-multi");
+        expect(objects).toContain("T-progress-medium-multi");
+        expect(objects).not.toContain("F-low-draft-multi");
+        expect(objects).not.toContain("T-done-low-multi");
+      });
+
+      it("should apply AND logic between different filter types", async () => {
+        const result = await client.callTool("list_issues", {
+          type: ["task"],
+          status: ["open"],
+          priority: ["high"],
+        });
+
+        const objects = extractObjectIds(result.content[0].text as string);
+        expect(objects).toContain("T-open-high-multi");
+        expect(objects).not.toContain("T-progress-medium-multi");
+        expect(objects).not.toContain("T-done-low-multi");
+      });
+    });
+  });
+
+  describe("Optional Type Parameter", () => {
+    beforeEach(async () => {
+      // Create objects of all types with same status/priority for testing
+      await createObjectFile(
+        testEnv.projectRoot,
+        "project",
+        "P-optional-type",
+        createObjectContent({
+          id: "P-optional-type",
+          title: "Optional Type Project",
+          status: "open",
+          priority: "high",
+        }),
+      );
+
+      await createObjectFile(
+        testEnv.projectRoot,
+        "epic",
+        "E-optional-type",
+        createObjectContent({
+          id: "E-optional-type",
+          title: "Optional Type Epic",
+          status: "open",
+          priority: "high",
+          parent: "P-optional-type",
+        }),
+        { projectId: "P-optional-type" },
+      );
+
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        "F-optional-type",
+        createObjectContent({
+          id: "F-optional-type",
+          title: "Optional Type Feature",
+          status: "open",
+          priority: "high",
+        }),
+      );
+
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-optional-type",
+        createObjectContent({
+          id: "T-optional-type",
+          title: "Optional Type Task",
+          status: "open",
+          priority: "high",
+        }),
+        { status: "open" },
+      );
+    });
+
+    it("should return all object types when type parameter is omitted", async () => {
+      const result = await client.callTool("list_issues", {
+        status: "open",
+        priority: "high",
+      });
+
+      const objects = extractObjectIds(result.content[0].text as string);
+      expect(objects).toContain("P-optional-type");
+      expect(objects).toContain("E-optional-type");
+      expect(objects).toContain("F-optional-type");
+      expect(objects).toContain("T-optional-type");
+    });
+
+    it("should filter by status across all types when type is omitted", async () => {
+      // Add objects with different statuses
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-different-status",
+        createObjectContent({
+          id: "T-different-status",
+          title: "Different Status Task",
+          status: "in-progress",
+          priority: "high",
+        }),
+        { status: "open" },
+      );
+
+      const result = await client.callTool("list_issues", {
+        status: "open",
+        priority: "high",
+      });
+
+      const objects = extractObjectIds(result.content[0].text as string);
+      expect(objects).toContain("P-optional-type");
+      expect(objects).toContain("E-optional-type");
+      expect(objects).toContain("F-optional-type");
+      expect(objects).toContain("T-optional-type");
+      expect(objects).not.toContain("T-different-status");
+    });
+
+    it("should filter by priority across all types when type is omitted", async () => {
+      // Add objects with different priorities
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        "F-different-priority",
+        createObjectContent({
+          id: "F-different-priority",
+          title: "Different Priority Feature",
+          status: "open",
+          priority: "low",
+        }),
+      );
+
+      const result = await client.callTool("list_issues", {
+        status: "open",
+        priority: "high",
+      });
+
+      const objects = extractObjectIds(result.content[0].text as string);
+      expect(objects).toContain("P-optional-type");
+      expect(objects).toContain("E-optional-type");
+      expect(objects).toContain("F-optional-type");
+      expect(objects).toContain("T-optional-type");
+      expect(objects).not.toContain("F-different-priority");
+    });
+  });
+
+  describe("Mixed Single and Multiple Value Tests", () => {
+    beforeEach(async () => {
+      // Create test objects for mixed filtering scenarios
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-mixed-high-open",
+        createObjectContent({
+          id: "T-mixed-high-open",
+          title: "Mixed High Open Task",
+          status: "open",
+          priority: "high",
+        }),
+        { status: "open" },
+      );
+
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-mixed-high-progress",
+        createObjectContent({
+          id: "T-mixed-high-progress",
+          title: "Mixed High Progress Task",
+          status: "in-progress",
+          priority: "high",
+        }),
+        { status: "open" },
+      );
+
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-mixed-medium-open",
+        createObjectContent({
+          id: "T-mixed-medium-open",
+          title: "Mixed Medium Open Task",
+          status: "open",
+          priority: "medium",
+        }),
+        { status: "open" },
+      );
+
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        "F-mixed-high-open",
+        createObjectContent({
+          id: "F-mixed-high-open",
+          title: "Mixed High Open Feature",
+          status: "open",
+          priority: "high",
+        }),
+      );
+    });
+
+    it("should handle single type with multiple statuses", async () => {
+      const result = await client.callTool("list_issues", {
+        type: "task",
+        status: ["open", "in-progress"],
+        priority: "high",
+      });
+
+      const objects = extractObjectIds(result.content[0].text as string);
+      expect(objects).toContain("T-mixed-high-open");
+      expect(objects).toContain("T-mixed-high-progress");
+      expect(objects).not.toContain("T-mixed-medium-open");
+    });
+
+    it("should handle multiple types with single status", async () => {
+      const result = await client.callTool("list_issues", {
+        type: ["task", "feature"],
+        status: "open",
+        priority: "high",
+      });
+
+      const objects = extractObjectIds(result.content[0].text as string);
+      expect(objects).toContain("T-mixed-high-open");
+      expect(objects).toContain("F-mixed-high-open");
+      expect(objects).not.toContain("T-mixed-high-progress");
+      expect(objects).not.toContain("T-mixed-medium-open");
+    });
+
+    it("should handle single type and status with multiple priorities", async () => {
+      const result = await client.callTool("list_issues", {
+        type: "task",
+        status: "open",
+        priority: ["high", "medium"],
+      });
+
+      const objects = extractObjectIds(result.content[0].text as string);
+      expect(objects).toContain("T-mixed-high-open");
+      expect(objects).toContain("T-mixed-medium-open");
+      expect(objects).not.toContain("T-mixed-high-progress");
+    });
+
+    it("should handle mixed array and single value parameters", async () => {
+      const result = await client.callTool("list_issues", {
+        type: ["task", "feature"],
+        status: ["open", "in-progress"],
+        priority: "high",
+      });
+
+      const objects = extractObjectIds(result.content[0].text as string);
+      expect(objects).toContain("T-mixed-high-open");
+      expect(objects).toContain("T-mixed-high-progress");
+      expect(objects).toContain("F-mixed-high-open");
+      expect(objects).not.toContain("T-mixed-medium-open");
+    });
+  });
+
+  describe("Backward Compatibility Validation", () => {
+    beforeEach(async () => {
+      // Create objects to test that existing single-value behavior is preserved
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-compat-single",
+        createObjectContent({
+          id: "T-compat-single",
+          title: "Compatibility Single Task",
+          status: "open",
+          priority: "high",
+        }),
+        { status: "open" },
+      );
+
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        "F-compat-single",
+        createObjectContent({
+          id: "F-compat-single",
+          title: "Compatibility Single Feature",
+          status: "in-progress",
+          priority: "medium",
+        }),
+      );
+    });
+
+    it("should preserve existing single value type filtering", async () => {
+      const result = await client.callTool("list_issues", {
+        type: "task",
+      });
+
+      const objects = extractObjectIds(result.content[0].text as string);
+      const tasks = objects.filter((id) => id.startsWith("T-"));
+      const nonTasks = objects.filter((id) => !id.startsWith("T-"));
+
+      expect(tasks.length).toBeGreaterThan(0);
+      expect(nonTasks.length).toBe(0);
+    });
+
+    it("should preserve existing single value status filtering", async () => {
+      const result = await client.callTool("list_issues", {
+        type: "task",
+        status: "open",
+      });
+
+      const objects = extractObjectIds(result.content[0].text as string);
+      expect(objects).toContain("T-compat-single");
+    });
+
+    it("should preserve existing single value priority filtering", async () => {
+      const result = await client.callTool("list_issues", {
+        type: "feature",
+        priority: "medium",
+      });
+
+      const objects = extractObjectIds(result.content[0].text as string);
+      expect(objects).toContain("F-compat-single");
+    });
+
+    it("should preserve existing combined single value filters", async () => {
+      const result = await client.callTool("list_issues", {
+        type: "task",
+        status: "open",
+        priority: "high",
+      });
+
+      const objects = extractObjectIds(result.content[0].text as string);
+      expect(objects).toContain("T-compat-single");
+    });
+
+    it("should maintain existing error behavior for invalid single values", async () => {
+      const result = await client.callTool("list_issues", {
+        type: "invalid-type",
+      });
+
+      expect(result.content[0].text).toContain("Error listing objects");
+      expect(result.content[0].text).toContain(
+        "Invalid type value: invalid-type",
+      );
+    });
+  });
+
+  describe("Error Handling for Array Inputs", () => {
+    it("should handle invalid array values for type parameter", async () => {
+      const result = await client.callTool("list_issues", {
+        type: ["invalid-type"],
+      });
+
+      expect(result.content[0].text).toContain("Error listing objects");
+      expect(result.content[0].text).toContain(
+        "Invalid type value: invalid-type",
+      );
+    });
+
+    it("should handle mixed valid and invalid values in type array", async () => {
+      const result = await client.callTool("list_issues", {
+        type: ["task", "invalid-type"],
+      });
+
+      expect(result.content[0].text).toContain("Error listing objects");
+      expect(result.content[0].text).toContain(
+        "Invalid type value: invalid-type",
+      );
+    });
+
+    it("should handle invalid array values for status parameter", async () => {
+      const result = await client.callTool("list_issues", {
+        type: "task",
+        status: ["invalid-status"],
+      });
+
+      expect(result.content[0].text).toContain("Error listing objects");
+      expect(result.content[0].text).toContain(
+        "Invalid status value: invalid-status",
+      );
+    });
+
+    it("should handle mixed valid and invalid values in status array", async () => {
+      const result = await client.callTool("list_issues", {
+        type: "task",
+        status: ["open", "invalid-status"],
+      });
+
+      expect(result.content[0].text).toContain("Error listing objects");
+      expect(result.content[0].text).toContain(
+        "Invalid status value: invalid-status",
+      );
+    });
+
+    it("should handle invalid array values for priority parameter", async () => {
+      const result = await client.callTool("list_issues", {
+        type: "task",
+        priority: ["invalid-priority"],
+      });
+
+      expect(result.content[0].text).toContain("Error listing objects");
+      expect(result.content[0].text).toContain(
+        "Invalid priority value: invalid-priority",
+      );
+    });
+
+    it("should handle multiple invalid values in priority array", async () => {
+      const result = await client.callTool("list_issues", {
+        type: "task",
+        priority: ["invalid1", "invalid2"],
+      });
+
+      expect(result.content[0].text).toContain("Error listing objects");
+      expect(result.content[0].text).toContain("Invalid priority value");
+    });
+
+    it("should handle empty arrays as no filter provided", async () => {
+      const result = await client.callTool("list_issues", {
+        type: "task",
+        status: [],
+      });
+
+      const objects = extractObjectIds(result.content[0].text as string);
+      // Empty array should be treated as no filter, so all tasks should be returned
+      expect(Array.isArray(objects)).toBe(true);
+    });
+
+    it("should require at least one filter when type is omitted", async () => {
+      const result = await client.callTool("list_issues", {});
+
+      expect(result.content[0].text).toContain("Error listing objects");
+      expect(result.content[0].text).toContain(
+        "At least one filter parameter (type, status, priority, or scope) must be provided",
+      );
+    });
+
+    it("should handle empty arrays in all parameters", async () => {
+      const result = await client.callTool("list_issues", {
+        type: [],
+        status: [],
+        priority: [],
+      });
+
+      expect(result.content[0].text).toContain("Error listing objects");
+      expect(result.content[0].text).toContain(
+        "At least one filter parameter (type, status, priority, or scope) must be provided",
+      );
     });
   });
 });

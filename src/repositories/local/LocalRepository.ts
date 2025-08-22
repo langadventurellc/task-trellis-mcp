@@ -36,9 +36,9 @@ export class LocalRepository implements Repository {
   async getObjects(
     includeClosed?: boolean,
     scope?: string,
-    type?: TrellisObjectType,
-    status?: TrellisObjectStatus,
-    priority?: TrellisObjectPriority,
+    type?: TrellisObjectType | TrellisObjectType[],
+    status?: TrellisObjectStatus | TrellisObjectStatus[],
+    priority?: TrellisObjectPriority | TrellisObjectPriority[],
   ) {
     const { getObjects } = await import("./getObjects");
     return await getObjects(
@@ -48,6 +48,15 @@ export class LocalRepository implements Repository {
       type,
       status,
       priority,
+    );
+  }
+
+  async getChildrenOf(parentId: string, includeClosed?: boolean) {
+    const { getChildrenOf } = await import("./getChildrenOf");
+    return await getChildrenOf(
+      parentId,
+      this.config.planningRootFolder!,
+      includeClosed,
     );
   }
 

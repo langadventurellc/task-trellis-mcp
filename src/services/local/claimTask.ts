@@ -6,8 +6,10 @@ import {
 } from "../../models";
 import { Repository } from "../../repositories";
 import { checkPrerequisitesComplete } from "../../utils/checkPrerequisitesComplete";
+import { checkHierarchicalPrerequisitesComplete } from "../../utils/checkHierarchicalPrerequisitesComplete";
 import { filterUnavailableObjects } from "../../utils/filterUnavailableObjects";
 import { sortTrellisObjects } from "../../utils/sortTrellisObjects";
+import { updateParentHierarchy } from "../../utils/updateParentHierarchy";
 
 export async function claimTask(
   repository: Repository,
@@ -30,7 +32,14 @@ export async function claimTask(
       content: [
         {
           type: "text",
-          text: `Successfully claimed task: ${JSON.stringify(updatedTask, null, 2)}`,
+          text: `Successfully claimed task: ${JSON.stringify(
+            {
+              ...updatedTask,
+              affectedFiles: Object.fromEntries(updatedTask.affectedFiles),
+            },
+            null,
+            2,
+          )}`,
         },
       ],
     };
@@ -72,7 +81,7 @@ async function findNextAvailableTask(
   );
 
   // Filter to get only available tasks
-  const availableTasks = filterUnavailableObjects(objects);
+  const availableTasks = await filterUnavailableObjects(objects, repository);
 
   if (availableTasks.length === 0) {
     throw new Error("No available tasks to claim");
@@ -102,7 +111,14 @@ async function updateTaskStatus(
     console.warn("Failed to update parent hierarchy:", error);
   }
 
-  return updatedTask;
+  // Re-read the object from repository to ensure proper Map reconstruction
+  // This is needed because the in-memory object may not have the Map properly reconstructed
+  const savedTask = await repository.getObjectById(task.id);
+  if (!savedTask) {
+    throw new Error(`Failed to retrieve saved task with ID "${task.id}"`);
+  }
+
+  return savedTask;
 }
 
 async function validateTaskForClaiming(
@@ -126,53 +142,26 @@ async function validateTaskForClaiming(
       );
     }
 
-    // Validate all prerequisites are complete
-    const prerequisitesComplete = await checkPrerequisitesComplete(
+    // Validate all prerequisites are complete (including hierarchical)
+    const prerequisitesComplete = await checkHierarchicalPrerequisitesComplete(
       task,
       repository,
     );
     if (!prerequisitesComplete) {
-      throw new Error(
-        `Task "${taskId}" cannot be claimed. Not all prerequisites are complete.`,
+      // Determine if it's the task's own prerequisites or a parent's
+      const ownPrerequisitesComplete = await checkPrerequisitesComplete(
+        task,
+        repository,
       );
+      if (ownPrerequisitesComplete) {
+        throw new Error(
+          `Task "${taskId}" cannot be claimed. Parent hierarchy has incomplete prerequisites.`,
+        );
+      } else {
+        throw new Error(
+          `Task "${taskId}" cannot be claimed. Not all prerequisites are complete.`,
+        );
+      }
     }
   }
-}
-
-async function updateParentHierarchy(
-  parentId: string | undefined,
-  repository: Repository,
-  visitedIds: Set<string> = new Set(),
-): Promise<void> {
-  if (!parentId) {
-    return;
-  }
-
-  // Prevent infinite recursion by checking if we've already visited this ID
-  if (visitedIds.has(parentId)) {
-    return;
-  }
-  visitedIds.add(parentId);
-
-  const parent = await repository.getObjectById(parentId);
-  if (!parent) {
-    return;
-  }
-
-  // If parent is already in progress, we can stop here since we assume
-  // its parent is already in progress too
-  if (parent.status === TrellisObjectStatus.IN_PROGRESS) {
-    return;
-  }
-
-  // Update parent to in-progress
-  const updatedParent = {
-    ...parent,
-    status: TrellisObjectStatus.IN_PROGRESS,
-  };
-
-  await repository.saveObject(updatedParent);
-
-  // Continue up the hierarchy
-  await updateParentHierarchy(parent.parent, repository, visitedIds);
 }

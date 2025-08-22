@@ -1,16 +1,17 @@
+import { ServerConfig } from "../configuration";
 import { TrellisObjectPriority, TrellisObjectStatus } from "../models";
 import { Repository } from "../repositories";
 import { TaskTrellisService } from "../services/TaskTrellisService";
 
 export const updateObjectTool = {
-  name: "update_object",
-  description: `Updates an existing object in the task trellis system
+  name: "update_issue",
+  description: `Updates an existing issue in the task trellis system
 
-Use this tool to modify properties of existing objects such as changing status, priority, prerequisites, or content. Essential for managing work item lifecycle and maintaining project state.
+Use this tool to modify properties of existing issues such as changing status, priority, prerequisites, or content. Essential for managing work item lifecycle and maintaining project state.
 
 Available status values:
-- 'draft': Initial state for new objects
-- 'open': Ready to begin work (default for new objects)
+- 'draft': Initial state for new issues
+- 'open': Ready to begin work (default for new issues)
 - 'in-progress': Currently being worked on
 - 'done': Completed successfully
 - 'wont-do': Cancelled or decided against
@@ -21,13 +22,15 @@ Available priority values:
 - 'low': Nice-to-have or future work
 
 Updatable properties:
+- 'title': Title of the work item
 - 'status': Progress state (follows workflow: draft → open → in-progress → done)
 - 'priority': Importance level (high, medium, low)
-- 'prerequisites': Dependency relationships (add/remove prerequisite objects)
+- 'prerequisites': Dependency relationships (add/remove prerequisite issues)
 - 'body': Detailed description or content of the work item
 - 'force': Bypass certain validation checks when necessary
 
 Common update patterns:
+- Update title: title='New task title'
 - Mark task as ready: status='open'
 - Start working: status='in-progress'
 - Change priority: priority='high'
@@ -36,7 +39,7 @@ Common update patterns:
 - Complete work: status='done'
 - Cancel work: status='wont-do'
 
-The update maintains object integrity by validating relationships and preserving audit trail. Use 'force=true' only when bypassing standard validation is necessary for administrative operations.
+The update maintains issue integrity by validating relationships and preserving audit trail. Use 'force=true' only when bypassing standard validation is necessary for administrative operations.
 
 Updates automatically refresh the 'updated' timestamp while preserving creation metadata and change history.`,
   inputSchema: {
@@ -44,7 +47,11 @@ Updates automatically refresh the 'updated' timestamp while preserving creation 
     properties: {
       id: {
         type: "string",
-        description: "ID of the object to update",
+        description: "ID of the issue to update",
+      },
+      title: {
+        type: "string",
+        description: "Title of the issue (optional)",
       },
       priority: {
         type: "string",
@@ -55,15 +62,15 @@ Updates automatically refresh the 'updated' timestamp while preserving creation 
         items: {
           type: "string",
         },
-        description: "Array of prerequisite object IDs (optional)",
+        description: "Array of prerequisite issue IDs (optional)",
       },
       body: {
         type: "string",
-        description: "Body content of the object (optional)",
+        description: "Body content of the issue (optional)",
       },
       status: {
         type: "string",
-        description: "Status of the object (optional)",
+        description: "Status of the issue (optional)",
       },
       force: {
         type: "boolean",
@@ -79,9 +86,11 @@ export async function handleUpdateObject(
   service: TaskTrellisService,
   repository: Repository,
   args: unknown,
+  serverConfig: ServerConfig,
 ) {
   const {
     id,
+    title,
     priority,
     prerequisites,
     body,
@@ -89,6 +98,7 @@ export async function handleUpdateObject(
     force = false,
   } = args as {
     id: string;
+    title?: string;
     priority?: string;
     prerequisites?: string[];
     body?: string;
@@ -98,7 +108,9 @@ export async function handleUpdateObject(
 
   return service.updateObject(
     repository,
+    serverConfig,
     id,
+    title,
     priority as TrellisObjectPriority,
     prerequisites,
     body,

@@ -7,12 +7,12 @@ import { Repository } from "../repositories";
 import { TaskTrellisService } from "../services/TaskTrellisService";
 
 export const createObjectTool = {
-  name: "create_object",
-  description: `Creates a new object in the task trellis system
+  name: "create_issue",
+  description: `Creates a new issue in the task trellis system
 
-Use this tool to create new objects such as tasks, projects, or other work items within the task management hierarchy. Objects can have parent-child relationships and dependencies through prerequisites.
+Use this tool to create new issues such as tasks, projects, or other work items within the task management hierarchy. Issues can have parent-child relationships and dependencies through prerequisites.
 
-Available object types and hierarchy requirements:
+Available issue types and hierarchy requirements:
 - 'project': Top-level containers, cannot have a parent
 - 'epic': Can have no parent or a project as a parent
 - 'feature': Can have no parent or an epic as a parent
@@ -26,7 +26,7 @@ Supported hierarchy structures:
 - Standalone: task
 
 Available status values:
-- 'draft': Initial state for new objects
+- 'draft': Initial state for new issues
 - 'open': Ready to begin work (default)
 - 'open': Ready to begin work
 - 'in-progress': Currently being worked on
@@ -39,8 +39,8 @@ Available priority values:
 - 'low': Nice-to-have or future work
 
 Key aspects:
-- Objects support hierarchical organization via parent relationships
-- Prerequisites define execution order dependencies between objects
+- Issues support hierarchical organization via parent relationships
+- Prerequisites define execution order dependencies between issues
 - Parent-child relationships must follow the hierarchy rules above
 - The system validates parent types during creation
 
@@ -55,15 +55,15 @@ Best practices:
     properties: {
       type: {
         type: "string",
-        description: "Type of object to create",
+        description: "Type of issue to create",
       },
       title: {
         type: "string",
-        description: "Title of the object",
+        description: "Title of the issue",
       },
       parent: {
         type: "string",
-        description: "Parent object ID (optional)",
+        description: "Parent issue ID (optional)",
       },
       priority: {
         type: "string",
@@ -72,7 +72,7 @@ Best practices:
       },
       status: {
         type: "string",
-        description: "Status of the object (defaults to 'open')",
+        description: "Status of the issue (defaults to 'open')",
         default: "open",
       },
       prerequisites: {
@@ -81,12 +81,12 @@ Best practices:
           type: "string",
         },
         description:
-          "Array of prerequisite object IDs (defaults to empty array)",
+          "Array of prerequisite issue IDs (defaults to empty array)",
         default: [],
       },
       description: {
         type: "string",
-        description: "Description of the object",
+        description: "Description of the issue",
       },
     },
     required: ["type", "title"],

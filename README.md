@@ -1,16 +1,17 @@
 # Task Trellis MCP
 
+**Project planning and task management built specifically for AI agents**
+
 [![npm version](https://badge.fury.io/js/%40langadventurellc%2Ftask-trellis-mcp.svg)](https://www.npmjs.com/package/@langadventurellc/task-trellis-mcp)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-An MCP server that helps you manage developing with AI coding agents, by breaking down complex projects and tracking its progress with built-in task management, complete with progress tracking, dependency management, and workflow automation.
+Task Trellis is an MCP server for project planning and task management built specifically for AI agents. It helps by breaking down complex projects and tracking their progress with built-in task management, complete with progress tracking, dependency management, and workflow automation. By default, all data is stored locally in Markdown files.
 
-Primarily built as a much better alternative to managing markdown checklists. Task Trellis will make it easier to define requirements, specifications, and tasks in a structured way that the agent can actually use directly.
-
-It's kinda like Jira specifically for coding agents.
+Primarily built as a much better alternative to managing markdown checklists. Task Trellis will make it easier to define requirements, specifications, and tasks in a structured way that the agents can actually use directly.
 
 ## Table of Contents
 
+- [At a Glance](#at-a-glance)
 - [Why Task Trellis?](#why-task-trellis)
 - [Core Benefits](#core-benefits)
 - [Usage](#usage)
@@ -18,16 +19,14 @@ It's kinda like Jira specifically for coding agents.
 - [Project Hierarchy](#project-hierarchy)
 - [Prerequisites & Dependencies](#prerequisites--dependencies)
 - [File Storage](#file-storage)
-- [Installation](#installation)
-- [Quick Test](#quick-test)
-- [Configuration Options](#configuration-options)
+- [Installation and Configuration](#installation-and-configuration)
 - [Troubleshooting](#troubleshooting)
 
 ## At a Glance
 
-Task Trellis works with "objects" that are projects, epics, features or tasks.
+Task Trellis works with issues that are projects, epics, features or tasks.
 
-**Tasks** are the most important type of object. This is where the actual work gets done. Each task is a specific piece of work that needs to be completed in order to achieve the project's goals. The other object types are too big to be a task and they exist to help organize and manage multiple tasks to accomplish a particular goal. Tasks can be standalone or part of a larger feature.
+**Tasks** are the most important type of issue. This is where the actual work gets done. Each task is a specific piece of work that needs to be completed in order to achieve the project's goals. The other issue types are too big to be a task and they exist to help organize and manage multiple tasks to accomplish a particular goal. Tasks can be standalone or part of a larger feature.
 
 **Features** are the next level up from tasks. They represent the requirements and functionality needed to deliver a specific aspect of the project. Features can be standalone or a part of a larger epic.
 
@@ -37,7 +36,7 @@ Task Trellis works with "objects" that are projects, epics, features or tasks.
 
 Depending on the size of the effort, you can choose to create a project with epics, features, and tasks, or you can create standalone tasks as needed. Once you have your tasks defined, you can easily manage and track their progress through the Task Trellis MCP tools.
 
-Currently, all Task Trellis objects are stored as markdown files in the `.trellis` folder in the root of your project. This makes it unsuitable for projects with multiple developers, but a remote option is in development now and should be available soon.
+Currently, all Task Trellis issues are stored as markdown files in the `.trellis` folder in the root of your project. This makes it unsuitable for projects with multiple developers, but a remote option is in development now and should be available soon.
 
 ## Why Task Trellis?
 
@@ -104,26 +103,26 @@ See sample prompts (written as Claude Code slash commands): [Sample Prompts](doc
 
 ## Available Tools
 
-### Core Object Management
+### Core Issue Management
 
-- **create_object** - Create projects, epics, features, or tasks with hierarchical relationships
-- **update_object** - Modify object properties, status, priority, or prerequisites
-- **get_object** - Retrieve detailed object information with history and relationships
-- **list_objects** - Query and filter objects by type, status, priority, or scope (returns object summaries)
-- **delete_object** - Remove objects (with dependency validation)
-- **replace_object_body_regex** - Make targeted body content edits using regex patterns
+- **create_issue** - Create projects, epics, features, or tasks with hierarchical relationships
+- **update_issue** - Modify issue properties, status, priority, or prerequisites
+- **get_issue** - Retrieve detailed issue information with history and relationships
+- **list_issues** - Query and filter issues by type, status, priority, or scope (returns issue summaries)
+- **delete_issue** - Remove issues (with dependency validation)
+- **replace_issue_body_regex** - Make targeted body content edits using regex patterns
 
 ### Task Workflow Management
 
 - **claim_task** - Claim available tasks for execution with automatic priority ordering
 - **complete_task** - Mark tasks complete with file change documentation
-- **append_object_log** - Add progress notes and status updates to task history (occurs automatically on task completion)
+- **append_issue_log** - Add progress notes and status updates to task history (occurs automatically on task completion)
 - **append_modified_files** - Record files modified during task execution with change descriptions (occurs automatically on task completion)
 
 ### System Management
 
 - **activate** - Initialize the task system (if not configured via command line)
-- **prune_closed** - Clean up old completed/cancelled objects for maintenance
+- **prune_closed** - Clean up old completed/cancelled issues for maintenance
 
 ## Project Hierarchy
 
@@ -212,201 +211,11 @@ your-project/
             └── T-completed-task-id.md
 ```
 
-Each object is stored as a Markdown file with YAML frontmatter metadata and content body.
+Each issue is stored as a Markdown file with YAML frontmatter metadata and content body.
 
-## Installation
+## Installation and Configuration
 
-### CLI Arguments
-
-- **--mode <mode>**: Server mode. `local` or `remote` (default: `local`) (`remote` not yet supported)
-- **--projectRootFolder <path>**: Project root folder path (typically, the root of your repository, but can be in a shared folder for collaboration)
-- **--auto-complete-parent**: Enable automatic completion of parent tasks when the last task of a feature is completed
-
-### Claude Code
-
-The easiest way to install Task Trellis MCP in Claude Code:
-
-```bash
-claude mcp add @langadventurellc/task-trellis-mcp --projectRootFolder "$(pwd)"
-```
-
-Or (you'll be required to call the activate tool once to set the project root folder):
-
-```bash
-claude mcp add @langadventurellc/task-trellis-mcp
-```
-
-### VS Code with GitHub Copilot
-
-1. Add Task Trellis to your VS Code settings. Open your settings JSON file and add:
-
-```json
-{
-  "github.copilot.chat.mcpServers": {
-    "task-trellis": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@langadventurellc/task-trellis-mcp",
-        "--projectRootFolder",
-        "${workspaceFolder}"
-      ]
-    }
-  }
-}
-```
-
-### Cursor
-
-Install Task Trellis MCP in Cursor by adding to your Cursor settings:
-
-**Method 1: Via Settings UI**
-
-1. Open Cursor Settings (⌘/Ctrl + ,)
-2. Search for "MCP"
-3. Add new server with:
-   - **Name**: `task-trellis`
-   - **Command**: `npx`
-   - **Args**: `["-y", "@langadventurellc/task-trellis-mcp", "--projectRootFolder", "${workspaceFolder}"]`
-
-**Method 2: Via Configuration File**
-Add to your Cursor configuration:
-
-```json
-{
-  "mcpServers": {
-    "task-trellis": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@langadventurellc/task-trellis-mcp",
-        "--projectRootFolder",
-        "${workspaceFolder}"
-      ]
-    }
-  }
-}
-```
-
-### Windsurf
-
-Add Task Trellis to your Windsurf MCP configuration:
-
-```json
-{
-  "mcpServers": {
-    "task-trellis": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@langadventurellc/task-trellis-mcp",
-        "--projectRootFolder",
-        "${workspaceRoot}"
-      ]
-    }
-  }
-}
-```
-
-### Cline (VS Code Extension)
-
-1. Add Task Trellis to your Cline MCP servers in VS Code settings:
-
-```json
-{
-  "cline.mcpServers": {
-    "task-trellis": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@langadventurellc/task-trellis-mcp",
-        "--projectRootFolder",
-        "${workspaceFolder}"
-      ]
-    }
-  }
-}
-```
-
-### Continue (VS Code Extension)
-
-1. Add to your Continue configuration file (`~/.continue/config.json`):
-
-```json
-{
-  "mcpServers": {
-    "task-trellis": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@langadventurellc/task-trellis-mcp",
-        "--projectRootFolder",
-        "/path/to/your/project"
-      ]
-    }
-  }
-}
-```
-
-### Other MCP Clients
-
-For any MCP-compatible client, use this configuration:
-
-```json
-{
-  "mcpServers": {
-    "task-trellis": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@langadventurellc/task-trellis-mcp",
-        "--projectRootFolder",
-        "/absolute/path/to/project"
-      ]
-    }
-  }
-}
-```
-
-## Quick Test
-
-After installation, test that Task Trellis is working by asking your AI assistant:
-
-> "Create a new project called 'My Test Project'"
-
-If configured correctly, the AI should respond with a confirmation and create the project structure in your specified project root folder.
-
-## Configuration Options
-
-The Task Trellis MCP server supports these command-line options:
-
-- `--mode <mode>` - Server mode (default: "local")
-  - `local` - Use local file-based storage
-  - `remote` - Use remote repository (planned feature)
-
-- `--projectRootFolder <path>` - Project root folder path
-  - Creates a `.trellis` folder inside the project root for task storage
-  - Example: `--projectRootFolder /path/to/my-project` creates `/path/to/my-project/.trellis/`
-
-**Advanced Configuration Example:**
-
-```json
-{
-  "mcpServers": {
-    "task-trellis": {
-      "type": "stdio",
-      "command": "npx",
-      "args": [
-        "@langadventurellc/task-trellis-mcp",
-        "--mode",
-        "local",
-        "--projectRootFolder",
-        "/path/to/your/project"
-      ]
-    }
-  }
-}
-```
+See [installation instructions](docs/installation.md).
 
 ## Troubleshooting
 

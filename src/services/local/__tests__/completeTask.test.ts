@@ -10,6 +10,7 @@ import { completeTask } from "../completeTask";
 
 describe("completeTask service function", () => {
   let mockRepository: jest.Mocked<Repository>;
+  let mockServerConfig: jest.Mocked<ServerConfig>;
 
   const createMockTask = (
     overrides?: Partial<TrellisObject>,
@@ -100,6 +101,13 @@ describe("completeTask service function", () => {
       getObjects: jest.fn(),
       saveObject: jest.fn(),
       deleteObject: jest.fn(),
+      getChildrenOf: jest.fn(),
+    };
+
+    mockServerConfig = {
+      mode: "local",
+      autoCompleteParent: true,
+      autoPrune: 0,
     };
   });
 
@@ -116,6 +124,7 @@ describe("completeTask service function", () => {
 
       const result = await completeTask(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
         "Task completed successfully",
         filesChanged,
@@ -148,6 +157,7 @@ describe("completeTask service function", () => {
 
       await completeTask(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
         "Added new functionality",
         filesChanged,
@@ -180,6 +190,7 @@ describe("completeTask service function", () => {
 
       await completeTask(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
         "Added new functionality",
         filesChanged,
@@ -206,6 +217,7 @@ describe("completeTask service function", () => {
 
       await completeTask(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
         "New log entry",
         filesChanged,
@@ -228,6 +240,7 @@ describe("completeTask service function", () => {
 
       const result = await completeTask(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
         "Task completed with no file changes",
         filesChanged,
@@ -248,7 +261,13 @@ describe("completeTask service function", () => {
       mockRepository.getObjectById.mockResolvedValue(null);
 
       await expect(
-        completeTask(mockRepository, "T-nonexistent", "Summary", {}),
+        completeTask(
+          mockRepository,
+          mockServerConfig,
+          "T-nonexistent",
+          "Summary",
+          {},
+        ),
       ).rejects.toThrow('Task with ID "T-nonexistent" not found');
 
       expect(mockRepository.getObjectById).toHaveBeenCalledWith(
@@ -262,7 +281,13 @@ describe("completeTask service function", () => {
       mockRepository.getObjectById.mockResolvedValue(mockTask);
 
       await expect(
-        completeTask(mockRepository, "T-test-task", "Summary", {}),
+        completeTask(
+          mockRepository,
+          mockServerConfig,
+          "T-test-task",
+          "Summary",
+          {},
+        ),
       ).rejects.toThrow(
         'Task "T-test-task" is not in progress (current status: open)',
       );
@@ -275,7 +300,13 @@ describe("completeTask service function", () => {
       mockRepository.getObjectById.mockResolvedValue(mockTask);
 
       await expect(
-        completeTask(mockRepository, "T-test-task", "Summary", {}),
+        completeTask(
+          mockRepository,
+          mockServerConfig,
+          "T-test-task",
+          "Summary",
+          {},
+        ),
       ).rejects.toThrow(
         'Task "T-test-task" is not in progress (current status: done)',
       );
@@ -288,7 +319,13 @@ describe("completeTask service function", () => {
       mockRepository.getObjectById.mockResolvedValue(mockTask);
 
       await expect(
-        completeTask(mockRepository, "T-test-task", "Summary", {}),
+        completeTask(
+          mockRepository,
+          mockServerConfig,
+          "T-test-task",
+          "Summary",
+          {},
+        ),
       ).rejects.toThrow(
         'Task "T-test-task" is not in progress (current status: draft)',
       );
@@ -301,7 +338,13 @@ describe("completeTask service function", () => {
       mockRepository.getObjectById.mockRejectedValue(new Error(errorMessage));
 
       await expect(
-        completeTask(mockRepository, "T-test-task", "Summary", {}),
+        completeTask(
+          mockRepository,
+          mockServerConfig,
+          "T-test-task",
+          "Summary",
+          {},
+        ),
       ).rejects.toThrow(errorMessage);
 
       expect(mockRepository.saveObject).not.toHaveBeenCalled();
@@ -315,9 +358,15 @@ describe("completeTask service function", () => {
       mockRepository.saveObject.mockRejectedValue(new Error(errorMessage));
 
       await expect(
-        completeTask(mockRepository, "T-test-task", "Summary", {
-          "file.ts": "Description",
-        }),
+        completeTask(
+          mockRepository,
+          mockServerConfig,
+          "T-test-task",
+          "Summary",
+          {
+            "file.ts": "Description",
+          },
+        ),
       ).rejects.toThrow(errorMessage);
 
       expect(mockRepository.getObjectById).toHaveBeenCalledWith("T-test-task");
@@ -330,12 +379,14 @@ describe("completeTask service function", () => {
       mode: "local",
       planningRootFolder: "/test",
       autoCompleteParent: true,
+      autoPrune: 0,
     };
 
     const serverConfigWithoutAutoComplete: ServerConfig = {
       mode: "local",
       planningRootFolder: "/test",
       autoCompleteParent: false,
+      autoPrune: 0,
     };
 
     it("should not auto-complete parents when autoCompleteParent is false", async () => {
@@ -351,10 +402,10 @@ describe("completeTask service function", () => {
 
       await completeTask(
         mockRepository,
+        serverConfigWithoutAutoComplete,
         "T-test-task",
         "Task completed",
         {},
-        serverConfigWithoutAutoComplete,
       );
 
       expect(mockRepository.saveObject).toHaveBeenCalledTimes(1);
@@ -364,17 +415,6 @@ describe("completeTask service function", () => {
         affectedFiles: new Map(),
         log: ["Task completed"],
       });
-    });
-
-    it("should not auto-complete parents when serverConfig is undefined", async () => {
-      const mockTask = createMockTask();
-
-      mockRepository.getObjectById.mockResolvedValue(mockTask);
-      mockRepository.saveObject.mockResolvedValue();
-
-      await completeTask(mockRepository, "T-test-task", "Task completed", {});
-
-      expect(mockRepository.saveObject).toHaveBeenCalledTimes(1);
     });
 
     it("should auto-complete feature when all tasks are done", async () => {
@@ -402,10 +442,10 @@ describe("completeTask service function", () => {
 
       await completeTask(
         mockRepository,
+        serverConfigWithAutoComplete,
         mockTask1.id,
         "Task completed",
         {},
-        serverConfigWithAutoComplete,
       );
 
       expect(mockRepository.saveObject).toHaveBeenCalledTimes(3);
@@ -441,10 +481,10 @@ describe("completeTask service function", () => {
 
       await completeTask(
         mockRepository,
+        serverConfigWithAutoComplete,
         mockTask1.id,
         "Task completed",
         {},
-        serverConfigWithAutoComplete,
       );
 
       expect(mockRepository.saveObject).toHaveBeenCalledTimes(2);
@@ -475,10 +515,10 @@ describe("completeTask service function", () => {
 
       await completeTask(
         mockRepository,
+        serverConfigWithAutoComplete,
         mockTask1.id,
         "Task completed",
         {},
-        serverConfigWithAutoComplete,
       );
 
       expect(mockRepository.saveObject).toHaveBeenCalledTimes(3);
@@ -516,10 +556,10 @@ describe("completeTask service function", () => {
 
       await completeTask(
         mockRepository,
+        serverConfigWithAutoComplete,
         mockTask.id,
         "Task completed",
         {},
-        serverConfigWithAutoComplete,
       );
 
       expect(mockRepository.saveObject).toHaveBeenCalledTimes(5);
@@ -557,10 +597,10 @@ describe("completeTask service function", () => {
 
       await completeTask(
         mockRepository,
+        serverConfigWithAutoComplete,
         mockTask.id,
         "Task completed",
         {},
-        serverConfigWithAutoComplete,
       );
 
       expect(mockRepository.saveObject).toHaveBeenCalledTimes(7);
@@ -582,10 +622,10 @@ describe("completeTask service function", () => {
 
       await completeTask(
         mockRepository,
+        serverConfigWithAutoComplete,
         mockTask.id,
         "Task completed",
         {},
-        serverConfigWithAutoComplete,
       );
 
       expect(mockRepository.saveObject).toHaveBeenCalledTimes(1);
@@ -602,10 +642,10 @@ describe("completeTask service function", () => {
 
       await completeTask(
         mockRepository,
+        serverConfigWithAutoComplete,
         mockTask.id,
         "Task completed",
         {},
-        serverConfigWithAutoComplete,
       );
 
       expect(mockRepository.saveObject).toHaveBeenCalledTimes(1);
@@ -628,10 +668,10 @@ describe("completeTask service function", () => {
 
       await completeTask(
         mockRepository,
+        serverConfigWithAutoComplete,
         mockTask.id,
         "Task completed",
         {},
-        serverConfigWithAutoComplete,
       );
 
       expect(mockRepository.saveObject).toHaveBeenCalledTimes(1);
@@ -652,6 +692,7 @@ describe("completeTask service function", () => {
 
       await completeTask(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
         "Multiple files changed",
         filesChanged,

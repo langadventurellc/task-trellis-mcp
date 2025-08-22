@@ -33,7 +33,9 @@ export class LocalTaskTrellisService implements TaskTrellisService {
 
   async updateObject(
     repository: Repository,
+    serverConfig: ServerConfig,
     id: string,
+    title?: string,
     priority?: TrellisObjectPriority,
     prerequisites?: string[],
     body?: string,
@@ -43,7 +45,9 @@ export class LocalTaskTrellisService implements TaskTrellisService {
     const { updateObject } = await import("./updateObject");
     return updateObject(
       repository,
+      serverConfig,
       id,
+      title,
       priority,
       prerequisites,
       body,
@@ -64,27 +68,27 @@ export class LocalTaskTrellisService implements TaskTrellisService {
 
   async completeTask(
     repository: Repository,
+    serverConfig: ServerConfig,
     taskId: string,
     summary: string,
     filesChanged: Record<string, string>,
-    serverConfig?: ServerConfig,
   ): Promise<{ content: Array<{ type: string; text: string }> }> {
     const { completeTask } = await import("./completeTask");
     return completeTask(
       repository,
+      serverConfig,
       taskId,
       summary,
       filesChanged,
-      serverConfig,
     );
   }
 
   async listObjects(
     repository: Repository,
-    type: TrellisObjectType,
+    type?: TrellisObjectType | TrellisObjectType[],
     scope?: string,
-    status?: TrellisObjectStatus,
-    priority?: TrellisObjectPriority,
+    status?: TrellisObjectStatus | TrellisObjectStatus[],
+    priority?: TrellisObjectPriority | TrellisObjectPriority[],
     includeClosed: boolean = false,
   ): Promise<{ content: Array<{ type: string; text: string }> }> {
     const { listObjects } = await import("./listObjects");
@@ -114,23 +118,6 @@ export class LocalTaskTrellisService implements TaskTrellisService {
   ): Promise<{ content: Array<{ type: string; text: string }> }> {
     const { pruneClosed } = await import("./pruneClosed");
     return pruneClosed(repository, age, scope);
-  }
-
-  async replaceObjectBodyRegex(
-    repository: Repository,
-    id: string,
-    regex: string,
-    replacement: string,
-    allowMultipleOccurrences: boolean = false,
-  ): Promise<{ content: Array<{ type: string; text: string }> }> {
-    const { replaceObjectBodyRegex } = await import("./replaceObjectBodyRegex");
-    return replaceObjectBodyRegex(
-      repository,
-      id,
-      regex,
-      replacement,
-      allowMultipleOccurrences,
-    );
   }
 
   async appendModifiedFiles(

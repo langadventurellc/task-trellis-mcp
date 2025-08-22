@@ -72,7 +72,7 @@ describe("E2E CRUD - getObject", () => {
         { projectId: "P-test-project" },
       );
 
-      const result = await client.callTool("get_object", {
+      const result = await client.callTool("get_issue", {
         id: "P-test-project",
       });
 
@@ -86,7 +86,7 @@ describe("E2E CRUD - getObject", () => {
       expect(object.priority).toBe("high");
       expect(object.parent).toBeUndefined();
       expect(object.prerequisites).toEqual(["P-dep1", "P-dep2"]);
-      expect(object.affectedFiles).toEqual({});
+      expect(object.affectedFiles).toEqual({ "src/index.ts": "Initial setup" });
       expect(object.log).toEqual(["Created project", "Updated priority"]);
       expect(object.schema).toBe("1.1");
       expect(object.body).toBe("This is the project description");
@@ -111,7 +111,7 @@ describe("E2E CRUD - getObject", () => {
         { projectId: "P-parent-project" },
       );
 
-      const result = await client.callTool("get_object", {
+      const result = await client.callTool("get_issue", {
         id: "E-test-epic",
       });
 
@@ -137,7 +137,7 @@ describe("E2E CRUD - getObject", () => {
         content,
       );
 
-      const result = await client.callTool("get_object", {
+      const result = await client.callTool("get_issue", {
         id: "F-standalone-feature",
       });
 
@@ -176,7 +176,7 @@ describe("E2E CRUD - getObject", () => {
         { status: "closed" },
       );
 
-      const openResult = await client.callTool("get_object", {
+      const openResult = await client.callTool("get_issue", {
         id: "T-open-task",
       });
       const openObject = parseGetObjectResponse(
@@ -184,7 +184,7 @@ describe("E2E CRUD - getObject", () => {
       );
       expect(openObject.status).toBe("open");
 
-      const closedResult = await client.callTool("get_object", {
+      const closedResult = await client.callTool("get_issue", {
         id: "T-closed-task",
       });
       const closedObject = parseGetObjectResponse(
@@ -257,7 +257,7 @@ describe("E2E CRUD - getObject", () => {
       );
 
       // Verify each object can be retrieved and has correct parent/children
-      const projectResult = await client.callTool("get_object", {
+      const projectResult = await client.callTool("get_issue", {
         id: projectId,
       });
       const project = parseGetObjectResponse(
@@ -266,12 +266,12 @@ describe("E2E CRUD - getObject", () => {
       expect(project.childrenIds).toContain(epicId);
       expect(project.parent).toBeUndefined();
 
-      const epicResult = await client.callTool("get_object", { id: epicId });
+      const epicResult = await client.callTool("get_issue", { id: epicId });
       const epic = parseGetObjectResponse(epicResult.content[0].text as string);
       expect(epic.parent).toBe(projectId);
       expect(epic.childrenIds).toContain(featureId);
 
-      const featureResult = await client.callTool("get_object", {
+      const featureResult = await client.callTool("get_issue", {
         id: featureId,
       });
       const feature = parseGetObjectResponse(
@@ -280,7 +280,7 @@ describe("E2E CRUD - getObject", () => {
       expect(feature.parent).toBe(epicId);
       expect(feature.childrenIds).toContain(taskId);
 
-      const taskResult = await client.callTool("get_object", { id: taskId });
+      const taskResult = await client.callTool("get_issue", { id: taskId });
       const task = parseGetObjectResponse(taskResult.content[0].text as string);
       expect(task.parent).toBe(featureId);
       expect(task.prerequisites).toEqual([epicId, featureId]);
@@ -329,7 +329,7 @@ describe("E2E CRUD - getObject", () => {
         { featureId, status: "closed" },
       );
 
-      const featureResult = await client.callTool("get_object", {
+      const featureResult = await client.callTool("get_issue", {
         id: featureId,
       });
       const feature = parseGetObjectResponse(
@@ -337,24 +337,95 @@ describe("E2E CRUD - getObject", () => {
       );
       expect(feature.childrenIds).toEqual([task1Id, task2Id]);
 
-      const task1Result = await client.callTool("get_object", { id: task1Id });
+      const task1Result = await client.callTool("get_issue", { id: task1Id });
       const task1 = parseGetObjectResponse(
         task1Result.content[0].text as string,
       );
       expect(task1.parent).toBe(featureId);
 
-      const task2Result = await client.callTool("get_object", { id: task2Id });
+      const task2Result = await client.callTool("get_issue", { id: task2Id });
       const task2 = parseGetObjectResponse(
         task2Result.content[0].text as string,
       );
       expect(task2.parent).toBe(featureId);
       expect(task2.status).toBe("done");
     });
+
+    it("should properly display affected files in response (regression test)", async () => {
+      // This test specifically validates the bug fix where affected files
+      // weren't being properly serialized due to Map JSON.stringify issue
+      const taskData: ObjectData = {
+        id: "T-affected-files-test",
+        title: "Task with Affected Files",
+        status: "in-progress",
+        priority: "high",
+        affectedFiles: {
+          "src/components/Button.tsx": "Added new button component",
+          "src/styles/theme.css": "Updated button theme",
+          "tests/Button.test.tsx": "Added comprehensive tests",
+          "docs/components.md": "Updated component documentation",
+        },
+        log: [
+          "Started implementation",
+          "Added component structure",
+          "Implemented styling",
+          "Added tests and documentation",
+        ],
+      };
+
+      const content = createObjectContent(taskData);
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-affected-files-test",
+        content,
+      );
+
+      const result = await client.callTool("get_issue", {
+        id: "T-affected-files-test",
+      });
+
+      expect(result.content[0].type).toBe("text");
+      const object = parseGetObjectResponse(result.content[0].text as string);
+
+      // Verify affected files are properly populated (not empty)
+      expect(object.affectedFiles).toBeDefined();
+      expect(typeof object.affectedFiles).toBe("object");
+      expect(
+        Object.keys(object.affectedFiles as Record<string, string>),
+      ).toHaveLength(4);
+
+      // Verify specific affected files
+      expect(object.affectedFiles["src/components/Button.tsx"]).toBe(
+        "Added new button component",
+      );
+      expect(object.affectedFiles["src/styles/theme.css"]).toBe(
+        "Updated button theme",
+      );
+      expect(object.affectedFiles["tests/Button.test.tsx"]).toBe(
+        "Added comprehensive tests",
+      );
+      expect(object.affectedFiles["docs/components.md"]).toBe(
+        "Updated component documentation",
+      );
+
+      // Verify log is also properly populated
+      expect(object.log).toHaveLength(4);
+      expect(object.log).toContain("Started implementation");
+      expect(object.log).toContain("Added tests and documentation");
+
+      // Verify that the response text contains the affected files content
+      const responseText = result.content[0].text as string;
+      expect(responseText).toContain("src/components/Button.tsx");
+      expect(responseText).toContain("Added new button component");
+      expect(responseText).toContain("src/styles/theme.css");
+      expect(responseText).toContain("Updated button theme");
+    });
   });
 
   describe("Error Handling", () => {
     it("should handle non-existent object IDs", async () => {
-      const result = await client.callTool("get_object", {
+      const result = await client.callTool("get_issue", {
         id: "P-nonexistent",
       });
 
@@ -375,7 +446,7 @@ describe("E2E CRUD - getObject", () => {
       ];
 
       for (const id of malformedIds) {
-        const result = await client.callTool("get_object", { id });
+        const result = await client.callTool("get_issue", { id });
 
         expect(result.content[0].type).toBe("text");
         const text = result.content[0].text;
@@ -405,7 +476,7 @@ describe("E2E CRUD - getObject", () => {
       await fs.mkdir(path.dirname(filePath), { recursive: true });
       await fs.writeFile(filePath, corruptedContent, "utf-8");
 
-      const result = await client.callTool("get_object", {
+      const result = await client.callTool("get_issue", {
         id: "P-corrupted",
       });
 
@@ -435,7 +506,7 @@ Body content`;
       await fs.mkdir(path.dirname(filePath), { recursive: true });
       await fs.writeFile(filePath, incompleteContent, "utf-8");
 
-      const result = await client.callTool("get_object", {
+      const result = await client.callTool("get_issue", {
         id: "P-incomplete",
       });
 
@@ -475,7 +546,7 @@ Body content`;
           testCase.hierarchy,
         );
 
-        const result = await client.callTool("get_object", {
+        const result = await client.callTool("get_issue", {
           id: testCase.id,
         });
 
@@ -497,7 +568,7 @@ Body content`;
 
       // Test that the system handles these IDs gracefully
       for (const id of specialIds) {
-        const result = await client.callTool("get_object", { id });
+        const result = await client.callTool("get_issue", { id });
 
         expect(result.content[0].type).toBe("text");
         // Should return "not found" since we haven't created these
@@ -535,7 +606,7 @@ updated: "2024-01-01T00:00:00.000Z"
       await fs.mkdir(path.dirname(filePath), { recursive: true });
       await fs.writeFile(filePath, minimalContent, "utf-8");
 
-      const result = await client.callTool("get_object", {
+      const result = await client.callTool("get_issue", {
         id: "P-minimal",
       });
 
@@ -596,17 +667,121 @@ This is a complex task with extensive documentation.`,
         { featureId: "F-parent-feature", status: "open" },
       );
 
-      const result = await client.callTool("get_object", {
+      const result = await client.callTool("get_issue", {
         id: "T-complex",
       });
 
       const object = parseGetObjectResponse(result.content[0].text as string);
       expect(object.id).toBe("T-complex");
       expect(object.prerequisites).toHaveLength(4);
-      expect(Object.keys(object.affectedFiles as object)).toHaveLength(0);
+      expect(Object.keys(object.affectedFiles as object)).toHaveLength(3);
+      expect(object.affectedFiles).toEqual({
+        "src/index.ts": "Updated main entry",
+        "src/utils/helper.ts": "Added utility function",
+        "tests/index.test.ts": "Added test coverage",
+      });
       expect(object.log).toHaveLength(4);
       expect(object.body).toContain("# Complex Task Implementation");
       expect(object.body).toContain("This is a complex task");
+    });
+  });
+
+  describe("Title Updates", () => {
+    it("should update task title and retrieve updated object", async () => {
+      // Create initial task
+      const taskData: ObjectData = {
+        id: "T-title-update-test",
+        title: "Original Task Title",
+        status: "open",
+        priority: "medium",
+        body: "Task body content",
+      };
+
+      const content = createObjectContent(taskData);
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-title-update-test",
+        content,
+        { status: "open" },
+      );
+
+      // Update the title
+      const updateResult = await client.callTool("update_issue", {
+        id: "T-title-update-test",
+        title: "Updated Task Title",
+      });
+
+      expect(updateResult.content[0].type).toBe("text");
+      expect(updateResult.content[0].text).toContain(
+        "Successfully updated object",
+      );
+
+      // Retrieve and verify the updated object
+      const getResult = await client.callTool("get_issue", {
+        id: "T-title-update-test",
+      });
+
+      const object = parseGetObjectResponse(
+        getResult.content[0].text as string,
+      );
+      expect(object.id).toBe("T-title-update-test");
+      expect(object.title).toBe("Updated Task Title");
+      expect(object.body).toBe("Task body content"); // Other fields should remain unchanged
+      expect(object.status).toBe("open");
+      expect(object.priority).toBe("medium");
+    });
+
+    it("should update project title while preserving other properties", async () => {
+      // Create initial project with complex data
+      const projectData: ObjectData = {
+        id: "P-title-update-project",
+        title: "Original Project Title",
+        status: "in-progress",
+        priority: "high",
+        prerequisites: ["P-dep1"],
+        affectedFiles: { "src/main.ts": "Main implementation" },
+        log: ["Project created", "Initial setup"],
+        body: "Project description",
+      };
+
+      const content = createObjectContent(projectData);
+      await createObjectFile(
+        testEnv.projectRoot,
+        "project",
+        "P-title-update-project",
+        content,
+      );
+
+      // Update only the title
+      const updateResult = await client.callTool("update_issue", {
+        id: "P-title-update-project",
+        title: "New Project Title",
+      });
+
+      expect(updateResult.content[0].type).toBe("text");
+      expect(updateResult.content[0].text).toContain(
+        "Successfully updated object",
+      );
+
+      // Retrieve and verify all properties are preserved except title
+      const getResult = await client.callTool("get_issue", {
+        id: "P-title-update-project",
+      });
+
+      const object = parseGetObjectResponse(
+        getResult.content[0].text as string,
+      );
+      expect(object.id).toBe("P-title-update-project"); // ID should remain unchanged
+      expect(object.title).toBe("New Project Title"); // Title should be updated
+      expect(object.status).toBe("in-progress"); // All other properties preserved
+      expect(object.priority).toBe("high");
+      expect(object.prerequisites).toEqual(["P-dep1"]);
+      expect(object.affectedFiles).toEqual({
+        "src/main.ts": "Main implementation",
+      });
+      expect(object.log).toEqual(["Project created", "Initial setup"]);
+      expect(object.body).toBe("Project description");
     });
   });
 });

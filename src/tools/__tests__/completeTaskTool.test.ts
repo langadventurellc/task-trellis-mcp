@@ -1,11 +1,12 @@
+import { ServerConfig } from "../../configuration";
 import { Repository } from "../../repositories/Repository";
 import { TaskTrellisService } from "../../services/TaskTrellisService";
 import { handleCompleteTask } from "../completeTaskTool";
-import { ServerConfig } from "../../configuration";
 
 describe("completeTaskTool", () => {
   let mockService: jest.Mocked<TaskTrellisService>;
   let mockRepository: jest.Mocked<Repository>;
+  let mockServerConfig: jest.Mocked<ServerConfig>;
 
   beforeEach(() => {
     mockService = {
@@ -16,7 +17,6 @@ describe("completeTaskTool", () => {
       listObjects: jest.fn(),
       appendObjectLog: jest.fn(),
       pruneClosed: jest.fn(),
-      replaceObjectBodyRegex: jest.fn(),
       appendModifiedFiles: jest.fn(),
     };
 
@@ -25,6 +25,13 @@ describe("completeTaskTool", () => {
       getObjects: jest.fn(),
       saveObject: jest.fn(),
       deleteObject: jest.fn(),
+      getChildrenOf: jest.fn(),
+    };
+
+    mockServerConfig = {
+      mode: "local",
+      autoCompleteParent: true,
+      autoPrune: 0,
     };
   });
 
@@ -54,17 +61,18 @@ describe("completeTaskTool", () => {
         mockService,
         mockRepository,
         args,
+        mockServerConfig,
       );
 
       expect(mockService.completeTask).toHaveBeenCalledWith(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
         "Task completed successfully",
         {
           "src/file1.ts": "Added new feature",
           "src/file2.ts": "Fixed bug",
         },
-        undefined,
       );
       expect(result).toBe(expectedResult);
     });
@@ -83,6 +91,7 @@ describe("completeTaskTool", () => {
         mode: "local",
         planningRootFolder: "/test",
         autoCompleteParent: true,
+        autoPrune: 0,
       };
 
       mockService.completeTask.mockResolvedValue(expectedResult);
@@ -102,10 +111,10 @@ describe("completeTaskTool", () => {
 
       expect(mockService.completeTask).toHaveBeenCalledWith(
         mockRepository,
+        serverConfig,
         "T-test-task",
         "Task completed",
         {},
-        serverConfig,
       );
       expect(result).toBe(expectedResult);
     });
@@ -132,14 +141,15 @@ describe("completeTaskTool", () => {
         mockService,
         mockRepository,
         args,
+        mockServerConfig,
       );
 
       expect(mockService.completeTask).toHaveBeenCalledWith(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
         "Task completed with no file changes",
         {},
-        undefined,
       );
       expect(result).toBe(expectedResult);
     });
@@ -155,15 +165,15 @@ describe("completeTaskTool", () => {
       };
 
       await expect(
-        handleCompleteTask(mockService, mockRepository, args),
+        handleCompleteTask(mockService, mockRepository, args, mockServerConfig),
       ).rejects.toThrow(errorMessage);
 
       expect(mockService.completeTask).toHaveBeenCalledWith(
         mockRepository,
+        mockServerConfig,
         "T-nonexistent",
         "Summary",
         {},
-        undefined,
       );
     });
 
@@ -193,10 +203,12 @@ describe("completeTaskTool", () => {
         mockService,
         mockRepository,
         args,
+        mockServerConfig,
       );
 
       expect(mockService.completeTask).toHaveBeenCalledWith(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
         "Multiple files changed",
         {
@@ -204,7 +216,6 @@ describe("completeTaskTool", () => {
           "file2.js": "Second file",
           "config.json": "Configuration file",
         },
-        undefined,
       );
       expect(result).toBe(expectedResult);
     });
@@ -233,14 +244,15 @@ describe("completeTaskTool", () => {
         mockService,
         mockRepository,
         args,
+        mockServerConfig,
       );
 
       expect(mockService.completeTask).toHaveBeenCalledWith(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
         "Test summary",
         { "test.ts": "Test file" },
-        undefined,
       );
       expect(result).toBe(expectedResult);
     });
@@ -262,14 +274,19 @@ describe("completeTaskTool", () => {
         },
       };
 
-      await handleCompleteTask(mockService, mockRepository, args);
+      await handleCompleteTask(
+        mockService,
+        mockRepository,
+        args,
+        mockServerConfig,
+      );
 
       expect(mockService.completeTask).toHaveBeenCalledWith(
         mockRepository,
+        mockServerConfig,
         "T-extract-test",
         "Extraction test summary",
         { "extract.ts": "Extraction test" },
-        undefined,
       );
     });
   });

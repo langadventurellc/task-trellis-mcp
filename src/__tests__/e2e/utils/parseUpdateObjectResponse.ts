@@ -1,5 +1,5 @@
 /**
- * Helper to parse update_object response
+ * Helper to parse update_issue response
  */
 export function parseUpdateObjectResponse(responseText: string): any {
   const prefix = "Successfully updated object: ";

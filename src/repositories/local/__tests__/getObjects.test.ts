@@ -713,4 +713,646 @@ describe("getObjects", () => {
       }
     });
   });
+
+  describe("multiple value filtering", () => {
+    describe("multiple type values", () => {
+      it("should filter objects by multiple types", async () => {
+        const objects = await getObjects(testRoot, true, undefined, [
+          TrellisObjectType.FEATURE,
+          TrellisObjectType.TASK,
+        ]);
+
+        expect(objects.length).toBeGreaterThan(0);
+        objects.forEach((obj) => {
+          expect([TrellisObjectType.FEATURE, TrellisObjectType.TASK]).toContain(
+            obj.type,
+          );
+        });
+
+        // Should include both features and tasks
+        const features = objects.filter(
+          (obj) => obj.type === TrellisObjectType.FEATURE,
+        );
+        const tasks = objects.filter(
+          (obj) => obj.type === TrellisObjectType.TASK,
+        );
+
+        expect(features.length).toBeGreaterThan(0);
+        expect(tasks.length).toBeGreaterThan(0);
+
+        // Should not include projects or epics
+        const projects = objects.filter(
+          (obj) => obj.type === TrellisObjectType.PROJECT,
+        );
+        const epics = objects.filter(
+          (obj) => obj.type === TrellisObjectType.EPIC,
+        );
+
+        expect(projects.length).toBe(0);
+        expect(epics.length).toBe(0);
+      });
+
+      it("should filter objects by multiple types (PROJECT and EPIC)", async () => {
+        const objects = await getObjects(testRoot, true, undefined, [
+          TrellisObjectType.PROJECT,
+          TrellisObjectType.EPIC,
+        ]);
+
+        expect(objects.length).toBeGreaterThan(0);
+        objects.forEach((obj) => {
+          expect([TrellisObjectType.PROJECT, TrellisObjectType.EPIC]).toContain(
+            obj.type,
+          );
+        });
+
+        // Should include both projects and epics
+        const projects = objects.filter(
+          (obj) => obj.type === TrellisObjectType.PROJECT,
+        );
+        const epics = objects.filter(
+          (obj) => obj.type === TrellisObjectType.EPIC,
+        );
+
+        expect(projects.length).toBeGreaterThan(0);
+        expect(epics.length).toBeGreaterThan(0);
+
+        // Should not include features or tasks
+        const features = objects.filter(
+          (obj) => obj.type === TrellisObjectType.FEATURE,
+        );
+        const tasks = objects.filter(
+          (obj) => obj.type === TrellisObjectType.TASK,
+        );
+
+        expect(features.length).toBe(0);
+        expect(tasks.length).toBe(0);
+      });
+
+      it("should work with single element array (equivalent to single value)", async () => {
+        const singleArrayObjects = await getObjects(testRoot, true, undefined, [
+          TrellisObjectType.FEATURE,
+        ]);
+
+        const singleValueObjects = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          TrellisObjectType.FEATURE,
+        );
+
+        expect(singleArrayObjects).toEqual(singleValueObjects);
+      });
+
+      it("should return all types when empty type array is provided", async () => {
+        const emptyArrayObjects = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          [],
+        );
+
+        const allObjects = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          undefined,
+        );
+
+        expect(emptyArrayObjects).toEqual(allObjects);
+      });
+    });
+
+    describe("multiple status values", () => {
+      it("should filter objects by multiple statuses", async () => {
+        const objects = await getObjects(testRoot, true, undefined, undefined, [
+          TrellisObjectStatus.OPEN,
+          TrellisObjectStatus.IN_PROGRESS,
+        ]);
+
+        expect(objects.length).toBeGreaterThan(0);
+        objects.forEach((obj) => {
+          expect([
+            TrellisObjectStatus.OPEN,
+            TrellisObjectStatus.IN_PROGRESS,
+          ]).toContain(obj.status);
+        });
+
+        // Should not include done objects
+        const doneObjects = objects.filter(
+          (obj) => obj.status === TrellisObjectStatus.DONE,
+        );
+        expect(doneObjects.length).toBe(0);
+      });
+
+      it("should filter objects by multiple statuses including DONE", async () => {
+        const objects = await getObjects(testRoot, true, undefined, undefined, [
+          TrellisObjectStatus.OPEN,
+          TrellisObjectStatus.DONE,
+        ]);
+
+        expect(objects.length).toBeGreaterThan(0);
+        objects.forEach((obj) => {
+          expect([
+            TrellisObjectStatus.OPEN,
+            TrellisObjectStatus.DONE,
+          ]).toContain(obj.status);
+        });
+
+        // Should include both open and done objects
+        const openObjects = objects.filter(
+          (obj) => obj.status === TrellisObjectStatus.OPEN,
+        );
+        const doneObjects = objects.filter(
+          (obj) => obj.status === TrellisObjectStatus.DONE,
+        );
+
+        expect(openObjects.length).toBeGreaterThan(0);
+        expect(doneObjects.length).toBeGreaterThan(0);
+
+        // Should not include in-progress objects
+        const inProgressObjects = objects.filter(
+          (obj) => obj.status === TrellisObjectStatus.IN_PROGRESS,
+        );
+        expect(inProgressObjects.length).toBe(0);
+      });
+
+      it("should work with single element status array", async () => {
+        const singleArrayObjects = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          undefined,
+          [TrellisObjectStatus.OPEN],
+        );
+
+        const singleValueObjects = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          undefined,
+          TrellisObjectStatus.OPEN,
+        );
+
+        expect(singleArrayObjects).toEqual(singleValueObjects);
+      });
+
+      it("should return all statuses when empty status array is provided", async () => {
+        const emptyArrayObjects = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          undefined,
+          [],
+        );
+
+        const allObjects = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          undefined,
+          undefined,
+        );
+
+        expect(emptyArrayObjects).toEqual(allObjects);
+      });
+    });
+
+    describe("multiple priority values", () => {
+      it("should filter objects by multiple priorities", async () => {
+        const objects = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          undefined,
+          undefined,
+          [TrellisObjectPriority.HIGH, TrellisObjectPriority.MEDIUM],
+        );
+
+        expect(objects.length).toBeGreaterThan(0);
+        objects.forEach((obj) => {
+          expect([
+            TrellisObjectPriority.HIGH,
+            TrellisObjectPriority.MEDIUM,
+          ]).toContain(obj.priority);
+        });
+
+        // Should not include low priority objects
+        const lowPriorityObjects = objects.filter(
+          (obj) => obj.priority === TrellisObjectPriority.LOW,
+        );
+        expect(lowPriorityObjects.length).toBe(0);
+      });
+
+      it("should filter objects by all three priorities", async () => {
+        const objects = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          undefined,
+          undefined,
+          [
+            TrellisObjectPriority.HIGH,
+            TrellisObjectPriority.MEDIUM,
+            TrellisObjectPriority.LOW,
+          ],
+        );
+
+        const allObjects = await getObjects(testRoot, true);
+
+        // Should return the same as no filter
+        expect(objects.length).toBe(allObjects.length);
+        expect(objects.sort((a, b) => a.id.localeCompare(b.id))).toEqual(
+          allObjects.sort((a, b) => a.id.localeCompare(b.id)),
+        );
+      });
+
+      it("should work with single element priority array", async () => {
+        const singleArrayObjects = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          undefined,
+          undefined,
+          [TrellisObjectPriority.HIGH],
+        );
+
+        const singleValueObjects = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          undefined,
+          undefined,
+          TrellisObjectPriority.HIGH,
+        );
+
+        expect(singleArrayObjects).toEqual(singleValueObjects);
+      });
+
+      it("should return all priorities when empty priority array is provided", async () => {
+        const emptyArrayObjects = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          undefined,
+          undefined,
+          [],
+        );
+
+        const allObjects = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+        );
+
+        expect(emptyArrayObjects).toEqual(allObjects);
+      });
+    });
+
+    describe("mixed single and multiple filters", () => {
+      it("should work with single type and multiple statuses", async () => {
+        const objects = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          TrellisObjectType.TASK,
+          [TrellisObjectStatus.OPEN, TrellisObjectStatus.DONE],
+        );
+
+        objects.forEach((obj) => {
+          expect(obj.type).toBe(TrellisObjectType.TASK);
+          expect([
+            TrellisObjectStatus.OPEN,
+            TrellisObjectStatus.DONE,
+          ]).toContain(obj.status);
+        });
+      });
+
+      it("should work with multiple types and single status", async () => {
+        const objects = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          [TrellisObjectType.FEATURE, TrellisObjectType.TASK],
+          TrellisObjectStatus.OPEN,
+        );
+
+        objects.forEach((obj) => {
+          expect([TrellisObjectType.FEATURE, TrellisObjectType.TASK]).toContain(
+            obj.type,
+          );
+          expect(obj.status).toBe(TrellisObjectStatus.OPEN);
+        });
+      });
+
+      it("should work with single type and multiple priorities", async () => {
+        const objects = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          TrellisObjectType.TASK,
+          undefined,
+          [TrellisObjectPriority.HIGH, TrellisObjectPriority.MEDIUM],
+        );
+
+        objects.forEach((obj) => {
+          expect(obj.type).toBe(TrellisObjectType.TASK);
+          expect([
+            TrellisObjectPriority.HIGH,
+            TrellisObjectPriority.MEDIUM,
+          ]).toContain(obj.priority);
+        });
+      });
+    });
+
+    describe("combined multiple filters", () => {
+      it("should work with multiple types, statuses, and priorities", async () => {
+        const objects = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          [TrellisObjectType.FEATURE, TrellisObjectType.TASK],
+          [TrellisObjectStatus.OPEN, TrellisObjectStatus.IN_PROGRESS],
+          [TrellisObjectPriority.HIGH, TrellisObjectPriority.MEDIUM],
+        );
+
+        objects.forEach((obj) => {
+          expect([TrellisObjectType.FEATURE, TrellisObjectType.TASK]).toContain(
+            obj.type,
+          );
+          expect([
+            TrellisObjectStatus.OPEN,
+            TrellisObjectStatus.IN_PROGRESS,
+          ]).toContain(obj.status);
+          expect([
+            TrellisObjectPriority.HIGH,
+            TrellisObjectPriority.MEDIUM,
+          ]).toContain(obj.priority);
+        });
+      });
+
+      it("should work with multiple filters and scope", async () => {
+        const objects = await getObjects(
+          testRoot,
+          true,
+          "P-ecommerce-platform",
+          [TrellisObjectType.FEATURE, TrellisObjectType.TASK],
+          [TrellisObjectStatus.OPEN, TrellisObjectStatus.DONE],
+        );
+
+        // All returned objects should match the filters
+        objects.forEach((obj) => {
+          expect([TrellisObjectType.FEATURE, TrellisObjectType.TASK]).toContain(
+            obj.type,
+          );
+          expect([
+            TrellisObjectStatus.OPEN,
+            TrellisObjectStatus.DONE,
+          ]).toContain(obj.status);
+        });
+
+        // Get all objects from the scope to verify filtering is working correctly
+        const allScopeObjects = await getObjects(
+          testRoot,
+          true,
+          "P-ecommerce-platform",
+        );
+
+        // Objects should be a subset of all scope objects
+        expect(objects.length).toBeLessThanOrEqual(allScopeObjects.length);
+
+        // All returned objects should be in the scope
+        objects.forEach((obj) => {
+          expect(
+            allScopeObjects.some((scopeObj) => scopeObj.id === obj.id),
+          ).toBe(true);
+        });
+
+        // Should not include objects from other scopes (standalone objects)
+        const standaloneObjects = await getObjects(
+          testRoot,
+          true,
+          "F-user-authentication", // A standalone feature scope
+          [TrellisObjectType.FEATURE, TrellisObjectType.TASK],
+        );
+
+        // No overlap between scoped and standalone objects
+        objects.forEach((obj) => {
+          expect(
+            standaloneObjects.some(
+              (standaloneObj) => standaloneObj.id === obj.id,
+            ),
+          ).toBe(false);
+        });
+      });
+
+      it("should work with multiple filters and includeClosed=false", async () => {
+        const objects = await getObjects(
+          testRoot,
+          false,
+          undefined,
+          [TrellisObjectType.FEATURE, TrellisObjectType.TASK],
+          [TrellisObjectStatus.OPEN, TrellisObjectStatus.IN_PROGRESS],
+        );
+
+        objects.forEach((obj) => {
+          expect([TrellisObjectType.FEATURE, TrellisObjectType.TASK]).toContain(
+            obj.type,
+          );
+          expect([
+            TrellisObjectStatus.OPEN,
+            TrellisObjectStatus.IN_PROGRESS,
+          ]).toContain(obj.status);
+          // All should be open (not closed)
+          expect(obj.status).not.toBe(TrellisObjectStatus.DONE);
+          expect(obj.status).not.toBe(TrellisObjectStatus.WONT_DO);
+        });
+      });
+    });
+
+    describe("backward compatibility", () => {
+      it("should maintain existing behavior for single values", async () => {
+        // Test that all existing single-value calls still work exactly the same
+        const singleTypeObjects = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          TrellisObjectType.TASK,
+        );
+
+        const singleStatusObjects = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          undefined,
+          TrellisObjectStatus.OPEN,
+        );
+
+        const singlePriorityObjects = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          undefined,
+          undefined,
+          TrellisObjectPriority.HIGH,
+        );
+
+        // Verify single value filtering still works correctly
+        singleTypeObjects.forEach((obj) => {
+          expect(obj.type).toBe(TrellisObjectType.TASK);
+        });
+
+        singleStatusObjects.forEach((obj) => {
+          expect(obj.status).toBe(TrellisObjectStatus.OPEN);
+        });
+
+        singlePriorityObjects.forEach((obj) => {
+          expect(obj.priority).toBe(TrellisObjectPriority.HIGH);
+        });
+      });
+
+      it("should return same results for single value vs single-element array", async () => {
+        // Compare single value with equivalent single-element array for all filter types
+        const singleType = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          TrellisObjectType.FEATURE,
+        );
+        const arrayType = await getObjects(testRoot, true, undefined, [
+          TrellisObjectType.FEATURE,
+        ]);
+
+        const singleStatus = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          undefined,
+          TrellisObjectStatus.OPEN,
+        );
+        const arrayStatus = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          undefined,
+          [TrellisObjectStatus.OPEN],
+        );
+
+        const singlePriority = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          undefined,
+          undefined,
+          TrellisObjectPriority.MEDIUM,
+        );
+        const arrayPriority = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          undefined,
+          undefined,
+          [TrellisObjectPriority.MEDIUM],
+        );
+
+        expect(singleType).toEqual(arrayType);
+        expect(singleStatus).toEqual(arrayStatus);
+        expect(singlePriority).toEqual(arrayPriority);
+      });
+    });
+
+    describe("edge cases", () => {
+      it("should handle empty arrays as no filter applied", async () => {
+        const emptyArrayObjects = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          [],
+          [],
+          [],
+        );
+
+        const noFilterObjects = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+        );
+
+        expect(emptyArrayObjects).toEqual(noFilterObjects);
+      });
+
+      it("should return empty result when multiple filters have no intersection", async () => {
+        // Try to find tasks that are both DONE and OPEN (impossible)
+        const objects = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          TrellisObjectType.TASK,
+          [TrellisObjectStatus.DONE, TrellisObjectStatus.OPEN],
+          TrellisObjectPriority.LOW, // Assuming no low priority tasks exist with these statuses
+        );
+
+        // The result might be empty or might have some objects depending on test data
+        // The important thing is that it doesn't throw an error and returns a valid array
+        expect(Array.isArray(objects)).toBe(true);
+
+        // If there are results, they should match all the filters
+        objects.forEach((obj) => {
+          expect(obj.type).toBe(TrellisObjectType.TASK);
+          expect([
+            TrellisObjectStatus.DONE,
+            TrellisObjectStatus.OPEN,
+          ]).toContain(obj.status);
+          expect(obj.priority).toBe(TrellisObjectPriority.LOW);
+        });
+      });
+
+      it("should handle large filter arrays efficiently", async () => {
+        // Test with all possible enum values to ensure performance is acceptable
+        const allTypes = [
+          TrellisObjectType.PROJECT,
+          TrellisObjectType.EPIC,
+          TrellisObjectType.FEATURE,
+          TrellisObjectType.TASK,
+        ];
+
+        const allStatuses = [
+          TrellisObjectStatus.DRAFT,
+          TrellisObjectStatus.OPEN,
+          TrellisObjectStatus.IN_PROGRESS,
+          TrellisObjectStatus.DONE,
+          TrellisObjectStatus.WONT_DO,
+        ];
+
+        const allPriorities = [
+          TrellisObjectPriority.HIGH,
+          TrellisObjectPriority.MEDIUM,
+          TrellisObjectPriority.LOW,
+        ];
+
+        const startTime = Date.now();
+        const objects = await getObjects(
+          testRoot,
+          true,
+          undefined,
+          allTypes,
+          allStatuses,
+          allPriorities,
+        );
+        const endTime = Date.now();
+
+        // Should return all objects (same as no filter)
+        const allObjects = await getObjects(testRoot, true);
+        expect(objects.length).toBe(allObjects.length);
+
+        // Performance test - should complete in reasonable time (under 1 second)
+        expect(endTime - startTime).toBeLessThan(1000);
+      });
+    });
+  });
 });

@@ -1,10 +1,10 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { CallToolResultSchema } from "@modelcontextprotocol/sdk/types.js";
-import { TestEnvironment } from "../utils";
 import { chmod, mkdir, writeFile } from "fs/promises";
-import path from "path";
 import * as os from "os";
+import path from "path";
+import { TestEnvironment } from "../utils";
 
 describe("E2E Configuration - Invalid Configuration Scenarios", () => {
   let testEnv: TestEnvironment;
@@ -66,7 +66,7 @@ describe("E2E Configuration - Invalid Configuration Scenarios", () => {
       expect(response.content[0].text).toContain("Activated in local mode");
 
       // But operations should handle missing directory gracefully
-      const createResponse = await callTool("create_object", {
+      const createResponse = await callTool("create_issue", {
         type: "project",
         title: "Test Project",
       });
@@ -85,7 +85,7 @@ describe("E2E Configuration - Invalid Configuration Scenarios", () => {
 
       // Try to use - may fail depending on OS
       try {
-        await callTool("create_object", {
+        await callTool("create_issue", {
           type: "project",
           title: "Test",
         });
@@ -125,7 +125,7 @@ describe("E2E Configuration - Invalid Configuration Scenarios", () => {
       });
 
       try {
-        await callTool("create_object", {
+        await callTool("create_issue", {
           type: "project",
           title: "Test",
         });
@@ -153,7 +153,7 @@ describe("E2E Configuration - Invalid Configuration Scenarios", () => {
       });
 
       try {
-        await callTool("create_object", {
+        await callTool("create_issue", {
           type: "project",
           title: "Test",
         });
@@ -182,7 +182,7 @@ describe("E2E Configuration - Invalid Configuration Scenarios", () => {
 
       // Tools should fail due to incomplete remote config
       try {
-        await callTool("list_objects", {});
+        await callTool("list_issues", {});
         expect(true).toBe(false); // Should not reach here
       } catch (error: any) {
         expect(error.message).toBeDefined();
@@ -210,7 +210,7 @@ describe("E2E Configuration - Invalid Configuration Scenarios", () => {
       expect(response.content[0].text).toContain("Activated in local mode");
 
       // And use tools
-      const listResponse = await callTool("list_objects", {});
+      const listResponse = await callTool("list_issues", {});
       expect(listResponse).toBeDefined();
     });
   });
@@ -228,7 +228,7 @@ describe("E2E Configuration - Invalid Configuration Scenarios", () => {
 
       // Try to use a tool - should fail due to incomplete remote config
       try {
-        await callTool("list_objects", {});
+        await callTool("list_issues", {});
         expect(true).toBe(false); // Should not reach here
       } catch (error: any) {
         expect(error.message).toBeDefined();

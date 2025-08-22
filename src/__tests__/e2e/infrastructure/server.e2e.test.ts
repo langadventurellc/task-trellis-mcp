@@ -1,5 +1,5 @@
-import { TestEnvironment } from "../utils/testEnvironment";
 import { McpTestClient } from "../utils/mcpTestClient";
+import { TestEnvironment } from "../utils/testEnvironment";
 
 describe("E2E Infrastructure - Server", () => {
   let testEnv: TestEnvironment;
@@ -32,10 +32,10 @@ describe("E2E Infrastructure - Server", () => {
 
     // Verify expected tools are present
     const toolNames = response.tools.map((t: any) => t.name);
-    expect(toolNames).toContain("create_object");
-    expect(toolNames).toContain("list_objects");
-    expect(toolNames).toContain("get_object");
-    expect(toolNames).toContain("update_object");
-    expect(toolNames).toContain("delete_object");
+    expect(toolNames).toContain("create_issue");
+    expect(toolNames).toContain("list_issues");
+    expect(toolNames).toContain("get_issue");
+    expect(toolNames).toContain("update_issue");
+    expect(toolNames).toContain("delete_issue");
   });
 });

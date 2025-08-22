@@ -1,3 +1,4 @@
+import { ServerConfig } from "../../../configuration";
 import {
   TrellisObject,
   TrellisObjectPriority,
@@ -5,6 +6,10 @@ import {
   TrellisObjectType,
 } from "../../../models";
 import { Repository } from "../../../repositories/Repository";
+import {
+  autoCompleteParentHierarchy,
+  updateParentHierarchy,
+} from "../../../utils";
 import { validateStatusTransition } from "../../../validation/validateStatusTransition";
 import { updateObject } from "../updateObject";
 
@@ -13,13 +18,29 @@ jest.mock("../../../validation/validateStatusTransition", () => ({
   validateStatusTransition: jest.fn(),
 }));
 
+// Mock the utils functions
+jest.mock("../../../utils", () => ({
+  updateParentHierarchy: jest.fn(),
+  autoCompleteParentHierarchy: jest.fn(),
+}));
+
 const mockValidateStatusTransition =
   validateStatusTransition as jest.MockedFunction<
     typeof validateStatusTransition
   >;
 
+const mockUpdateParentHierarchy = updateParentHierarchy as jest.MockedFunction<
+  typeof updateParentHierarchy
+>;
+
+const mockAutoCompleteParentHierarchy =
+  autoCompleteParentHierarchy as jest.MockedFunction<
+    typeof autoCompleteParentHierarchy
+  >;
+
 describe("updateObject", () => {
   let mockRepository: jest.Mocked<Repository>;
+  let mockServerConfig: jest.Mocked<ServerConfig>;
 
   beforeEach(() => {
     mockRepository = {
@@ -27,7 +48,15 @@ describe("updateObject", () => {
       getObjects: jest.fn(),
       saveObject: jest.fn(),
       deleteObject: jest.fn(),
+      getChildrenOf: jest.fn(),
     };
+
+    mockServerConfig = {
+      mode: "local",
+      autoCompleteParent: true,
+      autoPrune: 0,
+    };
+
     jest.clearAllMocks();
   });
 
@@ -61,7 +90,9 @@ describe("updateObject", () => {
 
       const result = await updateObject(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
+        undefined,
         TrellisObjectPriority.HIGH,
         ["T-prereq-1", "T-prereq-2"],
         "Updated body content",
@@ -97,7 +128,9 @@ describe("updateObject", () => {
 
       const result = await updateObject(
         mockRepository,
+        mockServerConfig,
         "P-test-project",
+        undefined,
         TrellisObjectPriority.LOW,
       );
 
@@ -123,7 +156,9 @@ describe("updateObject", () => {
 
       const result = await updateObject(
         mockRepository,
+        mockServerConfig,
         "E-test-epic",
+        undefined,
         undefined,
         ["E-new-prereq", "E-another-prereq"],
       );
@@ -148,7 +183,9 @@ describe("updateObject", () => {
 
       const result = await updateObject(
         mockRepository,
+        mockServerConfig,
         "F-test-feature",
+        undefined,
         undefined,
         undefined,
         "New detailed feature description",
@@ -157,6 +194,29 @@ describe("updateObject", () => {
       const expectedUpdatedObject = {
         ...mockFeature,
         body: "New detailed feature description",
+      };
+
+      expect(mockRepository.saveObject).toHaveBeenCalledWith(
+        expectedUpdatedObject,
+      );
+      expect(result.content[0].text).toContain("Successfully updated object:");
+    });
+
+    it("should update only title for a task", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK);
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      const result = await updateObject(
+        mockRepository,
+        mockServerConfig,
+        "T-test-task",
+        "Updated Task Title",
+      );
+
+      const expectedUpdatedObject = {
+        ...mockTask,
+        title: "Updated Task Title",
       };
 
       expect(mockRepository.saveObject).toHaveBeenCalledWith(
@@ -174,7 +234,9 @@ describe("updateObject", () => {
 
       await updateObject(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
+        undefined,
         TrellisObjectPriority.HIGH,
       );
 
@@ -194,7 +256,9 @@ describe("updateObject", () => {
 
       await updateObject(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
+        undefined,
         TrellisObjectPriority.MEDIUM,
       );
 
@@ -212,7 +276,9 @@ describe("updateObject", () => {
 
       await updateObject(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
+        undefined,
         TrellisObjectPriority.LOW,
       );
 
@@ -232,10 +298,14 @@ describe("updateObject", () => {
       mockRepository.getObjectById.mockResolvedValue(mockTask);
       mockRepository.saveObject.mockResolvedValue();
 
-      await updateObject(mockRepository, "T-test-task", undefined, [
-        "T-prereq-1",
-        "T-prereq-2",
-      ]);
+      await updateObject(
+        mockRepository,
+        mockServerConfig,
+        "T-test-task",
+        undefined,
+        undefined,
+        ["T-prereq-1", "T-prereq-2"],
+      );
 
       expect(mockRepository.saveObject).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -251,10 +321,14 @@ describe("updateObject", () => {
       mockRepository.getObjectById.mockResolvedValue(mockTask);
       mockRepository.saveObject.mockResolvedValue();
 
-      await updateObject(mockRepository, "T-test-task", undefined, [
-        "T-new-prereq-1",
-        "T-new-prereq-2",
-      ]);
+      await updateObject(
+        mockRepository,
+        mockServerConfig,
+        "T-test-task",
+        undefined,
+        undefined,
+        ["T-new-prereq-1", "T-new-prereq-2"],
+      );
 
       expect(mockRepository.saveObject).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -270,7 +344,14 @@ describe("updateObject", () => {
       mockRepository.getObjectById.mockResolvedValue(mockTask);
       mockRepository.saveObject.mockResolvedValue();
 
-      await updateObject(mockRepository, "T-test-task", undefined, []);
+      await updateObject(
+        mockRepository,
+        mockServerConfig,
+        "T-test-task",
+        undefined,
+        undefined,
+        [],
+      );
 
       expect(mockRepository.saveObject).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -291,7 +372,9 @@ describe("updateObject", () => {
 
       await updateObject(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
+        undefined,
         undefined,
         undefined,
         undefined,
@@ -317,7 +400,9 @@ describe("updateObject", () => {
 
       await updateObject(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
+        undefined,
         undefined,
         undefined,
         undefined,
@@ -339,7 +424,9 @@ describe("updateObject", () => {
 
       await updateObject(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
+        undefined,
         undefined,
         undefined,
         undefined,
@@ -362,7 +449,9 @@ describe("updateObject", () => {
 
       const result = await updateObject(
         mockRepository,
+        mockServerConfig,
         "T-nonexistent",
+        undefined,
         TrellisObjectPriority.HIGH,
       );
 
@@ -386,7 +475,9 @@ describe("updateObject", () => {
 
       const result = await updateObject(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
+        undefined,
         undefined,
         undefined,
         undefined,
@@ -407,6 +498,7 @@ describe("updateObject", () => {
 
       const result = await updateObject(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
         undefined,
         undefined,
@@ -427,6 +519,7 @@ describe("updateObject", () => {
 
       const result = await updateObject(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
         undefined,
         undefined,
@@ -444,7 +537,9 @@ describe("updateObject", () => {
 
       const result = await updateObject(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
+        undefined,
         TrellisObjectPriority.HIGH,
       );
 
@@ -465,7 +560,12 @@ describe("updateObject", () => {
       mockRepository.getObjectById.mockResolvedValue(mockTask);
       mockRepository.saveObject.mockResolvedValue();
 
-      await updateObject(mockRepository, "T-test-task");
+      await updateObject(
+        mockRepository,
+        mockServerConfig,
+        "T-test-task",
+        undefined,
+      );
 
       expect(mockRepository.saveObject).toHaveBeenCalledWith(mockTask);
     });
@@ -483,7 +583,9 @@ describe("updateObject", () => {
 
       const result = await updateObject(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
+        undefined,
         TrellisObjectPriority.HIGH,
         ["T-prereq-1", "T-prereq-2", "T-prereq-3"],
         "Updated comprehensive body with new requirements",
@@ -525,7 +627,9 @@ describe("updateObject", () => {
 
       await updateObject(
         mockRepository,
+        mockServerConfig,
         "T-preserve-test",
+        undefined,
         TrellisObjectPriority.HIGH,
       );
 
@@ -543,6 +647,385 @@ describe("updateObject", () => {
           priority: TrellisObjectPriority.HIGH,
         }),
       );
+    });
+  });
+
+  describe("parent hierarchy updates", () => {
+    beforeEach(() => {
+      mockUpdateParentHierarchy.mockClear();
+      mockAutoCompleteParentHierarchy.mockClear();
+    });
+
+    it("should call updateParentHierarchy when status changes to IN_PROGRESS", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK, {
+        status: TrellisObjectStatus.OPEN,
+        parent: "F-parent-feature",
+      });
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+      mockUpdateParentHierarchy.mockResolvedValue();
+
+      await updateObject(
+        mockRepository,
+        mockServerConfig,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        TrellisObjectStatus.IN_PROGRESS,
+      );
+
+      expect(mockUpdateParentHierarchy).toHaveBeenCalledWith(
+        "F-parent-feature",
+        mockRepository,
+      );
+    });
+
+    it("should not call updateParentHierarchy when status is already IN_PROGRESS", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK, {
+        status: TrellisObjectStatus.IN_PROGRESS,
+        parent: "F-parent-feature",
+      });
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      await updateObject(
+        mockRepository,
+        mockServerConfig,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        TrellisObjectStatus.IN_PROGRESS,
+      );
+
+      expect(mockUpdateParentHierarchy).not.toHaveBeenCalled();
+    });
+
+    it("should not call updateParentHierarchy when status changes to something other than IN_PROGRESS", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK, {
+        status: TrellisObjectStatus.OPEN,
+        parent: "F-parent-feature",
+      });
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      await updateObject(
+        mockRepository,
+        mockServerConfig,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        TrellisObjectStatus.DONE,
+      );
+
+      expect(mockUpdateParentHierarchy).not.toHaveBeenCalled();
+    });
+
+    it("should not call updateParentHierarchy when no status change is requested", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK, {
+        status: TrellisObjectStatus.OPEN,
+        parent: "F-parent-feature",
+      });
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      await updateObject(
+        mockRepository,
+        mockServerConfig,
+        "T-test-task",
+        undefined,
+        TrellisObjectPriority.HIGH,
+      );
+
+      expect(mockUpdateParentHierarchy).not.toHaveBeenCalled();
+    });
+
+    it("should handle updateParentHierarchy errors gracefully", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK, {
+        status: TrellisObjectStatus.OPEN,
+        parent: "F-parent-feature",
+      });
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+      mockUpdateParentHierarchy.mockRejectedValue(
+        new Error("Parent hierarchy update failed"),
+      );
+
+      const consoleSpy = jest.spyOn(console, "warn").mockImplementation();
+
+      const result = await updateObject(
+        mockRepository,
+        mockServerConfig,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        TrellisObjectStatus.IN_PROGRESS,
+      );
+
+      expect(mockUpdateParentHierarchy).toHaveBeenCalled();
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Failed to update parent hierarchy:",
+        expect.any(Error),
+      );
+      expect(result.content[0].text).toContain("Successfully updated object:");
+
+      consoleSpy.mockRestore();
+    });
+
+    it("should not call updateParentHierarchy when object has no parent", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK, {
+        status: TrellisObjectStatus.OPEN,
+        parent: undefined,
+      });
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      await updateObject(
+        mockRepository,
+        mockServerConfig,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        TrellisObjectStatus.IN_PROGRESS,
+      );
+
+      expect(mockUpdateParentHierarchy).toHaveBeenCalledWith(
+        undefined,
+        mockRepository,
+      );
+    });
+
+    it("should call autoCompleteParentHierarchy when status changes to DONE", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK, {
+        status: TrellisObjectStatus.IN_PROGRESS,
+        parent: "F-parent-feature",
+      });
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+      mockAutoCompleteParentHierarchy.mockResolvedValue();
+
+      const serverConfig: ServerConfig = {
+        mode: "local",
+        autoCompleteParent: true,
+        autoPrune: 0,
+      };
+
+      await updateObject(
+        mockRepository,
+        serverConfig,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        TrellisObjectStatus.DONE,
+        false,
+      );
+
+      expect(mockAutoCompleteParentHierarchy).toHaveBeenCalledWith(
+        mockRepository,
+        expect.objectContaining({
+          status: TrellisObjectStatus.DONE,
+          parent: "F-parent-feature",
+        }),
+      );
+    });
+
+    it("should call autoCompleteParentHierarchy when status changes to WONT_DO", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK, {
+        status: TrellisObjectStatus.IN_PROGRESS,
+        parent: "F-parent-feature",
+      });
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+      mockAutoCompleteParentHierarchy.mockResolvedValue();
+
+      const serverConfig: ServerConfig = {
+        mode: "local",
+        autoCompleteParent: true,
+        autoPrune: 0,
+      };
+
+      await updateObject(
+        mockRepository,
+        serverConfig,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        TrellisObjectStatus.WONT_DO,
+        false,
+      );
+
+      expect(mockAutoCompleteParentHierarchy).toHaveBeenCalledWith(
+        mockRepository,
+        expect.objectContaining({
+          status: TrellisObjectStatus.WONT_DO,
+          parent: "F-parent-feature",
+        }),
+      );
+    });
+
+    it("should not call autoCompleteParentHierarchy when status is already DONE", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK, {
+        status: TrellisObjectStatus.DONE,
+        parent: "F-parent-feature",
+      });
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      await updateObject(
+        mockRepository,
+        mockServerConfig,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        TrellisObjectStatus.DONE,
+      );
+
+      expect(mockAutoCompleteParentHierarchy).not.toHaveBeenCalled();
+    });
+
+    it("should not call autoCompleteParentHierarchy when status changes to something other than DONE or WONT_DO", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK, {
+        status: TrellisObjectStatus.OPEN,
+        parent: "F-parent-feature",
+      });
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      await updateObject(
+        mockRepository,
+        mockServerConfig,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        TrellisObjectStatus.IN_PROGRESS,
+      );
+
+      expect(mockAutoCompleteParentHierarchy).not.toHaveBeenCalled();
+    });
+
+    it("should handle autoCompleteParentHierarchy errors gracefully", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK, {
+        status: TrellisObjectStatus.IN_PROGRESS,
+        parent: "F-parent-feature",
+      });
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+      mockAutoCompleteParentHierarchy.mockRejectedValue(
+        new Error("Auto-complete hierarchy update failed"),
+      );
+
+      const consoleSpy = jest.spyOn(console, "warn").mockImplementation();
+
+      const serverConfig: ServerConfig = {
+        mode: "local",
+        autoCompleteParent: true,
+        autoPrune: 0,
+      };
+
+      const result = await updateObject(
+        mockRepository,
+        serverConfig,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        TrellisObjectStatus.DONE,
+        false,
+      );
+
+      expect(mockAutoCompleteParentHierarchy).toHaveBeenCalled();
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Failed to auto-complete parent hierarchy:",
+        expect.any(Error),
+      );
+      expect(result.content[0].text).toContain("Successfully updated object:");
+
+      consoleSpy.mockRestore();
+    });
+  });
+
+  describe("serverConfig behavior", () => {
+    it("should call autoCompleteParentHierarchy when serverConfig.autoCompleteParent is true", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK, {
+        status: TrellisObjectStatus.IN_PROGRESS,
+        parent: "F-parent-feature",
+      });
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+      mockAutoCompleteParentHierarchy.mockResolvedValue();
+
+      const serverConfig: ServerConfig = {
+        mode: "local",
+        autoCompleteParent: true,
+        autoPrune: 0,
+      };
+
+      await updateObject(
+        mockRepository,
+        serverConfig,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        TrellisObjectStatus.DONE,
+        false,
+      );
+
+      expect(mockAutoCompleteParentHierarchy).toHaveBeenCalledWith(
+        mockRepository,
+        expect.objectContaining({
+          status: TrellisObjectStatus.DONE,
+          parent: "F-parent-feature",
+        }),
+      );
+    });
+
+    it("should not call autoCompleteParentHierarchy when serverConfig.autoCompleteParent is false", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK, {
+        status: TrellisObjectStatus.IN_PROGRESS,
+        parent: "F-parent-feature",
+      });
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      const serverConfig: ServerConfig = {
+        mode: "local",
+        autoCompleteParent: false,
+        autoPrune: 0,
+      };
+
+      await updateObject(
+        mockRepository,
+        serverConfig,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        TrellisObjectStatus.DONE,
+        false,
+      );
+
+      expect(mockAutoCompleteParentHierarchy).not.toHaveBeenCalled();
     });
   });
 });

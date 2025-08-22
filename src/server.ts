@@ -30,12 +30,8 @@ import {
   handleDeleteObject,
   handleGetObject,
   handleListObjects,
-  handlePruneClosed,
-  handleReplaceObjectBodyRegex,
   handleUpdateObject,
   listObjectsTool,
-  pruneClosedTool,
-  replaceObjectBodyRegexTool,
   updateObjectTool,
 } from "./tools";
 
@@ -48,8 +44,13 @@ program
   .option("--mode <mode>", "Server mode", "local")
   .option("--projectRootFolder <path>", "Project root folder path")
   .option(
-    "--auto-complete-parent",
-    "Enable automatic completion of parent tasks",
+    "--no-auto-complete-parent",
+    "Disable automatic completion of parent tasks",
+  )
+  .option(
+    "--auto-prune <days>",
+    "Auto-prune closed objects older than N days (0=disabled)",
+    "0",
   );
 
 program.parse();
@@ -58,9 +59,25 @@ interface CliOptions {
   mode?: string;
   projectRootFolder?: string;
   autoCompleteParent: boolean;
+  autoPrune: string;
 }
 
 const options = program.opts<CliOptions>();
+
+// Validate and convert auto-prune argument
+const autoPruneValue = parseInt(options.autoPrune, 10);
+if (isNaN(autoPruneValue)) {
+  console.error(
+    `Error: --auto-prune must be a numeric value, got "${options.autoPrune}"`,
+  );
+  process.exit(1);
+}
+if (autoPruneValue < 0) {
+  console.error(
+    `Error: --auto-prune must be a non-negative number, got ${autoPruneValue}`,
+  );
+  process.exit(1);
+}
 
 // Read version from package.json
 function getPackageVersion(): string {
@@ -84,7 +101,8 @@ const packageVersion = getPackageVersion();
 // Create server config - always create with at least mode set
 const serverConfig: ServerConfig = {
   mode: options.mode === "remote" ? "remote" : "local",
-  autoCompleteParent: options.autoCompleteParent || false,
+  autoCompleteParent: options.autoCompleteParent,
+  autoPrune: autoPruneValue,
   ...(options.projectRootFolder && typeof options.projectRootFolder === "string"
     ? { planningRootFolder: path.join(options.projectRootFolder, ".trellis") }
     : {}),
@@ -139,7 +157,6 @@ server.setRequestHandler(ListToolsRequestSchema, () => {
   const tools: unknown[] = [
     createObjectTool,
     updateObjectTool,
-    replaceObjectBodyRegexTool,
     getObjectTool,
     deleteObjectTool,
     listObjectsTool,
@@ -147,7 +164,6 @@ server.setRequestHandler(ListToolsRequestSchema, () => {
     appendModifiedFilesTool,
     claimTaskTool,
     completeTaskTool,
-    pruneClosedTool,
   ];
 
   // Only include activate tool if server is not properly configured from command line
@@ -216,17 +232,15 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
   const repository = getRepository();
 
   switch (toolName) {
-    case "create_object":
+    case "create_issue":
       return handleCreateObject(_getService(), repository, args);
-    case "update_object":
-      return handleUpdateObject(_getService(), repository, args);
-    case "replace_object_body_regex":
-      return handleReplaceObjectBodyRegex(_getService(), repository, args);
-    case "get_object":
+    case "update_issue":
+      return handleUpdateObject(_getService(), repository, args, serverConfig);
+    case "get_issue":
       return handleGetObject(repository, args);
-    case "delete_object":
+    case "delete_issue":
       return handleDeleteObject(repository, args);
-    case "list_objects":
+    case "list_issues":
       return handleListObjects(_getService(), repository, args);
     case "append_object_log":
       return handleAppendObjectLog(_getService(), repository, args);
@@ -236,8 +250,6 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
       return handleClaimTask(_getService(), repository, args);
     case "complete_task":
       return handleCompleteTask(_getService(), repository, args, serverConfig);
-    case "prune_closed":
-      return handlePruneClosed(_getService(), repository, args);
     case "activate":
     default:
       throw new Error(`Unknown tool: ${toolName}`);
@@ -249,7 +261,33 @@ async function runServer() {
   await server.connect(transport);
 }
 
-runServer().catch((error) => {
+async function startServer() {
+  // Auto-prune closed objects if enabled
+  if (serverConfig.autoPrune > 0) {
+    try {
+      console.warn(
+        `Starting auto-prune for objects older than ${serverConfig.autoPrune} days...`,
+      );
+      const repository = getRepository();
+      const service = _getService();
+      const result = await service.pruneClosed(
+        repository,
+        serverConfig.autoPrune,
+      );
+      console.warn(`Auto-prune completed: ${result.content[0].text}`);
+    } catch (error) {
+      console.error(
+        `Auto-prune failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      // Don't exit - continue starting server even if prune fails
+    }
+  }
+
+  // Start the main server
+  await runServer();
+}
+
+startServer().catch((error) => {
   console.error("Server error:", error);
   process.exit(1);
 });

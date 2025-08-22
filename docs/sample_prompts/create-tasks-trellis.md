@@ -33,8 +33,6 @@ This hierarchy enables parallel development, clear dependencies, and manageable 
 
 Analyze a feature's comprehensive specification to create granular tasks that can be individually claimed and completed by developers, ensuring complete implementation of the feature with proper testing and security considerations.
 
-**Note**: Tasks can be created either as part of a feature hierarchy OR as standalone tasks. Both approaches are valid depending on your project structure and needs.
-
 ## Hierarchical vs Standalone Tasks
 
 ### **Hierarchical Tasks** (with feature parent):
@@ -71,7 +69,7 @@ The input may contain:
 
 **For Hierarchical Tasks:**
 
-- Retrieve the feature using MCP `get_object` to access its comprehensive description, requirements, and parent epic/project context
+- Retrieve the feature using MCP `get_issue` to access its comprehensive description, requirements, and parent epic/project context
 
 **For Standalone Tasks:**
 
@@ -82,7 +80,6 @@ The input may contain:
 
 **Thoroughly analyze the requirements (feature description OR standalone requirements) to identify required tasks:**
 
-- **Use context7 MCP tool** to research implementation patterns and best practices
 - **Search codebase** for similar task patterns or implementations
 - Extract all components and deliverables from the feature description
 - Review implementation guidance and technical approach
@@ -140,7 +137,7 @@ For each task, create:
 - **Title**: Clear, actionable description
 - **Description**: Detailed explanation including:
   - **Detailed Context**: Enough information for a developer new to the project to complete the work, including:
-    - Links to relevant specifications, documentation, or other Trellis objects (tasks, features, epics, projects)
+    - Links to relevant specifications, documentation, or other Trellis issues (tasks, features, epics, projects)
     - References to existing patterns or similar implementations in the codebase
     - Specific technologies, frameworks, or libraries to use
     - File paths and component locations where work should be done
@@ -181,7 +178,7 @@ Group tasks logically:
 
 ### 5. Create Tasks Using MCP
 
-For each task, call the Task Trellis MCP `create_object` tool:
+For each task, call the Task Trellis MCP `create_issue` tool:
 
 - `type`: Set to `"task"`
 - `parent`: The feature ID (optional - omit for standalone tasks)
@@ -294,32 +291,6 @@ Common task patterns:
 - **Frontend Component**: Create with interactivity, state handling, tests, and docs
 - **Security**: Input validation, authorization, rate limiting with tests and docs
 
-## Simplicity Principles
-
-When creating tasks, follow these guidelines:
-
-### Keep It Simple:
-
-- **No over-engineering** - Create only the tasks needed for the feature
-- **No extra features** - Don't add functionality that wasn't requested
-- **Choose straightforward approaches** - Simple task structure over complex designs
-- **Solve the actual problem** - Don't anticipate future requirements
-
-### Forbidden Patterns:
-
-- **NO premature optimization** - Don't optimize task structure unless requested
-- **NO feature creep** - Stick to the specified feature requirements
-- **NO complex dependencies** - Keep task relationships simple and clear
-- **NO unnecessary abstractions** - Choose direct, maintainable approaches
-
-### Modular Architecture:
-
-- **Clear boundaries** - Each task should have distinct, well-defined responsibilities
-- **Minimal coupling** - Tasks should create components that interact through clean interfaces
-- **High cohesion** - Related functionality should be grouped within the same task/component
-- **Avoid big ball of mud** - Prevent tangled cross-dependencies between components
-- **Clean interfaces** - Create clear contracts between components for data and functionality exchange
-
 ## Question Guidelines
 
 Ask questions that:
@@ -334,26 +305,15 @@ Ask questions that:
 Assign priorities based on:
 
 - **High**: Blocking other work, security-critical, core functionality
-- **Normal**: Standard implementation tasks
+- **Medium**: Standard implementation tasks
 - **Low**: Enhancements, optimizations, nice-to-have features
 
-## Error Handling
-
-- **Feature not found**: Provide clear error message
-- **Invalid dependencies**: Detect and prevent circular dependencies
-- **Missing feature description**: Request feature details be added first
-
 <rules>
-  <critical>Feature ID is required (from arguments or context)</critical>
-  <critical>Base task breakdown primarily on feature description</critical>
   <critical>Never directly access `.trellis/` directory directly</critical>
-  <critical>Use MCP tools for all operations (create_object, get_object, etc.)</critical>
+  <critical>Use MCP tools for all operations (create_issue, get_issue, etc.)</critical>
   <critical>Each task must be completable in 1-2 hours</critical>
   <critical>Ask one question at a time with specific options</critical>
   <critical>Continue asking questions until you have complete understanding of task boundaries</critical>
-  <important>Use context7 MCP tool to research implementation patterns and best practices</important>
   <important>Include testing and documentation within implementation tasks</important>
   <important>Add security validation with tests where applicable</important>
-  <important>Configure dependencies to enable parallel work</important>
-  <important>Follow project patterns identified in feature</important>
 </rules>

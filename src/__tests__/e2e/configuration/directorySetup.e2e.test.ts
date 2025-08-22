@@ -1,9 +1,9 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { CallToolResultSchema } from "@modelcontextprotocol/sdk/types.js";
-import { TestEnvironment, pathExists } from "../utils";
-import { readdir, stat, mkdir, writeFile } from "fs/promises";
+import { mkdir, readdir, stat, writeFile } from "fs/promises";
 import path from "path";
+import { TestEnvironment, pathExists } from "../utils";
 
 describe("E2E Configuration - Directory Setup", () => {
   let testEnv: TestEnvironment;
@@ -66,7 +66,7 @@ describe("E2E Configuration - Directory Setup", () => {
       expect(await pathExists(trellisPath)).toBe(false);
 
       // Create first object
-      await callTool("create_object", {
+      await callTool("create_issue", {
         type: "project",
         title: "Test Project",
       });
@@ -85,7 +85,7 @@ describe("E2E Configuration - Directory Setup", () => {
         projectRoot: testEnv.projectRoot,
       });
 
-      await callTool("create_object", {
+      await callTool("create_issue", {
         type: "project",
         title: "Test Project",
       });
@@ -109,13 +109,13 @@ describe("E2E Configuration - Directory Setup", () => {
       });
 
       // Create project first
-      await callTool("create_object", {
+      await callTool("create_issue", {
         type: "project",
         title: "Parent Project",
       });
 
       // Create epic
-      await callTool("create_object", {
+      await callTool("create_issue", {
         type: "epic",
         title: "Test Epic",
         parent: "P-parent-project",
@@ -139,18 +139,18 @@ describe("E2E Configuration - Directory Setup", () => {
       });
 
       // Create hierarchy
-      await callTool("create_object", {
+      await callTool("create_issue", {
         type: "project",
         title: "Project",
       });
 
-      await callTool("create_object", {
+      await callTool("create_issue", {
         type: "epic",
         title: "Epic",
         parent: "P-project",
       });
 
-      await callTool("create_object", {
+      await callTool("create_issue", {
         type: "feature",
         title: "Feature",
         parent: "E-epic",
@@ -176,13 +176,13 @@ describe("E2E Configuration - Directory Setup", () => {
       });
 
       // Create feature
-      await callTool("create_object", {
+      await callTool("create_issue", {
         type: "feature",
         title: "Feature",
       });
 
       // Create task
-      await callTool("create_object", {
+      await callTool("create_issue", {
         type: "task",
         title: "Open Task",
         parent: "F-feature",
@@ -219,7 +219,7 @@ describe("E2E Configuration - Directory Setup", () => {
       });
 
       // Create standalone task
-      await callTool("create_object", {
+      await callTool("create_issue", {
         type: "task",
         title: "Standalone Task",
         status: "open",
@@ -249,7 +249,7 @@ describe("E2E Configuration - Directory Setup", () => {
         projectRoot: testEnv.projectRoot,
       });
 
-      await callTool("create_object", {
+      await callTool("create_issue", {
         type: "project",
         title: "Test",
       });
@@ -274,7 +274,7 @@ describe("E2E Configuration - Directory Setup", () => {
       });
 
       // Should work with existing directory
-      await callTool("create_object", {
+      await callTool("create_issue", {
         type: "project",
         title: "Test",
       });
@@ -303,13 +303,13 @@ describe("E2E Configuration - Directory Setup", () => {
       });
 
       // Should be able to read existing objects
-      const response = await callTool("get_object", {
+      const response = await callTool("get_issue", {
         id: "P-existing",
       });
       expect(response.content[0].text).toContain("P-existing");
 
       // And create new ones
-      await callTool("create_object", {
+      await callTool("create_issue", {
         type: "project",
         title: "New",
       });
@@ -332,24 +332,24 @@ describe("E2E Configuration - Directory Setup", () => {
       });
 
       // Create complete hierarchy
-      await callTool("create_object", {
+      await callTool("create_issue", {
         type: "project",
         title: "Full Project",
       });
 
-      await callTool("create_object", {
+      await callTool("create_issue", {
         type: "epic",
         title: "Epic One",
         parent: "P-full-project",
       });
 
-      await callTool("create_object", {
+      await callTool("create_issue", {
         type: "feature",
         title: "Feature Alpha",
         parent: "E-epic-one",
       });
 
-      await callTool("create_object", {
+      await callTool("create_issue", {
         type: "task",
         title: "Task Beta",
         parent: "F-feature-alpha",

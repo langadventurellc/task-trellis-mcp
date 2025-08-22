@@ -1,44 +1,42 @@
-import { isClaimable, isOpen } from "../models";
+import { isClaimable } from "../models";
 import { TrellisObject } from "../models/TrellisObject";
+import { Repository } from "../repositories/Repository";
+import { checkHierarchicalPrerequisitesComplete } from "./checkHierarchicalPrerequisitesComplete";
 
 /**
  * Filters a list of TrellisObjects to return only those that are available to work on.
  *
  * An object is considered unavailable if:
- * 1. It doesn't have a status of "open"
- * 2. It has prerequisites that refer to objects in the same list that are not "done" or "wont-do"
+ * 1. It doesn't have a claimable status (e.g., "open")
+ * 2. It has prerequisites that are incomplete (including hierarchical prerequisites)
  *
  * @param objects - Array of TrellisObjects to filter
- * @returns Array of available TrellisObjects
+ * @param repository - Repository for loading parent objects and checking prerequisites
+ * @returns Promise<Array<TrellisObject>> - Array of available TrellisObjects
  */
-export function filterUnavailableObjects(
+export async function filterUnavailableObjects(
   objects: TrellisObject[],
-): TrellisObject[] {
-  // Create a map for quick lookup of objects by ID
-  const objectMap = new Map<string, TrellisObject>();
-  objects.forEach((obj) => objectMap.set(obj.id, obj));
+  repository: Repository,
+): Promise<TrellisObject[]> {
+  // Filter objects asynchronously using hierarchical prerequisite checking
+  const availableObjects: TrellisObject[] = [];
 
-  return objects.filter((obj) => {
+  for (const obj of objects) {
     // Rule 1: Object must be claimable
     if (!isClaimable(obj)) {
-      return false;
+      continue;
     }
 
-    // Rule 2: Check prerequisites
-    for (const prerequisiteId of obj.prerequisites) {
-      const prerequisiteObj = objectMap.get(prerequisiteId);
+    // Rule 2: Check hierarchical prerequisites
+    const prereqsComplete = await checkHierarchicalPrerequisitesComplete(
+      obj,
+      repository,
+    );
 
-      // If prerequisite is not in the list, it's fine (external dependency)
-      if (!prerequisiteObj) {
-        continue;
-      }
-
-      // If prerequisite is open, exclude this object
-      if (isOpen(prerequisiteObj)) {
-        return false;
-      }
+    if (prereqsComplete) {
+      availableObjects.push(obj);
     }
+  }
 
-    return true;
-  });
+  return availableObjects;
 }

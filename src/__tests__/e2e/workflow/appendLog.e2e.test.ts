@@ -60,7 +60,7 @@ describe("E2E Workflow - appendObjectLog", () => {
     });
 
     it("should append log to project", async () => {
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "project",
         title: "Log Test Project",
       });
@@ -82,7 +82,7 @@ describe("E2E Workflow - appendObjectLog", () => {
 
     it("should append log to epic", async () => {
       // Create project first
-      const projectResult = await client.callTool("create_object", {
+      const projectResult = await client.callTool("create_issue", {
         type: "project",
         title: "Parent Project",
       });
@@ -90,7 +90,7 @@ describe("E2E Workflow - appendObjectLog", () => {
         projectResult.content[0].text.match(/ID: (P-[a-z-]+)/)![1];
 
       // Create epic
-      const epicResult = await client.callTool("create_object", {
+      const epicResult = await client.callTool("create_issue", {
         type: "epic",
         title: "Log Test Epic",
         parent: projectId,
@@ -112,7 +112,7 @@ describe("E2E Workflow - appendObjectLog", () => {
     });
 
     it("should append log to feature", async () => {
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "feature",
         title: "Log Test Feature",
       });

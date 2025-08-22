@@ -5,6 +5,8 @@ import {
   TrellisObjectType,
 } from "../../../models";
 import { Repository } from "../../../repositories/Repository";
+import * as checkHierarchicalUtils from "../../../utils/checkHierarchicalPrerequisitesComplete";
+import * as checkPrereqUtils from "../../../utils/checkPrerequisitesComplete";
 import * as filterUtils from "../../../utils/filterUnavailableObjects";
 import * as sortUtils from "../../../utils/sortTrellisObjects";
 import { claimTask } from "../claimTask";
@@ -12,6 +14,9 @@ import { claimTask } from "../claimTask";
 // Mock the utility functions
 jest.mock("../../../utils/filterUnavailableObjects");
 jest.mock("../../../utils/sortTrellisObjects");
+jest.mock("../../../utils/checkHierarchicalPrerequisitesComplete");
+jest.mock("../../../utils/checkPrerequisitesComplete");
+jest.mock("../../../utils/updateParentHierarchy");
 
 const mockFilterUnavailableObjects =
   filterUtils.filterUnavailableObjects as jest.MockedFunction<
@@ -20,6 +25,14 @@ const mockFilterUnavailableObjects =
 const mockSortTrellisObjects =
   sortUtils.sortTrellisObjects as jest.MockedFunction<
     typeof sortUtils.sortTrellisObjects
+  >;
+const mockCheckHierarchicalPrerequisitesComplete =
+  checkHierarchicalUtils.checkHierarchicalPrerequisitesComplete as jest.MockedFunction<
+    typeof checkHierarchicalUtils.checkHierarchicalPrerequisitesComplete
+  >;
+const mockCheckPrerequisitesComplete =
+  checkPrereqUtils.checkPrerequisitesComplete as jest.MockedFunction<
+    typeof checkPrereqUtils.checkPrerequisitesComplete
   >;
 
 describe("claimTask service function", () => {
@@ -110,11 +123,18 @@ describe("claimTask service function", () => {
       getObjects: jest.fn(),
       saveObject: jest.fn(),
       deleteObject: jest.fn(),
+      getChildrenOf: jest.fn(),
     };
 
     // Reset mocks
     mockFilterUnavailableObjects.mockReset();
     mockSortTrellisObjects.mockReset();
+    mockCheckHierarchicalPrerequisitesComplete.mockReset();
+    mockCheckPrerequisitesComplete.mockReset();
+
+    // Default mocking for prerequisite checks (most tests expect tasks to be claimable)
+    mockCheckHierarchicalPrerequisitesComplete.mockResolvedValue(true);
+    mockCheckPrerequisitesComplete.mockResolvedValue(true);
   });
 
   afterEach(() => {
@@ -127,12 +147,17 @@ describe("claimTask service function", () => {
       const mockFeature = createMockFeature();
       const mockEpic = createMockEpic();
       const mockProject = createMockProject();
+      const mockUpdatedTask = {
+        ...mockTask,
+        status: TrellisObjectStatus.IN_PROGRESS,
+      };
 
       mockRepository.getObjectById
         .mockResolvedValueOnce(mockTask) // First call for the task
-        .mockResolvedValueOnce(mockFeature) // Second call for feature parent
-        .mockResolvedValueOnce(mockEpic) // Third call for epic parent
-        .mockResolvedValueOnce(mockProject); // Fourth call for project parent
+        .mockResolvedValueOnce(mockUpdatedTask) // Second call to re-read after save
+        .mockResolvedValueOnce(mockFeature) // Third call for feature parent
+        .mockResolvedValueOnce(mockEpic) // Fourth call for epic parent
+        .mockResolvedValueOnce(mockProject); // Fifth call for project parent
 
       mockRepository.getObjects.mockResolvedValue([mockTask]);
       mockRepository.saveObject.mockResolvedValue();
@@ -194,7 +219,7 @@ describe("claimTask service function", () => {
       );
     });
 
-    it("should throw error when prerequisites are not complete (without force)", async () => {
+    it("should throw error when task's own prerequisites are not complete (without force)", async () => {
       const mockTask = createMockTask({ prerequisites: ["T-prerequisite"] });
       const mockPrerequisite = createMockTask({
         id: "T-prerequisite",
@@ -203,6 +228,11 @@ describe("claimTask service function", () => {
 
       mockRepository.getObjectById.mockResolvedValue(mockTask);
       mockRepository.getObjects.mockResolvedValue([mockTask, mockPrerequisite]);
+
+      // Mock hierarchical check to fail
+      mockCheckHierarchicalPrerequisitesComplete.mockResolvedValue(false);
+      // Mock own prerequisites check to also fail (task's own prerequisites incomplete)
+      mockCheckPrerequisitesComplete.mockResolvedValue(false);
 
       const result = await claimTask(
         mockRepository,
@@ -216,7 +246,29 @@ describe("claimTask service function", () => {
       );
     });
 
-    it("should allow claiming when prerequisites are done (without force)", async () => {
+    it("should throw error when parent hierarchy has incomplete prerequisites (without force)", async () => {
+      const mockTask = createMockTask({ prerequisites: [] });
+
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+
+      // Mock hierarchical check to fail (parent prerequisites incomplete)
+      mockCheckHierarchicalPrerequisitesComplete.mockResolvedValue(false);
+      // Mock own prerequisites check to pass (task's own prerequisites are complete)
+      mockCheckPrerequisitesComplete.mockResolvedValue(true);
+
+      const result = await claimTask(
+        mockRepository,
+        undefined,
+        "T-test-task",
+        false,
+      );
+
+      expect(result.content[0].text).toContain(
+        "Parent hierarchy has incomplete prerequisites",
+      );
+    });
+
+    it("should allow claiming when hierarchical prerequisites are complete (without force)", async () => {
       const mockTask = createMockTask({ prerequisites: ["T-prerequisite"] });
       const mockPrerequisite = createMockTask({
         id: "T-prerequisite",
@@ -226,6 +278,9 @@ describe("claimTask service function", () => {
       mockRepository.getObjectById.mockResolvedValue(mockTask);
       mockRepository.getObjects.mockResolvedValue([mockTask, mockPrerequisite]);
       mockRepository.saveObject.mockResolvedValue();
+
+      // Mock hierarchical prerequisites as complete (default setup should handle this)
+      mockCheckHierarchicalPrerequisitesComplete.mockResolvedValue(true);
 
       const result = await claimTask(
         mockRepository,
@@ -280,7 +335,7 @@ describe("claimTask service function", () => {
       expect(result.content[0].text).toContain("Successfully claimed task:");
     });
 
-    it("should bypass all checks when force is true", async () => {
+    it("should bypass hierarchical prerequisite checks when force is true", async () => {
       const mockTask = createMockTask({
         status: TrellisObjectStatus.IN_PROGRESS,
         prerequisites: ["T-incomplete-prerequisite"],
@@ -295,7 +350,9 @@ describe("claimTask service function", () => {
         true,
       );
 
-      expect(mockRepository.getObjects).not.toHaveBeenCalled();
+      // Force should bypass prerequisite checks entirely
+      expect(mockCheckHierarchicalPrerequisitesComplete).not.toHaveBeenCalled();
+      expect(mockCheckPrerequisitesComplete).not.toHaveBeenCalled();
       expect(mockRepository.saveObject).toHaveBeenCalledWith({
         ...mockTask,
         status: TrellisObjectStatus.IN_PROGRESS,
@@ -336,9 +393,14 @@ describe("claimTask service function", () => {
 
       const availableTasks = [mockTasks[1]]; // Only high priority task is available
       const sortedTasks = [mockTasks[1]]; // Highest priority first
+      const updatedTask = {
+        ...mockTasks[1],
+        status: TrellisObjectStatus.IN_PROGRESS,
+      };
 
       mockRepository.getObjects.mockResolvedValue(mockTasks);
-      mockFilterUnavailableObjects.mockReturnValue(availableTasks);
+      mockRepository.getObjectById.mockResolvedValue(updatedTask); // Re-read after save
+      mockFilterUnavailableObjects.mockResolvedValue(availableTasks);
       mockSortTrellisObjects.mockReturnValue(sortedTasks);
       mockRepository.saveObject.mockResolvedValue();
 
@@ -349,7 +411,10 @@ describe("claimTask service function", () => {
         undefined,
         TrellisObjectType.TASK,
       );
-      expect(mockFilterUnavailableObjects).toHaveBeenCalledWith(mockTasks);
+      expect(mockFilterUnavailableObjects).toHaveBeenCalledWith(
+        mockTasks,
+        mockRepository,
+      );
       expect(mockSortTrellisObjects).toHaveBeenCalledWith(availableTasks);
       expect(mockRepository.saveObject).toHaveBeenCalledWith({
         ...mockTasks[1],
@@ -361,7 +426,7 @@ describe("claimTask service function", () => {
     it("should use scope when provided", async () => {
       const mockTasks = [createMockTask()];
       mockRepository.getObjects.mockResolvedValue(mockTasks);
-      mockFilterUnavailableObjects.mockReturnValue(mockTasks);
+      mockFilterUnavailableObjects.mockResolvedValue(mockTasks);
       mockSortTrellisObjects.mockReturnValue(mockTasks);
       mockRepository.saveObject.mockResolvedValue();
 
@@ -376,7 +441,7 @@ describe("claimTask service function", () => {
 
     it("should throw error when no available tasks", async () => {
       mockRepository.getObjects.mockResolvedValue([]);
-      mockFilterUnavailableObjects.mockReturnValue([]);
+      mockFilterUnavailableObjects.mockResolvedValue([]);
 
       const result = await claimTask(mockRepository);
 
@@ -390,7 +455,7 @@ describe("claimTask service function", () => {
       ];
 
       mockRepository.getObjects.mockResolvedValue(mockTasks);
-      mockFilterUnavailableObjects.mockReturnValue([]);
+      mockFilterUnavailableObjects.mockResolvedValue([]);
 
       const result = await claimTask(mockRepository);
 
@@ -448,176 +513,165 @@ describe("claimTask service function", () => {
     });
   });
 
-  describe("parent hierarchy updates", () => {
-    it("should update feature parent to in-progress when claiming task", async () => {
-      const mockFeature = createMockFeature({
-        status: TrellisObjectStatus.OPEN,
-      });
-      const mockTask = createMockTask({ parent: "F-test-feature" });
-
-      mockRepository.getObjectById
-        .mockResolvedValueOnce(mockTask) // First call for the task
-        .mockResolvedValueOnce(mockFeature); // Second call for the parent feature
-      mockRepository.saveObject.mockResolvedValue();
-
-      const result = await claimTask(mockRepository, undefined, "T-test-task");
-
-      expect(mockRepository.saveObject).toHaveBeenCalledTimes(2);
-      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(1, {
-        ...mockTask,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      });
-      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(2, {
-        ...mockFeature,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      });
-      expect(result.content[0].text).toContain("Successfully claimed task:");
-    });
-
-    it("should update full hierarchy (feature → epic → project) when claiming task", async () => {
-      const mockProject = createMockProject({
-        status: TrellisObjectStatus.OPEN,
-      });
-      const mockEpic = createMockEpic({ status: TrellisObjectStatus.OPEN });
-      const mockFeature = createMockFeature({
-        status: TrellisObjectStatus.OPEN,
-      });
-      const mockTask = createMockTask({ parent: "F-test-feature" });
-
-      mockRepository.getObjectById
-        .mockResolvedValueOnce(mockTask) // Task
-        .mockResolvedValueOnce(mockFeature) // Feature
-        .mockResolvedValueOnce(mockEpic) // Epic
-        .mockResolvedValueOnce(mockProject); // Project
-      mockRepository.saveObject.mockResolvedValue();
-
-      const result = await claimTask(mockRepository, undefined, "T-test-task");
-
-      expect(mockRepository.saveObject).toHaveBeenCalledTimes(4);
-      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(1, {
-        ...mockTask,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      });
-      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(2, {
-        ...mockFeature,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      });
-      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(3, {
-        ...mockEpic,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      });
-      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(4, {
-        ...mockProject,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      });
-      expect(result.content[0].text).toContain("Successfully claimed task:");
-    });
-
-    it("should stop updating hierarchy when parent is already in-progress", async () => {
-      const mockEpic = createMockEpic({
-        status: TrellisObjectStatus.IN_PROGRESS,
-      });
-      const mockFeature = createMockFeature({
-        status: TrellisObjectStatus.OPEN,
-      });
-      const mockTask = createMockTask({ parent: "F-test-feature" });
-
-      mockRepository.getObjectById
-        .mockResolvedValueOnce(mockTask) // Task
-        .mockResolvedValueOnce(mockFeature) // Feature
-        .mockResolvedValueOnce(mockEpic); // Epic (already in progress)
-      mockRepository.saveObject.mockResolvedValue();
-
-      const result = await claimTask(mockRepository, undefined, "T-test-task");
-
-      expect(mockRepository.saveObject).toHaveBeenCalledTimes(2);
-      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(1, {
-        ...mockTask,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      });
-      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(2, {
-        ...mockFeature,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      });
-      // Should not save the epic since it's already in progress
-      expect(result.content[0].text).toContain("Successfully claimed task:");
-    });
-
-    it("should handle task with no parent gracefully", async () => {
-      const mockTask = createMockTask({ parent: undefined });
-
-      mockRepository.getObjectById.mockResolvedValue(mockTask);
-      mockRepository.saveObject.mockResolvedValue();
-
-      const result = await claimTask(mockRepository, undefined, "T-test-task");
-
-      expect(mockRepository.saveObject).toHaveBeenCalledTimes(1);
-      expect(mockRepository.saveObject).toHaveBeenCalledWith({
-        ...mockTask,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      });
-      expect(result.content[0].text).toContain("Successfully claimed task:");
-    });
-
-    it("should handle non-existent parent gracefully", async () => {
-      const mockTask = createMockTask({ parent: "F-nonexistent" });
-
-      mockRepository.getObjectById
-        .mockResolvedValueOnce(mockTask) // Task exists
-        .mockResolvedValueOnce(null); // Parent doesn't exist
-      mockRepository.saveObject.mockResolvedValue();
-
-      const result = await claimTask(mockRepository, undefined, "T-test-task");
-
-      expect(mockRepository.saveObject).toHaveBeenCalledTimes(1);
-      expect(mockRepository.saveObject).toHaveBeenCalledWith({
-        ...mockTask,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      });
-      expect(result.content[0].text).toContain("Successfully claimed task:");
-    });
-
-    it("should handle parent hierarchy update errors without failing task claim", async () => {
-      const mockTask = createMockTask({ parent: "F-test-feature" });
-
-      mockRepository.getObjectById
-        .mockResolvedValueOnce(mockTask) // Task lookup succeeds
-        .mockRejectedValueOnce(new Error("Parent lookup failed")); // Parent lookup fails
-      mockRepository.saveObject.mockResolvedValue();
-
-      const result = await claimTask(mockRepository, undefined, "T-test-task");
-
-      expect(mockRepository.saveObject).toHaveBeenCalledTimes(1);
-      expect(result.content[0].text).toContain("Successfully claimed task:");
-    });
-
-    it("should update parents even when using force flag", async () => {
-      const mockFeature = createMockFeature({
-        status: TrellisObjectStatus.OPEN,
-      });
+  describe("hierarchical prerequisite checking", () => {
+    it("should prevent claiming task when parent feature has incomplete prerequisites", async () => {
       const mockTask = createMockTask({
         parent: "F-test-feature",
-        status: TrellisObjectStatus.IN_PROGRESS, // Already in progress
+        prerequisites: [], // Task itself has no prerequisites
       });
 
-      mockRepository.getObjectById
-        .mockResolvedValueOnce(mockTask)
-        .mockResolvedValueOnce(mockFeature);
-      mockRepository.saveObject.mockResolvedValue();
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+
+      // Mock hierarchical check to fail due to parent prerequisites
+      mockCheckHierarchicalPrerequisitesComplete.mockResolvedValue(false);
+      // Mock own prerequisites check to pass (task has no prerequisites)
+      mockCheckPrerequisitesComplete.mockResolvedValue(true);
 
       const result = await claimTask(
         mockRepository,
         undefined,
         "T-test-task",
-        true,
+        false,
       );
 
-      expect(mockRepository.saveObject).toHaveBeenCalledTimes(2);
-      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(2, {
-        ...mockFeature,
+      expect(result.content[0].text).toContain(
+        "Parent hierarchy has incomplete prerequisites",
+      );
+      expect(mockCheckHierarchicalPrerequisitesComplete).toHaveBeenCalledWith(
+        mockTask,
+        mockRepository,
+      );
+    });
+
+    it("should prevent claiming task when grandparent epic has incomplete prerequisites", async () => {
+      const mockTask = createMockTask({
+        parent: "F-test-feature",
+        prerequisites: [],
+      });
+
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+
+      // Mock hierarchical check to fail due to grandparent prerequisites
+      mockCheckHierarchicalPrerequisitesComplete.mockResolvedValue(false);
+      // Mock own prerequisites check to pass
+      mockCheckPrerequisitesComplete.mockResolvedValue(true);
+
+      const result = await claimTask(
+        mockRepository,
+        undefined,
+        "T-test-task",
+        false,
+      );
+
+      expect(result.content[0].text).toContain(
+        "Parent hierarchy has incomplete prerequisites",
+      );
+    });
+
+    it("should allow claiming task when all hierarchical prerequisites are complete", async () => {
+      const mockTask = createMockTask({
+        parent: "F-test-feature",
+        prerequisites: ["T-complete-prereq"],
+      });
+
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      // Mock all prerequisite checks to pass
+      mockCheckHierarchicalPrerequisitesComplete.mockResolvedValue(true);
+
+      const result = await claimTask(
+        mockRepository,
+        undefined,
+        "T-test-task",
+        false,
+      );
+
+      expect(mockRepository.saveObject).toHaveBeenCalled();
+      expect(result.content[0].text).toContain("Successfully claimed task:");
+    });
+
+    it("should exclude hierarchically blocked tasks in findNextAvailableTask", async () => {
+      const mockTask1 = createMockTask({
+        id: "T-task-1",
+        priority: TrellisObjectPriority.HIGH,
+      });
+      const mockTask2 = createMockTask({
+        id: "T-task-2",
+        priority: TrellisObjectPriority.MEDIUM,
+      });
+      const mockTasks = [mockTask1, mockTask2];
+
+      // filterUnavailableObjects should handle hierarchical filtering
+      const availableTasks = [mockTask2]; // Task1 filtered out due to hierarchical prerequisites
+      const sortedTasks = [mockTask2];
+      const updatedTask = {
+        ...mockTask2,
+        status: TrellisObjectStatus.IN_PROGRESS,
+      };
+
+      mockRepository.getObjects.mockResolvedValue(mockTasks);
+      mockRepository.getObjectById.mockResolvedValue(updatedTask);
+      mockFilterUnavailableObjects.mockResolvedValue(availableTasks);
+      mockSortTrellisObjects.mockReturnValue(sortedTasks);
+      mockRepository.saveObject.mockResolvedValue();
+
+      const result = await claimTask(mockRepository);
+
+      expect(mockFilterUnavailableObjects).toHaveBeenCalledWith(
+        mockTasks,
+        mockRepository,
+      );
+      expect(mockRepository.saveObject).toHaveBeenCalledWith({
+        ...mockTask2,
         status: TrellisObjectStatus.IN_PROGRESS,
       });
       expect(result.content[0].text).toContain("Successfully claimed task:");
+    });
+
+    it("should provide specific error message for task's own incomplete prerequisites", async () => {
+      const mockTask = createMockTask({
+        prerequisites: ["T-incomplete-prereq"],
+      });
+
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+
+      // Mock hierarchical check to fail
+      mockCheckHierarchicalPrerequisitesComplete.mockResolvedValue(false);
+      // Mock own prerequisites check to also fail (task's own prerequisites incomplete)
+      mockCheckPrerequisitesComplete.mockResolvedValue(false);
+
+      const result = await claimTask(
+        mockRepository,
+        undefined,
+        "T-test-task",
+        false,
+      );
+
+      expect(result.content[0].text).toContain(
+        "Not all prerequisites are complete",
+      );
+      expect(result.content[0].text).not.toContain(
+        "Parent hierarchy has incomplete prerequisites",
+      );
+    });
+
+    it("should use checkHierarchicalPrerequisitesComplete instead of checkPrerequisitesComplete", async () => {
+      const mockTask = createMockTask({ prerequisites: [] });
+
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      // Mock hierarchical prerequisites as complete
+      mockCheckHierarchicalPrerequisitesComplete.mockResolvedValue(true);
+
+      await claimTask(mockRepository, undefined, "T-test-task", false);
+
+      // Should call hierarchical check for validation
+      expect(mockCheckHierarchicalPrerequisitesComplete).toHaveBeenCalledWith(
+        mockTask,
+        mockRepository,
+      );
     });
   });
 });

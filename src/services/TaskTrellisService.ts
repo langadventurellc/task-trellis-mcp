@@ -1,10 +1,10 @@
 import { ServerConfig } from "../configuration";
-import { Repository } from "../repositories";
 import {
   TrellisObjectPriority,
   TrellisObjectStatus,
   TrellisObjectType,
 } from "../models";
+import { Repository } from "../repositories";
 
 export interface TaskTrellisService {
   /**
@@ -26,7 +26,9 @@ export interface TaskTrellisService {
    */
   updateObject(
     repository: Repository,
+    serverConfig: ServerConfig,
     id: string,
+    title?: string,
     priority?: TrellisObjectPriority,
     prerequisites?: string[],
     body?: string,
@@ -49,10 +51,10 @@ export interface TaskTrellisService {
    */
   completeTask(
     repository: Repository,
+    serverConfig: ServerConfig,
     taskId: string,
     summary: string,
     filesChanged: Record<string, string>,
-    serverConfig?: ServerConfig,
   ): Promise<{ content: Array<{ type: string; text: string }> }>;
 
   /**
@@ -60,10 +62,10 @@ export interface TaskTrellisService {
    */
   listObjects(
     repository: Repository,
-    type: TrellisObjectType,
+    type?: TrellisObjectType | TrellisObjectType[],
     scope?: string,
-    status?: TrellisObjectStatus,
-    priority?: TrellisObjectPriority,
+    status?: TrellisObjectStatus | TrellisObjectStatus[],
+    priority?: TrellisObjectPriority | TrellisObjectPriority[],
     includeClosed?: boolean,
   ): Promise<{ content: Array<{ type: string; text: string }> }>;
 
@@ -83,17 +85,6 @@ export interface TaskTrellisService {
     repository: Repository,
     age: number,
     scope?: string,
-  ): Promise<{ content: Array<{ type: string; text: string }> }>;
-
-  /**
-   * Replaces portions of an object's body using regular expressions
-   */
-  replaceObjectBodyRegex(
-    repository: Repository,
-    id: string,
-    regex: string,
-    replacement: string,
-    allowMultipleOccurrences?: boolean,
   ): Promise<{ content: Array<{ type: string; text: string }> }>;
 
   /**
