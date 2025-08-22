@@ -1,12 +1,26 @@
 ---
 id: T-add-e2e-tests-for-hierarchical
 title: Add E2E tests for hierarchical prerequisites via MCP tools
-status: open
+status: done
 priority: medium
 prerequisites:
   - T-update-claimtask-service-to
-affectedFiles: {}
-log: []
+affectedFiles:
+  src/__tests__/e2e/hierarchicalPrerequisites.e2e.test.ts: Created comprehensive
+    E2E test suite for hierarchical prerequisites with 6 test cases covering
+    workflow validation, error message verification, and force flag
+    functionality. Tests execute through MCP handlers and verify real file
+    system operations.
+log:
+  - Successfully implemented comprehensive E2E tests for hierarchical
+    prerequisites via MCP tools. Created hierarchicalPrerequisites.e2e.test.ts
+    with 6 test cases covering complete workflow tests (epic→feature→task
+    hierarchy blocking), error message validation (distinguishing between task
+    vs parent hierarchy prerequisites), and force flag override functionality.
+    All tests execute through MCP tool handlers, use real file system
+    operations, verify proper error responses, and include cleanup. Tests
+    validate the hierarchical prerequisite checking works correctly when
+    accessed via external MCP clients.
 schema: v1.0
 childrenIds: []
 created: 2025-08-22T05:32:02.309Z
