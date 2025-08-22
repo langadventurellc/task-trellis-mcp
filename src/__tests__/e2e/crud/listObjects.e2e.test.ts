@@ -83,7 +83,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should list only projects when type=project", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "project",
       });
 
@@ -93,7 +93,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should list only tasks when type=task", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
       });
 
@@ -103,7 +103,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should list only epics when type=epic", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "epic",
       });
 
@@ -113,7 +113,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should list only features when type=feature", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "feature",
       });
 
@@ -124,7 +124,7 @@ describe("E2E CRUD - listObjects", () => {
 
     it("should return empty array when no objects of specified type exist", async () => {
       // Test with a scope that doesn't exist to get empty results
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         scope: "E-nonexistent-epic",
       });
@@ -158,7 +158,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should filter objects by status", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         status: "in-progress",
       });
@@ -168,7 +168,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should exclude closed tasks by default", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
       });
 
@@ -179,7 +179,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should include closed tasks when includeClosed=true", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         includeClosed: true,
       });
@@ -190,7 +190,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should filter open tasks correctly", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         status: "open",
       });
@@ -316,7 +316,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should exclude closed projects by default", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "project",
       });
 
@@ -332,7 +332,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should include closed projects when includeClosed=true", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "project",
         includeClosed: true,
       });
@@ -349,7 +349,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should exclude closed epics by default", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "epic",
       });
 
@@ -362,7 +362,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should include closed epics when includeClosed=true", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "epic",
         includeClosed: true,
       });
@@ -376,7 +376,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should exclude closed features by default", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "feature",
       });
 
@@ -389,7 +389,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should include closed features when includeClosed=true", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "feature",
         includeClosed: true,
       });
@@ -403,7 +403,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should exclude closed tasks by default", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
       });
 
@@ -419,7 +419,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should include closed tasks when includeClosed=true", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         includeClosed: true,
       });
@@ -436,7 +436,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should work with includeClosed and status filters for projects", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "project",
         status: "done",
         includeClosed: true,
@@ -448,7 +448,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should work with includeClosed and status filters for epics", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "epic",
         status: "wont-do",
         includeClosed: true,
@@ -460,7 +460,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should return empty array when status filter requires closed objects but includeClosed=false", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "feature",
         status: "done",
         includeClosed: false,
@@ -490,7 +490,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should filter objects by priority", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "feature",
         priority: "high",
       });
@@ -501,7 +501,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should filter objects by medium priority", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "feature",
         priority: "medium",
       });
@@ -512,7 +512,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should filter objects by low priority", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "feature",
         priority: "low",
       });
@@ -523,7 +523,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should return all priorities when no filter specified", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "feature",
       });
 
@@ -601,7 +601,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should list objects within project scope", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "epic",
         scope: "P-parent",
       });
@@ -613,7 +613,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should list objects within epic scope", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "feature",
         scope: "E-child-1",
       });
@@ -624,7 +624,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should not include objects outside of scope", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "feature",
         scope: "P-parent",
       });
@@ -635,7 +635,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should return empty array for non-existent scope", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         scope: "P-nonexistent",
       });
@@ -735,7 +735,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should apply multiple filters simultaneously", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         status: "open",
         priority: "high",
@@ -748,7 +748,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should combine includeClosed with other filters", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         priority: "high",
         scope: "P-complex",
@@ -762,7 +762,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should return empty when combined filters match nothing", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         status: "draft",
         priority: "high",
@@ -774,7 +774,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should combine status and priority filters", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         status: "in-progress",
         priority: "medium",
@@ -820,7 +820,7 @@ describe("E2E CRUD - listObjects", () => {
         { projectId: "P-detailed" },
       );
 
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "project",
       });
 
@@ -843,7 +843,7 @@ describe("E2E CRUD - listObjects", () => {
         { status: "open" },
       );
 
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
       });
 
@@ -905,7 +905,7 @@ describe("E2E CRUD - listObjects", () => {
         },
       );
 
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         scope: "P-hierarchy",
       });
@@ -941,7 +941,7 @@ describe("E2E CRUD - listObjects", () => {
       }
 
       const startTime = Date.now();
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         includeClosed: true,
       });
@@ -978,7 +978,7 @@ describe("E2E CRUD - listObjects", () => {
         );
       }
 
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "feature",
         priority: "high",
       });
@@ -991,7 +991,7 @@ describe("E2E CRUD - listObjects", () => {
 
   describe("Error Handling", () => {
     it("should handle invalid type parameter", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "invalid-type",
       });
 
@@ -1002,7 +1002,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should handle invalid status parameter", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         status: "invalid-status",
       });
@@ -1014,7 +1014,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should handle invalid priority parameter", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
         priority: "critical",
       });
@@ -1044,7 +1044,7 @@ describe("E2E CRUD - listObjects", () => {
       );
 
       // Should skip invalid files and continue
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
       });
 
@@ -1054,7 +1054,7 @@ describe("E2E CRUD - listObjects", () => {
     });
 
     it("should handle empty directories gracefully", async () => {
-      const result = await client.callTool("list_objects", {
+      const result = await client.callTool("list_issues", {
         type: "task",
       });
 

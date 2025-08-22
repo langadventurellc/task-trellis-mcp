@@ -4,8 +4,8 @@ import {
   createObjectContent,
   fileExists,
   folderExists,
-  type ObjectData,
   type HierarchyOptions,
+  type ObjectData,
 } from "../utils";
 
 describe("E2E CRUD - deleteObject", () => {
@@ -102,7 +102,7 @@ describe("E2E CRUD - deleteObject", () => {
       );
 
       // Delete project
-      const result = await client.callTool("delete_object", {
+      const result = await client.callTool("delete_issue", {
         id: "P-test-project",
       });
 
@@ -146,7 +146,7 @@ describe("E2E CRUD - deleteObject", () => {
       ).toBe(true);
 
       // Delete epic
-      const result = await client.callTool("delete_object", {
+      const result = await client.callTool("delete_issue", {
         id: "E-test-epic",
       });
 
@@ -184,7 +184,7 @@ describe("E2E CRUD - deleteObject", () => {
       );
 
       // Delete feature
-      const result = await client.callTool("delete_object", {
+      const result = await client.callTool("delete_issue", {
         id: "F-test-feature",
       });
 
@@ -215,7 +215,7 @@ describe("E2E CRUD - deleteObject", () => {
       ).toBe(true);
 
       // Delete task
-      const result = await client.callTool("delete_object", {
+      const result = await client.callTool("delete_issue", {
         id: "T-test-task",
       });
 
@@ -240,7 +240,7 @@ describe("E2E CRUD - deleteObject", () => {
       ).toBe(true);
 
       // Delete task
-      const result = await client.callTool("delete_object", {
+      const result = await client.callTool("delete_issue", {
         id: "T-closed-task",
       });
 
@@ -268,7 +268,7 @@ describe("E2E CRUD - deleteObject", () => {
       });
 
       // Attempt deletion without force
-      const result = await client.callTool("delete_object", {
+      const result = await client.callTool("delete_issue", {
         id: "T-prerequisite",
       });
 
@@ -291,7 +291,7 @@ describe("E2E CRUD - deleteObject", () => {
       });
 
       // Delete with force
-      const result = await client.callTool("delete_object", {
+      const result = await client.callTool("delete_issue", {
         id: "T-force-prereq",
         force: true,
       });
@@ -316,7 +316,7 @@ describe("E2E CRUD - deleteObject", () => {
       });
 
       // Delete dependent first
-      const dependentResult = await client.callTool("delete_object", {
+      const dependentResult = await client.callTool("delete_issue", {
         id: "T-dependent-first",
       });
 
@@ -328,7 +328,7 @@ describe("E2E CRUD - deleteObject", () => {
       ).toBe(false);
 
       // Now delete prerequisite (should work without force)
-      const prereqResult = await client.callTool("delete_object", {
+      const prereqResult = await client.callTool("delete_issue", {
         id: "T-prereq-safe",
       });
 
@@ -343,7 +343,7 @@ describe("E2E CRUD - deleteObject", () => {
 
   describe("Error Handling", () => {
     it("should handle non-existent object IDs gracefully", async () => {
-      const result = await client.callTool("delete_object", {
+      const result = await client.callTool("delete_issue", {
         id: "P-nonexistent",
       });
 
@@ -360,7 +360,7 @@ describe("E2E CRUD - deleteObject", () => {
       ];
 
       for (const id of malformedIds) {
-        const result = await client.callTool("delete_object", { id });
+        const result = await client.callTool("delete_issue", { id });
         expect(result.content[0].text).toContain("Error");
       }
     });
@@ -383,7 +383,7 @@ describe("E2E CRUD - deleteObject", () => {
       ).toBe(true);
 
       // Delete should work normally
-      const result = await client.callTool("delete_object", {
+      const result = await client.callTool("delete_issue", {
         id: "T-special-chars",
       });
 
@@ -418,7 +418,7 @@ describe("E2E CRUD - deleteObject", () => {
       });
 
       // Delete task from hierarchy
-      const result = await client.callTool("delete_object", {
+      const result = await client.callTool("delete_issue", {
         id: taskId,
       });
 
@@ -455,7 +455,7 @@ describe("E2E CRUD - deleteObject", () => {
       });
 
       // Delete feature
-      const result = await client.callTool("delete_object", {
+      const result = await client.callTool("delete_issue", {
         id: featureId,
       });
 
@@ -492,7 +492,7 @@ describe("E2E CRUD - deleteObject", () => {
       });
 
       // Try to delete one prerequisite without force
-      const result1 = await client.callTool("delete_object", {
+      const result1 = await client.callTool("delete_issue", {
         id: "T-multi-prereq-1",
       });
 
@@ -502,7 +502,7 @@ describe("E2E CRUD - deleteObject", () => {
       ).toBe(true);
 
       // Delete with force should work
-      const result2 = await client.callTool("delete_object", {
+      const result2 = await client.callTool("delete_issue", {
         id: "T-multi-prereq-1",
         force: true,
       });
@@ -531,7 +531,7 @@ describe("E2E CRUD - deleteObject", () => {
       );
 
       // Try deletion that will fail
-      const result = await client.callTool("delete_object", {
+      const result = await client.callTool("delete_issue", {
         id: "T-integrity-prereq",
       });
 
@@ -563,8 +563,8 @@ describe("E2E CRUD - deleteObject", () => {
 
       // Simulate concurrent deletion attempts (second will fail as file won't exist)
       const results = await Promise.allSettled([
-        client.callTool("delete_object", { id: "T-concurrent" }),
-        client.callTool("delete_object", { id: "T-concurrent" }),
+        client.callTool("delete_issue", { id: "T-concurrent" }),
+        client.callTool("delete_issue", { id: "T-concurrent" }),
       ]);
 
       // At least one should succeed, others should fail gracefully

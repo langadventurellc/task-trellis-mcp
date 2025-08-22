@@ -1,5 +1,5 @@
-import { TestEnvironment } from "../utils/testEnvironment";
 import { McpTestClient } from "../utils/mcpTestClient";
+import { TestEnvironment } from "../utils/testEnvironment";
 
 describe("E2E Infrastructure - Client", () => {
   let testEnv: TestEnvironment;
@@ -37,7 +37,7 @@ describe("E2E Infrastructure - Client", () => {
     });
 
     // Create a project
-    const result = await client.callTool("create_object", {
+    const result = await client.callTool("create_issue", {
       type: "project",
       title: "Test Project",
       body: "Test project body",
@@ -59,14 +59,14 @@ describe("E2E Infrastructure - Client", () => {
       projectRoot: testEnv.projectRoot,
     });
 
-    await client.callTool("create_object", {
+    await client.callTool("create_issue", {
       type: "project",
       title: "Test Project",
       body: "Test project body",
     });
 
     // List objects with type parameter
-    const result = await client.callTool("list_objects", {
+    const result = await client.callTool("list_issues", {
       type: "project",
     });
 

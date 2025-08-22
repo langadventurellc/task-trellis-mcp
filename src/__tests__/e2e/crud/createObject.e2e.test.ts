@@ -1,8 +1,8 @@
 import {
   McpTestClient,
   TestEnvironment,
-  readObjectFile,
   fileExists,
+  readObjectFile,
 } from "../utils";
 
 describe("E2E CRUD - createObject", () => {
@@ -29,7 +29,7 @@ describe("E2E CRUD - createObject", () => {
 
   describe("Project Creation", () => {
     it("should create project with minimal parameters", async () => {
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "project",
         title: "Test Project",
       });
@@ -54,7 +54,7 @@ describe("E2E CRUD - createObject", () => {
     });
 
     it("should create project with all optional fields", async () => {
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "project",
         title: "Full Project",
         priority: "high",
@@ -77,7 +77,7 @@ describe("E2E CRUD - createObject", () => {
 
     it("should reject project with parent", async () => {
       try {
-        await client.callTool("create_object", {
+        await client.callTool("create_issue", {
           type: "project",
           title: "Invalid Project",
           parent: "P-parent",
@@ -94,7 +94,7 @@ describe("E2E CRUD - createObject", () => {
 
     beforeEach(async () => {
       // Create parent project first
-      const projectResult = await client.callTool("create_object", {
+      const projectResult = await client.callTool("create_issue", {
         type: "project",
         title: "Parent Project",
       });
@@ -103,7 +103,7 @@ describe("E2E CRUD - createObject", () => {
     });
 
     it("should create epic under project", async () => {
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "epic",
         title: "Test Epic",
         parent: projectId,
@@ -122,7 +122,7 @@ describe("E2E CRUD - createObject", () => {
     });
 
     it("should create standalone epic", async () => {
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "epic",
         title: "Standalone Epic",
         priority: "high",
@@ -143,7 +143,7 @@ describe("E2E CRUD - createObject", () => {
 
     it("should reject epic with non-project parent", async () => {
       try {
-        await client.callTool("create_object", {
+        await client.callTool("create_issue", {
           type: "epic",
           title: "Invalid Epic",
           parent: "E-another-epic",
@@ -158,7 +158,7 @@ describe("E2E CRUD - createObject", () => {
 
     it("should reject epic with non-existent parent", async () => {
       try {
-        await client.callTool("create_object", {
+        await client.callTool("create_issue", {
           type: "epic",
           title: "Epic with Missing Parent",
           parent: "P-nonexistent",
@@ -178,13 +178,13 @@ describe("E2E CRUD - createObject", () => {
 
     beforeEach(async () => {
       // Create project and epic hierarchy
-      const projectResult = await client.callTool("create_object", {
+      const projectResult = await client.callTool("create_issue", {
         type: "project",
         title: "Feature Test Project",
       });
       projectId = projectResult.content[0].text.match(/ID: (P-[a-z-]+)/)![1];
 
-      const epicResult = await client.callTool("create_object", {
+      const epicResult = await client.callTool("create_issue", {
         type: "epic",
         title: "Feature Test Epic",
         parent: projectId,
@@ -193,7 +193,7 @@ describe("E2E CRUD - createObject", () => {
     });
 
     it("should create standalone feature", async () => {
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "feature",
         title: "Standalone Feature",
         status: "in-progress",
@@ -210,7 +210,7 @@ describe("E2E CRUD - createObject", () => {
     });
 
     it("should create feature under epic", async () => {
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "feature",
         title: "Epic Feature",
         parent: epicId,
@@ -227,7 +227,7 @@ describe("E2E CRUD - createObject", () => {
 
     it("should reject feature with project parent", async () => {
       try {
-        await client.callTool("create_object", {
+        await client.callTool("create_issue", {
           type: "feature",
           title: "Invalid Feature",
           parent: projectId,
@@ -244,7 +244,7 @@ describe("E2E CRUD - createObject", () => {
   describe("Standalone Epic Hierarchy", () => {
     it("should create epic → feature → task hierarchy in e/ folder", async () => {
       // Create standalone epic
-      const epicResult = await client.callTool("create_object", {
+      const epicResult = await client.callTool("create_issue", {
         type: "epic",
         title: "Standalone Epic for Hierarchy",
         description: "Testing epic without project parent",
@@ -252,7 +252,7 @@ describe("E2E CRUD - createObject", () => {
       const epicId = epicResult.content[0].text.match(/ID: (E-[a-z-]+)/)![1];
 
       // Create feature under standalone epic
-      const featureResult = await client.callTool("create_object", {
+      const featureResult = await client.callTool("create_issue", {
         type: "feature",
         title: "Feature Under Standalone Epic",
         parent: epicId,
@@ -262,7 +262,7 @@ describe("E2E CRUD - createObject", () => {
         featureResult.content[0].text.match(/ID: (F-[a-z-]+)/)![1];
 
       // Create task under feature
-      const taskResult = await client.callTool("create_object", {
+      const taskResult = await client.callTool("create_issue", {
         type: "task",
         title: "Task in Epic Hierarchy",
         parent: featureId,
@@ -327,7 +327,7 @@ describe("E2E CRUD - createObject", () => {
 
     beforeEach(async () => {
       // Create standalone feature
-      const featureResult = await client.callTool("create_object", {
+      const featureResult = await client.callTool("create_issue", {
         type: "feature",
         title: "Task Test Feature",
       });
@@ -335,7 +335,7 @@ describe("E2E CRUD - createObject", () => {
     });
 
     it("should create standalone task in open folder", async () => {
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "task",
         title: "Standalone Task",
         status: "open",
@@ -353,7 +353,7 @@ describe("E2E CRUD - createObject", () => {
     });
 
     it("should create task in closed folder when done", async () => {
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "task",
         title: "Completed Task",
         status: "done",
@@ -370,21 +370,21 @@ describe("E2E CRUD - createObject", () => {
 
     it("should create task with prerequisites", async () => {
       // Create prerequisite tasks first
-      const prereq1Result = await client.callTool("create_object", {
+      const prereq1Result = await client.callTool("create_issue", {
         type: "task",
         title: "Prereq One",
       });
       const prereq1Id =
         prereq1Result.content[0].text.match(/ID: (T-[a-z-]+)/)![1];
 
-      const prereq2Result = await client.callTool("create_object", {
+      const prereq2Result = await client.callTool("create_issue", {
         type: "task",
         title: "Prereq Two",
       });
       const prereq2Id =
         prereq2Result.content[0].text.match(/ID: (T-[a-z-]+)/)![1];
 
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "task",
         title: "Task with Dependencies",
         prerequisites: [prereq1Id, prereq2Id, "F-external-feature"],
@@ -404,7 +404,7 @@ describe("E2E CRUD - createObject", () => {
     });
 
     it("should create task under feature", async () => {
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "task",
         title: "Feature Task",
         parent: featureId,
@@ -422,7 +422,7 @@ describe("E2E CRUD - createObject", () => {
     });
 
     it("should create closed task in correct hierarchy", async () => {
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "task",
         title: "Closed Feature Task",
         parent: featureId,
@@ -442,7 +442,7 @@ describe("E2E CRUD - createObject", () => {
   describe("Error Handling", () => {
     it("should handle invalid object type", async () => {
       try {
-        await client.callTool("create_object", {
+        await client.callTool("create_issue", {
           type: "invalid",
           title: "Invalid Type",
         });
@@ -454,7 +454,7 @@ describe("E2E CRUD - createObject", () => {
 
     it("should handle missing required fields", async () => {
       try {
-        await client.callTool("create_object", {
+        await client.callTool("create_issue", {
           type: "task",
           // Missing title
         });
@@ -465,7 +465,7 @@ describe("E2E CRUD - createObject", () => {
     });
 
     it("should handle special characters in title", async () => {
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "task",
         title: "Task with Special/Characters & Symbols!",
       });
@@ -482,7 +482,7 @@ describe("E2E CRUD - createObject", () => {
 
     it("should handle very long titles", async () => {
       const longTitle = "A".repeat(200);
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "task",
         title: longTitle,
       });
@@ -492,13 +492,13 @@ describe("E2E CRUD - createObject", () => {
     });
 
     it("should generate unique IDs for duplicate titles", async () => {
-      const result1 = await client.callTool("create_object", {
+      const result1 = await client.callTool("create_issue", {
         type: "task",
         title: "Duplicate Title",
       });
       const id1 = result1.content[0].text.match(/ID: (T-[a-z0-9-]+)/)![1];
 
-      const result2 = await client.callTool("create_object", {
+      const result2 = await client.callTool("create_issue", {
         type: "task",
         title: "Duplicate Title",
       });
@@ -517,7 +517,7 @@ describe("E2E CRUD - createObject", () => {
   describe("Complex Hierarchy", () => {
     it("should create complete hierarchy from project to task", async () => {
       // Create project
-      const projectResult = await client.callTool("create_object", {
+      const projectResult = await client.callTool("create_issue", {
         type: "project",
         title: "Full Hierarchy Project",
         status: "open",
@@ -526,7 +526,7 @@ describe("E2E CRUD - createObject", () => {
         projectResult.content[0].text.match(/ID: (P-[a-z-]+)/)![1];
 
       // Create epic under project
-      const epicResult = await client.callTool("create_object", {
+      const epicResult = await client.callTool("create_issue", {
         type: "epic",
         title: "Full Hierarchy Epic",
         parent: projectId,
@@ -535,7 +535,7 @@ describe("E2E CRUD - createObject", () => {
       const epicId = epicResult.content[0].text.match(/ID: (E-[a-z-]+)/)![1];
 
       // Create feature under epic
-      const featureResult = await client.callTool("create_object", {
+      const featureResult = await client.callTool("create_issue", {
         type: "feature",
         title: "Full Hierarchy Feature",
         parent: epicId,
@@ -545,7 +545,7 @@ describe("E2E CRUD - createObject", () => {
         featureResult.content[0].text.match(/ID: (F-[a-z-]+)/)![1];
 
       // Create task under feature
-      const taskResult = await client.callTool("create_object", {
+      const taskResult = await client.callTool("create_issue", {
         type: "task",
         title: "Full Hierarchy Task",
         parent: featureId,

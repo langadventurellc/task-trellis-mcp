@@ -210,15 +210,15 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
   const repository = getRepository();
 
   switch (toolName) {
-    case "create_object":
+    case "create_issue":
       return handleCreateObject(_getService(), repository, args);
-    case "update_object":
+    case "update_issue":
       return handleUpdateObject(_getService(), repository, args);
-    case "get_object":
+    case "get_issue":
       return handleGetObject(repository, args);
-    case "delete_object":
+    case "delete_issue":
       return handleDeleteObject(repository, args);
-    case "list_objects":
+    case "list_issues":
       return handleListObjects(_getService(), repository, args);
     case "append_object_log":
       return handleAppendObjectLog(_getService(), repository, args);

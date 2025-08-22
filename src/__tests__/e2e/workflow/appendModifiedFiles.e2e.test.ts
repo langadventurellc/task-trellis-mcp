@@ -69,7 +69,7 @@ describe("E2E Workflow - appendModifiedFiles", () => {
     });
 
     it("should append modified files to project", async () => {
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "project",
         title: "Files Test Project",
       });
@@ -98,7 +98,7 @@ describe("E2E Workflow - appendModifiedFiles", () => {
 
     it("should append modified files to epic", async () => {
       // Create project first
-      const projectResult = await client.callTool("create_object", {
+      const projectResult = await client.callTool("create_issue", {
         type: "project",
         title: "Parent Project",
       });
@@ -106,7 +106,7 @@ describe("E2E Workflow - appendModifiedFiles", () => {
         projectResult.content[0].text.match(/ID: (P-[a-z-]+)/)![1];
 
       // Create epic
-      const epicResult = await client.callTool("create_object", {
+      const epicResult = await client.callTool("create_issue", {
         type: "epic",
         title: "Files Test Epic",
         parent: projectId,
@@ -133,7 +133,7 @@ describe("E2E Workflow - appendModifiedFiles", () => {
     });
 
     it("should append modified files to feature", async () => {
-      const result = await client.callTool("create_object", {
+      const result = await client.callTool("create_issue", {
         type: "feature",
         title: "Files Test Feature",
       });
@@ -491,7 +491,7 @@ describe("E2E Workflow - appendModifiedFiles", () => {
   describe("Recursive Parent File Updates", () => {
     it("should recursively update parent objects when appending files to a task", async () => {
       // Create project
-      const projectResult = await client.callTool("create_object", {
+      const projectResult = await client.callTool("create_issue", {
         type: "project",
         title: "Recursive Files Test Project",
       });
@@ -499,7 +499,7 @@ describe("E2E Workflow - appendModifiedFiles", () => {
         projectResult.content[0].text.match(/ID: (P-[a-z-]+)/)![1];
 
       // Create epic
-      const epicResult = await client.callTool("create_object", {
+      const epicResult = await client.callTool("create_issue", {
         type: "epic",
         title: "Recursive Files Epic",
         parent: projectId,
@@ -507,7 +507,7 @@ describe("E2E Workflow - appendModifiedFiles", () => {
       const epicId = epicResult.content[0].text.match(/ID: (E-[a-z-]+)/)![1];
 
       // Create feature
-      const featureResult = await client.callTool("create_object", {
+      const featureResult = await client.callTool("create_issue", {
         type: "feature",
         title: "Recursive Files Feature",
         parent: epicId,
@@ -516,7 +516,7 @@ describe("E2E Workflow - appendModifiedFiles", () => {
         featureResult.content[0].text.match(/ID: (F-[a-z-]+)/)![1];
 
       // Create task
-      const taskResult = await client.callTool("create_object", {
+      const taskResult = await client.callTool("create_issue", {
         type: "task",
         title: "Recursive Files Task",
         parent: featureId,
@@ -654,7 +654,7 @@ describe("E2E Workflow - appendModifiedFiles", () => {
 
     it("should handle feature with no parent (partial hierarchy)", async () => {
       // Create standalone feature
-      const featureResult = await client.callTool("create_object", {
+      const featureResult = await client.callTool("create_issue", {
         type: "feature",
         title: "Standalone Parent Test Feature",
       });
@@ -662,7 +662,7 @@ describe("E2E Workflow - appendModifiedFiles", () => {
         featureResult.content[0].text.match(/ID: (F-[a-z-]+)/)![1];
 
       // Create task under the feature
-      const taskResult = await client.callTool("create_object", {
+      const taskResult = await client.callTool("create_issue", {
         type: "task",
         title: "Standalone Parent Task",
         parent: featureId,
@@ -701,14 +701,14 @@ describe("E2E Workflow - appendModifiedFiles", () => {
 
     it("should work when appending files to a feature (not just tasks)", async () => {
       // Create epic
-      const epicResult = await client.callTool("create_object", {
+      const epicResult = await client.callTool("create_issue", {
         type: "epic",
         title: "Feature Parent Test Epic",
       });
       const epicId = epicResult.content[0].text.match(/ID: (E-[a-z-]+)/)![1];
 
       // Create feature under epic
-      const featureResult = await client.callTool("create_object", {
+      const featureResult = await client.callTool("create_issue", {
         type: "feature",
         title: "Feature Parent Test Feature",
         parent: epicId,
@@ -748,7 +748,7 @@ describe("E2E Workflow - appendModifiedFiles", () => {
 
     it("should handle object with no parent gracefully", async () => {
       // Create standalone task (no parent hierarchy)
-      const taskResult = await client.callTool("create_object", {
+      const taskResult = await client.callTool("create_issue", {
         type: "task",
         title: "Standalone No Parent Task",
       });
@@ -777,14 +777,14 @@ describe("E2E Workflow - appendModifiedFiles", () => {
 
     it("should handle multiple sequential append operations with parent propagation", async () => {
       // Create feature and task
-      const featureResult = await client.callTool("create_object", {
+      const featureResult = await client.callTool("create_issue", {
         type: "feature",
         title: "Sequential Parent Updates Feature",
       });
       const featureId =
         featureResult.content[0].text.match(/ID: (F-[a-z-]+)/)![1];
 
-      const taskResult = await client.callTool("create_object", {
+      const taskResult = await client.callTool("create_issue", {
         type: "task",
         title: "Sequential Parent Updates Task",
         parent: featureId,

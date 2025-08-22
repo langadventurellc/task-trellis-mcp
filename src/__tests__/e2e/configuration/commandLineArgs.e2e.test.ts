@@ -4,8 +4,8 @@ import {
   CallToolResultSchema,
   ListToolsResultSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { TestEnvironment } from "../utils";
 import path from "path";
+import { TestEnvironment } from "../utils";
 
 describe("E2E Configuration - Command Line Arguments", () => {
   let testEnv: TestEnvironment;
@@ -77,7 +77,7 @@ describe("E2E Configuration - Command Line Arguments", () => {
     ]);
 
     // Should be able to use tools without activation
-    const response = await callTool("list_objects", { type: "project" });
+    const response = await callTool("list_issues", { type: "project" });
 
     expect(response.content[0].text).not.toContain("not configured");
   });
@@ -115,7 +115,7 @@ describe("E2E Configuration - Command Line Arguments", () => {
     ]);
 
     // Should work initially
-    let response = await callTool("list_objects", { type: "project" });
+    let response = await callTool("list_issues", { type: "project" });
     expect(response.content[0].text).not.toContain("not configured");
 
     // Override with different path
@@ -126,7 +126,7 @@ describe("E2E Configuration - Command Line Arguments", () => {
     });
 
     // Should now use new path
-    response = await callTool("create_object", {
+    response = await callTool("create_issue", {
       type: "project",
       title: "Test",
     });
@@ -142,13 +142,13 @@ describe("E2E Configuration - Command Line Arguments", () => {
     ]);
 
     // First tool call
-    await callTool("create_object", {
+    await callTool("create_issue", {
       type: "project",
       title: "Project 1",
     });
 
     // Second tool call should still work without re-activation
-    const response = await callTool("create_object", {
+    const response = await callTool("create_issue", {
       type: "project",
       title: "Project 2",
     });

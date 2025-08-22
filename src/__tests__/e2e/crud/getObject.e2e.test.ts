@@ -72,7 +72,7 @@ describe("E2E CRUD - getObject", () => {
         { projectId: "P-test-project" },
       );
 
-      const result = await client.callTool("get_object", {
+      const result = await client.callTool("get_issue", {
         id: "P-test-project",
       });
 
@@ -111,7 +111,7 @@ describe("E2E CRUD - getObject", () => {
         { projectId: "P-parent-project" },
       );
 
-      const result = await client.callTool("get_object", {
+      const result = await client.callTool("get_issue", {
         id: "E-test-epic",
       });
 
@@ -137,7 +137,7 @@ describe("E2E CRUD - getObject", () => {
         content,
       );
 
-      const result = await client.callTool("get_object", {
+      const result = await client.callTool("get_issue", {
         id: "F-standalone-feature",
       });
 
@@ -176,7 +176,7 @@ describe("E2E CRUD - getObject", () => {
         { status: "closed" },
       );
 
-      const openResult = await client.callTool("get_object", {
+      const openResult = await client.callTool("get_issue", {
         id: "T-open-task",
       });
       const openObject = parseGetObjectResponse(
@@ -184,7 +184,7 @@ describe("E2E CRUD - getObject", () => {
       );
       expect(openObject.status).toBe("open");
 
-      const closedResult = await client.callTool("get_object", {
+      const closedResult = await client.callTool("get_issue", {
         id: "T-closed-task",
       });
       const closedObject = parseGetObjectResponse(
@@ -257,7 +257,7 @@ describe("E2E CRUD - getObject", () => {
       );
 
       // Verify each object can be retrieved and has correct parent/children
-      const projectResult = await client.callTool("get_object", {
+      const projectResult = await client.callTool("get_issue", {
         id: projectId,
       });
       const project = parseGetObjectResponse(
@@ -266,12 +266,12 @@ describe("E2E CRUD - getObject", () => {
       expect(project.childrenIds).toContain(epicId);
       expect(project.parent).toBeUndefined();
 
-      const epicResult = await client.callTool("get_object", { id: epicId });
+      const epicResult = await client.callTool("get_issue", { id: epicId });
       const epic = parseGetObjectResponse(epicResult.content[0].text as string);
       expect(epic.parent).toBe(projectId);
       expect(epic.childrenIds).toContain(featureId);
 
-      const featureResult = await client.callTool("get_object", {
+      const featureResult = await client.callTool("get_issue", {
         id: featureId,
       });
       const feature = parseGetObjectResponse(
@@ -280,7 +280,7 @@ describe("E2E CRUD - getObject", () => {
       expect(feature.parent).toBe(epicId);
       expect(feature.childrenIds).toContain(taskId);
 
-      const taskResult = await client.callTool("get_object", { id: taskId });
+      const taskResult = await client.callTool("get_issue", { id: taskId });
       const task = parseGetObjectResponse(taskResult.content[0].text as string);
       expect(task.parent).toBe(featureId);
       expect(task.prerequisites).toEqual([epicId, featureId]);
@@ -329,7 +329,7 @@ describe("E2E CRUD - getObject", () => {
         { featureId, status: "closed" },
       );
 
-      const featureResult = await client.callTool("get_object", {
+      const featureResult = await client.callTool("get_issue", {
         id: featureId,
       });
       const feature = parseGetObjectResponse(
@@ -337,13 +337,13 @@ describe("E2E CRUD - getObject", () => {
       );
       expect(feature.childrenIds).toEqual([task1Id, task2Id]);
 
-      const task1Result = await client.callTool("get_object", { id: task1Id });
+      const task1Result = await client.callTool("get_issue", { id: task1Id });
       const task1 = parseGetObjectResponse(
         task1Result.content[0].text as string,
       );
       expect(task1.parent).toBe(featureId);
 
-      const task2Result = await client.callTool("get_object", { id: task2Id });
+      const task2Result = await client.callTool("get_issue", { id: task2Id });
       const task2 = parseGetObjectResponse(
         task2Result.content[0].text as string,
       );
@@ -381,7 +381,7 @@ describe("E2E CRUD - getObject", () => {
         content,
       );
 
-      const result = await client.callTool("get_object", {
+      const result = await client.callTool("get_issue", {
         id: "T-affected-files-test",
       });
 
@@ -425,7 +425,7 @@ describe("E2E CRUD - getObject", () => {
 
   describe("Error Handling", () => {
     it("should handle non-existent object IDs", async () => {
-      const result = await client.callTool("get_object", {
+      const result = await client.callTool("get_issue", {
         id: "P-nonexistent",
       });
 
@@ -446,7 +446,7 @@ describe("E2E CRUD - getObject", () => {
       ];
 
       for (const id of malformedIds) {
-        const result = await client.callTool("get_object", { id });
+        const result = await client.callTool("get_issue", { id });
 
         expect(result.content[0].type).toBe("text");
         const text = result.content[0].text;
@@ -476,7 +476,7 @@ describe("E2E CRUD - getObject", () => {
       await fs.mkdir(path.dirname(filePath), { recursive: true });
       await fs.writeFile(filePath, corruptedContent, "utf-8");
 
-      const result = await client.callTool("get_object", {
+      const result = await client.callTool("get_issue", {
         id: "P-corrupted",
       });
 
@@ -506,7 +506,7 @@ Body content`;
       await fs.mkdir(path.dirname(filePath), { recursive: true });
       await fs.writeFile(filePath, incompleteContent, "utf-8");
 
-      const result = await client.callTool("get_object", {
+      const result = await client.callTool("get_issue", {
         id: "P-incomplete",
       });
 
@@ -546,7 +546,7 @@ Body content`;
           testCase.hierarchy,
         );
 
-        const result = await client.callTool("get_object", {
+        const result = await client.callTool("get_issue", {
           id: testCase.id,
         });
 
@@ -568,7 +568,7 @@ Body content`;
 
       // Test that the system handles these IDs gracefully
       for (const id of specialIds) {
-        const result = await client.callTool("get_object", { id });
+        const result = await client.callTool("get_issue", { id });
 
         expect(result.content[0].type).toBe("text");
         // Should return "not found" since we haven't created these
@@ -606,7 +606,7 @@ updated: "2024-01-01T00:00:00.000Z"
       await fs.mkdir(path.dirname(filePath), { recursive: true });
       await fs.writeFile(filePath, minimalContent, "utf-8");
 
-      const result = await client.callTool("get_object", {
+      const result = await client.callTool("get_issue", {
         id: "P-minimal",
       });
 
@@ -667,7 +667,7 @@ This is a complex task with extensive documentation.`,
         { featureId: "F-parent-feature", status: "open" },
       );
 
-      const result = await client.callTool("get_object", {
+      const result = await client.callTool("get_issue", {
         id: "T-complex",
       });
 

@@ -1,7 +1,7 @@
 import { TrellisObjectSummary } from "../../../models/TrellisObjectSummary";
 
 /**
- * Parses the JSON response from list_objects MCP tool calls
+ * Parses the JSON response from list_issues MCP tool calls
  * Note: Returns an array of TrellisObjectSummary instances
  */
 export function parseListObjectsResponse(

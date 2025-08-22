@@ -49,7 +49,7 @@ describe("E2E CRUD - updateObject", () => {
       );
 
       // Update priority
-      const result = await client.callTool("update_object", {
+      const result = await client.callTool("update_issue", {
         id: "T-priority-test",
         priority: "high",
       });
@@ -88,7 +88,7 @@ describe("E2E CRUD - updateObject", () => {
       );
 
       // Update status
-      const result = await client.callTool("update_object", {
+      const result = await client.callTool("update_issue", {
         id: "P-status-test",
         status: "open",
       });
@@ -131,7 +131,7 @@ This is the new body content with markdown formatting.
 - Point 1
 - Point 2`;
 
-      const result = await client.callTool("update_object", {
+      const result = await client.callTool("update_issue", {
         id: "F-body-test",
         body: newBody,
       });
@@ -187,7 +187,7 @@ This is the new body content with markdown formatting.
       );
 
       // Update prerequisites
-      const result = await client.callTool("update_object", {
+      const result = await client.callTool("update_issue", {
         id: "T-deps-test",
         prerequisites: ["T-prereq-1", "T-prereq-2", "F-external-dep"],
       });
@@ -235,7 +235,7 @@ This is the new body content with markdown formatting.
       );
 
       // Update multiple fields
-      const result = await client.callTool("update_object", {
+      const result = await client.callTool("update_issue", {
         id: "E-multi-update",
         priority: "high",
         status: "open",
@@ -350,7 +350,7 @@ This is the new body content with markdown formatting.
       );
 
       // Update only priority
-      const result = await client.callTool("update_object", {
+      const result = await client.callTool("update_issue", {
         id: "F-preserve-test",
         priority: "high",
       });
@@ -401,7 +401,7 @@ This is the new body content with markdown formatting.
       );
 
       // Update status to in-progress
-      const result = await client.callTool("update_object", {
+      const result = await client.callTool("update_issue", {
         id: "T-can-progress",
         status: "in-progress",
       });
@@ -440,7 +440,7 @@ This is the new body content with markdown formatting.
       );
 
       // Attempt to update status to in-progress
-      const result = await client.callTool("update_object", {
+      const result = await client.callTool("update_issue", {
         id: "T-blocked",
         status: "in-progress",
       });
@@ -495,7 +495,7 @@ This is the new body content with markdown formatting.
       );
 
       // Attempt to update status to done
-      const result = await client.callTool("update_object", {
+      const result = await client.callTool("update_issue", {
         id: "F-blocked-done",
         status: "done",
       });
@@ -532,7 +532,7 @@ This is the new body content with markdown formatting.
       );
 
       // Force update status to done
-      const result = await client.callTool("update_object", {
+      const result = await client.callTool("update_issue", {
         id: "T-force-update",
         status: "done",
         force: true,
@@ -567,7 +567,7 @@ This is the new body content with markdown formatting.
       );
 
       // Update to draft (no validation required)
-      const result = await client.callTool("update_object", {
+      const result = await client.callTool("update_issue", {
         id: "T-to-draft",
         status: "draft",
       });
@@ -594,7 +594,7 @@ This is the new body content with markdown formatting.
       );
 
       // Update to wont-do (no validation required)
-      const result = await client.callTool("update_object", {
+      const result = await client.callTool("update_issue", {
         id: "T-to-wontdo",
         status: "wont-do",
       });
@@ -633,7 +633,7 @@ This is the new body content with markdown formatting.
       );
 
       // Should allow progression since wont-do is considered complete
-      const result = await client.callTool("update_object", {
+      const result = await client.callTool("update_issue", {
         id: "T-with-wontdo",
         status: "done",
       });
@@ -648,7 +648,7 @@ This is the new body content with markdown formatting.
 
   describe("Error Handling", () => {
     it("should handle non-existent object IDs", async () => {
-      const result = await client.callTool("update_object", {
+      const result = await client.callTool("update_issue", {
         id: "T-nonexistent",
         priority: "high",
       });
@@ -672,7 +672,7 @@ This is the new body content with markdown formatting.
       );
 
       // Attempt update with invalid priority
-      const result = await client.callTool("update_object", {
+      const result = await client.callTool("update_issue", {
         id: "T-invalid-priority",
         priority: "critical", // Invalid value
       });
@@ -704,7 +704,7 @@ This is the new body content with markdown formatting.
       );
 
       // Attempt update with invalid status
-      const result = await client.callTool("update_object", {
+      const result = await client.callTool("update_issue", {
         id: "P-invalid-status",
         status: "completed", // Invalid value (should be "done")
       });
@@ -731,7 +731,7 @@ This is the new body content with markdown formatting.
       ];
 
       for (const id of malformedIds) {
-        const result = await client.callTool("update_object", {
+        const result = await client.callTool("update_issue", {
           id,
           priority: "high",
         });
@@ -755,7 +755,7 @@ This is the new body content with markdown formatting.
       );
 
       // Clear prerequisites
-      const result = await client.callTool("update_object", {
+      const result = await client.callTool("update_issue", {
         id: "T-clear-prereqs",
         prerequisites: [],
       });
@@ -789,7 +789,7 @@ This is the new body content with markdown formatting.
       // Create very long body content
       const longBody = "A".repeat(10000) + "\n\n" + "B".repeat(10000);
 
-      const result = await client.callTool("update_object", {
+      const result = await client.callTool("update_issue", {
         id: "F-long-body",
         body: longBody,
       });
@@ -836,7 +836,7 @@ const test = "value with 'quotes' and 'double quotes'";
 - Arrows: → ← ↑ ↓
 - Other: & < > | \\ / * ? : " ' \` ~ ! @ # $ % ^ & * ( ) [ ] { }`;
 
-      const result = await client.callTool("update_object", {
+      const result = await client.callTool("update_issue", {
         id: "E-special-chars",
         body: specialBody,
       });
@@ -919,7 +919,7 @@ const test = "value with 'quotes' and 'double quotes'";
       );
 
       // Update task in deep hierarchy
-      const result = await client.callTool("update_object", {
+      const result = await client.callTool("update_issue", {
         id: taskId,
         priority: "high",
         status: "done",
@@ -981,7 +981,7 @@ const test = "value with 'quotes' and 'double quotes'";
       );
 
       // Update with cross-hierarchy prerequisites
-      const result = await client.callTool("update_object", {
+      const result = await client.callTool("update_issue", {
         id: "T-cross-deps",
         prerequisites: ["P-proj-1", "F-feat-1", "E-external"],
         status: "in-progress",
@@ -1017,21 +1017,21 @@ const test = "value with 'quotes' and 'double quotes'";
       );
 
       // First update
-      const result1 = await client.callTool("update_object", {
+      const result1 = await client.callTool("update_issue", {
         id: "T-sequential",
         priority: "medium",
       });
       expect(result1.content[0].text).toContain("Successfully updated object");
 
       // Second update
-      const result2 = await client.callTool("update_object", {
+      const result2 = await client.callTool("update_issue", {
         id: "T-sequential",
         status: "open",
       });
       expect(result2.content[0].text).toContain("Successfully updated object");
 
       // Third update
-      const result3 = await client.callTool("update_object", {
+      const result3 = await client.callTool("update_issue", {
         id: "T-sequential",
         body: "Final content after multiple updates",
       });
