@@ -35,7 +35,7 @@ Full documentation is available in the [docs](docs/index.md) folder.
 
 _... and much more!_
 
-See (Sample Prompts)[docs/sample_prompts/index.md] for battle-tested prompts (written as Claude Code slash commands).
+See [Sample Prompts](docs/sample_prompts/index.md) for battle-tested prompts (written as Claude Code slash commands).
 
 ## Why Task Trellis?
 

@@ -1,6 +1,6 @@
 # Project Hierarchy
 
-Task Trellis supports up to 4 levels of hierarchy for organizing work, but you can use fewer for smaller efforts. See [IssuesPicking a Parent Issue Type](issues.md#picking-a-parent-issue-type)
+Task Trellis supports up to 4 levels of hierarchy for organizing work, but you can use fewer for smaller efforts. See [Picking a Parent Issue Type](issues.md#picking-a-parent-issue-type)
 
 ```
 Project (Top-level container)
