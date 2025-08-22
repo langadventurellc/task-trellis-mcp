@@ -1,12 +1,22 @@
 ---
 id: T-create-e2e-tests-for-auto
 title: Create E2E tests for auto-prune feature
-status: open
+status: done
 priority: medium
 prerequisites:
   - T-integrate-auto-prune-into
-affectedFiles: {}
-log: []
+affectedFiles:
+  src/__tests__/e2e/autoPrune.e2e.test.ts: Created comprehensive E2E test suite
+    for auto-prune functionality with 13 test cases covering all requirements
+    including CLI argument handling, hierarchical validation, server startup
+    integration, and complex workflow scenarios
+log:
+  - Successfully created comprehensive E2E tests for auto-prune feature covering
+    CLI integration, basic functionality, hierarchical validation, server
+    startup integration, complex workflows, and performance edge cases. All
+    tests pass and verify that auto-prune correctly deletes old closed objects
+    while respecting hierarchical constraints (not deleting objects with open
+    children).
 schema: v1.0
 childrenIds: []
 created: 2025-08-22T18:24:31.313Z
