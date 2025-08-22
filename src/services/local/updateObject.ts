@@ -9,6 +9,7 @@ import { validateStatusTransition } from "../../validation/validateStatusTransit
 export async function updateObject(
   repository: Repository,
   id: string,
+  title?: string,
   priority?: TrellisObjectPriority,
   prerequisites?: string[],
   body?: string,
@@ -32,6 +33,7 @@ export async function updateObject(
     // Create updated object with new properties, ensuring proper typing
     const updatedObject: TrellisObject = {
       ...existingObject,
+      ...(title && { title }),
       ...(priority && { priority }),
       ...(prerequisites && { prerequisites }),
       ...(body && { body }),

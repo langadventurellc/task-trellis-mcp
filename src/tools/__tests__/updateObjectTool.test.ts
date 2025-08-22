@@ -47,6 +47,7 @@ describe("updateObjectTool", () => {
       expect(mockService.updateObject).toHaveBeenCalledWith(
         mockRepository,
         "T-test-task",
+        undefined,
         "high" as TrellisObjectPriority,
         ["T-prereq-1", "T-prereq-2"],
         "Updated body content",
@@ -67,7 +68,29 @@ describe("updateObjectTool", () => {
       expect(mockService.updateObject).toHaveBeenCalledWith(
         mockRepository,
         "T-test-task",
+        undefined,
         "low" as TrellisObjectPriority,
+        undefined,
+        undefined,
+        undefined,
+        false,
+      );
+      expect(result).toBe(mockResult);
+    });
+
+    it("should call service.updateObject with title parameter", async () => {
+      mockService.updateObject.mockResolvedValue(mockResult);
+
+      const result = await handleUpdateObject(mockService, mockRepository, {
+        id: "T-test-task",
+        title: "Updated Task Title",
+      });
+
+      expect(mockService.updateObject).toHaveBeenCalledWith(
+        mockRepository,
+        "T-test-task",
+        "Updated Task Title",
+        undefined,
         undefined,
         undefined,
         undefined,
@@ -90,6 +113,7 @@ describe("updateObjectTool", () => {
         undefined,
         undefined,
         undefined,
+        undefined,
         "in-progress" as TrellisObjectStatus,
         false,
       );
@@ -107,6 +131,7 @@ describe("updateObjectTool", () => {
       expect(mockService.updateObject).toHaveBeenCalledWith(
         mockRepository,
         "T-test-task",
+        undefined,
         undefined,
         undefined,
         undefined,

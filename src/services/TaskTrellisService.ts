@@ -27,6 +27,7 @@ export interface TaskTrellisService {
   updateObject(
     repository: Repository,
     id: string,
+    title?: string,
     priority?: TrellisObjectPriority,
     prerequisites?: string[],
     body?: string,

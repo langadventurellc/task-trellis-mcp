@@ -62,6 +62,7 @@ describe("updateObject", () => {
       const result = await updateObject(
         mockRepository,
         "T-test-task",
+        undefined,
         TrellisObjectPriority.HIGH,
         ["T-prereq-1", "T-prereq-2"],
         "Updated body content",
@@ -98,6 +99,7 @@ describe("updateObject", () => {
       const result = await updateObject(
         mockRepository,
         "P-test-project",
+        undefined,
         TrellisObjectPriority.LOW,
       );
 
@@ -125,6 +127,7 @@ describe("updateObject", () => {
         mockRepository,
         "E-test-epic",
         undefined,
+        undefined,
         ["E-new-prereq", "E-another-prereq"],
       );
 
@@ -151,12 +154,35 @@ describe("updateObject", () => {
         "F-test-feature",
         undefined,
         undefined,
+        undefined,
         "New detailed feature description",
       );
 
       const expectedUpdatedObject = {
         ...mockFeature,
         body: "New detailed feature description",
+      };
+
+      expect(mockRepository.saveObject).toHaveBeenCalledWith(
+        expectedUpdatedObject,
+      );
+      expect(result.content[0].text).toContain("Successfully updated object:");
+    });
+
+    it("should update only title for a task", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK);
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      const result = await updateObject(
+        mockRepository,
+        "T-test-task",
+        "Updated Task Title",
+      );
+
+      const expectedUpdatedObject = {
+        ...mockTask,
+        title: "Updated Task Title",
       };
 
       expect(mockRepository.saveObject).toHaveBeenCalledWith(
@@ -175,6 +201,7 @@ describe("updateObject", () => {
       await updateObject(
         mockRepository,
         "T-test-task",
+        undefined,
         TrellisObjectPriority.HIGH,
       );
 
@@ -195,6 +222,7 @@ describe("updateObject", () => {
       await updateObject(
         mockRepository,
         "T-test-task",
+        undefined,
         TrellisObjectPriority.MEDIUM,
       );
 
@@ -213,6 +241,7 @@ describe("updateObject", () => {
       await updateObject(
         mockRepository,
         "T-test-task",
+        undefined,
         TrellisObjectPriority.LOW,
       );
 
@@ -232,7 +261,7 @@ describe("updateObject", () => {
       mockRepository.getObjectById.mockResolvedValue(mockTask);
       mockRepository.saveObject.mockResolvedValue();
 
-      await updateObject(mockRepository, "T-test-task", undefined, [
+      await updateObject(mockRepository, "T-test-task", undefined, undefined, [
         "T-prereq-1",
         "T-prereq-2",
       ]);
@@ -251,7 +280,7 @@ describe("updateObject", () => {
       mockRepository.getObjectById.mockResolvedValue(mockTask);
       mockRepository.saveObject.mockResolvedValue();
 
-      await updateObject(mockRepository, "T-test-task", undefined, [
+      await updateObject(mockRepository, "T-test-task", undefined, undefined, [
         "T-new-prereq-1",
         "T-new-prereq-2",
       ]);
@@ -270,7 +299,13 @@ describe("updateObject", () => {
       mockRepository.getObjectById.mockResolvedValue(mockTask);
       mockRepository.saveObject.mockResolvedValue();
 
-      await updateObject(mockRepository, "T-test-task", undefined, []);
+      await updateObject(
+        mockRepository,
+        "T-test-task",
+        undefined,
+        undefined,
+        [],
+      );
 
       expect(mockRepository.saveObject).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -292,6 +327,7 @@ describe("updateObject", () => {
       await updateObject(
         mockRepository,
         "T-test-task",
+        undefined,
         undefined,
         undefined,
         undefined,
@@ -321,6 +357,7 @@ describe("updateObject", () => {
         undefined,
         undefined,
         undefined,
+        undefined,
         TrellisObjectStatus.DONE,
       );
 
@@ -340,6 +377,7 @@ describe("updateObject", () => {
       await updateObject(
         mockRepository,
         "T-test-task",
+        undefined,
         undefined,
         undefined,
         undefined,
@@ -363,6 +401,7 @@ describe("updateObject", () => {
       const result = await updateObject(
         mockRepository,
         "T-nonexistent",
+        undefined,
         TrellisObjectPriority.HIGH,
       );
 
@@ -387,6 +426,7 @@ describe("updateObject", () => {
       const result = await updateObject(
         mockRepository,
         "T-test-task",
+        undefined,
         undefined,
         undefined,
         undefined,
@@ -445,6 +485,7 @@ describe("updateObject", () => {
       const result = await updateObject(
         mockRepository,
         "T-test-task",
+        undefined,
         TrellisObjectPriority.HIGH,
       );
 
@@ -465,7 +506,7 @@ describe("updateObject", () => {
       mockRepository.getObjectById.mockResolvedValue(mockTask);
       mockRepository.saveObject.mockResolvedValue();
 
-      await updateObject(mockRepository, "T-test-task");
+      await updateObject(mockRepository, "T-test-task", undefined);
 
       expect(mockRepository.saveObject).toHaveBeenCalledWith(mockTask);
     });
@@ -484,6 +525,7 @@ describe("updateObject", () => {
       const result = await updateObject(
         mockRepository,
         "T-test-task",
+        undefined,
         TrellisObjectPriority.HIGH,
         ["T-prereq-1", "T-prereq-2", "T-prereq-3"],
         "Updated comprehensive body with new requirements",
@@ -526,6 +568,7 @@ describe("updateObject", () => {
       await updateObject(
         mockRepository,
         "T-preserve-test",
+        undefined,
         TrellisObjectPriority.HIGH,
       );
 

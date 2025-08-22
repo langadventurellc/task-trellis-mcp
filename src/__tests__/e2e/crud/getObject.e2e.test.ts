@@ -685,4 +685,103 @@ This is a complex task with extensive documentation.`,
       expect(object.body).toContain("This is a complex task");
     });
   });
+
+  describe("Title Updates", () => {
+    it("should update task title and retrieve updated object", async () => {
+      // Create initial task
+      const taskData: ObjectData = {
+        id: "T-title-update-test",
+        title: "Original Task Title",
+        status: "open",
+        priority: "medium",
+        body: "Task body content",
+      };
+
+      const content = createObjectContent(taskData);
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-title-update-test",
+        content,
+        { status: "open" },
+      );
+
+      // Update the title
+      const updateResult = await client.callTool("update_issue", {
+        id: "T-title-update-test",
+        title: "Updated Task Title",
+      });
+
+      expect(updateResult.content[0].type).toBe("text");
+      expect(updateResult.content[0].text).toContain(
+        "Successfully updated object",
+      );
+
+      // Retrieve and verify the updated object
+      const getResult = await client.callTool("get_issue", {
+        id: "T-title-update-test",
+      });
+
+      const object = parseGetObjectResponse(
+        getResult.content[0].text as string,
+      );
+      expect(object.id).toBe("T-title-update-test");
+      expect(object.title).toBe("Updated Task Title");
+      expect(object.body).toBe("Task body content"); // Other fields should remain unchanged
+      expect(object.status).toBe("open");
+      expect(object.priority).toBe("medium");
+    });
+
+    it("should update project title while preserving other properties", async () => {
+      // Create initial project with complex data
+      const projectData: ObjectData = {
+        id: "P-title-update-project",
+        title: "Original Project Title",
+        status: "in-progress",
+        priority: "high",
+        prerequisites: ["P-dep1"],
+        affectedFiles: { "src/main.ts": "Main implementation" },
+        log: ["Project created", "Initial setup"],
+        body: "Project description",
+      };
+
+      const content = createObjectContent(projectData);
+      await createObjectFile(
+        testEnv.projectRoot,
+        "project",
+        "P-title-update-project",
+        content,
+      );
+
+      // Update only the title
+      const updateResult = await client.callTool("update_issue", {
+        id: "P-title-update-project",
+        title: "New Project Title",
+      });
+
+      expect(updateResult.content[0].type).toBe("text");
+      expect(updateResult.content[0].text).toContain(
+        "Successfully updated object",
+      );
+
+      // Retrieve and verify all properties are preserved except title
+      const getResult = await client.callTool("get_issue", {
+        id: "P-title-update-project",
+      });
+
+      const object = parseGetObjectResponse(
+        getResult.content[0].text as string,
+      );
+      expect(object.id).toBe("P-title-update-project"); // ID should remain unchanged
+      expect(object.title).toBe("New Project Title"); // Title should be updated
+      expect(object.status).toBe("in-progress"); // All other properties preserved
+      expect(object.priority).toBe("high");
+      expect(object.prerequisites).toEqual(["P-dep1"]);
+      expect(object.affectedFiles).toEqual({
+        "src/main.ts": "Main implementation",
+      });
+      expect(object.log).toEqual(["Project created", "Initial setup"]);
+      expect(object.body).toBe("Project description");
+    });
+  });
 });

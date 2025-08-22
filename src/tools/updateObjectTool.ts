@@ -21,6 +21,7 @@ Available priority values:
 - 'low': Nice-to-have or future work
 
 Updatable properties:
+- 'title': Title of the work item
 - 'status': Progress state (follows workflow: draft → open → in-progress → done)
 - 'priority': Importance level (high, medium, low)
 - 'prerequisites': Dependency relationships (add/remove prerequisite issues)
@@ -28,6 +29,7 @@ Updatable properties:
 - 'force': Bypass certain validation checks when necessary
 
 Common update patterns:
+- Update title: title='New task title'
 - Mark task as ready: status='open'
 - Start working: status='in-progress'
 - Change priority: priority='high'
@@ -45,6 +47,10 @@ Updates automatically refresh the 'updated' timestamp while preserving creation 
       id: {
         type: "string",
         description: "ID of the issue to update",
+      },
+      title: {
+        type: "string",
+        description: "Title of the issue (optional)",
       },
       priority: {
         type: "string",
@@ -82,6 +88,7 @@ export async function handleUpdateObject(
 ) {
   const {
     id,
+    title,
     priority,
     prerequisites,
     body,
@@ -89,6 +96,7 @@ export async function handleUpdateObject(
     force = false,
   } = args as {
     id: string;
+    title?: string;
     priority?: string;
     prerequisites?: string[];
     body?: string;
@@ -99,6 +107,7 @@ export async function handleUpdateObject(
   return service.updateObject(
     repository,
     id,
+    title,
     priority as TrellisObjectPriority,
     prerequisites,
     body,

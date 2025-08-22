@@ -34,6 +34,7 @@ export class LocalTaskTrellisService implements TaskTrellisService {
   async updateObject(
     repository: Repository,
     id: string,
+    title?: string,
     priority?: TrellisObjectPriority,
     prerequisites?: string[],
     body?: string,
@@ -44,6 +45,7 @@ export class LocalTaskTrellisService implements TaskTrellisService {
     return updateObject(
       repository,
       id,
+      title,
       priority,
       prerequisites,
       body,
