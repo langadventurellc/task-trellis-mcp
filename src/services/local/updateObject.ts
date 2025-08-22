@@ -1,17 +1,19 @@
+import { ServerConfig } from "../../configuration";
 import {
   TrellisObject,
   TrellisObjectPriority,
   TrellisObjectStatus,
 } from "../../models";
 import { Repository } from "../../repositories";
-import { validateStatusTransition } from "../../validation/validateStatusTransition";
 import {
-  updateParentHierarchy,
   autoCompleteParentHierarchy,
+  updateParentHierarchy,
 } from "../../utils";
+import { validateStatusTransition } from "../../validation/validateStatusTransition";
 
 export async function updateObject(
   repository: Repository,
+  serverConfig: ServerConfig,
   id: string,
   title?: string,
   priority?: TrellisObjectPriority,
@@ -65,11 +67,12 @@ export async function updateObject(
       }
     }
 
-    // If status is being changed to done or wont-do, auto-complete parent hierarchy
+    // If status is being changed to done or wont-do, auto-complete parent hierarchy (if enabled)
     if (
       (status === TrellisObjectStatus.DONE ||
         status === TrellisObjectStatus.WONT_DO) &&
-      existingObject.status !== status
+      existingObject.status !== status &&
+      serverConfig.autoCompleteParent
     ) {
       try {
         await autoCompleteParentHierarchy(repository, updatedObject);

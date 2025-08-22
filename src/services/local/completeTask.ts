@@ -6,10 +6,10 @@ import { appendAffectedFiles } from "./appendAffectedFiles.js";
 
 export async function completeTask(
   repository: Repository,
+  serverConfig: ServerConfig,
   taskId: string,
   summary: string,
   filesChanged: Record<string, string>,
-  serverConfig?: ServerConfig,
 ): Promise<{ content: Array<{ type: string; text: string }> }> {
   // Get the task object from repository
   const task = await repository.getObjectById(taskId);
@@ -37,7 +37,7 @@ export async function completeTask(
   await repository.saveObject(task);
 
   // If auto-complete parent is enabled, check if we should complete parent objects
-  if (serverConfig?.autoCompleteParent) {
+  if (serverConfig.autoCompleteParent) {
     await autoCompleteParentHierarchy(repository, task);
   }
 

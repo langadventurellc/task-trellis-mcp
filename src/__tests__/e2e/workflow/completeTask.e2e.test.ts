@@ -14,7 +14,7 @@ describe("E2E Workflow - completeTask", () => {
   beforeEach(async () => {
     testEnv = new TestEnvironment();
     testEnv.setup();
-    client = new McpTestClient(testEnv.projectRoot);
+    client = new McpTestClient(testEnv.projectRoot, false); // Disable auto-complete for regular client
     await client.connect();
     await client.callTool("activate", {
       mode: "local",
@@ -175,8 +175,8 @@ describe("E2E Workflow - completeTask", () => {
     let autoCompleteClient: McpTestClient;
 
     beforeEach(async () => {
-      // Create a separate client with auto-complete enabled
-      autoCompleteClient = new McpTestClient(testEnv.projectRoot, true);
+      // Create a separate client with auto-complete enabled (default behavior)
+      autoCompleteClient = new McpTestClient(testEnv.projectRoot); // No parameter means use default (auto-complete enabled)
       await autoCompleteClient.connect();
       await autoCompleteClient.callTool("activate", {
         mode: "local",
@@ -528,7 +528,7 @@ describe("E2E Workflow - completeTask", () => {
       );
     });
 
-    it("should not auto-complete when auto-complete-parent is disabled", async () => {
+    it("should not auto-complete when no-auto-complete-parent is enabled", async () => {
       // Use the regular client without auto-complete enabled
       const featureData: ObjectData = {
         id: "F-no-auto",

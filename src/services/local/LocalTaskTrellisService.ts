@@ -33,6 +33,7 @@ export class LocalTaskTrellisService implements TaskTrellisService {
 
   async updateObject(
     repository: Repository,
+    serverConfig: ServerConfig,
     id: string,
     title?: string,
     priority?: TrellisObjectPriority,
@@ -44,6 +45,7 @@ export class LocalTaskTrellisService implements TaskTrellisService {
     const { updateObject } = await import("./updateObject");
     return updateObject(
       repository,
+      serverConfig,
       id,
       title,
       priority,
@@ -66,18 +68,18 @@ export class LocalTaskTrellisService implements TaskTrellisService {
 
   async completeTask(
     repository: Repository,
+    serverConfig: ServerConfig,
     taskId: string,
     summary: string,
     filesChanged: Record<string, string>,
-    serverConfig?: ServerConfig,
   ): Promise<{ content: Array<{ type: string; text: string }> }> {
     const { completeTask } = await import("./completeTask");
     return completeTask(
       repository,
+      serverConfig,
       taskId,
       summary,
       filesChanged,
-      serverConfig,
     );
   }
 

@@ -61,7 +61,7 @@ export function handleCompleteTask(
   service: TaskTrellisService,
   repository: Repository,
   args: unknown,
-  serverConfig?: ServerConfig,
+  serverConfig: ServerConfig,
 ) {
   const { taskId, summary, filesChanged } = args as {
     taskId: string;
@@ -72,9 +72,9 @@ export function handleCompleteTask(
   // Delegate to service.completeTask
   return service.completeTask(
     repository,
+    serverConfig,
     taskId,
     summary,
     filesChanged,
-    serverConfig,
   );
 }

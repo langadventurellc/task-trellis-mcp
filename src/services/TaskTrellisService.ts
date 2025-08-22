@@ -26,6 +26,7 @@ export interface TaskTrellisService {
    */
   updateObject(
     repository: Repository,
+    serverConfig: ServerConfig,
     id: string,
     title?: string,
     priority?: TrellisObjectPriority,
@@ -50,10 +51,10 @@ export interface TaskTrellisService {
    */
   completeTask(
     repository: Repository,
+    serverConfig: ServerConfig,
     taskId: string,
     summary: string,
     filesChanged: Record<string, string>,
-    serverConfig?: ServerConfig,
   ): Promise<{ content: Array<{ type: string; text: string }> }>;
 
   /**

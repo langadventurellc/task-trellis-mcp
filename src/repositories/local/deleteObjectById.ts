@@ -46,6 +46,7 @@ async function checkObjectDependencies(
   const config: ServerConfig = {
     mode: "local",
     planningRootFolder: planningRoot,
+    autoCompleteParent: false,
   };
   const repository = new LocalRepository(config);
 

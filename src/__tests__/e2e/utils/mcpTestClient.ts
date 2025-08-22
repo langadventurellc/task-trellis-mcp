@@ -29,8 +29,9 @@ export class McpTestClient {
       this.projectRoot,
     ];
 
-    if (this.autoCompleteParent) {
-      args.push("--auto-complete-parent");
+    // Since auto-complete is now the default, only add flag to disable it
+    if (this.autoCompleteParent === false) {
+      args.push("--no-auto-complete-parent");
     }
 
     this.transport = new StdioClientTransport({

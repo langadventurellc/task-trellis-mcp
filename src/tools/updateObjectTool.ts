@@ -1,3 +1,4 @@
+import { ServerConfig } from "../configuration";
 import { TrellisObjectPriority, TrellisObjectStatus } from "../models";
 import { Repository } from "../repositories";
 import { TaskTrellisService } from "../services/TaskTrellisService";
@@ -85,6 +86,7 @@ export async function handleUpdateObject(
   service: TaskTrellisService,
   repository: Repository,
   args: unknown,
+  serverConfig: ServerConfig,
 ) {
   const {
     id,
@@ -106,6 +108,7 @@ export async function handleUpdateObject(
 
   return service.updateObject(
     repository,
+    serverConfig,
     id,
     title,
     priority as TrellisObjectPriority,

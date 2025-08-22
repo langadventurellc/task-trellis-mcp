@@ -44,8 +44,8 @@ program
   .option("--mode <mode>", "Server mode", "local")
   .option("--projectRootFolder <path>", "Project root folder path")
   .option(
-    "--auto-complete-parent",
-    "Enable automatic completion of parent tasks",
+    "--no-auto-complete-parent",
+    "Disable automatic completion of parent tasks",
   );
 
 program.parse();
@@ -80,7 +80,7 @@ const packageVersion = getPackageVersion();
 // Create server config - always create with at least mode set
 const serverConfig: ServerConfig = {
   mode: options.mode === "remote" ? "remote" : "local",
-  autoCompleteParent: options.autoCompleteParent || false,
+  autoCompleteParent: options.autoCompleteParent,
   ...(options.projectRootFolder && typeof options.projectRootFolder === "string"
     ? { planningRootFolder: path.join(options.projectRootFolder, ".trellis") }
     : {}),
@@ -213,7 +213,7 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
     case "create_issue":
       return handleCreateObject(_getService(), repository, args);
     case "update_issue":
-      return handleUpdateObject(_getService(), repository, args);
+      return handleUpdateObject(_getService(), repository, args, serverConfig);
     case "get_issue":
       return handleGetObject(repository, args);
     case "delete_issue":

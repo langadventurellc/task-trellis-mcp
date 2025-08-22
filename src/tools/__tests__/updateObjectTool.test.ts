@@ -1,3 +1,4 @@
+import { ServerConfig } from "../../configuration";
 import { TrellisObjectPriority, TrellisObjectStatus } from "../../models";
 import { Repository } from "../../repositories/Repository";
 import { TaskTrellisService } from "../../services/TaskTrellisService";
@@ -6,6 +7,7 @@ import { handleUpdateObject } from "../updateObjectTool";
 describe("updateObjectTool", () => {
   let mockService: jest.Mocked<TaskTrellisService>;
   let mockRepository: jest.Mocked<Repository>;
+  let mockServerConfig: jest.Mocked<ServerConfig>;
 
   beforeEach(() => {
     mockService = {
@@ -17,6 +19,11 @@ describe("updateObjectTool", () => {
       getObjects: jest.fn(),
       saveObject: jest.fn(),
       deleteObject: jest.fn(),
+    };
+
+    mockServerConfig = {
+      mode: "local",
+      autoCompleteParent: true,
     };
 
     jest.clearAllMocks();
@@ -35,17 +42,23 @@ describe("updateObjectTool", () => {
     it("should call service.updateObject with correct parameters for all properties", async () => {
       mockService.updateObject.mockResolvedValue(mockResult);
 
-      const result = await handleUpdateObject(mockService, mockRepository, {
-        id: "T-test-task",
-        priority: "high",
-        prerequisites: ["T-prereq-1", "T-prereq-2"],
-        body: "Updated body content",
-        status: "draft",
-        force: true,
-      });
+      const result = await handleUpdateObject(
+        mockService,
+        mockRepository,
+        {
+          id: "T-test-task",
+          priority: "high",
+          prerequisites: ["T-prereq-1", "T-prereq-2"],
+          body: "Updated body content",
+          status: "draft",
+          force: true,
+        },
+        mockServerConfig,
+      );
 
       expect(mockService.updateObject).toHaveBeenCalledWith(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
         undefined,
         "high" as TrellisObjectPriority,
@@ -60,13 +73,19 @@ describe("updateObjectTool", () => {
     it("should call service.updateObject with only specified properties", async () => {
       mockService.updateObject.mockResolvedValue(mockResult);
 
-      const result = await handleUpdateObject(mockService, mockRepository, {
-        id: "T-test-task",
-        priority: "low",
-      });
+      const result = await handleUpdateObject(
+        mockService,
+        mockRepository,
+        {
+          id: "T-test-task",
+          priority: "low",
+        },
+        mockServerConfig,
+      );
 
       expect(mockService.updateObject).toHaveBeenCalledWith(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
         undefined,
         "low" as TrellisObjectPriority,
@@ -81,13 +100,19 @@ describe("updateObjectTool", () => {
     it("should call service.updateObject with title parameter", async () => {
       mockService.updateObject.mockResolvedValue(mockResult);
 
-      const result = await handleUpdateObject(mockService, mockRepository, {
-        id: "T-test-task",
-        title: "Updated Task Title",
-      });
+      const result = await handleUpdateObject(
+        mockService,
+        mockRepository,
+        {
+          id: "T-test-task",
+          title: "Updated Task Title",
+        },
+        mockServerConfig,
+      );
 
       expect(mockService.updateObject).toHaveBeenCalledWith(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
         "Updated Task Title",
         undefined,
@@ -102,13 +127,19 @@ describe("updateObjectTool", () => {
     it("should handle missing optional parameters correctly", async () => {
       mockService.updateObject.mockResolvedValue(mockResult);
 
-      const result = await handleUpdateObject(mockService, mockRepository, {
-        id: "T-test-task",
-        status: "in-progress",
-      });
+      const result = await handleUpdateObject(
+        mockService,
+        mockRepository,
+        {
+          id: "T-test-task",
+          status: "in-progress",
+        },
+        mockServerConfig,
+      );
 
       expect(mockService.updateObject).toHaveBeenCalledWith(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
         undefined,
         undefined,
@@ -123,13 +154,19 @@ describe("updateObjectTool", () => {
     it("should default force to false when not provided", async () => {
       mockService.updateObject.mockResolvedValue(mockResult);
 
-      await handleUpdateObject(mockService, mockRepository, {
-        id: "T-test-task",
-        status: "done",
-      });
+      await handleUpdateObject(
+        mockService,
+        mockRepository,
+        {
+          id: "T-test-task",
+          status: "done",
+        },
+        mockServerConfig,
+      );
 
       expect(mockService.updateObject).toHaveBeenCalledWith(
         mockRepository,
+        mockServerConfig,
         "T-test-task",
         undefined,
         undefined,
@@ -151,10 +188,15 @@ describe("updateObjectTool", () => {
       };
       mockService.updateObject.mockResolvedValue(errorResult);
 
-      const result = await handleUpdateObject(mockService, mockRepository, {
-        id: "T-nonexistent",
-        priority: "high",
-      });
+      const result = await handleUpdateObject(
+        mockService,
+        mockRepository,
+        {
+          id: "T-nonexistent",
+          priority: "high",
+        },
+        mockServerConfig,
+      );
 
       expect(result).toBe(errorResult);
     });
@@ -163,11 +205,46 @@ describe("updateObjectTool", () => {
       mockService.updateObject.mockRejectedValue(new Error("Service error"));
 
       await expect(
-        handleUpdateObject(mockService, mockRepository, {
+        handleUpdateObject(
+          mockService,
+          mockRepository,
+          {
+            id: "T-test-task",
+            status: "done",
+          },
+          mockServerConfig,
+        ),
+      ).rejects.toThrow("Service error");
+    });
+
+    it("should pass serverConfig to service when provided", async () => {
+      mockService.updateObject.mockResolvedValue(mockResult);
+      const serverConfig: ServerConfig = {
+        mode: "local",
+        autoCompleteParent: true,
+      };
+
+      await handleUpdateObject(
+        mockService,
+        mockRepository,
+        {
           id: "T-test-task",
           status: "done",
-        }),
-      ).rejects.toThrow("Service error");
+        },
+        serverConfig,
+      );
+
+      expect(mockService.updateObject).toHaveBeenCalledWith(
+        mockRepository,
+        serverConfig,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        "done" as TrellisObjectStatus,
+        false,
+      );
     });
   });
 });
