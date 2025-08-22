@@ -14,6 +14,10 @@ export interface Repository {
     status?: TrellisObjectStatus | TrellisObjectStatus[],
     priority?: TrellisObjectPriority | TrellisObjectPriority[],
   ): Promise<TrellisObject[]>;
+  getChildrenOf(
+    parentId: string,
+    includeClosed?: boolean,
+  ): Promise<TrellisObject[]>;
   saveObject(trellisObject: TrellisObject): Promise<void>;
   deleteObject(id: string, force?: boolean): Promise<void>;
 }

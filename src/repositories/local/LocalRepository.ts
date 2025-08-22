@@ -51,6 +51,15 @@ export class LocalRepository implements Repository {
     );
   }
 
+  async getChildrenOf(parentId: string, includeClosed?: boolean) {
+    const { getChildrenOf } = await import("./getChildrenOf");
+    return await getChildrenOf(
+      parentId,
+      this.config.planningRootFolder!,
+      includeClosed,
+    );
+  }
+
   async saveObject(trellisObject: TrellisObject): Promise<void> {
     const { saveObject: saveObjectImpl } = await import("./saveObject");
     await saveObjectImpl(trellisObject, this.config.planningRootFolder!);

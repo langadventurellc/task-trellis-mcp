@@ -32,6 +32,16 @@ class MockRepository implements Repository {
     this.objects.delete(id);
     return Promise.resolve();
   }
+
+  async getChildrenOf(
+    parentId: string,
+    _includeClosed?: boolean,
+  ): Promise<TrellisObject[]> {
+    const children = Array.from(this.objects.values()).filter(
+      (obj) => obj.parent === parentId,
+    );
+    return Promise.resolve(children);
+  }
 }
 
 describe("isRequiredForOtherObjects", () => {
@@ -306,6 +316,7 @@ describe("isRequiredForOtherObjects", () => {
       getObjects: jest.fn().mockRejectedValue(new Error("Repository error")),
       saveObject: jest.fn(),
       deleteObject: jest.fn(),
+      getChildrenOf: jest.fn(),
     };
 
     await expect(

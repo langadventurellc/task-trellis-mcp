@@ -41,6 +41,7 @@ describe("filterUnavailableObjects", () => {
       getObjects: jest.fn().mockResolvedValue(objects),
       saveObject: jest.fn(),
       deleteObject: jest.fn(),
+      getChildrenOf: jest.fn(),
     };
   };
 

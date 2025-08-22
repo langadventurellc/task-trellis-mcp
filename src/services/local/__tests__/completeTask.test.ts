@@ -101,6 +101,7 @@ describe("completeTask service function", () => {
       getObjects: jest.fn(),
       saveObject: jest.fn(),
       deleteObject: jest.fn(),
+      getChildrenOf: jest.fn(),
     };
 
     mockServerConfig = {

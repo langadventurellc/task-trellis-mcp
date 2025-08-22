@@ -17,6 +17,7 @@ describe("listObjectsTool", () => {
       getObjects: jest.fn(),
       saveObject: jest.fn(),
       deleteObject: jest.fn(),
+      getChildrenOf: jest.fn(),
     };
 
     mockService = {
