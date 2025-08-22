@@ -1000,6 +1000,315 @@ const test = "value with 'quotes' and 'double quotes'";
     });
   });
 
+  describe("Hierarchical Status Updates", () => {
+    it("should update parent hierarchy to in-progress when task changes to in-progress", async () => {
+      // Create complete hierarchy: Project -> Epic -> Feature -> Task
+      const projectId = "P-hierarchy-status";
+      const epicId = "E-hierarchy-status";
+      const featureId = "F-hierarchy-status";
+      const taskId = "T-hierarchy-status";
+
+      // Create project (open status)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "project",
+        projectId,
+        createObjectContent({
+          id: projectId,
+          title: "Hierarchy Status Project",
+          status: "open",
+          childrenIds: [epicId],
+        }),
+      );
+
+      // Create epic (open status)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "epic",
+        epicId,
+        createObjectContent({
+          id: epicId,
+          title: "Hierarchy Status Epic",
+          parent: projectId,
+          status: "open",
+          childrenIds: [featureId],
+        }),
+        { projectId },
+      );
+
+      // Create feature (open status)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        featureId,
+        createObjectContent({
+          id: featureId,
+          title: "Hierarchy Status Feature",
+          parent: epicId,
+          status: "open",
+          childrenIds: [taskId],
+        }),
+        { projectId, epicId },
+      );
+
+      // Create task (open status)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        taskId,
+        createObjectContent({
+          id: taskId,
+          title: "Hierarchy Status Task",
+          parent: featureId,
+          status: "open",
+        }),
+        { projectId, epicId, featureId, status: "open" },
+      );
+
+      // Update task to in-progress
+      const result = await client.callTool("update_issue", {
+        id: taskId,
+        status: "in-progress",
+      });
+
+      expect(result.content[0].text).toContain("Successfully updated object");
+      const updatedTask = parseUpdateObjectResponse(
+        result.content[0].text as string,
+      );
+      expect(updatedTask.status).toBe("in-progress");
+
+      // Verify task file remains in open folder (in-progress is still "open")
+      const taskFile = await readObjectFile(
+        testEnv.projectRoot,
+        `p/${projectId}/e/${epicId}/f/${featureId}/t/open/${taskId}.md`,
+      );
+      expect(taskFile.yaml.status).toBe("in-progress");
+
+      // Verify feature was updated to in-progress
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        `p/${projectId}/e/${epicId}/f/${featureId}/${featureId}.md`,
+      );
+      expect(featureFile.yaml.status).toBe("in-progress");
+
+      // Verify epic was updated to in-progress
+      const epicFile = await readObjectFile(
+        testEnv.projectRoot,
+        `p/${projectId}/e/${epicId}/${epicId}.md`,
+      );
+      expect(epicFile.yaml.status).toBe("in-progress");
+
+      // Verify project was updated to in-progress
+      const projectFile = await readObjectFile(
+        testEnv.projectRoot,
+        `p/${projectId}/${projectId}.md`,
+      );
+      expect(projectFile.yaml.status).toBe("in-progress");
+    });
+
+    it("should update partial hierarchy when intermediate parent is missing", async () => {
+      // Create partial hierarchy: Feature -> Task (no parent for feature)
+      const featureId = "F-partial-hierarchy";
+      const taskId = "T-partial-hierarchy";
+
+      // Create feature (open status)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        featureId,
+        createObjectContent({
+          id: featureId,
+          title: "Partial Hierarchy Feature",
+          status: "open",
+          childrenIds: [taskId],
+        }),
+      );
+
+      // Create task (open status)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        taskId,
+        createObjectContent({
+          id: taskId,
+          title: "Partial Hierarchy Task",
+          parent: featureId,
+          status: "open",
+        }),
+        { featureId, status: "open" },
+      );
+
+      // Update task to in-progress
+      const result = await client.callTool("update_issue", {
+        id: taskId,
+        status: "in-progress",
+      });
+
+      expect(result.content[0].text).toContain("Successfully updated object");
+      const updatedTask = parseUpdateObjectResponse(
+        result.content[0].text as string,
+      );
+      expect(updatedTask.status).toBe("in-progress");
+
+      // Verify task file remains in open folder (in-progress is still "open")
+      const taskFile = await readObjectFile(
+        testEnv.projectRoot,
+        `f/${featureId}/t/open/${taskId}.md`,
+      );
+      expect(taskFile.yaml.status).toBe("in-progress");
+
+      // Verify feature was updated to in-progress
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        `f/${featureId}/${featureId}.md`,
+      );
+      expect(featureFile.yaml.status).toBe("in-progress");
+    });
+
+    it("should not update parent hierarchy if parent is already in-progress", async () => {
+      // Create hierarchy where parent is already in-progress
+      const projectId = "P-already-in-progress-parent";
+      const epicId = "E-already-in-progress";
+      const featureId = "F-child-of-in-progress";
+      const taskId = "T-child-of-in-progress";
+
+      // Create project first
+      await createObjectFile(
+        testEnv.projectRoot,
+        "project",
+        projectId,
+        createObjectContent({
+          id: projectId,
+          title: "Already In Progress Parent Project",
+          status: "open",
+          childrenIds: [epicId],
+        }),
+      );
+
+      // Create epic (already in-progress)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "epic",
+        epicId,
+        createObjectContent({
+          id: epicId,
+          title: "Already In Progress Epic",
+          parent: projectId,
+          status: "in-progress",
+          childrenIds: [featureId],
+        }),
+        { projectId },
+      );
+
+      // Create feature (open status)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        featureId,
+        createObjectContent({
+          id: featureId,
+          title: "Child Of In Progress Feature",
+          parent: epicId,
+          status: "open",
+          childrenIds: [taskId],
+        }),
+        { projectId, epicId },
+      );
+
+      // Create task (open status)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        taskId,
+        createObjectContent({
+          id: taskId,
+          title: "Child Of In Progress Task",
+          parent: featureId,
+          status: "open",
+        }),
+        { projectId, epicId, featureId, status: "open" },
+      );
+
+      // Update task to in-progress
+      const result = await client.callTool("update_issue", {
+        id: taskId,
+        status: "in-progress",
+      });
+
+      expect(result.content[0].text).toContain("Successfully updated object");
+
+      // Verify task is in-progress (remains in open folder)
+      const taskFile = await readObjectFile(
+        testEnv.projectRoot,
+        `p/${projectId}/e/${epicId}/f/${featureId}/t/open/${taskId}.md`,
+      );
+      expect(taskFile.yaml.status).toBe("in-progress");
+
+      // Verify feature was updated to in-progress
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        `p/${projectId}/e/${epicId}/f/${featureId}/${featureId}.md`,
+      );
+      expect(featureFile.yaml.status).toBe("in-progress");
+
+      // Verify epic remains in-progress (not changed)
+      const epicFile = await readObjectFile(
+        testEnv.projectRoot,
+        `p/${projectId}/e/${epicId}/${epicId}.md`,
+      );
+      expect(epicFile.yaml.status).toBe("in-progress");
+    });
+
+    it("should only update hierarchy when status changes to in-progress from non-in-progress", async () => {
+      // Create simple hierarchy
+      const featureId = "F-status-change-test";
+      const taskId = "T-status-change-test";
+
+      // Create feature (open status)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        featureId,
+        createObjectContent({
+          id: featureId,
+          title: "Status Change Test Feature",
+          status: "open",
+          childrenIds: [taskId],
+        }),
+      );
+
+      // Create task (already in-progress)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        taskId,
+        createObjectContent({
+          id: taskId,
+          title: "Status Change Test Task",
+          parent: featureId,
+          status: "in-progress",
+        }),
+        { featureId, status: "open" },
+      );
+
+      // Update task priority but keep status as in-progress (no status change)
+      const result = await client.callTool("update_issue", {
+        id: taskId,
+        priority: "high",
+        status: "in-progress", // Same status
+      });
+
+      expect(result.content[0].text).toContain("Successfully updated object");
+
+      // Verify feature status is unchanged (should still be open)
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        `f/${featureId}/${featureId}.md`,
+      );
+      expect(featureFile.yaml.status).toBe("open");
+    });
+  });
+
   describe("Concurrent Updates", () => {
     it("should handle sequential updates to same object", async () => {
       // Create initial task
