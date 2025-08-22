@@ -10,7 +10,7 @@ Welcome to the Task Trellis MCP documentation. This directory contains comprehen
 
 ### Core Concepts
 
-- **[Project Hierarchy](project-hierarchy.md)** - Understanding the 4-level hierarchy (Project � Epic � Feature � Task) and file storage structure
+- **[Project Hierarchy](project-hierarchy.md)** - Understanding the 4-level hierarchy (Project -> Epic -> Feature -> Task) and file storage structure
 - **[Issue Types](issues.md)** - Detailed guide to projects, epics, features, tasks, prerequisites, and dependencies
 
 ### Sample Prompts
