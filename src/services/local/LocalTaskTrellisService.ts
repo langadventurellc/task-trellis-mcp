@@ -107,32 +107,6 @@ export class LocalTaskTrellisService implements TaskTrellisService {
     return appendObjectLog(repository, id, contents);
   }
 
-  async pruneClosed(
-    repository: Repository,
-    age: number,
-    scope?: string,
-  ): Promise<{ content: Array<{ type: string; text: string }> }> {
-    const { pruneClosed } = await import("./pruneClosed");
-    return pruneClosed(repository, age, scope);
-  }
-
-  async replaceObjectBodyRegex(
-    repository: Repository,
-    id: string,
-    regex: string,
-    replacement: string,
-    allowMultipleOccurrences: boolean = false,
-  ): Promise<{ content: Array<{ type: string; text: string }> }> {
-    const { replaceObjectBodyRegex } = await import("./replaceObjectBodyRegex");
-    return replaceObjectBodyRegex(
-      repository,
-      id,
-      regex,
-      replacement,
-      allowMultipleOccurrences,
-    );
-  }
-
   async appendModifiedFiles(
     repository: Repository,
     id: string,

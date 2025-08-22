@@ -55,8 +55,8 @@ describe("E2E Configuration - Pre-Activation Behavior", () => {
     );
   }
 
-  it("should block create_object before activation", async () => {
-    const response = await callTool("create_object", {
+  it("should block create_issue before activation", async () => {
+    const response = await callTool("create_issue", {
       type: "project",
       title: "Test",
     });
@@ -65,8 +65,8 @@ describe("E2E Configuration - Pre-Activation Behavior", () => {
     );
   });
 
-  it("should block update_object before activation", async () => {
-    const response = await callTool("update_object", {
+  it("should block update_issue before activation", async () => {
+    const response = await callTool("update_issue", {
       id: "P-test",
       yamlPatch: { title: "Updated" },
     });
@@ -75,8 +75,8 @@ describe("E2E Configuration - Pre-Activation Behavior", () => {
     );
   });
 
-  it("should block get_object before activation", async () => {
-    const response = await callTool("get_object", {
+  it("should block get_issue before activation", async () => {
+    const response = await callTool("get_issue", {
       id: "P-test",
     });
     expect(response.content[0].text).toContain(
@@ -84,8 +84,8 @@ describe("E2E Configuration - Pre-Activation Behavior", () => {
     );
   });
 
-  it("should block list_objects before activation", async () => {
-    const response = await callTool("list_objects", { type: "project" });
+  it("should block list_issues before activation", async () => {
+    const response = await callTool("list_issues", { type: "project" });
     expect(response.content[0].text).toContain(
       "Planning root folder is not configured",
     );
@@ -128,8 +128,8 @@ describe("E2E Configuration - Pre-Activation Behavior", () => {
 
     const toolNames = response.tools.map((t: any) => t.name);
     expect(toolNames).toContain("activate");
-    expect(toolNames).toContain("create_object");
-    expect(toolNames).toContain("list_objects");
+    expect(toolNames).toContain("create_issue");
+    expect(toolNames).toContain("list_issues");
   });
 
   it("should establish MCP handshake before activation", async () => {
@@ -143,10 +143,10 @@ describe("E2E Configuration - Pre-Activation Behavior", () => {
 
   it("should provide clear error message for each blocked tool", async () => {
     const tools = [
-      "create_object",
-      "update_object",
-      "get_object",
-      "list_objects",
+      "create_issue",
+      "update_issue",
+      "get_issue",
+      "list_issues",
       "claim_task",
       "complete_task",
     ];
@@ -167,7 +167,7 @@ describe("E2E Configuration - Pre-Activation Behavior", () => {
     });
 
     // Should now work
-    const response = await callTool("list_objects", { type: "project" });
+    const response = await callTool("list_issues", { type: "project" });
     expect(response.content[0].text).not.toContain("not configured");
   });
 });

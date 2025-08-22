@@ -30,12 +30,8 @@ import {
   handleDeleteObject,
   handleGetObject,
   handleListObjects,
-  handlePruneClosed,
-  handleReplaceObjectBodyRegex,
   handleUpdateObject,
   listObjectsTool,
-  pruneClosedTool,
-  replaceObjectBodyRegexTool,
   updateObjectTool,
 } from "./tools";
 
@@ -139,7 +135,6 @@ server.setRequestHandler(ListToolsRequestSchema, () => {
   const tools: unknown[] = [
     createObjectTool,
     updateObjectTool,
-    replaceObjectBodyRegexTool,
     getObjectTool,
     deleteObjectTool,
     listObjectsTool,
@@ -147,7 +142,6 @@ server.setRequestHandler(ListToolsRequestSchema, () => {
     appendModifiedFilesTool,
     claimTaskTool,
     completeTaskTool,
-    pruneClosedTool,
   ];
 
   // Only include activate tool if server is not properly configured from command line
@@ -220,8 +214,6 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
       return handleCreateObject(_getService(), repository, args);
     case "update_object":
       return handleUpdateObject(_getService(), repository, args);
-    case "replace_object_body_regex":
-      return handleReplaceObjectBodyRegex(_getService(), repository, args);
     case "get_object":
       return handleGetObject(repository, args);
     case "delete_object":
@@ -236,8 +228,6 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
       return handleClaimTask(_getService(), repository, args);
     case "complete_task":
       return handleCompleteTask(_getService(), repository, args, serverConfig);
-    case "prune_closed":
-      return handlePruneClosed(_getService(), repository, args);
     case "activate":
     default:
       throw new Error(`Unknown tool: ${toolName}`);

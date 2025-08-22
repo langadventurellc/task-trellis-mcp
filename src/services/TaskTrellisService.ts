@@ -1,10 +1,10 @@
 import { ServerConfig } from "../configuration";
-import { Repository } from "../repositories";
 import {
   TrellisObjectPriority,
   TrellisObjectStatus,
   TrellisObjectType,
 } from "../models";
+import { Repository } from "../repositories";
 
 export interface TaskTrellisService {
   /**
@@ -74,26 +74,6 @@ export interface TaskTrellisService {
     repository: Repository,
     id: string,
     contents: string,
-  ): Promise<{ content: Array<{ type: string; text: string }> }>;
-
-  /**
-   * Prunes closed objects from the task trellis system
-   */
-  pruneClosed(
-    repository: Repository,
-    age: number,
-    scope?: string,
-  ): Promise<{ content: Array<{ type: string; text: string }> }>;
-
-  /**
-   * Replaces portions of an object's body using regular expressions
-   */
-  replaceObjectBodyRegex(
-    repository: Repository,
-    id: string,
-    regex: string,
-    replacement: string,
-    allowMultipleOccurrences?: boolean,
   ): Promise<{ content: Array<{ type: string; text: string }> }>;
 
   /**

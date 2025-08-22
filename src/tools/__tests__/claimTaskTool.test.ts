@@ -21,8 +21,6 @@ describe("claimTaskTool", () => {
       completeTask: jest.fn(),
       listObjects: jest.fn(),
       appendObjectLog: jest.fn(),
-      pruneClosed: jest.fn(),
-      replaceObjectBodyRegex: jest.fn(),
       appendModifiedFiles: jest.fn(),
     };
   });

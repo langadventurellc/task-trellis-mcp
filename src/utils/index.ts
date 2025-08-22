@@ -5,7 +5,5 @@ export { generateUniqueId } from "./generateUniqueId";
 export { inferObjectType } from "./inferObjectType";
 export { isRequiredForOtherObjects } from "./isRequiredForOtherObjects";
 export { MultipleMatchesError } from "./MultipleMatchesError";
-export { replaceStringWithRegex } from "./replaceStringWithRegex";
-export type { ReplaceStringOptions } from "./ReplaceStringOptions";
 export { serializeTrellisObject } from "./serializeTrellisObject";
 export { sortTrellisObjects } from "./sortTrellisObjects";

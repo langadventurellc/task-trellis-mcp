@@ -1,7 +1,7 @@
+import { ServerConfig } from "../../configuration";
 import { Repository } from "../../repositories/Repository";
 import { TaskTrellisService } from "../../services/TaskTrellisService";
 import { handleCompleteTask } from "../completeTaskTool";
-import { ServerConfig } from "../../configuration";
 
 describe("completeTaskTool", () => {
   let mockService: jest.Mocked<TaskTrellisService>;
@@ -15,8 +15,6 @@ describe("completeTaskTool", () => {
       claimTask: jest.fn(),
       listObjects: jest.fn(),
       appendObjectLog: jest.fn(),
-      pruneClosed: jest.fn(),
-      replaceObjectBodyRegex: jest.fn(),
       appendModifiedFiles: jest.fn(),
     };
 
