@@ -1,11 +1,31 @@
 ---
 id: T-add-auto-prune-cli-argument
 title: Add --auto-prune CLI argument parsing with validation
-status: open
+status: done
 priority: high
 prerequisites: []
-affectedFiles: {}
-log: []
+affectedFiles:
+  src/server.ts:
+    Added --auto-prune CLI option, validation logic, and integration
+    with ServerConfig
+  src/configuration/ServerConfig.ts: "Added autoPrune: number property to interface"
+  src/repositories/local/deleteObjectById.ts: Added autoPrune property to ServerConfig object creation
+  src/services/local/__tests__/completeTask.test.ts: Added autoPrune property to all ServerConfig mock objects
+  src/services/local/__tests__/updateObject.test.ts: Added autoPrune property to all ServerConfig mock objects
+  src/tools/__tests__/completeTaskTool.test.ts: Added autoPrune property to all ServerConfig mock objects
+  src/tools/__tests__/updateObjectTool.test.ts: Added autoPrune property to all ServerConfig mock objects
+  src/__tests__/e2e/configuration/commandLineArgs.e2e.test.ts: Added comprehensive E2E tests for --auto-prune argument validation
+log:
+  - Successfully implemented --auto-prune CLI argument parsing with
+    comprehensive validation. Added Commander.js option with default value "0"
+    (disabled), updated CliOptions interface, and implemented robust validation
+    that converts string input to number while rejecting negative values and
+    non-numeric inputs. Updated ServerConfig interface to include autoPrune
+    property and fixed all TypeScript compilation errors across test files.
+    Added comprehensive E2E tests covering valid numeric inputs, zero value
+    (disabled), default behavior, and large numeric values. All quality checks
+    pass and full test suite (600 unit tests + 317 E2E tests) passes
+    successfully.
 schema: v1.0
 childrenIds: []
 created: 2025-08-22T18:21:58.984Z

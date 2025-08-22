@@ -53,6 +53,7 @@ describe("updateObject", () => {
     mockServerConfig = {
       mode: "local",
       autoCompleteParent: true,
+      autoPrune: 0,
     };
 
     jest.clearAllMocks();
@@ -814,6 +815,7 @@ describe("updateObject", () => {
       const serverConfig: ServerConfig = {
         mode: "local",
         autoCompleteParent: true,
+        autoPrune: 0,
       };
 
       await updateObject(
@@ -849,6 +851,7 @@ describe("updateObject", () => {
       const serverConfig: ServerConfig = {
         mode: "local",
         autoCompleteParent: true,
+        autoPrune: 0,
       };
 
       await updateObject(
@@ -932,6 +935,7 @@ describe("updateObject", () => {
       const serverConfig: ServerConfig = {
         mode: "local",
         autoCompleteParent: true,
+        autoPrune: 0,
       };
 
       const result = await updateObject(
@@ -970,6 +974,7 @@ describe("updateObject", () => {
       const serverConfig: ServerConfig = {
         mode: "local",
         autoCompleteParent: true,
+        autoPrune: 0,
       };
 
       await updateObject(
@@ -1004,6 +1009,7 @@ describe("updateObject", () => {
       const serverConfig: ServerConfig = {
         mode: "local",
         autoCompleteParent: false,
+        autoPrune: 0,
       };
 
       await updateObject(

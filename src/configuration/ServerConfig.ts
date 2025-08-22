@@ -5,4 +5,5 @@ export interface ServerConfig {
   remoteProjectId?: string;
   remoteRepositoryApiToken?: string;
   autoCompleteParent: boolean;
+  autoPrune: number;
 }

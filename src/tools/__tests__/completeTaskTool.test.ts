@@ -30,6 +30,7 @@ describe("completeTaskTool", () => {
     mockServerConfig = {
       mode: "local",
       autoCompleteParent: true,
+      autoPrune: 0,
     };
   });
 
@@ -89,6 +90,7 @@ describe("completeTaskTool", () => {
         mode: "local",
         planningRootFolder: "/test",
         autoCompleteParent: true,
+        autoPrune: 0,
       };
 
       mockService.completeTask.mockResolvedValue(expectedResult);

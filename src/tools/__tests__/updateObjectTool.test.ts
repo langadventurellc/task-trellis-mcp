@@ -24,6 +24,7 @@ describe("updateObjectTool", () => {
     mockServerConfig = {
       mode: "local",
       autoCompleteParent: true,
+      autoPrune: 0,
     };
 
     jest.clearAllMocks();
@@ -222,6 +223,7 @@ describe("updateObjectTool", () => {
       const serverConfig: ServerConfig = {
         mode: "local",
         autoCompleteParent: true,
+        autoPrune: 0,
       };
 
       await handleUpdateObject(

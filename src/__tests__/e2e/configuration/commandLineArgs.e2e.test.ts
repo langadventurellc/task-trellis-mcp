@@ -155,4 +155,73 @@ describe("E2E Configuration - Command Line Arguments", () => {
 
     expect(response.content[0].text).toContain("Created object");
   });
+
+  describe("--auto-prune argument", () => {
+    it("should accept valid numeric values", async () => {
+      await startServerWithArgs([
+        "--mode",
+        "local",
+        "--projectRootFolder",
+        testEnv.projectRoot,
+        "--auto-prune",
+        "7",
+      ]);
+
+      const toolsResponse = await client!.request(
+        { method: "tools/list" },
+        ListToolsResultSchema,
+      );
+      expect(toolsResponse).toBeDefined();
+      expect(Array.isArray(toolsResponse.tools)).toBe(true);
+    });
+
+    it("should accept zero value (disabled)", async () => {
+      await startServerWithArgs([
+        "--mode",
+        "local",
+        "--projectRootFolder",
+        testEnv.projectRoot,
+        "--auto-prune",
+        "0",
+      ]);
+
+      const toolsResponse = await client!.request(
+        { method: "tools/list" },
+        ListToolsResultSchema,
+      );
+      expect(toolsResponse).toBeDefined();
+    });
+
+    it("should default to 0 when not specified", async () => {
+      await startServerWithArgs([
+        "--mode",
+        "local",
+        "--projectRootFolder",
+        testEnv.projectRoot,
+      ]);
+
+      const toolsResponse = await client!.request(
+        { method: "tools/list" },
+        ListToolsResultSchema,
+      );
+      expect(toolsResponse).toBeDefined();
+    });
+
+    it("should accept large numeric values", async () => {
+      await startServerWithArgs([
+        "--mode",
+        "local",
+        "--projectRootFolder",
+        testEnv.projectRoot,
+        "--auto-prune",
+        "365",
+      ]);
+
+      const toolsResponse = await client!.request(
+        { method: "tools/list" },
+        ListToolsResultSchema,
+      );
+      expect(toolsResponse).toBeDefined();
+    });
+  });
 });

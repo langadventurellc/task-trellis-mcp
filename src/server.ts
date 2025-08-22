@@ -46,6 +46,11 @@ program
   .option(
     "--no-auto-complete-parent",
     "Disable automatic completion of parent tasks",
+  )
+  .option(
+    "--auto-prune <days>",
+    "Auto-prune closed objects older than N days (0=disabled)",
+    "0",
   );
 
 program.parse();
@@ -54,9 +59,25 @@ interface CliOptions {
   mode?: string;
   projectRootFolder?: string;
   autoCompleteParent: boolean;
+  autoPrune: string;
 }
 
 const options = program.opts<CliOptions>();
+
+// Validate and convert auto-prune argument
+const autoPruneValue = parseInt(options.autoPrune, 10);
+if (isNaN(autoPruneValue)) {
+  console.error(
+    `Error: --auto-prune must be a numeric value, got "${options.autoPrune}"`,
+  );
+  process.exit(1);
+}
+if (autoPruneValue < 0) {
+  console.error(
+    `Error: --auto-prune must be a non-negative number, got ${autoPruneValue}`,
+  );
+  process.exit(1);
+}
 
 // Read version from package.json
 function getPackageVersion(): string {
@@ -81,6 +102,7 @@ const packageVersion = getPackageVersion();
 const serverConfig: ServerConfig = {
   mode: options.mode === "remote" ? "remote" : "local",
   autoCompleteParent: options.autoCompleteParent,
+  autoPrune: autoPruneValue,
   ...(options.projectRootFolder && typeof options.projectRootFolder === "string"
     ? { planningRootFolder: path.join(options.projectRootFolder, ".trellis") }
     : {}),
