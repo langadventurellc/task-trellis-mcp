@@ -1,11 +1,26 @@
 ---
 id: T-fix-auto-prune-zero-day
 title: Fix auto-prune zero-day threshold to properly disable pruning
-status: open
+status: done
 priority: high
 prerequisites: []
-affectedFiles: {}
-log: []
+affectedFiles:
+  src/services/local/pruneClosed.ts:
+    Added early return for age <= 0 with disabled
+    message, preventing incorrect deletion behavior when auto-prune threshold is
+    zero or negative
+  src/services/local/__tests__/pruneClosed.test.ts: Updated tests to verify
+    disabled behavior for zero and negative thresholds, ensuring no repository
+    methods are called when auto-prune is disabled
+log:
+  - 'Fixed auto-prune zero-day threshold to properly disable pruning instead of
+    deleting all objects. Added early return in pruneClosed function when age <=
+    0, returning a "disabled" message without performing any object scanning or
+    deletion. This prevents the bug where age=0 created a cutoff time of "now",
+    causing all objects older than the current moment to be deleted. The fix
+    provides double protection: server startup checks for autoPrune > 0, and the
+    service function itself handles zero/negative values gracefully. All
+    existing positive threshold behavior remains unchanged.'
 schema: v1.0
 childrenIds: []
 created: 2025-08-22T19:29:40.969Z

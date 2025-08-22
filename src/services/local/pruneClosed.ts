@@ -51,6 +51,17 @@ export async function pruneClosed(
   scope?: string,
 ): Promise<{ content: Array<{ type: string; text: string }> }> {
   try {
+    // Early return for disabled auto-prune
+    if (age <= 0) {
+      const message = scope
+        ? `Auto-prune disabled (threshold: ${age} days) in scope ${scope}`
+        : `Auto-prune disabled (threshold: ${age} days)`;
+
+      return {
+        content: [{ type: "text", text: message }],
+      };
+    }
+
     // Get all objects including closed ones
     const objects = await repository.getObjects(true, scope);
 

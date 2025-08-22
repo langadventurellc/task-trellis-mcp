@@ -743,20 +743,36 @@ describe("pruneClosed", () => {
       expect(mockRepository.deleteObject).not.toHaveBeenCalled();
     });
 
-    it("should handle zero age gracefully", async () => {
-      const objects = [
-        createMockObject("T-recent", TrellisObjectStatus.DONE, 0),
-      ];
-
-      mockRepository.getObjects.mockResolvedValue(objects);
-      mockRepository.getChildrenOf.mockResolvedValue([]);
-      mockRepository.deleteObject.mockResolvedValue();
-
+    it("should return disabled message for zero age threshold", async () => {
       const result = await pruneClosed(mockRepository, 0);
 
-      // With age=0, cutoff is exactly now, so objects updated exactly at mockDate won't be older
-      expect(result.content[0].text).toContain(
-        "Pruned 0 closed objects older than 0 days",
+      // Should return disabled message without calling any repository methods
+      expect(mockRepository.getObjects).not.toHaveBeenCalled();
+      expect(mockRepository.getChildrenOf).not.toHaveBeenCalled();
+      expect(mockRepository.deleteObject).not.toHaveBeenCalled();
+      expect(result.content[0].text).toBe(
+        "Auto-prune disabled (threshold: 0 days)",
+      );
+    });
+
+    it("should return disabled message for negative age threshold", async () => {
+      const result = await pruneClosed(mockRepository, -1);
+
+      // Should return disabled message without calling any repository methods
+      expect(mockRepository.getObjects).not.toHaveBeenCalled();
+      expect(mockRepository.getChildrenOf).not.toHaveBeenCalled();
+      expect(mockRepository.deleteObject).not.toHaveBeenCalled();
+      expect(result.content[0].text).toBe(
+        "Auto-prune disabled (threshold: -1 days)",
+      );
+    });
+
+    it("should include scope in disabled message when provided", async () => {
+      const result = await pruneClosed(mockRepository, 0, "P-test-project");
+
+      expect(mockRepository.getObjects).not.toHaveBeenCalled();
+      expect(result.content[0].text).toBe(
+        "Auto-prune disabled (threshold: 0 days) in scope P-test-project",
       );
     });
 
