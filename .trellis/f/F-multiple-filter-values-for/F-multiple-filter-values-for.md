@@ -35,20 +35,29 @@ affectedFiles:
     arrays for type, status, and priority parameters. Made type parameter
     optional. Enhanced handler function with array processing logic,
     normalization helpers, and proper enum conversion while maintaining backward
-    compatibility.
+    compatibility.; Updated handleListObjects function with enhanced array-aware
+    enum conversion helpers (toTypeArray, toStatusArray, toPriorityArray) that
+    handle both single values and arrays directly, added validation to ensure at
+    least one filter is provided when type is optional, enhanced error handling
+    to identify specific invalid array elements with detailed error messages,
+    and proper empty array handling as no filter provided
   src/tools/__tests__/listObjectsTool.test.ts:
     Added comprehensive unit tests for
     array input functionality including multiple value filtering, mixed
     single/array parameters, optional type parameter, backward compatibility
-    verification, and error handling for invalid array contents.
+    verification, and error handling for invalid array contents.; Added
+    comprehensive test coverage for enhanced array functionality including tests
+    for multiple invalid values in arrays, empty array handling as no filter
+    provided, validation when no filters provided, and mixed scenarios with
+    scope filters. All new tests ensure backward compatibility is maintained.
 log: []
 schema: v1.0
 childrenIds:
   - T-add-e2e-tests-for-multiple
   - T-update-tool-handler-for-array
-  - T-update-tool-schema-for
   - T-update-repository-layer-for
   - T-update-service-layer-for
+  - T-update-tool-schema-for
 created: 2025-08-22T04:21:12.029Z
 updated: 2025-08-22T04:21:12.029Z
 ---

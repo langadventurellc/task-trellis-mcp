@@ -100,77 +100,114 @@ export async function handleListObjects(
     includeClosed?: boolean;
   };
 
-  // Helper function to normalize input to array
-  const normalizeToArray = <T>(input: T | T[] | undefined): T[] | undefined => {
-    if (input === undefined) return undefined;
-    return Array.isArray(input) ? input : [input];
-  };
+  // Enhanced helper function to convert type input to enum array
+  const toTypeArray = (
+    input: string | string[] | undefined,
+  ): TrellisObjectType[] | undefined => {
+    if (!input) return undefined;
+    const values = Array.isArray(input) ? input : [input];
+    if (values.length === 0) return undefined;
 
-  // Helper function to convert type string to enum
-  const toType = (typeString: string): TrellisObjectType => {
-    if (
-      Object.values(TrellisObjectType).includes(typeString as TrellisObjectType)
-    ) {
-      return typeString as TrellisObjectType;
+    const invalidValues: string[] = [];
+    const validValues: TrellisObjectType[] = [];
+
+    values.forEach((value) => {
+      if (
+        Object.values(TrellisObjectType).includes(value as TrellisObjectType)
+      ) {
+        validValues.push(value as TrellisObjectType);
+      } else {
+        invalidValues.push(value);
+      }
+    });
+
+    if (invalidValues.length > 0) {
+      throw new Error(
+        `Invalid type value${invalidValues.length > 1 ? "s" : ""}: ${invalidValues.join(", ")}`,
+      );
     }
-    throw new Error(`Invalid type value: ${typeString}`);
+
+    return validValues;
   };
 
-  // Helper function to convert status string to enum
-  const toStatus = (statusString: string): TrellisObjectStatus => {
-    if (
-      Object.values(TrellisObjectStatus).includes(
-        statusString as TrellisObjectStatus,
-      )
-    ) {
-      return statusString as TrellisObjectStatus;
+  // Enhanced helper function to convert status input to enum array
+  const toStatusArray = (
+    input: string | string[] | undefined,
+  ): TrellisObjectStatus[] | undefined => {
+    if (!input) return undefined;
+    const values = Array.isArray(input) ? input : [input];
+    if (values.length === 0) return undefined;
+
+    const invalidValues: string[] = [];
+    const validValues: TrellisObjectStatus[] = [];
+
+    values.forEach((value) => {
+      if (
+        Object.values(TrellisObjectStatus).includes(
+          value as TrellisObjectStatus,
+        )
+      ) {
+        validValues.push(value as TrellisObjectStatus);
+      } else {
+        invalidValues.push(value);
+      }
+    });
+
+    if (invalidValues.length > 0) {
+      throw new Error(
+        `Invalid status value${invalidValues.length > 1 ? "s" : ""}: ${invalidValues.join(", ")}`,
+      );
     }
-    throw new Error(`Invalid status value: ${statusString}`);
+
+    return validValues;
   };
 
-  // Helper function to convert priority string to enum
-  const toPriority = (priorityString: string): TrellisObjectPriority => {
-    if (
-      Object.values(TrellisObjectPriority).includes(
-        priorityString as TrellisObjectPriority,
-      )
-    ) {
-      return priorityString as TrellisObjectPriority;
-    }
-    throw new Error(`Invalid priority value: ${priorityString}`);
-  };
-
-  // Helper function to convert array of type strings to array of enums
-  const toTypeArray = (typeStrings: string[]): TrellisObjectType[] => {
-    return typeStrings.map(toType);
-  };
-
-  // Helper function to convert array of status strings to array of enums
-  const toStatusArray = (statusStrings: string[]): TrellisObjectStatus[] => {
-    return statusStrings.map(toStatus);
-  };
-
-  // Helper function to convert array of priority strings to array of enums
+  // Enhanced helper function to convert priority input to enum array
   const toPriorityArray = (
-    priorityStrings: string[],
-  ): TrellisObjectPriority[] => {
-    return priorityStrings.map(toPriority);
+    input: string | string[] | undefined,
+  ): TrellisObjectPriority[] | undefined => {
+    if (!input) return undefined;
+    const values = Array.isArray(input) ? input : [input];
+    if (values.length === 0) return undefined;
+
+    const invalidValues: string[] = [];
+    const validValues: TrellisObjectPriority[] = [];
+
+    values.forEach((value) => {
+      if (
+        Object.values(TrellisObjectPriority).includes(
+          value as TrellisObjectPriority,
+        )
+      ) {
+        validValues.push(value as TrellisObjectPriority);
+      } else {
+        invalidValues.push(value);
+      }
+    });
+
+    if (invalidValues.length > 0) {
+      throw new Error(
+        `Invalid priority value${invalidValues.length > 1 ? "s" : ""}: ${invalidValues.join(", ")}`,
+      );
+    }
+
+    return validValues;
   };
 
   try {
-    // Normalize inputs to arrays
-    const typeArray = normalizeToArray(type);
-    const statusArray = normalizeToArray(status);
-    const priorityArray = normalizeToArray(priority);
+    // Convert inputs to enum arrays using enhanced helper functions
+    const typeEnums = toTypeArray(type);
+    const statusEnums = toStatusArray(status);
+    const priorityEnums = toPriorityArray(priority);
 
-    // Convert string arrays to enum arrays
-    const typeEnums = typeArray ? toTypeArray(typeArray) : undefined;
-    const statusEnums = statusArray ? toStatusArray(statusArray) : undefined;
-    const priorityEnums = priorityArray
-      ? toPriorityArray(priorityArray)
-      : undefined;
+    // Validate that at least one filter is provided when type is optional
+    if (!typeEnums && !statusEnums && !priorityEnums && !scope) {
+      throw new Error(
+        "At least one filter parameter (type, status, priority, or scope) must be provided",
+      );
+    }
 
-    // Convert arrays back to single values or keep as arrays based on original service signature
+    // Convert arrays back to single values or keep as arrays based on service signature
     const typeParam = typeEnums
       ? typeEnums.length === 1
         ? typeEnums[0]

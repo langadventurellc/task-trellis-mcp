@@ -515,15 +515,69 @@ describe("listObjectsTool", () => {
         expect(mockService.listObjects).not.toHaveBeenCalled();
       });
 
-      it("should handle empty parameter object gracefully", async () => {
+      it("should return error for multiple invalid values in array", async () => {
+        const result = await handleListObjects(mockService, mockRepository, {
+          type: ["task", "invalid-type", "another-invalid"],
+        });
+
+        expect(result).toEqual({
+          content: [
+            {
+              type: "text",
+              text: "Error listing objects: Invalid type values: invalid-type, another-invalid",
+            },
+          ],
+        });
+        expect(mockService.listObjects).not.toHaveBeenCalled();
+      });
+
+      it("should handle empty arrays as no filter provided", async () => {
         mockService.listObjects.mockResolvedValue(mockResponse);
 
-        await handleListObjects(mockService, mockRepository, {});
+        await handleListObjects(mockService, mockRepository, {
+          type: [],
+          status: "open",
+        });
 
         expect(mockService.listObjects).toHaveBeenCalledWith(
           mockRepository,
           undefined,
           undefined,
+          TrellisObjectStatus.OPEN,
+          undefined,
+          false,
+        );
+      });
+
+      it("should return error when all arrays are empty and no other filters", async () => {
+        const result = await handleListObjects(mockService, mockRepository, {
+          type: [],
+          status: [],
+          priority: [],
+        });
+
+        expect(result).toEqual({
+          content: [
+            {
+              type: "text",
+              text: "Error listing objects: At least one filter parameter (type, status, priority, or scope) must be provided",
+            },
+          ],
+        });
+        expect(mockService.listObjects).not.toHaveBeenCalled();
+      });
+
+      it("should handle empty parameter object with scope filter", async () => {
+        mockService.listObjects.mockResolvedValue(mockResponse);
+
+        await handleListObjects(mockService, mockRepository, {
+          scope: "P-project-1",
+        });
+
+        expect(mockService.listObjects).toHaveBeenCalledWith(
+          mockRepository,
+          undefined,
+          "P-project-1",
           undefined,
           undefined,
           false,
