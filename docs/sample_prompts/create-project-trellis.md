@@ -49,7 +49,6 @@ Read and analyze the specifications:
 
 **Before gathering requirements, research the existing system:**
 
-- **Use context7 MCP tool** to research current tech stack and best practices
 - **Search codebase** for similar projects or patterns
 - **Identify existing architecture** and conventions
 - **Document discovered technologies** for consistency
@@ -104,7 +103,6 @@ Based on gathered information:
   - Detailed functional requirements
   - Technical requirements and constraints
   - Architecture overview
-  - Architecture diagrams (if applicable) written in Mermaid
   - User stories or personas
   - Non-functional requirements (performance, security, etc.)
   - Integration requirements
@@ -122,7 +120,7 @@ Based on gathered information:
 
 ### 5. Create Project Using MCP
 
-Call the Task Trellis MCP `create_object` tool to create the project with the following parameters:
+Call the Task Trellis MCP `create_issue` tool to create the project with the following parameters:
 
 - `type`: Set to `"project"`
 - `title`: The generated project title
@@ -151,7 +149,7 @@ Use /create-epics to break down this project into major work streams.
 
 <rules>
   <critical>Never directly access `.trellis/` directory directly</critical>
-  <critical>Use MCP tools for all operations (create_object, get_object, activate, etc.)</critical>
+  <critical>Use MCP tools for all operations (create_issue, get_issue, activate, etc.)</critical>
   <critical>Continue asking questions until you have a complete understanding of the requirements</critical>
   <critical>Ask one question at a time with specific options</critical>
 </rules>

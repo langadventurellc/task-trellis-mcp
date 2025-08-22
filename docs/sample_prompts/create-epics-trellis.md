@@ -51,7 +51,7 @@ The project ID may be:
 
 #### Instructions
 
-Retrieve the project using MCP `get_object` to access its comprehensive description and requirements.
+Retrieve the project using MCP `get_issue` to access its comprehensive description and requirements.
 
 ### 2. Analyze Project Specification
 
@@ -121,22 +121,12 @@ For each epic, create:
   - Technical considerations
   - Dependencies on other epics
   - Estimated scale (number of features)
-  - **Architecture Diagrams** (where applicable) - System design, data flow, component relationships in Mermaid
   - **User Stories** - Key user scenarios this epic addresses
   - **Non-functional Requirements** - Performance, security, scalability considerations specific to this epic
 
-**Architecture Diagram Guidelines:**
-
-Include Mermaid diagrams when they add value for:
-
-- **Epic Architecture**: Components and interactions within the epic
-- **Data Flow**: How information moves through the epic's components
-- **Integration Points**: How this epic connects to other epics or external systems
-- **Sequence Diagrams**: Complex processes or workflows within the epic
-
 ### 5. Create Epics Using MCP
 
-For each epic, call the Task Trellis MCP `create_object` tool:
+For each epic, call the Task Trellis MCP `create_issue` tool:
 
 - `type`: Set to `"epic"`
 - `parent`: The project ID
@@ -144,6 +134,8 @@ For each epic, call the Task Trellis MCP `create_object` tool:
 - `status`: Set to `"open"` (default, ready to begin work) or `"draft"` unless specified
 - `prerequisites`: List of epic IDs that must complete first
 - `description`: Comprehensive epic description with all elements from step 4
+
+**For standalone epics**: Simply omit the `parent` parameter entirely.
 
 ### 6. Output Format
 
@@ -267,14 +259,9 @@ Ask questions that:
 - **Missing project description**: Request project details be added first
 
 <rules>
-  <critical>Project ID is required (from arguments or context)</critical>
-  <critical>Base epic breakdown primarily on project description</critical>
   <critical>Never directly access `.trellis/` directory directly</critical>
-  <critical>Use MCP tools for all operations (create_object, get_object, etc.)</critical>
+  <critical>Use MCP tools for all operations (create_issue, get_issue, etc.)</critical>
   <critical>Ask one question at a time with specific options</critical>
   <critical>Continue asking questions until you have complete understanding of epic boundaries</critical>
-  <important>Use context7 MCP tool to research architectural patterns and best practices</important>
   <important>Epic descriptions must be detailed enough for feature creation</important>
-  <important>Configure dependencies to enable parallel work</important>
-  <important>Include architecture diagrams where they add value for understanding epic structure</important>
 </rules>

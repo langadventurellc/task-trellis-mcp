@@ -11,6 +11,7 @@ It's kinda like Jira specifically for coding agents.
 
 ## Table of Contents
 
+- [At a Glance](#at-a-glance)
 - [Why Task Trellis?](#why-task-trellis)
 - [Core Benefits](#core-benefits)
 - [Usage](#usage)
@@ -25,7 +26,7 @@ It's kinda like Jira specifically for coding agents.
 
 ## At a Glance
 
-Task Trellis works with "issues" that are projects, epics, features or tasks.
+Task Trellis works with issues that are projects, epics, features or tasks.
 
 **Tasks** are the most important type of issue. This is where the actual work gets done. Each task is a specific piece of work that needs to be completed in order to achieve the project's goals. The other issue types are too big to be a task and they exist to help organize and manage multiple tasks to accomplish a particular goal. Tasks can be standalone or part of a larger feature.
 
