@@ -10,9 +10,9 @@ export interface Repository {
   getObjects(
     includeClosed?: boolean,
     scope?: string,
-    type?: TrellisObjectType,
-    status?: TrellisObjectStatus,
-    priority?: TrellisObjectPriority,
+    type?: TrellisObjectType | TrellisObjectType[],
+    status?: TrellisObjectStatus | TrellisObjectStatus[],
+    priority?: TrellisObjectPriority | TrellisObjectPriority[],
   ): Promise<TrellisObject[]>;
   saveObject(trellisObject: TrellisObject): Promise<void>;
   deleteObject(id: string, force?: boolean): Promise<void>;

@@ -1,13 +1,29 @@
 ---
 id: F-multiple-filter-values-for
 title: Multiple Filter Values for List Objects
-status: open
+status: in-progress
 priority: medium
 prerequisites: []
-affectedFiles: {}
+affectedFiles:
+  src/repositories/Repository.ts: Updated getObjects method signature to accept
+    union types (T | T[]) for type, status, and priority parameters
+  src/repositories/local/LocalRepository.ts: Updated getObjects method to pass
+    through new array parameters to core filtering function
+  src/repositories/local/getObjects.ts: Modified filtering logic to handle both
+    single values and arrays using Array.includes() for membership testing, with
+    proper empty array handling
+  src/repositories/local/__tests__/getObjects.test.ts: Added comprehensive unit
+    tests for multiple value filtering including multiple
+    types/statuses/priorities, mixed filters, backward compatibility, and edge
+    cases
 log: []
 schema: v1.0
-childrenIds: []
+childrenIds:
+  - T-add-e2e-tests-for-multiple
+  - T-update-repository-layer-for
+  - T-update-service-layer-for
+  - T-update-tool-handler-for-array
+  - T-update-tool-schema-for
 created: 2025-08-22T04:21:12.029Z
 updated: 2025-08-22T04:21:12.029Z
 ---
