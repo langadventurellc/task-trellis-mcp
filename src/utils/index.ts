@@ -1,3 +1,4 @@
+export { checkHierarchicalPrerequisitesComplete } from "./checkHierarchicalPrerequisitesComplete";
 export { checkPrerequisitesComplete } from "./checkPrerequisitesComplete";
 export { deserializeTrellisObject } from "./deserializeTrellisObject";
 export { filterUnavailableObjects } from "./filterUnavailableObjects";
