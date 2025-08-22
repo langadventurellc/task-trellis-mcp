@@ -25,12 +25,12 @@ Full documentation is available in the [docs](docs/index.md) folder.
 
 | Prompt                                                                                                  | Result                                                                                                 |
 | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| Use Trellis to create a project for <my project details>                                                | _project created with epics, features and tasks defined and dependencies identified_                   |
+| Use Trellis to create a project for (my project details)                                                | _project created with epics, features and tasks defined and dependencies identified_                   |
 | Complete the next available task                                                                        | _next open task with dependencies satisfied is claimed and worked on_                                  |
 | Work on all of the tasks for feature F-my-feature                                                       | _all tasks for the specified feature are claimed and worked on_                                        |
-| Show me all open tasks in <my project>                                                                  | _list of all open tasks in the specified project_                                                      |
-| After working on <feature>, there's a bug. Look at what changed and fix it.                             | _bug identified by examining all the files that were modified while working on that feature and fixed_ |
-| Create a new feature <feature details>. Look at <other feature> and follow the same pattern             | _new feature created by mirroring the pattern of the other feature_                                    |
+| Show me all open tasks in (my project)                                                                  | _list of all open tasks in the specified project_                                                      |
+| After working on (feature), there's a bug. Look at what changed and fix it.                             | _bug identified by examining all the files that were modified while working on that feature and fixed_ |
+| Create a new feature (feature details). Look at (other feature) and follow the same pattern             | _new feature created by mirroring the pattern of the other feature_                                    |
 | (after finding issue with design) Update all tasks in F-my-feature and update the design specifications | _all tasks in the specified feature are updated to reflect the new design specifications_              |
 
 _... and much more!_
