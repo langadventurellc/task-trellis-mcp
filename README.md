@@ -60,6 +60,7 @@ See [Sample Prompts](docs/sample_prompts/index.md) for battle-tested prompts (wr
 - **Session Continuity**: Pick up exactly where you left off across AI conversations
 - **Workflow Management**: Built-in task claiming, completion, and validation workflows
 - **File Change Tracking**: Automatic documentation of what files were modified for each task
+- **Learn from History**: AI agents can reference past work to inform future tasks
 
 ## Core Benefits
 
