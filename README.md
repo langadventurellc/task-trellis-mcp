@@ -1,13 +1,13 @@
 # Task Trellis MCP
 
+**Project planning and task management built specifically for AI agents**
+
 [![npm version](https://badge.fury.io/js/%40langadventurellc%2Ftask-trellis-mcp.svg)](https://www.npmjs.com/package/@langadventurellc/task-trellis-mcp)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-An MCP server that helps you manage developing with AI coding agents, by breaking down complex projects and tracking its progress with built-in task management, complete with progress tracking, dependency management, and workflow automation.
+Task Trellis is an MCP server for project planning and task management built specifically for AI agents. It helps by breaking down complex projects and tracking their progress with built-in task management, complete with progress tracking, dependency management, and workflow automation. By default, all data is stored locally in Markdown files.
 
-Primarily built as a much better alternative to managing markdown checklists. Task Trellis will make it easier to define requirements, specifications, and tasks in a structured way that the agent can actually use directly.
-
-It's kinda like Jira specifically for coding agents.
+Primarily built as a much better alternative to managing markdown checklists. Task Trellis will make it easier to define requirements, specifications, and tasks in a structured way that the agents can actually use directly.
 
 ## Table of Contents
 
@@ -19,9 +19,7 @@ It's kinda like Jira specifically for coding agents.
 - [Project Hierarchy](#project-hierarchy)
 - [Prerequisites & Dependencies](#prerequisites--dependencies)
 - [File Storage](#file-storage)
-- [Installation](#installation)
-- [Quick Test](#quick-test)
-- [Configuration Options](#configuration-options)
+- [Installation and Configuration](#installation-and-configuration)
 - [Troubleshooting](#troubleshooting)
 
 ## At a Glance
@@ -215,199 +213,9 @@ your-project/
 
 Each issue is stored as a Markdown file with YAML frontmatter metadata and content body.
 
-## Installation
+## Installation and Configuration
 
-### CLI Arguments
-
-- **--mode <mode>**: Server mode. `local` or `remote` (default: `local`) (`remote` not yet supported)
-- **--projectRootFolder <path>**: Project root folder path (typically, the root of your repository, but can be in a shared folder for collaboration)
-- **--auto-complete-parent**: Enable automatic completion of parent tasks when the last task of a feature is completed
-
-### Claude Code
-
-The easiest way to install Task Trellis MCP in Claude Code:
-
-```bash
-claude mcp add @langadventurellc/task-trellis-mcp --projectRootFolder "$(pwd)"
-```
-
-Or (you'll be required to call the activate tool once to set the project root folder):
-
-```bash
-claude mcp add @langadventurellc/task-trellis-mcp
-```
-
-### VS Code with GitHub Copilot
-
-1. Add Task Trellis to your VS Code settings. Open your settings JSON file and add:
-
-```json
-{
-  "github.copilot.chat.mcpServers": {
-    "task-trellis": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@langadventurellc/task-trellis-mcp",
-        "--projectRootFolder",
-        "${workspaceFolder}"
-      ]
-    }
-  }
-}
-```
-
-### Cursor
-
-Install Task Trellis MCP in Cursor by adding to your Cursor settings:
-
-**Method 1: Via Settings UI**
-
-1. Open Cursor Settings (⌘/Ctrl + ,)
-2. Search for "MCP"
-3. Add new server with:
-   - **Name**: `task-trellis`
-   - **Command**: `npx`
-   - **Args**: `["-y", "@langadventurellc/task-trellis-mcp", "--projectRootFolder", "${workspaceFolder}"]`
-
-**Method 2: Via Configuration File**
-Add to your Cursor configuration:
-
-```json
-{
-  "mcpServers": {
-    "task-trellis": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@langadventurellc/task-trellis-mcp",
-        "--projectRootFolder",
-        "${workspaceFolder}"
-      ]
-    }
-  }
-}
-```
-
-### Windsurf
-
-Add Task Trellis to your Windsurf MCP configuration:
-
-```json
-{
-  "mcpServers": {
-    "task-trellis": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@langadventurellc/task-trellis-mcp",
-        "--projectRootFolder",
-        "${workspaceRoot}"
-      ]
-    }
-  }
-}
-```
-
-### Cline (VS Code Extension)
-
-1. Add Task Trellis to your Cline MCP servers in VS Code settings:
-
-```json
-{
-  "cline.mcpServers": {
-    "task-trellis": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@langadventurellc/task-trellis-mcp",
-        "--projectRootFolder",
-        "${workspaceFolder}"
-      ]
-    }
-  }
-}
-```
-
-### Continue (VS Code Extension)
-
-1. Add to your Continue configuration file (`~/.continue/config.json`):
-
-```json
-{
-  "mcpServers": {
-    "task-trellis": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@langadventurellc/task-trellis-mcp",
-        "--projectRootFolder",
-        "/path/to/your/project"
-      ]
-    }
-  }
-}
-```
-
-### Other MCP Clients
-
-For any MCP-compatible client, use this configuration:
-
-```json
-{
-  "mcpServers": {
-    "task-trellis": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@langadventurellc/task-trellis-mcp",
-        "--projectRootFolder",
-        "/absolute/path/to/project"
-      ]
-    }
-  }
-}
-```
-
-## Quick Test
-
-After installation, test that Task Trellis is working by asking your AI assistant:
-
-> "Create a new project called 'My Test Project'"
-
-If configured correctly, the AI should respond with a confirmation and create the project structure in your specified project root folder.
-
-## Configuration Options
-
-The Task Trellis MCP server supports these command-line options:
-
-- `--mode <mode>` - Server mode (default: "local")
-  - `local` - Use local file-based storage
-  - `remote` - Use remote repository (planned feature)
-
-- `--projectRootFolder <path>` - Project root folder path
-  - Creates a `.trellis` folder inside the project root for task storage
-  - Example: `--projectRootFolder /path/to/my-project` creates `/path/to/my-project/.trellis/`
-
-**Advanced Configuration Example:**
-
-```json
-{
-  "mcpServers": {
-    "task-trellis": {
-      "type": "stdio",
-      "command": "npx",
-      "args": [
-        "@langadventurellc/task-trellis-mcp",
-        "--mode",
-        "local",
-        "--projectRootFolder",
-        "/path/to/your/project"
-      ]
-    }
-  }
-}
-```
+See [installation instructions](docs/installation.md).
 
 ## Troubleshooting
 
