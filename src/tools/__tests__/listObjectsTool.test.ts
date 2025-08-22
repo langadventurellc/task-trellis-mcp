@@ -551,22 +551,24 @@ describe("listObjectsTool", () => {
         );
       });
 
-      it("should return error when all arrays are empty and no other filters", async () => {
+      it("should handle empty arrays as no filter provided", async () => {
+        mockService.listObjects.mockResolvedValue(mockResponse);
+
         const result = await handleListObjects(mockService, mockRepository, {
           type: [],
           status: [],
           priority: [],
         });
 
-        expect(result).toEqual({
-          content: [
-            {
-              type: "text",
-              text: "Error listing objects: At least one filter parameter (type, status, priority, or scope) must be provided",
-            },
-          ],
-        });
-        expect(mockService.listObjects).not.toHaveBeenCalled();
+        expect(mockService.listObjects).toHaveBeenCalledWith(
+          mockRepository,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          false,
+        );
+        expect(result).toEqual(mockResponse);
       });
 
       it("should handle empty parameter object with scope filter", async () => {
@@ -584,6 +586,22 @@ describe("listObjectsTool", () => {
           undefined,
           false,
         );
+      });
+
+      it("should handle no filter parameters and return all objects", async () => {
+        mockService.listObjects.mockResolvedValue(mockResponse);
+
+        const result = await handleListObjects(mockService, mockRepository, {});
+
+        expect(mockService.listObjects).toHaveBeenCalledWith(
+          mockRepository,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          false,
+        );
+        expect(result).toEqual(mockResponse);
       });
 
       // Backward compatibility tests

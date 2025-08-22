@@ -1804,26 +1804,68 @@ describe("E2E CRUD - listObjects", () => {
       expect(Array.isArray(objects)).toBe(true);
     });
 
-    it("should require at least one filter when type is omitted", async () => {
+    it("should return all objects when no filters are provided", async () => {
+      // Create some test objects first
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-no-filter-test",
+        createObjectContent({
+          id: "T-no-filter-test",
+          title: "No Filter Test Task",
+          status: "open",
+          priority: "high",
+        }),
+        { status: "open" },
+      );
+
+      await createObjectFile(
+        testEnv.projectRoot,
+        "project",
+        "P-no-filter-test",
+        createObjectContent({
+          id: "P-no-filter-test",
+          title: "No Filter Test Project",
+          status: "open",
+          priority: "medium",
+        }),
+      );
+
       const result = await client.callTool("list_issues", {});
 
-      expect(result.content[0].text).toContain("Error listing objects");
-      expect(result.content[0].text).toContain(
-        "At least one filter parameter (type, status, priority, or scope) must be provided",
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
+      // Should return all objects without error
+      expect(Array.isArray(objects)).toBe(true);
+      expect(objects.length).toBeGreaterThan(0);
+      expect(objects).toContain("T-no-filter-test");
+      expect(objects).toContain("P-no-filter-test");
     });
 
-    it("should handle empty arrays in all parameters", async () => {
+    it("should handle empty arrays in all parameters as no filter", async () => {
+      // Create some test objects first
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        "F-empty-array-test",
+        createObjectContent({
+          id: "F-empty-array-test",
+          title: "Empty Array Test Feature",
+          status: "open",
+          priority: "low",
+        }),
+      );
+
       const result = await client.callTool("list_issues", {
         type: [],
         status: [],
         priority: [],
       });
 
-      expect(result.content[0].text).toContain("Error listing objects");
-      expect(result.content[0].text).toContain(
-        "At least one filter parameter (type, status, priority, or scope) must be provided",
-      );
+      const objects = extractObjectIds(result.content[0].text as string);
+      // Should return all objects without error
+      expect(Array.isArray(objects)).toBe(true);
+      expect(objects.length).toBeGreaterThan(0);
+      expect(objects).toContain("F-empty-array-test");
     });
   });
 });

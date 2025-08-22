@@ -200,13 +200,6 @@ export async function handleListObjects(
     const statusEnums = toStatusArray(status);
     const priorityEnums = toPriorityArray(priority);
 
-    // Validate that at least one filter is provided when type is optional
-    if (!typeEnums && !statusEnums && !priorityEnums && !scope) {
-      throw new Error(
-        "At least one filter parameter (type, status, priority, or scope) must be provided",
-      );
-    }
-
     // Convert arrays back to single values or keep as arrays based on service signature
     const typeParam = typeEnums
       ? typeEnums.length === 1
