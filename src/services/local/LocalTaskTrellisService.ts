@@ -111,6 +111,15 @@ export class LocalTaskTrellisService implements TaskTrellisService {
     return appendObjectLog(repository, id, contents);
   }
 
+  async pruneClosed(
+    repository: Repository,
+    age: number,
+    scope?: string,
+  ): Promise<{ content: Array<{ type: string; text: string }> }> {
+    const { pruneClosed } = await import("./pruneClosed");
+    return pruneClosed(repository, age, scope);
+  }
+
   async appendModifiedFiles(
     repository: Repository,
     id: string,

@@ -79,6 +79,15 @@ export interface TaskTrellisService {
   ): Promise<{ content: Array<{ type: string; text: string }> }>;
 
   /**
+   * Prunes closed objects from the task trellis system
+   */
+  pruneClosed(
+    repository: Repository,
+    age: number,
+    scope?: string,
+  ): Promise<{ content: Array<{ type: string; text: string }> }>;
+
+  /**
    * Appends modified files information to a trellis object
    */
   appendModifiedFiles(

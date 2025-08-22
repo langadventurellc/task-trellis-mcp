@@ -16,6 +16,7 @@ describe("completeTaskTool", () => {
       claimTask: jest.fn(),
       listObjects: jest.fn(),
       appendObjectLog: jest.fn(),
+      pruneClosed: jest.fn(),
       appendModifiedFiles: jest.fn(),
     };
 
