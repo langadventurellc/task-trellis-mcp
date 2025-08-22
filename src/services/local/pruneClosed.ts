@@ -1,6 +1,50 @@
 import { isClosed, isOpen } from "../../models";
 import { Repository } from "../../repositories";
 
+/**
+ * Recursively checks if an object has any open descendants at any level.
+ *
+ * @param objectId - The ID of the object to check for open descendants
+ * @param repository - The repository to query for children
+ * @param visited - Set to track visited objects and prevent infinite loops
+ * @returns Promise<boolean> - true if any descendant at any level is open
+ */
+async function hasOpenDescendants(
+  objectId: string,
+  repository: Repository,
+  visited: Set<string> = new Set(),
+): Promise<boolean> {
+  // Prevent infinite loops by tracking visited objects
+  if (visited.has(objectId)) {
+    return false;
+  }
+  visited.add(objectId);
+
+  try {
+    // Get all children (including closed ones)
+    const children = await repository.getChildrenOf(objectId, true);
+
+    // Check each child
+    for (const child of children) {
+      // If any direct child is open, return true immediately
+      if (isOpen(child)) {
+        return true;
+      }
+
+      // Recursively check if this child has open descendants
+      if (await hasOpenDescendants(child.id, repository, visited)) {
+        return true;
+      }
+    }
+
+    return false;
+  } catch (error) {
+    // If we can't check descendants, err on the side of caution
+    console.error(`Error checking descendants for ${objectId}:`, error);
+    return false;
+  }
+}
+
 export async function pruneClosed(
   repository: Repository,
   age: number,
@@ -28,12 +72,14 @@ export async function pruneClosed(
 
     for (const obj of objectsToDelete) {
       try {
-        // Check if object has open children
-        const children = await repository.getChildrenOf(obj.id, true); // Include closed children to check all
-        const hasOpenChildren = children.some((child) => isOpen(child));
+        // Check if object has open descendants at any level
+        const hasOpenDescendantsResult = await hasOpenDescendants(
+          obj.id,
+          repository,
+        );
 
-        if (hasOpenChildren) {
-          // Skip deletion if object has open children
+        if (hasOpenDescendantsResult) {
+          // Skip deletion if object has open descendants
           skippedIds.push(obj.id);
           continue;
         }

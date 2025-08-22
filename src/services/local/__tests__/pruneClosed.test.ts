@@ -282,7 +282,8 @@ describe("pruneClosed", () => {
 
       const result = await pruneClosed(mockRepository, 1);
 
-      expect(mockRepository.getChildrenOf).toHaveBeenCalledTimes(3);
+      // With recursive checking, we call getChildrenOf for each object and their descendants
+      expect(mockRepository.getChildrenOf).toHaveBeenCalledTimes(4);
       expect(mockRepository.deleteObject).toHaveBeenCalledTimes(2);
       expect(mockRepository.deleteObject).toHaveBeenCalledWith(
         "F-parent-2",
@@ -330,22 +331,278 @@ describe("pruneClosed", () => {
 
       const result = await pruneClosed(mockRepository, 1);
 
-      // Grandparent has no direct open children (parent is closed), so it gets deleted
-      // Parent should be skipped because it has open children
-      expect(mockRepository.deleteObject).toHaveBeenCalledTimes(1);
+      // Both grandparent and parent should be skipped because they have open descendants
+      expect(mockRepository.deleteObject).toHaveBeenCalledTimes(0);
+      expect(result.content[0].text).toContain(
+        "Pruned 0 closed objects older than 1 days",
+      );
+      expect(result.content[0].text).toContain(
+        "Skipped 2 objects with open children: E-grandparent, F-parent",
+      );
+    });
+  });
+
+  describe("deep hierarchy recursive descendant checking", () => {
+    it("should protect ancestors when deep descendant is open (4+ levels)", async () => {
+      const project = createMockObject(
+        "P-project",
+        TrellisObjectStatus.DONE,
+        10,
+      );
+      const epic = createMockObject("E-epic", TrellisObjectStatus.DONE, 8);
+      const feature = createMockObject(
+        "F-feature",
+        TrellisObjectStatus.DONE,
+        6,
+      );
+      const task = createMockObject("T-task", TrellisObjectStatus.DONE, 4);
+      const subtask = createMockObject(
+        "ST-subtask",
+        TrellisObjectStatus.OPEN,
+        2,
+      );
+
+      mockRepository.getObjects.mockResolvedValue([
+        project,
+        epic,
+        feature,
+        task,
+      ]);
+
+      mockRepository.getChildrenOf.mockImplementation((parentId) => {
+        if (parentId === "P-project") return Promise.resolve([epic]);
+        if (parentId === "E-epic") return Promise.resolve([feature]);
+        if (parentId === "F-feature") return Promise.resolve([task]);
+        if (parentId === "T-task") return Promise.resolve([subtask]);
+        return Promise.resolve([]);
+      });
+
+      mockRepository.deleteObject.mockResolvedValue();
+
+      const result = await pruneClosed(mockRepository, 1);
+
+      // All ancestors should be protected due to the open subtask at the deepest level
+      expect(mockRepository.deleteObject).toHaveBeenCalledTimes(0);
+      expect(result.content[0].text).toContain(
+        "Pruned 0 closed objects older than 1 days",
+      );
+      expect(result.content[0].text).toContain(
+        "Skipped 4 objects with open children: P-project, E-epic, F-feature, T-task",
+      );
+    });
+
+    it("should allow deletion when all deep descendants are closed", async () => {
+      const project = createMockObject(
+        "P-project",
+        TrellisObjectStatus.DONE,
+        10,
+      );
+      const epic = createMockObject("E-epic", TrellisObjectStatus.DONE, 8);
+      const feature = createMockObject(
+        "F-feature",
+        TrellisObjectStatus.DONE,
+        6,
+      );
+      const task1 = createMockObject("T-task1", TrellisObjectStatus.DONE, 4);
+      const task2 = createMockObject("T-task2", TrellisObjectStatus.WONT_DO, 3);
+      const subtask1 = createMockObject(
+        "ST-subtask1",
+        TrellisObjectStatus.DONE,
+        2,
+      );
+      const subtask2 = createMockObject(
+        "ST-subtask2",
+        TrellisObjectStatus.WONT_DO,
+        1,
+      );
+
+      mockRepository.getObjects.mockResolvedValue([
+        project,
+        epic,
+        feature,
+        task1,
+        task2,
+      ]);
+
+      mockRepository.getChildrenOf.mockImplementation((parentId) => {
+        if (parentId === "P-project") return Promise.resolve([epic]);
+        if (parentId === "E-epic") return Promise.resolve([feature]);
+        if (parentId === "F-feature") return Promise.resolve([task1, task2]);
+        if (parentId === "T-task1") return Promise.resolve([subtask1]);
+        if (parentId === "T-task2") return Promise.resolve([subtask2]);
+        return Promise.resolve([]);
+      });
+
+      mockRepository.deleteObject.mockResolvedValue();
+
+      const result = await pruneClosed(mockRepository, 1);
+
+      // All objects should be deleted since all descendants are closed
+      expect(mockRepository.deleteObject).toHaveBeenCalledTimes(5);
       expect(mockRepository.deleteObject).toHaveBeenCalledWith(
-        "E-grandparent",
+        "P-project",
         true,
       );
+      expect(mockRepository.deleteObject).toHaveBeenCalledWith("E-epic", true);
+      expect(mockRepository.deleteObject).toHaveBeenCalledWith(
+        "F-feature",
+        true,
+      );
+      expect(mockRepository.deleteObject).toHaveBeenCalledWith("T-task1", true);
+      expect(mockRepository.deleteObject).toHaveBeenCalledWith("T-task2", true);
       expect(result.content[0].text).toContain(
-        "Pruned 1 closed objects older than 1 days",
+        "Pruned 5 closed objects older than 1 days",
+      );
+    });
+
+    it("should handle mixed branches - some with open descendants, some without", async () => {
+      const epic = createMockObject("E-epic", TrellisObjectStatus.DONE, 8);
+      const feature1 = createMockObject(
+        "F-feature1",
+        TrellisObjectStatus.DONE,
+        6,
+      );
+      const feature2 = createMockObject(
+        "F-feature2",
+        TrellisObjectStatus.DONE,
+        6,
+      );
+      const task1 = createMockObject("T-task1", TrellisObjectStatus.OPEN, 4); // Open task
+      const task2 = createMockObject("T-task2", TrellisObjectStatus.DONE, 4); // Closed task
+      const subtask = createMockObject(
+        "ST-subtask",
+        TrellisObjectStatus.DONE,
+        2,
+      );
+
+      mockRepository.getObjects.mockResolvedValue([
+        epic,
+        feature1,
+        feature2,
+        task2,
+      ]);
+
+      mockRepository.getChildrenOf.mockImplementation((parentId) => {
+        if (parentId === "E-epic") return Promise.resolve([feature1, feature2]);
+        if (parentId === "F-feature1") return Promise.resolve([task1]); // Branch with open task
+        if (parentId === "F-feature2") return Promise.resolve([task2]); // Branch with closed task
+        if (parentId === "T-task2") return Promise.resolve([subtask]);
+        return Promise.resolve([]);
+      });
+
+      mockRepository.deleteObject.mockResolvedValue();
+
+      const result = await pruneClosed(mockRepository, 1);
+
+      // Epic and feature1 should be protected due to open task1
+      // Feature2 and task2 should be deleted (all descendants closed)
+      expect(mockRepository.deleteObject).toHaveBeenCalledTimes(2);
+      expect(mockRepository.deleteObject).toHaveBeenCalledWith(
+        "F-feature2",
+        true,
+      );
+      expect(mockRepository.deleteObject).toHaveBeenCalledWith("T-task2", true);
+      expect(result.content[0].text).toContain(
+        "Pruned 2 closed objects older than 1 days",
       );
       expect(result.content[0].text).toContain(
-        "Deleted objects: E-grandparent",
+        "Skipped 2 objects with open children: E-epic, F-feature1",
       );
+    });
+
+    it("should handle circular reference protection gracefully", async () => {
+      const obj1 = createMockObject("T-obj1", TrellisObjectStatus.DONE, 5);
+      const obj2 = createMockObject("T-obj2", TrellisObjectStatus.DONE, 5);
+
+      mockRepository.getObjects.mockResolvedValue([obj1, obj2]);
+
+      // Create circular reference: obj1 -> obj2 -> obj1
+      mockRepository.getChildrenOf.mockImplementation((parentId) => {
+        if (parentId === "T-obj1") return Promise.resolve([obj2]);
+        if (parentId === "T-obj2") return Promise.resolve([obj1]);
+        return Promise.resolve([]);
+      });
+
+      mockRepository.deleteObject.mockResolvedValue();
+
+      const result = await pruneClosed(mockRepository, 1);
+
+      // Should complete without infinite loop and delete both objects
+      // (since they're all closed, the circular reference shouldn't prevent deletion)
+      expect(mockRepository.deleteObject).toHaveBeenCalledTimes(2);
       expect(result.content[0].text).toContain(
-        "Skipped 1 objects with open children: F-parent",
+        "Pruned 2 closed objects older than 1 days",
       );
+    });
+
+    it("should handle empty hierarchy levels gracefully", async () => {
+      const parent = createMockObject("F-parent", TrellisObjectStatus.DONE, 5);
+      const middleChild = createMockObject(
+        "T-middle",
+        TrellisObjectStatus.DONE,
+        4,
+      );
+      const leafChild = createMockObject(
+        "ST-leaf",
+        TrellisObjectStatus.OPEN,
+        2,
+      );
+
+      mockRepository.getObjects.mockResolvedValue([parent, middleChild]);
+
+      mockRepository.getChildrenOf.mockImplementation((parentId) => {
+        if (parentId === "F-parent") return Promise.resolve([middleChild]);
+        if (parentId === "T-middle") return Promise.resolve([leafChild]);
+        return Promise.resolve([]);
+      });
+
+      mockRepository.deleteObject.mockResolvedValue();
+
+      const result = await pruneClosed(mockRepository, 1);
+
+      // Both parent and middle should be protected due to open leaf
+      expect(mockRepository.deleteObject).toHaveBeenCalledTimes(0);
+      expect(result.content[0].text).toContain(
+        "Skipped 2 objects with open children: F-parent, T-middle",
+      );
+    });
+
+    it("should handle child query errors gracefully in recursive checking", async () => {
+      const parent = createMockObject("F-parent", TrellisObjectStatus.DONE, 5);
+      const failingChild = createMockObject(
+        "T-failing",
+        TrellisObjectStatus.DONE,
+        4,
+      );
+
+      mockRepository.getObjects.mockResolvedValue([parent]);
+
+      mockRepository.getChildrenOf.mockImplementation((parentId) => {
+        if (parentId === "F-parent") return Promise.resolve([failingChild]);
+        if (parentId === "T-failing")
+          return Promise.reject(new Error("Query failed"));
+        return Promise.resolve([]);
+      });
+
+      mockRepository.deleteObject.mockResolvedValue();
+
+      const consoleSpy = jest.spyOn(console, "error").mockImplementation();
+
+      const _result = await pruneClosed(mockRepository, 1);
+
+      // Should handle error gracefully and proceed with deletion
+      // (when we can't check descendants, we err on the side of deletion)
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Error checking descendants for T-failing:",
+        expect.any(Error),
+      );
+      expect(mockRepository.deleteObject).toHaveBeenCalledTimes(1);
+      expect(mockRepository.deleteObject).toHaveBeenCalledWith(
+        "F-parent",
+        true,
+      );
+
+      consoleSpy.mockRestore();
     });
   });
 
@@ -370,17 +627,22 @@ describe("pruneClosed", () => {
       const result = await pruneClosed(mockRepository, 1);
 
       // Should continue processing other objects even if one child query fails
-      expect(mockRepository.deleteObject).toHaveBeenCalledTimes(1);
+      // With recursive checking, parent-1 gets deleted too (error in descendant check is handled gracefully)
+      expect(mockRepository.deleteObject).toHaveBeenCalledTimes(2);
+      expect(mockRepository.deleteObject).toHaveBeenCalledWith(
+        "F-parent-1",
+        true,
+      );
       expect(mockRepository.deleteObject).toHaveBeenCalledWith(
         "F-parent-2",
         true,
       );
       expect(consoleSpy).toHaveBeenCalledWith(
-        "Failed to delete object F-parent-1:",
+        "Error checking descendants for F-parent-1:",
         expect.any(Error),
       );
       expect(result.content[0].text).toContain(
-        "Pruned 1 closed objects older than 1 days",
+        "Pruned 2 closed objects older than 1 days",
       );
 
       consoleSpy.mockRestore();
