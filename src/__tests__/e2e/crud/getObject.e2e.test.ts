@@ -86,7 +86,7 @@ describe("E2E CRUD - getObject", () => {
       expect(object.priority).toBe("high");
       expect(object.parent).toBeUndefined();
       expect(object.prerequisites).toEqual(["P-dep1", "P-dep2"]);
-      expect(object.affectedFiles).toEqual({});
+      expect(object.affectedFiles).toEqual({ "src/index.ts": "Initial setup" });
       expect(object.log).toEqual(["Created project", "Updated priority"]);
       expect(object.schema).toBe("1.1");
       expect(object.body).toBe("This is the project description");
@@ -350,6 +350,77 @@ describe("E2E CRUD - getObject", () => {
       expect(task2.parent).toBe(featureId);
       expect(task2.status).toBe("done");
     });
+
+    it("should properly display affected files in response (regression test)", async () => {
+      // This test specifically validates the bug fix where affected files
+      // weren't being properly serialized due to Map JSON.stringify issue
+      const taskData: ObjectData = {
+        id: "T-affected-files-test",
+        title: "Task with Affected Files",
+        status: "in-progress",
+        priority: "high",
+        affectedFiles: {
+          "src/components/Button.tsx": "Added new button component",
+          "src/styles/theme.css": "Updated button theme",
+          "tests/Button.test.tsx": "Added comprehensive tests",
+          "docs/components.md": "Updated component documentation",
+        },
+        log: [
+          "Started implementation",
+          "Added component structure",
+          "Implemented styling",
+          "Added tests and documentation",
+        ],
+      };
+
+      const content = createObjectContent(taskData);
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-affected-files-test",
+        content,
+      );
+
+      const result = await client.callTool("get_object", {
+        id: "T-affected-files-test",
+      });
+
+      expect(result.content[0].type).toBe("text");
+      const object = parseGetObjectResponse(result.content[0].text as string);
+
+      // Verify affected files are properly populated (not empty)
+      expect(object.affectedFiles).toBeDefined();
+      expect(typeof object.affectedFiles).toBe("object");
+      expect(
+        Object.keys(object.affectedFiles as Record<string, string>),
+      ).toHaveLength(4);
+
+      // Verify specific affected files
+      expect(object.affectedFiles["src/components/Button.tsx"]).toBe(
+        "Added new button component",
+      );
+      expect(object.affectedFiles["src/styles/theme.css"]).toBe(
+        "Updated button theme",
+      );
+      expect(object.affectedFiles["tests/Button.test.tsx"]).toBe(
+        "Added comprehensive tests",
+      );
+      expect(object.affectedFiles["docs/components.md"]).toBe(
+        "Updated component documentation",
+      );
+
+      // Verify log is also properly populated
+      expect(object.log).toHaveLength(4);
+      expect(object.log).toContain("Started implementation");
+      expect(object.log).toContain("Added tests and documentation");
+
+      // Verify that the response text contains the affected files content
+      const responseText = result.content[0].text as string;
+      expect(responseText).toContain("src/components/Button.tsx");
+      expect(responseText).toContain("Added new button component");
+      expect(responseText).toContain("src/styles/theme.css");
+      expect(responseText).toContain("Updated button theme");
+    });
   });
 
   describe("Error Handling", () => {
@@ -603,7 +674,12 @@ This is a complex task with extensive documentation.`,
       const object = parseGetObjectResponse(result.content[0].text as string);
       expect(object.id).toBe("T-complex");
       expect(object.prerequisites).toHaveLength(4);
-      expect(Object.keys(object.affectedFiles as object)).toHaveLength(0);
+      expect(Object.keys(object.affectedFiles as object)).toHaveLength(3);
+      expect(object.affectedFiles).toEqual({
+        "src/index.ts": "Updated main entry",
+        "src/utils/helper.ts": "Added utility function",
+        "tests/index.test.ts": "Added test coverage",
+      });
       expect(object.log).toHaveLength(4);
       expect(object.body).toContain("# Complex Task Implementation");
       expect(object.body).toContain("This is a complex task");

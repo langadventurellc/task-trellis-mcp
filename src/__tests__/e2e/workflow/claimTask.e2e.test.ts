@@ -561,4 +561,63 @@ describe("E2E Workflow - claimTask", () => {
       expect(featureFile.yaml.status).toBe("in-progress");
     });
   });
+
+  describe("Response Format", () => {
+    it("should properly display affected files in claim response (regression test)", async () => {
+      // This test validates that the claimTask response properly serializes
+      // affected files in the "Successfully claimed task" message
+      const taskData: ObjectData = {
+        id: "T-claim-with-files",
+        title: "Task with Affected Files to Claim",
+        status: "open",
+        priority: "high",
+        affectedFiles: {
+          "src/api/auth.ts": "Authentication service",
+          "src/middleware/jwt.ts": "JWT middleware",
+          "tests/auth.test.ts": "Authentication tests",
+        },
+        log: [
+          "Created authentication service",
+          "Added JWT middleware",
+          "Implemented tests",
+        ],
+        body: "Implement user authentication system",
+      };
+
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        "T-claim-with-files",
+        createObjectContent(taskData),
+      );
+
+      // Claim the task
+      const result = await client.callTool("claim_task", {
+        taskId: "T-claim-with-files",
+      });
+
+      expect(result.content[0].text).toContain("Successfully claimed task");
+
+      // Verify that the response contains the affected files (not empty {})
+      const responseText = result.content[0].text as string;
+      expect(responseText).toContain("src/api/auth.ts");
+      expect(responseText).toContain("Authentication service");
+      expect(responseText).toContain("src/middleware/jwt.ts");
+      expect(responseText).toContain("JWT middleware");
+      expect(responseText).toContain("tests/auth.test.ts");
+      expect(responseText).toContain("Authentication tests");
+
+      // Verify that the log is also displayed
+      expect(responseText).toContain("Created authentication service");
+      expect(responseText).toContain("Added JWT middleware");
+      expect(responseText).toContain("Implemented tests");
+
+      // Verify the task was actually claimed (status updated)
+      const taskFile = await readObjectFile(
+        testEnv.projectRoot,
+        "t/open/T-claim-with-files.md",
+      );
+      expect(taskFile.yaml.status).toBe("in-progress");
+    });
+  });
 });

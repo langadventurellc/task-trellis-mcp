@@ -30,7 +30,14 @@ export async function claimTask(
       content: [
         {
           type: "text",
-          text: `Successfully claimed task: ${JSON.stringify(updatedTask, null, 2)}`,
+          text: `Successfully claimed task: ${JSON.stringify(
+            {
+              ...updatedTask,
+              affectedFiles: Object.fromEntries(updatedTask.affectedFiles),
+            },
+            null,
+            2,
+          )}`,
         },
       ],
     };
@@ -102,7 +109,14 @@ async function updateTaskStatus(
     console.warn("Failed to update parent hierarchy:", error);
   }
 
-  return updatedTask;
+  // Re-read the object from repository to ensure proper Map reconstruction
+  // This is needed because the in-memory object may not have the Map properly reconstructed
+  const savedTask = await repository.getObjectById(task.id);
+  if (!savedTask) {
+    throw new Error(`Failed to retrieve saved task with ID "${task.id}"`);
+  }
+
+  return savedTask;
 }
 
 async function validateTaskForClaiming(

@@ -127,12 +127,17 @@ describe("claimTask service function", () => {
       const mockFeature = createMockFeature();
       const mockEpic = createMockEpic();
       const mockProject = createMockProject();
+      const mockUpdatedTask = {
+        ...mockTask,
+        status: TrellisObjectStatus.IN_PROGRESS,
+      };
 
       mockRepository.getObjectById
         .mockResolvedValueOnce(mockTask) // First call for the task
-        .mockResolvedValueOnce(mockFeature) // Second call for feature parent
-        .mockResolvedValueOnce(mockEpic) // Third call for epic parent
-        .mockResolvedValueOnce(mockProject); // Fourth call for project parent
+        .mockResolvedValueOnce(mockUpdatedTask) // Second call to re-read after save
+        .mockResolvedValueOnce(mockFeature) // Third call for feature parent
+        .mockResolvedValueOnce(mockEpic) // Fourth call for epic parent
+        .mockResolvedValueOnce(mockProject); // Fifth call for project parent
 
       mockRepository.getObjects.mockResolvedValue([mockTask]);
       mockRepository.saveObject.mockResolvedValue();
@@ -336,8 +341,13 @@ describe("claimTask service function", () => {
 
       const availableTasks = [mockTasks[1]]; // Only high priority task is available
       const sortedTasks = [mockTasks[1]]; // Highest priority first
+      const updatedTask = {
+        ...mockTasks[1],
+        status: TrellisObjectStatus.IN_PROGRESS,
+      };
 
       mockRepository.getObjects.mockResolvedValue(mockTasks);
+      mockRepository.getObjectById.mockResolvedValue(updatedTask); // Re-read after save
       mockFilterUnavailableObjects.mockReturnValue(availableTasks);
       mockSortTrellisObjects.mockReturnValue(sortedTasks);
       mockRepository.saveObject.mockResolvedValue();
@@ -452,12 +462,18 @@ describe("claimTask service function", () => {
     it("should update feature parent to in-progress when claiming task", async () => {
       const mockFeature = createMockFeature({
         status: TrellisObjectStatus.OPEN,
+        parent: undefined, // No parent to stop hierarchy here
       });
       const mockTask = createMockTask({ parent: "F-test-feature" });
+      const updatedTask = {
+        ...mockTask,
+        status: TrellisObjectStatus.IN_PROGRESS,
+      };
 
       mockRepository.getObjectById
         .mockResolvedValueOnce(mockTask) // First call for the task
-        .mockResolvedValueOnce(mockFeature); // Second call for the parent feature
+        .mockResolvedValueOnce(mockFeature) // Second call for the parent feature
+        .mockResolvedValueOnce(updatedTask); // Third call to re-read after save
       mockRepository.saveObject.mockResolvedValue();
 
       const result = await claimTask(mockRepository, undefined, "T-test-task");
@@ -483,12 +499,17 @@ describe("claimTask service function", () => {
         status: TrellisObjectStatus.OPEN,
       });
       const mockTask = createMockTask({ parent: "F-test-feature" });
+      const updatedTask = {
+        ...mockTask,
+        status: TrellisObjectStatus.IN_PROGRESS,
+      };
 
       mockRepository.getObjectById
         .mockResolvedValueOnce(mockTask) // Task
         .mockResolvedValueOnce(mockFeature) // Feature
         .mockResolvedValueOnce(mockEpic) // Epic
-        .mockResolvedValueOnce(mockProject); // Project
+        .mockResolvedValueOnce(mockProject) // Project
+        .mockResolvedValueOnce(updatedTask); // Re-read task after save
       mockRepository.saveObject.mockResolvedValue();
 
       const result = await claimTask(mockRepository, undefined, "T-test-task");
@@ -521,11 +542,16 @@ describe("claimTask service function", () => {
         status: TrellisObjectStatus.OPEN,
       });
       const mockTask = createMockTask({ parent: "F-test-feature" });
+      const updatedTask = {
+        ...mockTask,
+        status: TrellisObjectStatus.IN_PROGRESS,
+      };
 
       mockRepository.getObjectById
         .mockResolvedValueOnce(mockTask) // Task
         .mockResolvedValueOnce(mockFeature) // Feature
-        .mockResolvedValueOnce(mockEpic); // Epic (already in progress)
+        .mockResolvedValueOnce(mockEpic) // Epic (already in progress)
+        .mockResolvedValueOnce(updatedTask); // Re-read task after save
       mockRepository.saveObject.mockResolvedValue();
 
       const result = await claimTask(mockRepository, undefined, "T-test-task");
@@ -561,10 +587,15 @@ describe("claimTask service function", () => {
 
     it("should handle non-existent parent gracefully", async () => {
       const mockTask = createMockTask({ parent: "F-nonexistent" });
+      const updatedTask = {
+        ...mockTask,
+        status: TrellisObjectStatus.IN_PROGRESS,
+      };
 
       mockRepository.getObjectById
         .mockResolvedValueOnce(mockTask) // Task exists
-        .mockResolvedValueOnce(null); // Parent doesn't exist
+        .mockResolvedValueOnce(null) // Parent doesn't exist
+        .mockResolvedValueOnce(updatedTask); // Re-read task after save
       mockRepository.saveObject.mockResolvedValue();
 
       const result = await claimTask(mockRepository, undefined, "T-test-task");
@@ -579,10 +610,15 @@ describe("claimTask service function", () => {
 
     it("should handle parent hierarchy update errors without failing task claim", async () => {
       const mockTask = createMockTask({ parent: "F-test-feature" });
+      const updatedTask = {
+        ...mockTask,
+        status: TrellisObjectStatus.IN_PROGRESS,
+      };
 
       mockRepository.getObjectById
         .mockResolvedValueOnce(mockTask) // Task lookup succeeds
-        .mockRejectedValueOnce(new Error("Parent lookup failed")); // Parent lookup fails
+        .mockRejectedValueOnce(new Error("Parent lookup failed")) // Parent lookup fails
+        .mockResolvedValueOnce(updatedTask); // Re-read task after save
       mockRepository.saveObject.mockResolvedValue();
 
       const result = await claimTask(mockRepository, undefined, "T-test-task");
@@ -594,15 +630,21 @@ describe("claimTask service function", () => {
     it("should update parents even when using force flag", async () => {
       const mockFeature = createMockFeature({
         status: TrellisObjectStatus.OPEN,
+        parent: undefined, // No parent to stop hierarchy here
       });
       const mockTask = createMockTask({
         parent: "F-test-feature",
         status: TrellisObjectStatus.IN_PROGRESS, // Already in progress
       });
+      const updatedTask = {
+        ...mockTask,
+        status: TrellisObjectStatus.IN_PROGRESS,
+      };
 
       mockRepository.getObjectById
         .mockResolvedValueOnce(mockTask)
-        .mockResolvedValueOnce(mockFeature);
+        .mockResolvedValueOnce(mockFeature)
+        .mockResolvedValueOnce(updatedTask); // Re-read task after save
       mockRepository.saveObject.mockResolvedValue();
 
       const result = await claimTask(

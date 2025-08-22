@@ -54,11 +54,17 @@ export async function handleGetObject(repository: Repository, args: unknown) {
       };
     }
 
+    // Convert Map objects to plain objects for proper JSON serialization
+    const serializedObject = {
+      ...object,
+      affectedFiles: Object.fromEntries(object.affectedFiles),
+    };
+
     return {
       content: [
         {
           type: "text",
-          text: `Retrieved object: ${JSON.stringify(object, null, 2)}`,
+          text: `Retrieved object: ${JSON.stringify(serializedObject, null, 2)}`,
         },
       ],
     };
