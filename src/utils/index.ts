@@ -9,3 +9,4 @@ export { MultipleMatchesError } from "./MultipleMatchesError";
 export { serializeTrellisObject } from "./serializeTrellisObject";
 export { sortTrellisObjects } from "./sortTrellisObjects";
 export { updateParentHierarchy } from "./updateParentHierarchy";
+export { autoCompleteParentHierarchy } from "./autoCompleteParentHierarchy";

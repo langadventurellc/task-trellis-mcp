@@ -5,7 +5,10 @@ import {
 } from "../../models";
 import { Repository } from "../../repositories";
 import { validateStatusTransition } from "../../validation/validateStatusTransition";
-import { updateParentHierarchy } from "../../utils/updateParentHierarchy";
+import {
+  updateParentHierarchy,
+  autoCompleteParentHierarchy,
+} from "../../utils";
 
 export async function updateObject(
   repository: Repository,
@@ -59,6 +62,20 @@ export async function updateObject(
       } catch (error) {
         // Log but don't propagate parent hierarchy update errors
         console.warn("Failed to update parent hierarchy:", error);
+      }
+    }
+
+    // If status is being changed to done or wont-do, auto-complete parent hierarchy
+    if (
+      (status === TrellisObjectStatus.DONE ||
+        status === TrellisObjectStatus.WONT_DO) &&
+      existingObject.status !== status
+    ) {
+      try {
+        await autoCompleteParentHierarchy(repository, updatedObject);
+      } catch (error) {
+        // Log but don't propagate parent hierarchy update errors
+        console.warn("Failed to auto-complete parent hierarchy:", error);
       }
     }
 

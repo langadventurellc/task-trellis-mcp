@@ -1309,6 +1309,535 @@ const test = "value with 'quotes' and 'double quotes'";
     });
   });
 
+  describe("Auto-Complete Parent Hierarchy", () => {
+    it("should auto-complete feature when all tasks are done via update", async () => {
+      // Create complete hierarchy: Project -> Epic -> Feature -> Tasks
+      const projectId = "P-auto-complete-done";
+      const epicId = "E-auto-complete-done";
+      const featureId = "F-auto-complete-done";
+      const task1Id = "T-auto-complete-1";
+      const task2Id = "T-auto-complete-2";
+
+      // Create project (open status)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "project",
+        projectId,
+        createObjectContent({
+          id: projectId,
+          title: "Auto Complete Done Project",
+          status: "open",
+          childrenIds: [epicId],
+        }),
+      );
+
+      // Create epic (open status)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "epic",
+        epicId,
+        createObjectContent({
+          id: epicId,
+          title: "Auto Complete Done Epic",
+          parent: projectId,
+          status: "open",
+          childrenIds: [featureId],
+        }),
+        { projectId },
+      );
+
+      // Create feature (open status)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        featureId,
+        createObjectContent({
+          id: featureId,
+          title: "Auto Complete Done Feature",
+          parent: epicId,
+          status: "open",
+          childrenIds: [task1Id, task2Id],
+        }),
+        { projectId, epicId },
+      );
+
+      // Create first task (already done)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        task1Id,
+        createObjectContent({
+          id: task1Id,
+          title: "Auto Complete Task 1",
+          parent: featureId,
+          status: "done",
+        }),
+        { projectId, epicId, featureId, status: "closed" },
+      );
+
+      // Create second task (in-progress)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        task2Id,
+        createObjectContent({
+          id: task2Id,
+          title: "Auto Complete Task 2",
+          parent: featureId,
+          status: "in-progress",
+        }),
+        { projectId, epicId, featureId, status: "open" },
+      );
+
+      // Update second task to done - this should trigger auto-complete
+      const result = await client.callTool("update_issue", {
+        id: task2Id,
+        status: "done",
+      });
+
+      expect(result.content[0].text).toContain("Successfully updated object");
+      const updatedTask = parseUpdateObjectResponse(
+        result.content[0].text as string,
+      );
+      expect(updatedTask.status).toBe("done");
+
+      // Verify task2 file moved to closed folder
+      const task2File = await readObjectFile(
+        testEnv.projectRoot,
+        `p/${projectId}/e/${epicId}/f/${featureId}/t/closed/${task2Id}.md`,
+      );
+      expect(task2File.yaml.status).toBe("done");
+
+      // Verify feature was auto-completed
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        `p/${projectId}/e/${epicId}/f/${featureId}/${featureId}.md`,
+      );
+      expect(featureFile.yaml.status).toBe("done");
+
+      // Verify epic was auto-completed (only one feature)
+      const epicFile = await readObjectFile(
+        testEnv.projectRoot,
+        `p/${projectId}/e/${epicId}/${epicId}.md`,
+      );
+      expect(epicFile.yaml.status).toBe("done");
+
+      // Verify project was auto-completed (only one epic)
+      const projectFile = await readObjectFile(
+        testEnv.projectRoot,
+        `p/${projectId}/${projectId}.md`,
+      );
+      expect(projectFile.yaml.status).toBe("done");
+    });
+
+    it("should auto-complete feature when mixing done and wont-do tasks via update", async () => {
+      // Create hierarchy: Feature -> Tasks (mixed done/wont-do completion)
+      const featureId = "F-auto-complete-mixed";
+      const task1Id = "T-mixed-done";
+      const task2Id = "T-mixed-wontdo";
+      const task3Id = "T-mixed-pending";
+
+      // Create feature (open status)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        featureId,
+        createObjectContent({
+          id: featureId,
+          title: "Auto Complete Mixed Feature",
+          status: "open",
+          childrenIds: [task1Id, task2Id, task3Id],
+        }),
+      );
+
+      // Create first task (done)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        task1Id,
+        createObjectContent({
+          id: task1Id,
+          title: "Mixed Done Task",
+          parent: featureId,
+          status: "done",
+        }),
+        { featureId, status: "closed" },
+      );
+
+      // Create second task (wont-do)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        task2Id,
+        createObjectContent({
+          id: task2Id,
+          title: "Mixed Wont-Do Task",
+          parent: featureId,
+          status: "wont-do",
+        }),
+        { featureId, status: "closed" },
+      );
+
+      // Create third task (in-progress)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        task3Id,
+        createObjectContent({
+          id: task3Id,
+          title: "Mixed Pending Task",
+          parent: featureId,
+          status: "in-progress",
+        }),
+        { featureId, status: "open" },
+      );
+
+      // Update third task to wont-do - this should trigger auto-complete
+      const result = await client.callTool("update_issue", {
+        id: task3Id,
+        status: "wont-do",
+      });
+
+      expect(result.content[0].text).toContain("Successfully updated object");
+      const updatedTask = parseUpdateObjectResponse(
+        result.content[0].text as string,
+      );
+      expect(updatedTask.status).toBe("wont-do");
+
+      // Verify task3 file moved to closed folder
+      const task3File = await readObjectFile(
+        testEnv.projectRoot,
+        `f/${featureId}/t/closed/${task3Id}.md`,
+      );
+      expect(task3File.yaml.status).toBe("wont-do");
+
+      // Verify feature was auto-completed
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        `f/${featureId}/${featureId}.md`,
+      );
+      expect(featureFile.yaml.status).toBe("done");
+    });
+
+    it("should not auto-complete when some children are still open", async () => {
+      // Create hierarchy with one complete feature and one incomplete feature
+      const projectId = "P-not-auto-complete";
+      const epicId = "E-not-auto-complete";
+      const feature1Id = "F-complete";
+      const feature2Id = "F-incomplete";
+
+      // Create project first
+      await createObjectFile(
+        testEnv.projectRoot,
+        "project",
+        projectId,
+        createObjectContent({
+          id: projectId,
+          title: "Not Auto Complete Project",
+          status: "open",
+          childrenIds: [epicId],
+        }),
+      );
+
+      // Create epic (open status)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "epic",
+        epicId,
+        createObjectContent({
+          id: epicId,
+          title: "Not Auto Complete Epic",
+          parent: projectId,
+          status: "open",
+          childrenIds: [feature1Id, feature2Id],
+        }),
+        { projectId },
+      );
+
+      // Create first feature (done)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        feature1Id,
+        createObjectContent({
+          id: feature1Id,
+          title: "Complete Feature",
+          parent: epicId,
+          status: "done",
+          childrenIds: [],
+        }),
+        { projectId, epicId },
+      );
+
+      // Create second feature (open - incomplete)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        feature2Id,
+        createObjectContent({
+          id: feature2Id,
+          title: "Incomplete Feature",
+          parent: epicId,
+          status: "open",
+          childrenIds: [],
+        }),
+        { projectId, epicId },
+      );
+
+      // Update first feature to done (already done, no status change)
+      // This should NOT auto-complete the epic because feature2 is still open
+      const result = await client.callTool("update_issue", {
+        id: feature1Id,
+        priority: "high", // Just update priority, keep status as done
+        status: "done",
+      });
+
+      expect(result.content[0].text).toContain("Successfully updated object");
+
+      // Verify epic status remains open (not auto-completed because feature2 is still open)
+      const epicFile = await readObjectFile(
+        testEnv.projectRoot,
+        `p/${projectId}/e/${epicId}/${epicId}.md`,
+      );
+      expect(epicFile.yaml.status).toBe("open");
+    });
+
+    it("should not trigger auto-complete when status doesn't change", async () => {
+      // Create simple hierarchy
+      const featureId = "F-no-status-change";
+      const taskId = "T-already-done";
+
+      // Create feature (open)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        featureId,
+        createObjectContent({
+          id: featureId,
+          title: "No Status Change Feature",
+          status: "open",
+          childrenIds: [taskId],
+        }),
+      );
+
+      // Create task (already done)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        taskId,
+        createObjectContent({
+          id: taskId,
+          title: "Already Done Task",
+          parent: featureId,
+          status: "done",
+        }),
+        { featureId, status: "closed" },
+      );
+
+      // Update task priority but keep status as done (no status change)
+      const result = await client.callTool("update_issue", {
+        id: taskId,
+        priority: "high",
+        status: "done", // Same status
+      });
+
+      expect(result.content[0].text).toContain("Successfully updated object");
+
+      // Verify feature status remains open (auto-complete should not trigger)
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        `f/${featureId}/${featureId}.md`,
+      );
+      expect(featureFile.yaml.status).toBe("open");
+    });
+
+    it("should handle auto-complete when parent object is missing", async () => {
+      // Create task with parent that doesn't exist
+      const taskId = "T-orphaned-task";
+      const missingParentId = "F-missing-parent";
+
+      // Create task with non-existent parent
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        taskId,
+        createObjectContent({
+          id: taskId,
+          title: "Orphaned Task",
+          parent: missingParentId,
+          status: "in-progress",
+        }),
+      );
+
+      // Update task to done (should fail due to missing parent validation)
+      const result = await client.callTool("update_issue", {
+        id: taskId,
+        status: "done",
+      });
+
+      // The system validates parent exists, so this should fail
+      expect(result.content[0].text).toContain(
+        "Parent object with ID 'F-missing-parent' not found",
+      );
+    });
+
+    it("should auto-complete up the entire hierarchy", async () => {
+      // Create deep hierarchy: Project -> Epic -> Feature -> Task
+      const projectId = "P-deep-auto-complete";
+      const epicId = "E-deep-auto-complete";
+      const featureId = "F-deep-auto-complete";
+      const taskId = "T-deep-auto-complete";
+
+      // Create project
+      await createObjectFile(
+        testEnv.projectRoot,
+        "project",
+        projectId,
+        createObjectContent({
+          id: projectId,
+          title: "Deep Auto Complete Project",
+          status: "open",
+          childrenIds: [epicId],
+        }),
+      );
+
+      // Create epic
+      await createObjectFile(
+        testEnv.projectRoot,
+        "epic",
+        epicId,
+        createObjectContent({
+          id: epicId,
+          title: "Deep Auto Complete Epic",
+          parent: projectId,
+          status: "open",
+          childrenIds: [featureId],
+        }),
+        { projectId },
+      );
+
+      // Create feature
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        featureId,
+        createObjectContent({
+          id: featureId,
+          title: "Deep Auto Complete Feature",
+          parent: epicId,
+          status: "open",
+          childrenIds: [taskId],
+        }),
+        { projectId, epicId },
+      );
+
+      // Create task
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        taskId,
+        createObjectContent({
+          id: taskId,
+          title: "Deep Auto Complete Task",
+          parent: featureId,
+          status: "open",
+        }),
+        { projectId, epicId, featureId, status: "open" },
+      );
+
+      // Update task to done - should trigger auto-complete all the way up
+      const result = await client.callTool("update_issue", {
+        id: taskId,
+        status: "done",
+      });
+
+      expect(result.content[0].text).toContain("Successfully updated object");
+
+      // Verify task is done
+      const taskFile = await readObjectFile(
+        testEnv.projectRoot,
+        `p/${projectId}/e/${epicId}/f/${featureId}/t/closed/${taskId}.md`,
+      );
+      expect(taskFile.yaml.status).toBe("done");
+
+      // Verify feature was auto-completed
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        `p/${projectId}/e/${epicId}/f/${featureId}/${featureId}.md`,
+      );
+      expect(featureFile.yaml.status).toBe("done");
+
+      // Verify epic was auto-completed
+      const epicFile = await readObjectFile(
+        testEnv.projectRoot,
+        `p/${projectId}/e/${epicId}/${epicId}.md`,
+      );
+      expect(epicFile.yaml.status).toBe("done");
+
+      // Verify project was auto-completed
+      const projectFile = await readObjectFile(
+        testEnv.projectRoot,
+        `p/${projectId}/${projectId}.md`,
+      );
+      expect(projectFile.yaml.status).toBe("done");
+    });
+
+    it("should not auto-complete parent if it's already done", async () => {
+      // Create hierarchy where parent is already done
+      const featureId = "F-already-done-parent";
+      const taskId = "T-child-of-done";
+
+      // Create feature (already done)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "feature",
+        featureId,
+        createObjectContent({
+          id: featureId,
+          title: "Already Done Parent Feature",
+          status: "done",
+          childrenIds: [taskId],
+        }),
+      );
+
+      // Create task (open)
+      await createObjectFile(
+        testEnv.projectRoot,
+        "task",
+        taskId,
+        createObjectContent({
+          id: taskId,
+          title: "Child of Done Task",
+          parent: featureId,
+          status: "open",
+        }),
+        { featureId, status: "open" },
+      );
+
+      // Update task to done
+      const result = await client.callTool("update_issue", {
+        id: taskId,
+        status: "done",
+      });
+
+      expect(result.content[0].text).toContain("Successfully updated object");
+
+      // Verify feature status remains done (unchanged)
+      const featureFile = await readObjectFile(
+        testEnv.projectRoot,
+        `f/${featureId}/${featureId}.md`,
+      );
+      expect(featureFile.yaml.status).toBe("done");
+
+      // Verify task is done
+      const taskFile = await readObjectFile(
+        testEnv.projectRoot,
+        `f/${featureId}/t/closed/${taskId}.md`,
+      );
+      expect(taskFile.yaml.status).toBe("done");
+    });
+  });
+
   describe("Concurrent Updates", () => {
     it("should handle sequential updates to same object", async () => {
       // Create initial task
