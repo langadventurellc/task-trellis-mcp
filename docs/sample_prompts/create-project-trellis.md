@@ -7,8 +7,6 @@ argument-hint: [project specifications or path to spec file]
 
 Create a new project in the Trellis task management system by analyzing specifications provided and gathering additional requirements as needed.
 
-Use ULTRATHINK.
-
 ## MCP Server Setup
 
 Ensure the Task Trellis MCP server is properly configured. If the server needs activation, use:
@@ -122,15 +120,6 @@ Based on gathered information:
     - Accessibility and usability standards
   - Any other context needed for epic creation
 
-**Architecture Diagram Guidelines:**
-
-Include Mermaid diagrams when they add value for:
-
-- **System Architecture**: Overall system components and relationships
-- **Data Flow**: How information moves through the system
-- **Integration Points**: External system connections
-- **Deployment Architecture**: Infrastructure and deployment strategy
-
 ### 5. Create Project Using MCP
 
 Call the Task Trellis MCP `create_object` tool to create the project with the following parameters:
@@ -160,47 +149,9 @@ Next steps:
 Use /create-epics to break down this project into major work streams.
 ```
 
-## Simplicity Principles
-
-When creating projects, follow these guidelines:
-
-### Keep It Simple:
-
-- **No over-engineering** - Create only the specifications needed for the project
-- **No extra features** - Don't add functionality that wasn't requested
-- **Choose straightforward approaches** - Simple project structure over complex architectures
-- **Solve the actual problem** - Don't anticipate future requirements
-
-### Forbidden Patterns:
-
-- **NO premature optimization** - Don't optimize project structure unless requested
-- **NO feature creep** - Stick to the specified project requirements
-- **NO complex architectures** - Choose simple, maintainable approaches
-- **NO unnecessary abstractions** - Use direct solutions that work
-
-### Modular Architecture:
-
-- **Clear boundaries** - Project should define distinct modules with well-defined responsibilities
-- **Minimal coupling** - Modules should interact through clean interfaces, not internal dependencies
-- **High cohesion** - Related functionality should be grouped within the same module
-- **Avoid big ball of mud** - Prevent tangled cross-dependencies between system components
-- **Clean interfaces** - Define clear contracts between modules for data and functionality exchange
-
-## Example Interaction
-
-User: `/create-project-trellis Create an inventory management system for small retail businesses`
-
-or
-
-User: `/create-project-trellis /path/to/specifications.md`
-
 <rules>
   <critical>Never directly access `.trellis/` directory directly</critical>
   <critical>Use MCP tools for all operations (create_object, get_object, activate, etc.)</critical>
   <critical>Continue asking questions until you have a complete understanding of the requirements</critical>
   <critical>Ask one question at a time with specific options</critical>
-  <important>Use context7 MCP tool to research current tech stack and best practices</important>
-  <important>Focus on decomposition - break large concepts into smaller components</important>
-  <important>Include architecture diagrams where they add value for system understanding</important>
-  <important>Document discovered technologies for consistency with existing patterns</important>
 </rules>

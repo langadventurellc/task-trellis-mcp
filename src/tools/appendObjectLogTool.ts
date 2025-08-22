@@ -2,10 +2,10 @@ import { Repository } from "../repositories";
 import { TaskTrellisService } from "../services/TaskTrellisService";
 
 export const appendObjectLogTool = {
-  name: "append_object_log",
-  description: `Appends content to an object's log in the task trellis system
+  name: "append_issue_log",
+  description: `Appends content to an issue's log in the task trellis system
 
-Use this tool to add progress updates, notes, or activity records to an object's audit trail. Essential for tracking work history, documenting decisions, and maintaining transparency in task execution.
+Use this tool to add progress updates, notes, or activity records to an issue's audit trail. Essential for tracking work history, documenting decisions, and maintaining transparency in task execution.
 
 Log entry purposes:
 - Record progress milestones and status changes
@@ -35,7 +35,7 @@ The log creates a permanent audit trail that helps with project retrospectives, 
     properties: {
       id: {
         type: "string",
-        description: "ID of the object to append log to",
+        description: "ID of the issue to append log to",
       },
       contents: {
         type: "string",

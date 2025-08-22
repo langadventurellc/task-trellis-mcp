@@ -1,13 +1,13 @@
 import { Repository } from "../repositories";
 
 export const getObjectTool = {
-  name: "get_object",
-  description: `Gets an object from the task trellis system
+  name: "get_issue",
+  description: `Gets an issue from the task trellis system
 
-Use this tool to retrieve detailed information about a specific object by its unique ID. Returns the complete object data including metadata, relationships, content, and activity history.
+Use this tool to retrieve detailed information about a specific issue by its unique ID. Returns the complete issue data including metadata, relationships, content, and activity history.
 
 Key information retrieved:
-- Object metadata (type, title, status, priority, timestamps)
+- Issue metadata (type, title, status, priority, timestamps)
 - Hierarchical relationships (parent, children, prerequisites)
 - Content body and description
 - Activity log and change history
@@ -16,7 +16,7 @@ Key information retrieved:
 
 Usage scenarios:
 - Review task details before starting work
-- Check object status and dependencies
+- Check issue status and dependencies
 - Examine change history and activity logs
 - Understand parent-child relationships
 - Verify prerequisite completion
@@ -28,7 +28,7 @@ Essential for understanding the full context of a work item before making modifi
     properties: {
       id: {
         type: "string",
-        description: "ID of the object to retrieve",
+        description: "ID of the issue to retrieve",
       },
     },
     required: ["id"],

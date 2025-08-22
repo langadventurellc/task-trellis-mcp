@@ -25,9 +25,9 @@ It's kinda like Jira specifically for coding agents.
 
 ## At a Glance
 
-Task Trellis works with "objects" that are projects, epics, features or tasks.
+Task Trellis works with "issues" that are projects, epics, features or tasks.
 
-**Tasks** are the most important type of object. This is where the actual work gets done. Each task is a specific piece of work that needs to be completed in order to achieve the project's goals. The other object types are too big to be a task and they exist to help organize and manage multiple tasks to accomplish a particular goal. Tasks can be standalone or part of a larger feature.
+**Tasks** are the most important type of issue. This is where the actual work gets done. Each task is a specific piece of work that needs to be completed in order to achieve the project's goals. The other issue types are too big to be a task and they exist to help organize and manage multiple tasks to accomplish a particular goal. Tasks can be standalone or part of a larger feature.
 
 **Features** are the next level up from tasks. They represent the requirements and functionality needed to deliver a specific aspect of the project. Features can be standalone or a part of a larger epic.
 
@@ -37,7 +37,7 @@ Task Trellis works with "objects" that are projects, epics, features or tasks.
 
 Depending on the size of the effort, you can choose to create a project with epics, features, and tasks, or you can create standalone tasks as needed. Once you have your tasks defined, you can easily manage and track their progress through the Task Trellis MCP tools.
 
-Currently, all Task Trellis objects are stored as markdown files in the `.trellis` folder in the root of your project. This makes it unsuitable for projects with multiple developers, but a remote option is in development now and should be available soon.
+Currently, all Task Trellis issues are stored as markdown files in the `.trellis` folder in the root of your project. This makes it unsuitable for projects with multiple developers, but a remote option is in development now and should be available soon.
 
 ## Why Task Trellis?
 
@@ -104,26 +104,26 @@ See sample prompts (written as Claude Code slash commands): [Sample Prompts](doc
 
 ## Available Tools
 
-### Core Object Management
+### Core Issue Management
 
-- **create_object** - Create projects, epics, features, or tasks with hierarchical relationships
-- **update_object** - Modify object properties, status, priority, or prerequisites
-- **get_object** - Retrieve detailed object information with history and relationships
-- **list_objects** - Query and filter objects by type, status, priority, or scope (returns object summaries)
-- **delete_object** - Remove objects (with dependency validation)
-- **replace_object_body_regex** - Make targeted body content edits using regex patterns
+- **create_issue** - Create projects, epics, features, or tasks with hierarchical relationships
+- **update_issue** - Modify issue properties, status, priority, or prerequisites
+- **get_issue** - Retrieve detailed issue information with history and relationships
+- **list_issues** - Query and filter issues by type, status, priority, or scope (returns issue summaries)
+- **delete_issue** - Remove issues (with dependency validation)
+- **replace_issue_body_regex** - Make targeted body content edits using regex patterns
 
 ### Task Workflow Management
 
 - **claim_task** - Claim available tasks for execution with automatic priority ordering
 - **complete_task** - Mark tasks complete with file change documentation
-- **append_object_log** - Add progress notes and status updates to task history (occurs automatically on task completion)
+- **append_issue_log** - Add progress notes and status updates to task history (occurs automatically on task completion)
 - **append_modified_files** - Record files modified during task execution with change descriptions (occurs automatically on task completion)
 
 ### System Management
 
 - **activate** - Initialize the task system (if not configured via command line)
-- **prune_closed** - Clean up old completed/cancelled objects for maintenance
+- **prune_closed** - Clean up old completed/cancelled issues for maintenance
 
 ## Project Hierarchy
 
@@ -212,7 +212,7 @@ your-project/
             └── T-completed-task-id.md
 ```
 
-Each object is stored as a Markdown file with YAML frontmatter metadata and content body.
+Each issue is stored as a Markdown file with YAML frontmatter metadata and content body.
 
 ## Installation
 

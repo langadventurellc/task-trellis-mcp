@@ -7,20 +7,20 @@ import { Repository } from "../repositories";
 import { TaskTrellisService } from "../services/TaskTrellisService";
 
 export const listObjectsTool = {
-  name: "list_objects",
-  description: `Lists objects from the task trellis system
+  name: "list_issues",
+  description: `Lists issues from the task trellis system
 
-Use this tool to retrieve and filter objects based on various criteria. Essential for discovering existing work items, understanding project structure, and finding objects that need attention.
+Use this tool to retrieve and filter issues based on various criteria. Essential for discovering existing work items, understanding project structure, and finding issues that need attention.
 
-Available object types:
+Available issue types:
 - 'project': Top-level containers
 - 'epic': Large features within projects  
 - 'feature': Specific functionality within epics
 - 'task': Individual work items
 
 Available status values:
-- 'draft': Initial state for new objects
-- 'open': Ready to begin work (default for new objects)
+- 'draft': Initial state for new issues
+- 'open': Ready to begin work (default for new issues)
 - 'in-progress': Currently being worked on
 - 'done': Completed successfully
 - 'wont-do': Cancelled or decided against
@@ -31,11 +31,11 @@ Available priority values:
 - 'low': Nice-to-have or future work
 
 Key filtering options:
-- 'type': Filter by object category (project, epic, feature, task)
+- 'type': Filter by issue category (project, epic, feature, task)
 - 'scope': Limit results to a specific project or area of work
-- 'status': Find objects in particular states (draft, open, in-progress, done, wont-do)
+- 'status': Find issues in particular states (draft, open, in-progress, done, wont-do)
 - 'priority': Filter by importance level (high, medium, low)
-- 'includeClosed': Whether to show completed/archived objects (defaults to false)
+- 'includeClosed': Whether to show completed/archived issues (defaults to false)
 
 Usage patterns:
 - List all tasks in progress: type='task', status='in-progress'
@@ -44,29 +44,29 @@ Usage patterns:
 - Audit completed work: includeClosed=true, status='done'
 - Find cancelled items: status='wont-do', includeClosed=true
 
-The results provide object summaries (TrellisObjectSummary instances) containing id, type, title, status, priority, parent, prerequisites, childrenIds, created, and updated fields to enable efficient filtering and further operations.`,
+The results provide issue summaries (TrellisObjectSummary instances) containing id, type, title, status, priority, parent, prerequisites, childrenIds, created, and updated fields to enable efficient filtering and further operations.`,
   inputSchema: {
     type: "object",
     properties: {
       type: {
         type: "string",
-        description: "Type of objects to list",
+        description: "Type of issues to list",
       },
       scope: {
         type: "string",
-        description: "Scope to filter objects (optional)",
+        description: "Scope to filter issues (optional)",
       },
       status: {
         type: "string",
-        description: "Status to filter objects (optional)",
+        description: "Status to filter issues (optional)",
       },
       priority: {
         type: "string",
-        description: "Priority to filter objects (optional)",
+        description: "Priority to filter issues (optional)",
       },
       includeClosed: {
         type: "boolean",
-        description: "Include closed objects (defaults to false)",
+        description: "Include closed issues (defaults to false)",
         default: false,
       },
     },
