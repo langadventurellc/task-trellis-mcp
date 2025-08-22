@@ -61,10 +61,10 @@ export interface TaskTrellisService {
    */
   listObjects(
     repository: Repository,
-    type: TrellisObjectType,
+    type?: TrellisObjectType | TrellisObjectType[],
     scope?: string,
-    status?: TrellisObjectStatus,
-    priority?: TrellisObjectPriority,
+    status?: TrellisObjectStatus | TrellisObjectStatus[],
+    priority?: TrellisObjectPriority | TrellisObjectPriority[],
     includeClosed?: boolean,
   ): Promise<{ content: Array<{ type: string; text: string }> }>;
 

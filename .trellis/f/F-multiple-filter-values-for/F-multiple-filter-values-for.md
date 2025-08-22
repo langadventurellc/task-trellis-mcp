@@ -16,14 +16,29 @@ affectedFiles:
     tests for multiple value filtering including multiple
     types/statuses/priorities, mixed filters, backward compatibility, and edge
     cases
+  src/services/TaskTrellisService.ts: Updated listObjects method signature to
+    accept array union types for type, status, and priority parameters,
+    maintaining backward compatibility with single values
+  src/services/local/LocalTaskTrellisService.ts: Updated listObjects method
+    implementation to match interface signature with array union types
+  src/services/local/listObjects.ts:
+    Added normalizeEnumInput helper function and
+    updated listObjects function to accept array union types, normalize inputs
+    to arrays, and pass arrays to repository layer
+  src/services/local/__tests__/listObjects.test.ts:
+    Added comprehensive test suite
+    for array input processing including multiple value filtering, mixed
+    single/multiple inputs, input normalization logic, and backward
+    compatibility verification. Updated existing tests to expect normalized
+    array format.
 log: []
 schema: v1.0
 childrenIds:
   - T-add-e2e-tests-for-multiple
-  - T-update-repository-layer-for
   - T-update-service-layer-for
   - T-update-tool-handler-for-array
   - T-update-tool-schema-for
+  - T-update-repository-layer-for
 created: 2025-08-22T04:21:12.029Z
 updated: 2025-08-22T04:21:12.029Z
 ---
