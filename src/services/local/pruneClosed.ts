@@ -1,4 +1,4 @@
-import { isClosed } from "../../models";
+import { isClosed, isOpen } from "../../models";
 import { Repository } from "../../repositories";
 
 export async function pruneClosed(
@@ -13,8 +13,8 @@ export async function pruneClosed(
     // Filter to only closed objects
     const closedObjects = objects.filter(isClosed);
 
-    // Calculate cutoff time (age in minutes ago)
-    const cutoffTime = new Date(Date.now() - age * 60 * 1000);
+    // Calculate cutoff time (age in days ago)
+    const cutoffTime = new Date(Date.now() - age * 24 * 60 * 60 * 1000);
 
     // Filter to objects older than cutoff
     const objectsToDelete = closedObjects.filter((obj) => {
@@ -22,10 +22,23 @@ export async function pruneClosed(
       return updatedTime < cutoffTime;
     });
 
-    // Delete each object
+    // Delete each object with hierarchical child validation
     const deletedIds: string[] = [];
+    const skippedIds: string[] = [];
+
     for (const obj of objectsToDelete) {
       try {
+        // Check if object has open children
+        const children = await repository.getChildrenOf(obj.id, true); // Include closed children to check all
+        const hasOpenChildren = children.some((child) => isOpen(child));
+
+        if (hasOpenChildren) {
+          // Skip deletion if object has open children
+          skippedIds.push(obj.id);
+          continue;
+        }
+
+        // Proceed with deletion if no open children
         await repository.deleteObject(obj.id, true);
         deletedIds.push(obj.id);
       } catch (error) {
@@ -35,8 +48,13 @@ export async function pruneClosed(
     }
 
     const message = scope
-      ? `Pruned ${deletedIds.length} closed objects older than ${age} minutes in scope ${scope}`
-      : `Pruned ${deletedIds.length} closed objects older than ${age} minutes`;
+      ? `Pruned ${deletedIds.length} closed objects older than ${age} days in scope ${scope}`
+      : `Pruned ${deletedIds.length} closed objects older than ${age} days`;
+
+    const skippedMessage =
+      skippedIds.length > 0
+        ? `\nSkipped ${skippedIds.length} objects with open children: ${skippedIds.join(", ")}`
+        : "";
 
     return {
       content: [
@@ -46,7 +64,7 @@ export async function pruneClosed(
             deletedIds.length > 0
               ? `\nDeleted objects: ${deletedIds.join(", ")}`
               : ""
-          }`,
+          }${skippedMessage}`,
         },
       ],
     };

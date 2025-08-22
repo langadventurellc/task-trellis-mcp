@@ -1,12 +1,28 @@
 ---
 id: T-modify-pruneclosed-function
 title: Modify pruneClosed function for day-based pruning with child validation
-status: open
+status: done
 priority: high
 prerequisites:
   - T-add-repository-method-to
-affectedFiles: {}
-log: []
+affectedFiles:
+  src/services/local/pruneClosed.ts: Updated time calculation from minutes to
+    days, added hierarchical child validation logic using getChildrenOf() and
+    isOpen() helper, enhanced deletion logic to skip objects with open children,
+    improved logging to show both deleted and skipped objects
+  src/services/local/__tests__/pruneClosed.test.ts: Created comprehensive unit
+    test suite covering day-based age calculations (1, 7, 30 days), hierarchical
+    child validation scenarios, multi-level hierarchies, error handling for
+    failed queries and deletions, scope filtering, and edge cases including
+    invalid timestamps and zero age
+log:
+  - Successfully modified pruneClosed function for day-based pruning with
+    hierarchical child validation. Updated time calculation from minutes to
+    days, added comprehensive child validation logic to prevent deletion of
+    objects with open children, enhanced logging to distinguish between deleted
+    and skipped objects, and implemented comprehensive unit tests covering all
+    scenarios including edge cases and error handling. All quality checks pass
+    and unit tests validate the new functionality.
 schema: v1.0
 childrenIds: []
 created: 2025-08-22T18:22:46.385Z
