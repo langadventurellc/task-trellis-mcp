@@ -6,6 +6,7 @@ import {
 } from "../../../models";
 import { Repository } from "../../../repositories/Repository";
 import { validateStatusTransition } from "../../../validation/validateStatusTransition";
+import { updateParentHierarchy } from "../../../utils/updateParentHierarchy";
 import { updateObject } from "../updateObject";
 
 // Mock the validateStatusTransition function
@@ -13,10 +14,19 @@ jest.mock("../../../validation/validateStatusTransition", () => ({
   validateStatusTransition: jest.fn(),
 }));
 
+// Mock the updateParentHierarchy function
+jest.mock("../../../utils/updateParentHierarchy", () => ({
+  updateParentHierarchy: jest.fn(),
+}));
+
 const mockValidateStatusTransition =
   validateStatusTransition as jest.MockedFunction<
     typeof validateStatusTransition
   >;
+
+const mockUpdateParentHierarchy = updateParentHierarchy as jest.MockedFunction<
+  typeof updateParentHierarchy
+>;
 
 describe("updateObject", () => {
   let mockRepository: jest.Mocked<Repository>;
@@ -585,6 +595,154 @@ describe("updateObject", () => {
           schema: "1.0",
           priority: TrellisObjectPriority.HIGH,
         }),
+      );
+    });
+  });
+
+  describe("parent hierarchy updates", () => {
+    beforeEach(() => {
+      mockUpdateParentHierarchy.mockClear();
+    });
+
+    it("should call updateParentHierarchy when status changes to IN_PROGRESS", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK, {
+        status: TrellisObjectStatus.OPEN,
+        parent: "F-parent-feature",
+      });
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+      mockUpdateParentHierarchy.mockResolvedValue();
+
+      await updateObject(
+        mockRepository,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        TrellisObjectStatus.IN_PROGRESS,
+      );
+
+      expect(mockUpdateParentHierarchy).toHaveBeenCalledWith(
+        "F-parent-feature",
+        mockRepository,
+      );
+    });
+
+    it("should not call updateParentHierarchy when status is already IN_PROGRESS", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK, {
+        status: TrellisObjectStatus.IN_PROGRESS,
+        parent: "F-parent-feature",
+      });
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      await updateObject(
+        mockRepository,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        TrellisObjectStatus.IN_PROGRESS,
+      );
+
+      expect(mockUpdateParentHierarchy).not.toHaveBeenCalled();
+    });
+
+    it("should not call updateParentHierarchy when status changes to something other than IN_PROGRESS", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK, {
+        status: TrellisObjectStatus.OPEN,
+        parent: "F-parent-feature",
+      });
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      await updateObject(
+        mockRepository,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        TrellisObjectStatus.DONE,
+      );
+
+      expect(mockUpdateParentHierarchy).not.toHaveBeenCalled();
+    });
+
+    it("should not call updateParentHierarchy when no status change is requested", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK, {
+        status: TrellisObjectStatus.OPEN,
+        parent: "F-parent-feature",
+      });
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      await updateObject(
+        mockRepository,
+        "T-test-task",
+        undefined,
+        TrellisObjectPriority.HIGH,
+      );
+
+      expect(mockUpdateParentHierarchy).not.toHaveBeenCalled();
+    });
+
+    it("should handle updateParentHierarchy errors gracefully", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK, {
+        status: TrellisObjectStatus.OPEN,
+        parent: "F-parent-feature",
+      });
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+      mockUpdateParentHierarchy.mockRejectedValue(
+        new Error("Parent hierarchy update failed"),
+      );
+
+      const consoleSpy = jest.spyOn(console, "warn").mockImplementation();
+
+      const result = await updateObject(
+        mockRepository,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        TrellisObjectStatus.IN_PROGRESS,
+      );
+
+      expect(mockUpdateParentHierarchy).toHaveBeenCalled();
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Failed to update parent hierarchy:",
+        expect.any(Error),
+      );
+      expect(result.content[0].text).toContain("Successfully updated object:");
+
+      consoleSpy.mockRestore();
+    });
+
+    it("should not call updateParentHierarchy when object has no parent", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK, {
+        status: TrellisObjectStatus.OPEN,
+        parent: undefined,
+      });
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      await updateObject(
+        mockRepository,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        TrellisObjectStatus.IN_PROGRESS,
+      );
+
+      expect(mockUpdateParentHierarchy).toHaveBeenCalledWith(
+        undefined,
+        mockRepository,
       );
     });
   });

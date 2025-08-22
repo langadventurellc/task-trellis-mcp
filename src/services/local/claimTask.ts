@@ -9,6 +9,7 @@ import { checkPrerequisitesComplete } from "../../utils/checkPrerequisitesComple
 import { checkHierarchicalPrerequisitesComplete } from "../../utils/checkHierarchicalPrerequisitesComplete";
 import { filterUnavailableObjects } from "../../utils/filterUnavailableObjects";
 import { sortTrellisObjects } from "../../utils/sortTrellisObjects";
+import { updateParentHierarchy } from "../../utils/updateParentHierarchy";
 
 export async function claimTask(
   repository: Repository,
@@ -163,42 +164,4 @@ async function validateTaskForClaiming(
       }
     }
   }
-}
-
-async function updateParentHierarchy(
-  parentId: string | undefined,
-  repository: Repository,
-  visitedIds: Set<string> = new Set(),
-): Promise<void> {
-  if (!parentId) {
-    return;
-  }
-
-  // Prevent infinite recursion by checking if we've already visited this ID
-  if (visitedIds.has(parentId)) {
-    return;
-  }
-  visitedIds.add(parentId);
-
-  const parent = await repository.getObjectById(parentId);
-  if (!parent) {
-    return;
-  }
-
-  // If parent is already in progress, we can stop here since we assume
-  // its parent is already in progress too
-  if (parent.status === TrellisObjectStatus.IN_PROGRESS) {
-    return;
-  }
-
-  // Update parent to in-progress
-  const updatedParent = {
-    ...parent,
-    status: TrellisObjectStatus.IN_PROGRESS,
-  };
-
-  await repository.saveObject(updatedParent);
-
-  // Continue up the hierarchy
-  await updateParentHierarchy(parent.parent, repository, visitedIds);
 }

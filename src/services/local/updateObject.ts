@@ -5,6 +5,7 @@ import {
 } from "../../models";
 import { Repository } from "../../repositories";
 import { validateStatusTransition } from "../../validation/validateStatusTransition";
+import { updateParentHierarchy } from "../../utils/updateParentHierarchy";
 
 export async function updateObject(
   repository: Repository,
@@ -47,6 +48,19 @@ export async function updateObject(
 
     // Save the updated object
     await repository.saveObject(updatedObject);
+
+    // If status is being changed to in-progress, update parent hierarchy
+    if (
+      status === TrellisObjectStatus.IN_PROGRESS &&
+      existingObject.status !== TrellisObjectStatus.IN_PROGRESS
+    ) {
+      try {
+        await updateParentHierarchy(updatedObject.parent, repository);
+      } catch (error) {
+        // Log but don't propagate parent hierarchy update errors
+        console.warn("Failed to update parent hierarchy:", error);
+      }
+    }
 
     return {
       content: [

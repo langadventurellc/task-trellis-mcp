@@ -5,10 +5,10 @@ import {
   TrellisObjectType,
 } from "../../../models";
 import { Repository } from "../../../repositories/Repository";
-import * as filterUtils from "../../../utils/filterUnavailableObjects";
-import * as sortUtils from "../../../utils/sortTrellisObjects";
 import * as checkHierarchicalUtils from "../../../utils/checkHierarchicalPrerequisitesComplete";
 import * as checkPrereqUtils from "../../../utils/checkPrerequisitesComplete";
+import * as filterUtils from "../../../utils/filterUnavailableObjects";
+import * as sortUtils from "../../../utils/sortTrellisObjects";
 import { claimTask } from "../claimTask";
 
 // Mock the utility functions
@@ -16,6 +16,7 @@ jest.mock("../../../utils/filterUnavailableObjects");
 jest.mock("../../../utils/sortTrellisObjects");
 jest.mock("../../../utils/checkHierarchicalPrerequisitesComplete");
 jest.mock("../../../utils/checkPrerequisitesComplete");
+jest.mock("../../../utils/updateParentHierarchy");
 
 const mockFilterUnavailableObjects =
   filterUtils.filterUnavailableObjects as jest.MockedFunction<
@@ -508,211 +509,6 @@ describe("claimTask service function", () => {
       expect(result.content[0].text).toContain(
         `Error claiming task: ${errorValue}`,
       );
-    });
-  });
-
-  describe("parent hierarchy updates", () => {
-    it("should update feature parent to in-progress when claiming task", async () => {
-      const mockFeature = createMockFeature({
-        status: TrellisObjectStatus.OPEN,
-        parent: undefined, // No parent to stop hierarchy here
-      });
-      const mockTask = createMockTask({ parent: "F-test-feature" });
-      const updatedTask = {
-        ...mockTask,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      };
-
-      mockRepository.getObjectById
-        .mockResolvedValueOnce(mockTask) // First call for the task
-        .mockResolvedValueOnce(mockFeature) // Second call for the parent feature
-        .mockResolvedValueOnce(updatedTask); // Third call to re-read after save
-      mockRepository.saveObject.mockResolvedValue();
-
-      const result = await claimTask(mockRepository, undefined, "T-test-task");
-
-      expect(mockRepository.saveObject).toHaveBeenCalledTimes(2);
-      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(1, {
-        ...mockTask,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      });
-      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(2, {
-        ...mockFeature,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      });
-      expect(result.content[0].text).toContain("Successfully claimed task:");
-    });
-
-    it("should update full hierarchy (feature → epic → project) when claiming task", async () => {
-      const mockProject = createMockProject({
-        status: TrellisObjectStatus.OPEN,
-      });
-      const mockEpic = createMockEpic({ status: TrellisObjectStatus.OPEN });
-      const mockFeature = createMockFeature({
-        status: TrellisObjectStatus.OPEN,
-      });
-      const mockTask = createMockTask({ parent: "F-test-feature" });
-      const updatedTask = {
-        ...mockTask,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      };
-
-      mockRepository.getObjectById
-        .mockResolvedValueOnce(mockTask) // Task
-        .mockResolvedValueOnce(mockFeature) // Feature
-        .mockResolvedValueOnce(mockEpic) // Epic
-        .mockResolvedValueOnce(mockProject) // Project
-        .mockResolvedValueOnce(updatedTask); // Re-read task after save
-      mockRepository.saveObject.mockResolvedValue();
-
-      const result = await claimTask(mockRepository, undefined, "T-test-task");
-
-      expect(mockRepository.saveObject).toHaveBeenCalledTimes(4);
-      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(1, {
-        ...mockTask,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      });
-      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(2, {
-        ...mockFeature,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      });
-      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(3, {
-        ...mockEpic,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      });
-      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(4, {
-        ...mockProject,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      });
-      expect(result.content[0].text).toContain("Successfully claimed task:");
-    });
-
-    it("should stop updating hierarchy when parent is already in-progress", async () => {
-      const mockEpic = createMockEpic({
-        status: TrellisObjectStatus.IN_PROGRESS,
-      });
-      const mockFeature = createMockFeature({
-        status: TrellisObjectStatus.OPEN,
-      });
-      const mockTask = createMockTask({ parent: "F-test-feature" });
-      const updatedTask = {
-        ...mockTask,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      };
-
-      mockRepository.getObjectById
-        .mockResolvedValueOnce(mockTask) // Task
-        .mockResolvedValueOnce(mockFeature) // Feature
-        .mockResolvedValueOnce(mockEpic) // Epic (already in progress)
-        .mockResolvedValueOnce(updatedTask); // Re-read task after save
-      mockRepository.saveObject.mockResolvedValue();
-
-      const result = await claimTask(mockRepository, undefined, "T-test-task");
-
-      expect(mockRepository.saveObject).toHaveBeenCalledTimes(2);
-      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(1, {
-        ...mockTask,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      });
-      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(2, {
-        ...mockFeature,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      });
-      // Should not save the epic since it's already in progress
-      expect(result.content[0].text).toContain("Successfully claimed task:");
-    });
-
-    it("should handle task with no parent gracefully", async () => {
-      const mockTask = createMockTask({ parent: undefined });
-
-      mockRepository.getObjectById.mockResolvedValue(mockTask);
-      mockRepository.saveObject.mockResolvedValue();
-
-      const result = await claimTask(mockRepository, undefined, "T-test-task");
-
-      expect(mockRepository.saveObject).toHaveBeenCalledTimes(1);
-      expect(mockRepository.saveObject).toHaveBeenCalledWith({
-        ...mockTask,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      });
-      expect(result.content[0].text).toContain("Successfully claimed task:");
-    });
-
-    it("should handle non-existent parent gracefully", async () => {
-      const mockTask = createMockTask({ parent: "F-nonexistent" });
-      const updatedTask = {
-        ...mockTask,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      };
-
-      mockRepository.getObjectById
-        .mockResolvedValueOnce(mockTask) // Task exists
-        .mockResolvedValueOnce(null) // Parent doesn't exist
-        .mockResolvedValueOnce(updatedTask); // Re-read task after save
-      mockRepository.saveObject.mockResolvedValue();
-
-      const result = await claimTask(mockRepository, undefined, "T-test-task");
-
-      expect(mockRepository.saveObject).toHaveBeenCalledTimes(1);
-      expect(mockRepository.saveObject).toHaveBeenCalledWith({
-        ...mockTask,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      });
-      expect(result.content[0].text).toContain("Successfully claimed task:");
-    });
-
-    it("should handle parent hierarchy update errors without failing task claim", async () => {
-      const mockTask = createMockTask({ parent: "F-test-feature" });
-      const updatedTask = {
-        ...mockTask,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      };
-
-      mockRepository.getObjectById
-        .mockResolvedValueOnce(mockTask) // Task lookup succeeds
-        .mockRejectedValueOnce(new Error("Parent lookup failed")) // Parent lookup fails
-        .mockResolvedValueOnce(updatedTask); // Re-read task after save
-      mockRepository.saveObject.mockResolvedValue();
-
-      const result = await claimTask(mockRepository, undefined, "T-test-task");
-
-      expect(mockRepository.saveObject).toHaveBeenCalledTimes(1);
-      expect(result.content[0].text).toContain("Successfully claimed task:");
-    });
-
-    it("should update parents even when using force flag", async () => {
-      const mockFeature = createMockFeature({
-        status: TrellisObjectStatus.OPEN,
-        parent: undefined, // No parent to stop hierarchy here
-      });
-      const mockTask = createMockTask({
-        parent: "F-test-feature",
-        status: TrellisObjectStatus.IN_PROGRESS, // Already in progress
-      });
-      const updatedTask = {
-        ...mockTask,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      };
-
-      mockRepository.getObjectById
-        .mockResolvedValueOnce(mockTask)
-        .mockResolvedValueOnce(mockFeature)
-        .mockResolvedValueOnce(updatedTask); // Re-read task after save
-      mockRepository.saveObject.mockResolvedValue();
-
-      const result = await claimTask(
-        mockRepository,
-        undefined,
-        "T-test-task",
-        true,
-      );
-
-      expect(mockRepository.saveObject).toHaveBeenCalledTimes(2);
-      expect(mockRepository.saveObject).toHaveBeenNthCalledWith(2, {
-        ...mockFeature,
-        status: TrellisObjectStatus.IN_PROGRESS,
-      });
-      expect(result.content[0].text).toContain("Successfully claimed task:");
     });
   });
 
