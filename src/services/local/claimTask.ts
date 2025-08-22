@@ -6,6 +6,7 @@ import {
 } from "../../models";
 import { Repository } from "../../repositories";
 import { checkPrerequisitesComplete } from "../../utils/checkPrerequisitesComplete";
+import { checkHierarchicalPrerequisitesComplete } from "../../utils/checkHierarchicalPrerequisitesComplete";
 import { filterUnavailableObjects } from "../../utils/filterUnavailableObjects";
 import { sortTrellisObjects } from "../../utils/sortTrellisObjects";
 
@@ -140,15 +141,26 @@ async function validateTaskForClaiming(
       );
     }
 
-    // Validate all prerequisites are complete
-    const prerequisitesComplete = await checkPrerequisitesComplete(
+    // Validate all prerequisites are complete (including hierarchical)
+    const prerequisitesComplete = await checkHierarchicalPrerequisitesComplete(
       task,
       repository,
     );
     if (!prerequisitesComplete) {
-      throw new Error(
-        `Task "${taskId}" cannot be claimed. Not all prerequisites are complete.`,
+      // Determine if it's the task's own prerequisites or a parent's
+      const ownPrerequisitesComplete = await checkPrerequisitesComplete(
+        task,
+        repository,
       );
+      if (ownPrerequisitesComplete) {
+        throw new Error(
+          `Task "${taskId}" cannot be claimed. Parent hierarchy has incomplete prerequisites.`,
+        );
+      } else {
+        throw new Error(
+          `Task "${taskId}" cannot be claimed. Not all prerequisites are complete.`,
+        );
+      }
     }
   }
 }

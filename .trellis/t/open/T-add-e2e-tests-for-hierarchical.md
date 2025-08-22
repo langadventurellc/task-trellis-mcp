@@ -4,7 +4,7 @@ title: Add E2E tests for hierarchical prerequisites via MCP tools
 status: open
 priority: medium
 prerequisites:
-  - T-create-integration-tests-for
+  - T-update-claimtask-service-to
 affectedFiles: {}
 log: []
 schema: v1.0

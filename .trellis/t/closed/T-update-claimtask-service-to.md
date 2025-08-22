@@ -1,13 +1,29 @@
 ---
 id: T-update-claimtask-service-to
 title: Update claimTask service to use hierarchical prerequisite checking
-status: open
+status: done
 priority: high
 prerequisites:
   - T-create-checkhierarchicalprereq
   - T-update-filterunavailableobject
-affectedFiles: {}
-log: []
+affectedFiles:
+  src/services/local/claimTask.ts: Updated to use
+    checkHierarchicalPrerequisitesComplete instead of checkPrerequisitesComplete
+    in validateTaskForClaiming function. Added logic to provide specific error
+    messages when parent hierarchy has incomplete prerequisites vs task's own
+    prerequisites.
+  src/services/local/__tests__/claimTask.test.ts: Added comprehensive test
+    coverage for hierarchical prerequisite checking including tests for parent
+    feature prerequisites, grandparent epic prerequisites, force flag bypass,
+    findNextAvailableTask filtering, and specific error message scenarios.
+    Updated existing tests to properly mock the new hierarchical functions.
+log:
+  - Successfully updated claimTask service to use hierarchical prerequisite
+    checking. Replaced checkPrerequisitesComplete with
+    checkHierarchicalPrerequisitesComplete in validation logic, added specific
+    error messages to distinguish between task prerequisites vs parent hierarchy
+    prerequisites, and added comprehensive test coverage. All tests pass
+    (585/585) and quality checks are clean.
 schema: v1.0
 childrenIds: []
 created: 2025-08-22T05:30:41.292Z
