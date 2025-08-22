@@ -49,7 +49,7 @@ program
   )
   .option(
     "--auto-prune <days>",
-    "Auto-prune closed objects older than N days (0=disabled)",
+    "Auto-prune closed issues older than N days (0=disabled)",
     "0",
   );
 
