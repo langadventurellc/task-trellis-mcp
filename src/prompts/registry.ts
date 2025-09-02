@@ -11,10 +11,31 @@ import { PromptsRegistry } from "./PromptsRegistry.js";
  * Registers prompt handlers with the MCP server
  */
 export async function registerPromptHandlers(server: Server): Promise<void> {
+  console.warn("Initializing prompts system...");
   const registry = new PromptsRegistry();
 
   // Initialize the registry by loading all prompts
-  await registry.initialize();
+  try {
+    await registry.initialize();
+    const loadedPrompts = registry.listPrompts();
+    console.warn(
+      `Successfully loaded ${loadedPrompts.prompts.length} prompt templates`,
+    );
+
+    // Log individual prompt names for debugging
+    if (loadedPrompts.prompts.length > 0) {
+      console.warn("Available prompts:");
+      loadedPrompts.prompts.forEach((prompt) => {
+        console.warn(`  - ${prompt.name}: ${prompt.description}`);
+      });
+    }
+  } catch (error) {
+    console.error("Warning: Failed to load prompt templates:", error);
+    console.warn(
+      "Continuing with empty prompts registry - prompts feature will be available but with no templates",
+    );
+    // Continue execution - prompts feature will be available but with no templates
+  }
 
   // Register prompts/list handler
   server.setRequestHandler(ListPromptsRequestSchema, () => {
@@ -54,4 +75,6 @@ export async function registerPromptHandlers(server: Server): Promise<void> {
       );
     }
   });
+
+  console.warn("Prompt handlers registered successfully");
 }
