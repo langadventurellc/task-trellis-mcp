@@ -1,13 +1,35 @@
 ---
 id: F-mcp-prompts-implementation
 title: MCP Prompts Implementation
-status: open
+status: in-progress
 priority: medium
 prerequisites: []
-affectedFiles: {}
+affectedFiles:
+  src/prompts/TrellisPrompt.ts:
+    Created TrellisPrompt interface with comprehensive
+    JSDoc comments, following feature specification exactly with name, title,
+    description, arguments, systemRules, and userTemplate fields
+  src/prompts/PromptArgument.ts: Created PromptArgument interface with proper
+    TypeScript typing including name, type, required, and description fields
+    with string literal type union
+  src/prompts/index.ts:
+    Created barrel export file consolidating TrellisPrompt and
+    PromptArgument exports following existing codebase patterns
+  src/prompts/__tests__/TrellisPrompt.test.ts: Comprehensive unit tests for
+    TrellisPrompt interface including structure validation, optional fields,
+    kebab-case names, and complex integration scenarios
+  src/prompts/__tests__/PromptArgument.test.ts: Complete unit tests for
+    PromptArgument interface covering required fields, optional type field, and
+    TypeScript type system validation
 log: []
 schema: v1.0
-childrenIds: []
+childrenIds:
+  - T-create-core-prompt-data
+  - T-create-mcp-prompts-registry
+  - T-create-prompt-manager-for
+  - T-implement-markdown-prompt
+  - T-implement-template-renderer
+  - T-integrate-prompts-system-into
 created: 2025-09-02T18:23:06.976Z
 updated: 2025-09-02T18:23:06.976Z
 ---

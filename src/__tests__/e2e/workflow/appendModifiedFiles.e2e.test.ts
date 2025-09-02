@@ -463,7 +463,7 @@ describe("E2E Workflow - appendModifiedFiles", () => {
       });
 
       // Append log (should not affect files)
-      await client.callTool("append_object_log", {
+      await client.callTool("append_issue_log", {
         id: "T-mixed-operations",
         contents: "Added initial implementation",
       });

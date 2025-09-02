@@ -52,12 +52,12 @@ describe("E2E Workflow - Task Lifecycle", () => {
       expect(file.yaml.status).toBe("in-progress");
 
       // Step 3: Add progress logs
-      await client.callTool("append_object_log", {
+      await client.callTool("append_issue_log", {
         id: taskId,
         contents: "Started implementation",
       });
 
-      await client.callTool("append_object_log", {
+      await client.callTool("append_issue_log", {
         id: taskId,
         contents: "Added unit tests",
       });
@@ -196,7 +196,7 @@ describe("E2E Workflow - Task Lifecycle", () => {
       // Claim and complete tasks
       for (const taskId of taskIds) {
         await client.callTool("claim_task", { taskId });
-        await client.callTool("append_object_log", {
+        await client.callTool("append_issue_log", {
           id: taskId,
           contents: `Working on ${taskId}`,
         });
@@ -242,7 +242,7 @@ describe("E2E Workflow - Task Lifecycle", () => {
       const taskId = result.content[0].text.match(/ID: (T-[a-z0-9-]+)/)![1];
 
       await client.callTool("claim_task", { taskId });
-      await client.callTool("append_object_log", {
+      await client.callTool("append_issue_log", {
         id: taskId,
         contents: "Started work but found blocker",
       });
@@ -272,7 +272,7 @@ describe("E2E Workflow - Task Lifecycle", () => {
 
       // First claim
       await client.callTool("claim_task", { taskId });
-      await client.callTool("append_object_log", {
+      await client.callTool("append_issue_log", {
         id: taskId,
         contents: "First attempt - need to hand off",
       });
@@ -285,7 +285,7 @@ describe("E2E Workflow - Task Lifecycle", () => {
 
       // Second claim
       await client.callTool("claim_task", { taskId });
-      await client.callTool("append_object_log", {
+      await client.callTool("append_issue_log", {
         id: taskId,
         contents: "Taking over task",
       });
@@ -441,7 +441,7 @@ describe("E2E Workflow - Task Lifecycle", () => {
 
       // Work on tasks (add logs to all)
       for (const taskId of taskIds) {
-        await client.callTool("append_object_log", {
+        await client.callTool("append_issue_log", {
           id: taskId,
           contents: `Working on ${taskId}`,
         });

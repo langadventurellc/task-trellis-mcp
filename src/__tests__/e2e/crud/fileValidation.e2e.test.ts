@@ -174,13 +174,13 @@ describe("E2E File Validation", () => {
       const taskId = createResult.content[0].text.match(/ID: (T-[a-z-]+)/)![1];
 
       // Add multi-line log entries
-      await client.callTool("append_object_log", {
+      await client.callTool("append_issue_log", {
         id: taskId,
         contents:
           "Multi-line entry:\n- Point 1\n- Point 2\n  - Nested point\n- Point 3",
       });
 
-      await client.callTool("append_object_log", {
+      await client.callTool("append_issue_log", {
         id: taskId,
         contents: "Another entry with:\n\nParagraph breaks\n\nAnd formatting",
       });
