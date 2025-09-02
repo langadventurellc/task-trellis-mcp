@@ -48,7 +48,7 @@ describe("E2E CRUD - createObject", () => {
       expect(file.yaml.title).toBe("Test Project");
       expect(file.yaml.status).toBe("open");
       expect(file.yaml.priority).toBe("medium");
-      expect(file.yaml.parent).toBeUndefined();
+      expect(file.yaml.parent).toBe("none");
       expect(file.yaml.prerequisites).toEqual([]);
       expect(file.body).toBe("");
     });
@@ -136,7 +136,7 @@ describe("E2E CRUD - createObject", () => {
         "e/E-standalone-epic/E-standalone-epic.md",
       );
       expect(file.yaml.id).toBe("E-standalone-epic");
-      expect(file.yaml.parent).toBeUndefined();
+      expect(file.yaml.parent).toBe("none");
       expect(file.yaml.priority).toBe("high");
       expect(file.body).toBe("Epic without parent project");
     });
@@ -205,7 +205,7 @@ describe("E2E CRUD - createObject", () => {
         testEnv.projectRoot,
         "f/F-standalone-feature/F-standalone-feature.md",
       );
-      expect(file.yaml.parent).toBeUndefined();
+      expect(file.yaml.parent).toBe("none");
       expect(file.yaml.status).toBe("in-progress");
     });
 
@@ -299,7 +299,7 @@ describe("E2E CRUD - createObject", () => {
         testEnv.projectRoot,
         `e/${epicId}/${epicId}.md`,
       );
-      expect(epicFile.yaml.parent).toBeUndefined();
+      expect(epicFile.yaml.parent).toBe("none");
       expect(epicFile.body).toBe("Testing epic without project parent");
 
       // Verify feature content

@@ -469,5 +469,30 @@ ${"Final section content repeated multiple times to test large content handling.
         expect(deserialized).toEqual(objects[index]);
       });
     });
+
+    it("should handle TrellisObject with undefined parent round-trip", () => {
+      const original: TrellisObject = {
+        id: "T-no-parent-round-trip",
+        title: "No Parent Round Trip Test",
+        status: TrellisObjectStatus.OPEN,
+        priority: TrellisObjectPriority.MEDIUM,
+        // parent is undefined (not included in object)
+        prerequisites: ["setup"],
+        affectedFiles: new Map([["test.ts", "created"]]),
+        log: ["Initial setup"],
+        schema: "v1.0",
+        childrenIds: [],
+        body: "Test content with no parent",
+        type: TrellisObjectType.TASK,
+        created: "2025-01-15T10:00:00Z",
+        updated: "2025-01-15T10:00:00Z",
+      };
+
+      const serialized = serializeTrellisObject(original);
+      const deserialized = deserializeTrellisObject(serialized);
+
+      expect(deserialized).toEqual(original);
+      expect(deserialized.parent).toBeUndefined();
+    });
   });
 });

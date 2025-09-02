@@ -261,8 +261,8 @@ describe("serializeTrellisObject", () => {
     const yamlPart = result.split("---\n")[1];
     const parsedYaml = parse(yamlPart);
 
-    // parent should be undefined or null in YAML
-    expect(parsedYaml.parent).toBeUndefined();
+    // parent should be "none" when undefined
+    expect(parsedYaml.parent).toBe("none");
     expect(parsedYaml.id).toBe("no-parent-test");
   });
 });

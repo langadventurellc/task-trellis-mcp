@@ -48,7 +48,7 @@ describe("E2E File Validation", () => {
       expect(file.yaml).toHaveProperty("priority");
       expect(file.yaml).toHaveProperty("prerequisites");
       expect(file.yaml).toHaveProperty("schema");
-      expect(file.yaml).not.toHaveProperty("parent"); // Projects don't have parents
+      expect(file.yaml.parent).toBe("none"); // Projects don't have parents
     });
 
     it("should validate all object types have correct YAML structure", async () => {
@@ -120,7 +120,7 @@ describe("E2E File Validation", () => {
 
       expect(file.yaml.prerequisites).toEqual([]);
       expect(file.body).toBe("");
-      expect(file.yaml.parent).toBeUndefined();
+      expect(file.yaml.parent).toBe("none");
     });
   });
 
