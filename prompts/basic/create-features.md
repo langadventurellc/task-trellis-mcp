@@ -6,47 +6,11 @@ description: Break down an epic into specific features by analyzing the epic spe
 
 Break down an epic into specific features using the Trellis task management system by analyzing the epic specification and gathering additional requirements as needed. Do not attempt to create multiple features in parallel. Do them sequentially one at a time.
 
-## MCP Server Setup
-
-Ensure the Task Trellis MCP server is properly configured. The server can be activated with:
-
-- `activate` tool with `mode: "local"` and `projectRoot: "/path/to/project"` (if not configured via command line)
-- Or started with command line arguments: `--mode local --projectRootFolder /path/to/project`
-
-This creates a `.trellis` folder inside the project root for task storage.
-
-## Trellis System Overview
-
-The Trellis task management system organizes work in a hierarchical structure:
-
-- **Projects**: Large-scale initiatives or products (e.g., "E-commerce Platform Redesign")
-- **Epics**: Major work streams within a project (e.g., "User Authentication", "Payment Processing")
-- **Features**: Specific functionality within epics (e.g., "Login Form", "Password Reset")
-- **Tasks**: Atomic units of work, 1-2 hours each (e.g., "Create user model", "Add email validation")
-
-This hierarchy enables parallel development, clear dependencies, and manageable work units.
-
 ## Goal
 
 Analyze an epic's comprehensive specification to create well-structured features that represent implementable functionality, ensuring complete coverage of the epic's scope and enabling effective task decomposition.
 
 **IMPORTANT**: Features must include actual changes, implementations, or deliverables. Do not create features that are purely research tasks or analysis tasks without any tangible output. Since all features and tasks are executed independently without context from other features or tasks, purely analytical work provides no value.
-
-## Hierarchical vs Standalone Features
-
-### **Hierarchical Features** (with epic parent):
-
-- Use when breaking down a large epic into manageable components
-- Provides clear organization and dependency tracking
-- Epic context helps inform feature scope and requirements
-- Input typically includes an epic ID
-
-### **Standalone Features** (no parent):
-
-- Use for independent functionality that doesn't fit into an existing epic
-- Suitable for bug fixes, small enhancements, or self-contained features
-- Can be created directly from user requirements without epic context
-- Input typically describes the standalone feature requirements
 
 ## Process
 
@@ -188,56 +152,6 @@ After successful creation:
 
 📊 Feature Summary:
 - Total Features: [N]
-- Dependencies Configured: ✓
-
-Next step:
-Use /create-tasks to break down features into implementable tasks
-```
-
-## Example Feature Structures
-
-### User Authentication Epic
-
-```
-1. User Registration
-   - Account creation, email verification, profile setup
-   - Dependencies: none
-
-2. Login System
-   - Authentication, session management, remember me
-   - Dependencies: User Registration
-
-3. Password Management
-   - Reset, change, strength requirements
-   - Dependencies: Login System
-
-4. Two-Factor Authentication
-   - TOTP setup, backup codes, recovery
-   - Dependencies: Login System
-
-5. OAuth Integration
-   - Social login providers, account linking
-   - Dependencies: Login System
-```
-
-### Data Management Epic
-
-```
-1. Core Data Models
-   - Entity definitions, relationships, validation
-   - Dependencies: none
-
-2. Database Migrations
-   - Schema versioning, rollback support
-   - Dependencies: Core Data Models
-
-3. Data Access Layer
-   - Repository pattern, query optimization
-   - Dependencies: Core Data Models
-
-4. Caching Strategy
-   - Redis integration, cache invalidation
-   - Dependencies: Data Access Layer
 ```
 
 ## Question Guidelines
@@ -250,7 +164,6 @@ Ask questions that:
 - **Consider testing**: How to verify feature completeness?
 
 <rules>
-  <critical>Never directly access `.trellis/` directory directly</critical>
   <critical>Use MCP tools for all operations (create_issue, get_issue, etc.)</critical>
   <critical>Ask one question at a time with specific options</critical>
   <critical>Continue asking questions until you have complete understanding of feature boundaries</critical>

@@ -6,47 +6,9 @@ description: Break down a feature into specific, actionable tasks (1-2 hours eac
 
 Break down a feature into specific, actionable tasks using the Trellis task management system. Do not attempt to create multiple tasks in parallel. Do them sequentially one at a time.
 
-Use ULTRATHINK.
-
-## MCP Server Setup
-
-Ensure the Task Trellis MCP server is properly configured. The server can be activated with:
-
-- `activate` tool with `mode: "local"` and `projectRoot: "/path/to/project"` (if not configured via command line)
-- Or started with command line arguments: `--mode local --projectRootFolder /path/to/project`
-
-This creates a `.trellis` folder inside the project root for task storage.
-
-## Trellis System Overview
-
-The Trellis task management system organizes work in a hierarchical structure:
-
-- **Projects**: Large-scale initiatives or products (e.g., "E-commerce Platform Redesign")
-- **Epics**: Major work streams within a project (e.g., "User Authentication", "Payment Processing")
-- **Features**: Specific functionality within epics (e.g., "Login Form", "Password Reset")
-- **Tasks**: Atomic units of work, 1-2 hours each (e.g., "Create user model", "Add email validation")
-
-This hierarchy enables parallel development, clear dependencies, and manageable work units.
-
 ## Goal
 
 Analyze a feature's comprehensive specification to create granular tasks that can be individually claimed and completed by developers, ensuring complete implementation of the feature with proper testing and security considerations.
-
-## Hierarchical vs Standalone Tasks
-
-### **Hierarchical Tasks** (with feature parent):
-
-- Use when breaking down a feature into atomic units of work
-- Provides clear organization and feature context
-- Feature context helps inform task scope and requirements
-- Input typically includes a feature ID
-
-### **Standalone Tasks** (no parent):
-
-- Use for independent work items that don't fit into a feature
-- Suitable for bug fixes, maintenance, research, or ad-hoc tasks
-- Can be created directly from user requirements without feature context
-- Input typically describes the standalone task requirements
 
 ## Process
 
@@ -217,60 +179,6 @@ Integration:
 📊 Task Summary:
 - Total Tasks: [N]
 - High Priority: [X]
-- Dependencies Configured: ✓
-
-Next step:
-Use /implement-task to claim and work on the next available task
-```
-
-## Example Task Structures
-
-### User Registration Feature
-
-```
-Setup & Configuration:
-  - Create user database model with required fields, validation, and unit tests
-  - Set up email service configuration with error handling and tests
-
-API Development:
-  - Create POST /api/register endpoint with input validation, tests, and docs
-  - Implement email verification token generation with security tests
-  - Create GET /api/verify-email endpoint with validation and integration tests
-  - Add rate limiting to registration endpoint with monitoring and tests
-
-Frontend Components:
-  - Create registration form component with unit tests and error handling
-  - Add client-side validation with comprehensive test coverage
-  - Implement success/error states with component tests
-  - Create email verification page with user flow tests
-
-Security Implementation:
-  - Add input sanitization for user data with security tests and docs
-  - Implement CAPTCHA integration with validation tests
-  - Add password strength validation with comprehensive test suite
-```
-
-### API Integration Feature
-
-```
-Configuration:
-  - Set up API client configuration with validation and documentation
-  - Create environment variables for API keys with security tests
-
-Implementation:
-  - Create API client service class with unit tests and comprehensive docs
-  - Implement authentication method with security tests and error handling
-  - Create data transformation layer with validation tests and examples
-  - Add retry logic with exponential backoff, monitoring, and tests
-
-Error Handling:
-  - Implement error response parsing with unit tests and documentation
-  - Create fallback mechanisms with reliability tests
-  - Add logging for API calls with log level tests and docs
-
-Performance & Integration:
-  - Write comprehensive integration test suite with real API scenarios
-  - Add performance tests for rate limits and response times
 ```
 
 ## Task Creation Guidelines
@@ -308,7 +216,6 @@ Assign priorities based on:
 - **Low**: Enhancements, optimizations, nice-to-have features
 
 <rules>
-  <critical>Never directly access `.trellis/` directory directly</critical>
   <critical>Use MCP tools for all operations (create_issue, get_issue, etc.)</critical>
   <critical>Each task must be completable in 1-2 hours</critical>
   <critical>Ask one question at a time with specific options</critical>

@@ -6,26 +6,6 @@ description: Claim and implement a task following Research and Plan → Implemen
 
 Claim and implement the next available task from the backlog using the Trellis task management system with the Research and Plan → Implement workflow.
 
-## MCP Server Setup
-
-Ensure the Task Trellis MCP server is properly configured. The server can be activated with:
-
-- `activate` tool with `mode: "local"` and `projectRoot: "/path/to/project"` (if not configured via command line)
-- Or started with command line arguments: `--mode local --projectRootFolder /path/to/project`
-
-This creates a `.trellis` folder inside the project root for task storage.
-
-### Trellis System Overview
-
-The Trellis task management system organizes work in a hierarchical structure:
-
-- **Projects**: Large-scale initiatives or products (e.g., "E-commerce Platform Redesign")
-- **Epics**: Major work streams within a project (e.g., "User Authentication", "Payment Processing")
-- **Features**: Specific functionality within epics (e.g., "Login Form", "Password Reset")
-- **Tasks**: Atomic units of work, 1-2 hours each (e.g., "Create user model", "Add email validation")
-
-This hierarchy enables parallel development, clear dependencies, and manageable work units.
-
 ## Goal
 
 Automatically claim the highest-priority available task and implement it following project standards, with comprehensive research, planning, and quality checks before marking complete.
@@ -129,14 +109,6 @@ Files changed:
 
 ```
 🎯 Task Complete: T-create-user-model
-
-Next available task:
-- T-add-user-validation: Add validation rules for user model
-  (Depends on the task you just completed)
-
-Run /implement-task again to claim and implement the next task.
-
-Note: Your completed task has unblocked dependent tasks!
 ```
 
 **STOP!** - Do not proceed. Complete one task and one task only. Do not implement another task.
@@ -181,22 +153,12 @@ During implementation, ensure:
 - **Documentation**: Comment complex logic
 - **Quality Checks**: All must pass before completion
 
-## Communication Standards
-
-### Suggesting Improvements:
-
-"The current approach works, but I notice [observation].
-Would you like me to [specific improvement]?"
-
-## Common Implementation Patterns
-
 ## Workflow Guidelines
 
 - Always follow Research and Plan → Implement
 - Run quality checks after each major change
 - Write tests alongside implementation
 - Commit only when all checks pass
-- Document decisions in code comments
 
 <rules>
   <critical>ALWAYS follow Research and Plan → Implement workflow</critical>
