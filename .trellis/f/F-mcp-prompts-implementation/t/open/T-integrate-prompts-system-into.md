@@ -101,7 +101,6 @@ capabilities: {
 - [ ] Handle prompts initialization errors without failing server startup
 - [ ] Log successful prompts loading with loaded prompt count
 - [ ] Maintain compatibility with existing tools functionality
-- [ ] Integration tests verifying prompts work end-to-end with server
 
 ## Dependencies
 

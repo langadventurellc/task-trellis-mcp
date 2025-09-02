@@ -142,7 +142,6 @@ Export `registerPromptHandlers(server: McpServer)` function that:
 - [ ] Omit internal-only fields from `prompts/list` responses
 - [ ] Generate proper MCP message format with system/user roles
 - [ ] Unit tests covering both endpoints with valid/invalid inputs
-- [ ] Integration tests with actual MCP server instance
 
 ## Dependencies
 
