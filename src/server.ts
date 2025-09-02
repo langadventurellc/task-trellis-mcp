@@ -34,6 +34,7 @@ import {
   listObjectsTool,
   updateObjectTool,
 } from "./tools";
+import { registerPromptHandlers } from "./prompts/registry.js";
 
 // Parse command line arguments
 const program = new Command();
@@ -149,6 +150,7 @@ Essential for AI agents working on complex, multi-step software projects where s
   {
     capabilities: {
       tools: {},
+      prompts: {},
     },
   },
 );
@@ -257,6 +259,9 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
 });
 
 async function runServer() {
+  // Register prompt handlers
+  await registerPromptHandlers(server);
+
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }

@@ -17,7 +17,8 @@ affectedFiles:
     PromptArgument exports following existing codebase patterns; Updated barrel
     exports to include PromptManager and parsePromptFile for external
     consumption.; Added exports for PromptRenderer and PromptMessage to the
-    prompts module barrel file
+    prompts module barrel file; Added exports for PromptsRegistry class and
+    registerPromptHandlers function to module barrel file
   src/prompts/__tests__/TrellisPrompt.test.ts: Comprehensive unit tests for
     TrellisPrompt interface including structure validation, optional fields,
     kebab-case names, and complex integration scenarios
@@ -51,15 +52,25 @@ affectedFiles:
     Created extensive unit test suite
     with 27 test cases covering all renderer functionality including edge cases,
     error conditions, and security sanitization
+  src/prompts/registry.ts:
+    Created MCP prompt handlers registration function using
+    proper MCP SDK schemas (ListPromptsRequestSchema, GetPromptRequestSchema)
+    with comprehensive error handling and argument validation
+  src/prompts/PromptsRegistry.ts: Created PromptsRegistry class implementing
+    prompts/list and prompts/get endpoint logic with integration of
+    PromptManager and PromptRenderer, following one-export-per-file rule
+  src/server.ts: Added prompts capability to server configuration, imported and
+    registered prompt handlers in runServer function to enable slash command
+    functionality
 log: []
 schema: v1.0
 childrenIds:
   - T-create-mcp-prompts-registry
-  - T-implement-template-renderer
   - T-integrate-prompts-system-into
   - T-create-core-prompt-data
   - T-create-prompt-manager-for
   - T-implement-markdown-prompt
+  - T-implement-template-renderer
 created: 2025-09-02T18:23:06.976Z
 updated: 2025-09-02T18:23:06.976Z
 ---

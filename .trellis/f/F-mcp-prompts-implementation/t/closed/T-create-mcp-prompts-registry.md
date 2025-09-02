@@ -1,14 +1,35 @@
 ---
 id: T-create-mcp-prompts-registry
 title: Create MCP prompts registry with list and get endpoints
-status: open
+status: done
 priority: high
 parent: F-mcp-prompts-implementation
 prerequisites:
   - T-create-prompt-manager-for
   - T-implement-template-renderer
-affectedFiles: {}
-log: []
+affectedFiles:
+  src/prompts/registry.ts:
+    Created MCP prompt handlers registration function using
+    proper MCP SDK schemas (ListPromptsRequestSchema, GetPromptRequestSchema)
+    with comprehensive error handling and argument validation
+  src/prompts/PromptsRegistry.ts: Created PromptsRegistry class implementing
+    prompts/list and prompts/get endpoint logic with integration of
+    PromptManager and PromptRenderer, following one-export-per-file rule
+  src/prompts/index.ts: Added exports for PromptsRegistry class and
+    registerPromptHandlers function to module barrel file
+  src/server.ts: Added prompts capability to server configuration, imported and
+    registered prompt handlers in runServer function to enable slash command
+    functionality
+log:
+  - Successfully implemented MCP prompts registry with list and get endpoints.
+    Created PromptsRegistry class that integrates PromptManager and
+    PromptRenderer to provide slash command functionality in Claude Code. The
+    implementation includes proper MCP protocol compliance with
+    ListPromptsRequestSchema and GetPromptRequestSchema handlers, comprehensive
+    error handling, argument validation, and template rendering. Followed
+    project standards with TypeScript strict typing, "one export per file" rule
+    compliance, and comprehensive quality checks. All 731 tests pass with no
+    regressions.
 schema: v1.0
 childrenIds: []
 created: 2025-09-02T18:45:41.589Z
