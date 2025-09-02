@@ -14,7 +14,9 @@ affectedFiles:
     with string literal type union
   src/prompts/index.ts:
     Created barrel export file consolidating TrellisPrompt and
-    PromptArgument exports following existing codebase patterns
+    PromptArgument exports following existing codebase patterns; Updated barrel
+    exports to include PromptManager and parsePromptFile for external
+    consumption.
   src/prompts/__tests__/TrellisPrompt.test.ts: Comprehensive unit tests for
     TrellisPrompt interface including structure validation, optional fields,
     kebab-case names, and complex integration scenarios
@@ -29,15 +31,24 @@ affectedFiles:
     with 19 test cases covering all parser functionality including valid
     parsing, error conditions, edge cases, and various frontmatter
     configurations with 100% test coverage
+  src/prompts/PromptManager.ts: Created PromptManager class with directory
+    scanning, caching, and validation. Features async loading, error logging,
+    and Map-based efficient lookup by prompt name.
+  src/prompts/__tests__/PromptManager.test.ts: Comprehensive unit tests covering
+    all methods, error conditions, and edge cases with full mocking of fs
+    operations and parsePromptFile.
+  src/prompts/__tests__/PromptManager.integration.test.ts: Integration tests
+    validating real file system interactions, performance, and prompt structure
+    validation with actual prompt files.
 log: []
 schema: v1.0
 childrenIds:
   - T-create-mcp-prompts-registry
   - T-create-prompt-manager-for
-  - T-implement-markdown-prompt
   - T-implement-template-renderer
   - T-integrate-prompts-system-into
   - T-create-core-prompt-data
+  - T-implement-markdown-prompt
 created: 2025-09-02T18:23:06.976Z
 updated: 2025-09-02T18:23:06.976Z
 ---

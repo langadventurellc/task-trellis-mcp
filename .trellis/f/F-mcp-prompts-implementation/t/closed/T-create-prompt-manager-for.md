@@ -1,13 +1,30 @@
 ---
 id: T-create-prompt-manager-for
 title: Create prompt manager for lifecycle and caching
-status: open
+status: done
 priority: high
 parent: F-mcp-prompts-implementation
 prerequisites:
   - T-implement-markdown-prompt
-affectedFiles: {}
-log: []
+affectedFiles:
+  src/prompts/PromptManager.ts: Created PromptManager class with directory
+    scanning, caching, and validation. Features async loading, error logging,
+    and Map-based efficient lookup by prompt name.
+  src/prompts/index.ts: Updated barrel exports to include PromptManager and
+    parsePromptFile for external consumption.
+  src/prompts/__tests__/PromptManager.test.ts: Comprehensive unit tests covering
+    all methods, error conditions, and edge cases with full mocking of fs
+    operations and parsePromptFile.
+  src/prompts/__tests__/PromptManager.integration.test.ts: Integration tests
+    validating real file system interactions, performance, and prompt structure
+    validation with actual prompt files.
+log:
+  - Implemented PromptManager class for lifecycle and caching management of
+    prompt templates. The component scans the prompts/basic/ directory on
+    startup, loads and validates prompt definitions using the existing
+    PromptParser, and provides efficient access methods (list, get, has) for the
+    MCP registry. Includes comprehensive error handling, graceful directory
+    handling, and extensive test coverage (25 tests total).
 schema: v1.0
 childrenIds: []
 created: 2025-09-02T18:44:55.946Z
