@@ -1,6 +1,5 @@
 ---
 description: Claim and implement a task following Research and Plan → Implement workflow
-argument-hint: [task-id] --worktree [worktree-path] --scope [issue-id] --force [additional context or instructions]
 ---
 
 # Implement Task Command

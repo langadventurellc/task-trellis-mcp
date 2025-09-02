@@ -24,7 +24,13 @@ export class PromptManager {
       return;
     }
 
-    const promptsDir = path.join(__dirname, "..", "..", "prompts", "basic");
+    const promptsDir = path.join(
+      __dirname,
+      "..",
+      "resources",
+      "prompts",
+      "basic",
+    );
 
     if (!(await this.checkDirectoryExists(promptsDir))) {
       this.loaded = true;

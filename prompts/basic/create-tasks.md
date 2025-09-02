@@ -1,6 +1,5 @@
 ---
 description: Break down a feature into specific, actionable tasks (1-2 hours each)
-argument-hint: [feature-id] [additional context or instructions]
 ---
 
 # Create Tasks Command

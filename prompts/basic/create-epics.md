@@ -1,6 +1,5 @@
 ---
 description: Break down a project into major epics by analyzing the project specification
-argument-hint: [project-id] [additional context or instructions]
 ---
 
 # Create Epics Command

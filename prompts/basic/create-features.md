@@ -1,6 +1,5 @@
 ---
 description: Break down an epic into specific features by analyzing the epic specification
-argument-hint: [epic-id] [additional context or instructions]
 ---
 
 # Create Features Command
