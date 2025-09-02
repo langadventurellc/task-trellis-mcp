@@ -1,13 +1,33 @@
 ---
 id: T-implement-markdown-prompt
 title: Implement markdown prompt file parser with frontmatter support
-status: open
+status: done
 priority: high
 parent: F-mcp-prompts-implementation
 prerequisites:
   - T-create-core-prompt-data
-affectedFiles: {}
-log: []
+affectedFiles:
+  src/prompts/PromptParser.ts: Created comprehensive markdown prompt file parser
+    with parsePromptFile() function that reads files, extracts YAML frontmatter,
+    processes system rules, validates structure, and returns TrellisPrompt
+    objects with robust error handling
+  src/prompts/__tests__/PromptParser.test.ts: Created extensive unit test suite
+    with 19 test cases covering all parser functionality including valid
+    parsing, error conditions, edge cases, and various frontmatter
+    configurations with 100% test coverage
+log:
+  - Successfully implemented comprehensive markdown prompt file parser with
+    frontmatter support. Created robust PromptParser.ts with parsePromptFile()
+    function that reads markdown files, extracts YAML frontmatter using existing
+    yaml dependency, processes system rules from <rules> blocks, validates
+    required fields, and returns TrellisPrompt objects. Implemented
+    comprehensive error handling with descriptive messages, including validation
+    for kebab-case names, unique argument names, and proper argument types.
+    Added extensive unit test coverage with 19 test cases covering all
+    functionality including edge cases, error conditions, and various
+    frontmatter configurations. All quality checks pass with no linting,
+    formatting, or TypeScript errors. Parser follows existing codebase patterns
+    and integrates seamlessly with TrellisPrompt and PromptArgument interfaces.
 schema: v1.0
 childrenIds: []
 created: 2025-09-02T18:44:37.509Z

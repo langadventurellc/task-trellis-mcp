@@ -21,15 +21,23 @@ affectedFiles:
   src/prompts/__tests__/PromptArgument.test.ts: Complete unit tests for
     PromptArgument interface covering required fields, optional type field, and
     TypeScript type system validation
+  src/prompts/PromptParser.ts: Created comprehensive markdown prompt file parser
+    with parsePromptFile() function that reads files, extracts YAML frontmatter,
+    processes system rules, validates structure, and returns TrellisPrompt
+    objects with robust error handling
+  src/prompts/__tests__/PromptParser.test.ts: Created extensive unit test suite
+    with 19 test cases covering all parser functionality including valid
+    parsing, error conditions, edge cases, and various frontmatter
+    configurations with 100% test coverage
 log: []
 schema: v1.0
 childrenIds:
-  - T-create-core-prompt-data
   - T-create-mcp-prompts-registry
   - T-create-prompt-manager-for
   - T-implement-markdown-prompt
   - T-implement-template-renderer
   - T-integrate-prompts-system-into
+  - T-create-core-prompt-data
 created: 2025-09-02T18:23:06.976Z
 updated: 2025-09-02T18:23:06.976Z
 ---
