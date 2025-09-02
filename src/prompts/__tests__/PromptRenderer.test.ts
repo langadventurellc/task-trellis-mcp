@@ -22,7 +22,7 @@ describe("PromptRenderer", () => {
 
       expect(result).toHaveLength(1);
       expect(result[0].role).toBe("user");
-      expect(result[0].content[0].text).toBe("Hello, world!");
+      expect(result[0].content.text).toBe("Hello, world!");
     });
 
     it("should include system message when systemRules is present", () => {
@@ -38,9 +38,9 @@ describe("PromptRenderer", () => {
 
       expect(result).toHaveLength(2);
       expect(result[0].role).toBe("system");
-      expect(result[0].content[0].text).toBe("System rules");
+      expect(result[0].content.text).toBe("System rules");
       expect(result[1].role).toBe("user");
-      expect(result[1].content[0].text).toBe("User message");
+      expect(result[1].content.text).toBe("User message");
     });
 
     it("should throw error for missing required arguments", () => {
@@ -102,7 +102,7 @@ describe("PromptRenderer", () => {
 
       const result = renderer.renderPrompt(prompt, { input: "test data" });
 
-      expect(result[0].content[0].text).toBe("Process this: test data");
+      expect(result[0].content.text).toBe("Process this: test data");
     });
 
     it("should handle empty single input argument", () => {
@@ -117,7 +117,7 @@ describe("PromptRenderer", () => {
 
       const result = renderer.renderPrompt(prompt, { input: "" });
 
-      expect(result[0].content[0].text).toBe("Process this: ");
+      expect(result[0].content.text).toBe("Process this: ");
     });
 
     it("should format multiple arguments as block", () => {
@@ -136,7 +136,7 @@ describe("PromptRenderer", () => {
         arg2: "value2",
       });
 
-      const text = result[0].content[0].text;
+      const text = result[0].content.text;
       expect(text).toContain("## Inputs");
       expect(text).toContain("**arg1**: value1");
       expect(text).toContain("**arg2**: value2");
@@ -157,7 +157,7 @@ describe("PromptRenderer", () => {
 
       const result = renderer.renderPrompt(prompt, { arg1: "value1" });
 
-      const text = result[0].content[0].text;
+      const text = result[0].content.text;
       expect(text).toContain("**arg1**: value1");
       expect(text).toContain("**arg2**: (not provided)");
     });
@@ -172,7 +172,7 @@ describe("PromptRenderer", () => {
 
       const result = renderer.renderPrompt(prompt, {});
 
-      expect(result[0].content[0].text).toBe("Here are the inputs:\n");
+      expect(result[0].content.text).toBe("Here are the inputs:\n");
     });
 
     it("should leave template unchanged when no $ARGUMENTS placeholder", () => {
@@ -187,7 +187,7 @@ describe("PromptRenderer", () => {
 
       const result = renderer.renderPrompt(prompt, { input: "test" });
 
-      expect(result[0].content[0].text).toBe("No arguments here");
+      expect(result[0].content.text).toBe("No arguments here");
     });
   });
 
@@ -208,7 +208,7 @@ describe("PromptRenderer", () => {
         lastName: "Doe",
       });
 
-      expect(result[0].content[0].text).toBe("Hello John Doe!");
+      expect(result[0].content.text).toBe("Hello John Doe!");
     });
 
     it("should handle missing optional arguments", () => {
@@ -224,7 +224,7 @@ describe("PromptRenderer", () => {
 
       const result = renderer.renderPrompt(prompt, { name: "John" });
 
-      expect(result[0].content[0].text).toBe("Name: John, Age: (not provided)");
+      expect(result[0].content.text).toBe("Name: John, Age: (not provided)");
     });
 
     it("should handle empty argument values", () => {
@@ -237,7 +237,7 @@ describe("PromptRenderer", () => {
 
       const result = renderer.renderPrompt(prompt, { name: "" });
 
-      expect(result[0].content[0].text).toBe("Name: ");
+      expect(result[0].content.text).toBe("Name: ");
     });
 
     it("should leave undefined placeholders as-is when not in arguments schema", () => {
@@ -250,7 +250,7 @@ describe("PromptRenderer", () => {
 
       const result = renderer.renderPrompt(prompt, { name: "John" });
 
-      expect(result[0].content[0].text).toBe("Name: John, Unknown: ${unknown}");
+      expect(result[0].content.text).toBe("Name: John, Unknown: ${unknown}");
     });
 
     it("should handle placeholders with whitespace", () => {
@@ -263,7 +263,7 @@ describe("PromptRenderer", () => {
 
       const result = renderer.renderPrompt(prompt, { name: "John" });
 
-      expect(result[0].content[0].text).toBe("Name: John");
+      expect(result[0].content.text).toBe("Name: John");
     });
 
     it("should throw error for missing required argument in placeholder", () => {
@@ -298,7 +298,7 @@ describe("PromptRenderer", () => {
       const maliciousInput = "test`code`$ARGUMENTS<script>alert()</script>";
       const result = renderer.renderPrompt(prompt, { input: maliciousInput });
 
-      const text = result[0].content[0].text;
+      const text = result[0].content.text;
       expect(text).toContain("\\`");
       expect(text).toContain("\\$");
       expect(text).toContain("&lt;script&gt;");
@@ -315,7 +315,7 @@ describe("PromptRenderer", () => {
 
       const result = renderer.renderPrompt(prompt, { input: "test\\path" });
 
-      expect(result[0].content[0].text).toContain("test\\\\path");
+      expect(result[0].content.text).toContain("test\\\\path");
     });
 
     it("should limit consecutive newlines", () => {
@@ -330,7 +330,7 @@ describe("PromptRenderer", () => {
         input: "line1\n\n\n\n\nline2",
       });
 
-      expect(result[0].content[0].text).toBe("Input: line1\n\nline2");
+      expect(result[0].content.text).toBe("Input: line1\n\nline2");
     });
   });
 
@@ -345,7 +345,7 @@ describe("PromptRenderer", () => {
 
       const result = renderer.renderPrompt(prompt, {});
 
-      expect(result[0].content[0].text).toBe("Simple template");
+      expect(result[0].content.text).toBe("Simple template");
     });
 
     it("should handle multiple $ARGUMENTS placeholders", () => {
@@ -358,7 +358,7 @@ describe("PromptRenderer", () => {
 
       const result = renderer.renderPrompt(prompt, { input: "test" });
 
-      expect(result[0].content[0].text).toBe("First: test, Second: test");
+      expect(result[0].content.text).toBe("First: test, Second: test");
     });
 
     it("should handle mixed placeholder types", () => {
@@ -377,7 +377,7 @@ describe("PromptRenderer", () => {
         name: "John",
       });
 
-      const text = result[0].content[0].text;
+      const text = result[0].content.text;
       expect(text).toContain("## Inputs");
       expect(text).toContain("**input**: data");
       expect(text).toContain("Name: John");
@@ -398,11 +398,9 @@ describe("PromptRenderer", () => {
       const messages: PromptMessage[] = result;
       expect(messages).toHaveLength(2);
       expect(messages[0].role).toBe("system");
-      expect(messages[0].content).toHaveLength(1);
-      expect(messages[0].content[0].type).toBe("text");
+      expect(messages[0].content.type).toBe("text");
       expect(messages[1].role).toBe("user");
-      expect(messages[1].content).toHaveLength(1);
-      expect(messages[1].content[0].type).toBe("text");
+      expect(messages[1].content.type).toBe("text");
     });
   });
 });

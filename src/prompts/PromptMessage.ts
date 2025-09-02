@@ -3,5 +3,5 @@
  */
 export interface PromptMessage {
   role: "system" | "user";
-  content: [{ type: "text"; text: string }];
+  content: { type: "text"; text: string };
 }

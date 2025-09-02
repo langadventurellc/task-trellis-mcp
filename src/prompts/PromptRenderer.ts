@@ -37,14 +37,14 @@ export class PromptRenderer {
     if (prompt.systemRules) {
       messages.push({
         role: "system",
-        content: [{ type: "text", text: prompt.systemRules }],
+        content: { type: "text", text: prompt.systemRules },
       });
     }
 
     // Add user message with rendered template
     messages.push({
       role: "user",
-      content: [{ type: "text", text: renderedTemplate }],
+      content: { type: "text", text: renderedTemplate },
     });
 
     return messages;

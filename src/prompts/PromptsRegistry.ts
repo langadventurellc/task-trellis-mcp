@@ -63,7 +63,7 @@ export class PromptsRegistry {
     description?: string;
     messages: Array<{
       role: "system" | "user";
-      content: Array<{ type: "text"; text: string }>;
+      content: { type: "text"; text: string };
     }>;
   } {
     // Get the prompt
