@@ -1,6 +1,7 @@
 .serena/cache
 src/repositories/local/__tests__/temp
 temp/
+scratch/
 
 # Logs
 logs
