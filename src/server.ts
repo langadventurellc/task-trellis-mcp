@@ -54,6 +54,11 @@ program
     "--auto-prune <days>",
     "Auto-prune closed issues older than N days (0=disabled)",
     "0",
+  )
+  .option(
+    "--prompt-package <package>",
+    "Prompt package to load (none, basic, basic-claude)",
+    "basic",
   );
 
 program.parse();
@@ -63,6 +68,7 @@ interface CliOptions {
   projectRootFolder?: string;
   autoCompleteParent: boolean;
   autoPrune: string;
+  promptPackage: string;
 }
 
 const options = program.opts<CliOptions>();
@@ -78,6 +84,15 @@ if (isNaN(autoPruneValue)) {
 if (autoPruneValue < 0) {
   console.error(
     `Error: --auto-prune must be a non-negative number, got ${autoPruneValue}`,
+  );
+  process.exit(1);
+}
+
+// Validate prompt package argument
+const validPromptPackages = ["none", "basic", "basic-claude"];
+if (!validPromptPackages.includes(options.promptPackage)) {
+  console.error(
+    `Error: --prompt-package must be one of: ${validPromptPackages.join(", ")}, got "${options.promptPackage}"`,
   );
   process.exit(1);
 }
@@ -264,8 +279,13 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
 });
 
 async function runServer() {
-  // Register prompt handlers
-  await registerPromptHandlers(server);
+  // Register prompt handlers conditionally based on package selection
+  if (options.promptPackage === "none") {
+    console.warn("Prompts disabled via --prompt-package none");
+  } else {
+    console.warn(`Loading prompts from package: ${options.promptPackage}`);
+    await registerPromptHandlers(server, options.promptPackage);
+  }
 
   const transport = new StdioServerTransport();
   await server.connect(transport);

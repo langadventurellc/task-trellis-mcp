@@ -9,9 +9,11 @@ import { PromptRenderer } from "./PromptRenderer.js";
 export class PromptsRegistry {
   private manager: PromptManager;
   private renderer: PromptRenderer;
+  private promptPackage: string;
 
-  constructor() {
-    this.manager = new PromptManager();
+  constructor(promptPackage: string = "basic") {
+    this.promptPackage = promptPackage;
+    this.manager = new PromptManager(promptPackage);
     this.renderer = new PromptRenderer();
   }
 

@@ -10,9 +10,12 @@ import { PromptsRegistry } from "./PromptsRegistry.js";
 /**
  * Registers prompt handlers with the MCP server
  */
-export async function registerPromptHandlers(server: Server): Promise<void> {
-  console.warn("Initializing prompts system...");
-  const registry = new PromptsRegistry();
+export async function registerPromptHandlers(
+  server: Server,
+  promptPackage: string = "basic",
+): Promise<void> {
+  console.warn(`Initializing prompts system with package: ${promptPackage}...`);
+  const registry = new PromptsRegistry(promptPackage);
 
   // Initialize the registry by loading all prompts
   try {

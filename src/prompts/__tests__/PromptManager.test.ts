@@ -18,7 +18,7 @@ describe("PromptManager", () => {
   let mockConsoleError: any;
 
   beforeEach(() => {
-    manager = new PromptManager();
+    manager = new PromptManager(); // Default to "basic" package
 
     // Setup mocks
     mockAccess = fs.access as jest.MockedFunction<typeof fs.access>;
@@ -369,6 +369,80 @@ describe("PromptManager", () => {
 
       // Should not throw and should complete normally
       expect(manager.size()).toBe(0);
+    });
+  });
+
+  describe("promptPackage parameter", () => {
+    it("should default to 'basic' package when no parameter provided", () => {
+      const defaultManager = new PromptManager();
+      // Internal state not exposed, but we can test behavior through load()
+      expect(defaultManager).toBeDefined();
+    });
+
+    it("should accept custom package parameter", () => {
+      const customManager = new PromptManager("basic-claude");
+      expect(customManager).toBeDefined();
+    });
+
+    it("should use correct path for 'basic' package", async () => {
+      const basicManager = new PromptManager("basic");
+
+      mockAccess.mockRejectedValue(new Error("Directory not found"));
+
+      await basicManager.load();
+
+      // Verify the correct path was checked (basic package)
+      expect(mockAccess).toHaveBeenCalledWith(
+        expect.stringContaining("resources/basic/prompts"),
+      );
+    });
+
+    it("should use correct path for 'basic-claude' package", async () => {
+      const claudeManager = new PromptManager("basic-claude");
+
+      mockAccess.mockRejectedValue(new Error("Directory not found"));
+
+      await claudeManager.load();
+
+      // Verify the correct path was checked (basic-claude package)
+      expect(mockAccess).toHaveBeenCalledWith(
+        expect.stringContaining("resources/basic-claude/prompts"),
+      );
+    });
+
+    it("should include package name in error messages", async () => {
+      const claudeManager = new PromptManager("basic-claude");
+
+      mockAccess.mockRejectedValue(new Error("Directory not found"));
+
+      await claudeManager.load();
+
+      expect(mockConsoleError).toHaveBeenCalledWith(
+        expect.stringContaining("for package 'basic-claude'"),
+      );
+    });
+
+    it("should include package name in success messages", async () => {
+      const mockParsePromptFile = require("../PromptParser.js").parsePromptFile;
+      const claudeManager = new PromptManager("basic-claude");
+
+      mockAccess.mockResolvedValue(undefined);
+      mockReaddir.mockResolvedValue(["test.md"] as string[]);
+
+      const mockPrompt: TrellisPrompt = {
+        name: "test-prompt",
+        description: "Test prompt",
+        arguments: [],
+        userTemplate: "Test template",
+      };
+
+      mockParsePromptFile.mockResolvedValue(mockPrompt);
+
+      await claudeManager.load();
+
+      expect(mockConsoleError).toHaveBeenCalledWith(
+        expect.stringContaining("from package 'basic-claude'"),
+      );
     });
   });
 });

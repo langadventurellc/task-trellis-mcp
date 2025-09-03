@@ -9,14 +9,16 @@ import { TrellisPrompt } from "./TrellisPrompt.js";
 export class PromptManager {
   private prompts: Map<string, TrellisPrompt>;
   private loaded: boolean;
+  private promptPackage: string;
 
-  constructor() {
+  constructor(promptPackage: string = "basic") {
     this.prompts = new Map<string, TrellisPrompt>();
     this.loaded = false;
+    this.promptPackage = promptPackage;
   }
 
   /**
-   * Loads all prompts from the prompts/basic directory
+   * Loads all prompts from the configured prompt package directory
    * This method should be called once during application startup
    */
   async load(): Promise<void> {
@@ -28,7 +30,7 @@ export class PromptManager {
       __dirname,
       "..",
       "resources",
-      "basic",
+      this.promptPackage,
       "prompts",
     );
 
@@ -48,7 +50,9 @@ export class PromptManager {
       await fs.access(promptsDir);
       return true;
     } catch {
-      console.error(`Prompts directory does not exist: ${promptsDir}`);
+      console.error(
+        `Prompts directory does not exist for package '${this.promptPackage}': ${promptsDir}`,
+      );
       return false;
     }
   }
@@ -67,7 +71,7 @@ export class PromptManager {
 
       this.loaded = true;
       console.error(
-        `Loaded ${this.prompts.size} prompts from ${mdFiles.length} files`,
+        `Loaded ${this.prompts.size} prompts from package '${this.promptPackage}' (${mdFiles.length} files)`,
       );
     } catch (error) {
       console.error("Failed to read prompts directory:", error);
