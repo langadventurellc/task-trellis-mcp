@@ -18,9 +18,6 @@ export interface TrellisPrompt {
   /** List of arguments that can be provided to fill the template */
   arguments: PromptArgument[];
 
-  /** Optional system rules extracted from <rules> tags */
-  systemRules?: string;
-
   /** Markdown body template with placeholders for arguments */
   userTemplate: string;
 }

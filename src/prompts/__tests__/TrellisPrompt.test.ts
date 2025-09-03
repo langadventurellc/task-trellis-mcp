@@ -29,18 +29,6 @@ describe("TrellisPrompt", () => {
       expect(prompt.title).toBe("Test Prompt Title");
     });
 
-    it("should accept prompt with optional systemRules field", () => {
-      const prompt: TrellisPrompt = {
-        name: "test-prompt",
-        description: "A test prompt",
-        arguments: [],
-        systemRules: "Follow these system rules",
-        userTemplate: "Test template",
-      };
-
-      expect(prompt.systemRules).toBe("Follow these system rules");
-    });
-
     it("should accept prompt with arguments", () => {
       const args: PromptArgument[] = [
         {
@@ -118,14 +106,12 @@ describe("Integration scenarios", () => {
           description: "Auto-generate test tasks",
         },
       ],
-      systemRules: "Ensure all tasks follow the naming convention",
       userTemplate: `Create a feature named "{{featureName}}" under epic {{epicId}}.
 {{#if generateTests}}Include test tasks for each component.{{/if}}`,
     };
 
     expect(prompt.arguments).toHaveLength(3);
     expect(prompt.arguments.filter((a) => a.required)).toHaveLength(2);
-    expect(prompt.systemRules).toBeDefined();
     expect(prompt.userTemplate).toContain("{{featureName}}");
   });
 });

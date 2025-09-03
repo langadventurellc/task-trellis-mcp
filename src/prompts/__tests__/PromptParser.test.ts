@@ -56,9 +56,8 @@ This is the prompt body with $ARGUMENTS placeholder.`;
             description: "Enable verbose output",
           },
         ],
-        systemRules: "Never access .trellis directly\nUse MCP tools only",
         userTemplate:
-          "# Create Project\n\nThis is the prompt body with $ARGUMENTS placeholder.",
+          "<rules>\nNever access .trellis directly\nUse MCP tools only\n</rules>\n\n# Create Project\n\nThis is the prompt body with $ARGUMENTS placeholder.",
       });
     });
 
@@ -92,10 +91,9 @@ Body content`;
       const result = await parsePromptFile("/path/to/minimal.md");
 
       expect(result.title).toBeUndefined();
-      expect(result.systemRules).toBeUndefined();
     });
 
-    it("should extract multiple rules blocks", async () => {
+    it("should keep rules blocks inline in userTemplate", async () => {
       const mockContent = `---
 description: "Multiple rules"
 ---
@@ -108,11 +106,12 @@ More content`;
 
       const result = await parsePromptFile("/path/to/multiple-rules.md");
 
-      expect(result.systemRules).toBe("First rule\n\nSecond rule");
-      expect(result.userTemplate).toBe("Content here\n\nMore content");
+      expect(result.userTemplate).toBe(
+        "<rules>First rule</rules>\nContent here\n<rules>Second rule</rules>\nMore content",
+      );
     });
 
-    it("should handle case-insensitive rules tags", async () => {
+    it("should keep rules tags with any case inline", async () => {
       const mockContent = `---
 description: "Case test"
 ---
@@ -124,11 +123,12 @@ Some content here
 
       const result = await parsePromptFile("/path/to/case-test.md");
 
-      expect(result.systemRules).toBe("Upper case\n\nMixed case");
-      expect(result.userTemplate).toBe("Some content here");
+      expect(result.userTemplate).toBe(
+        "<RULES>Upper case</RULES>\nSome content here\n<Rules>Mixed case</Rules>",
+      );
     });
 
-    it("should handle empty rules blocks", async () => {
+    it("should keep empty rules blocks inline", async () => {
       const mockContent = `---
 description: "Empty rules"
 ---
@@ -139,8 +139,7 @@ Content only`;
 
       const result = await parsePromptFile("/path/to/empty-rules.md");
 
-      expect(result.systemRules).toBeUndefined();
-      expect(result.userTemplate).toBe("Content only");
+      expect(result.userTemplate).toBe("<rules></rules>\nContent only");
     });
 
     it("should generate kebab-case names from filenames", async () => {

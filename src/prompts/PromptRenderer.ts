@@ -33,14 +33,6 @@ export class PromptRenderer {
     // Build response messages
     const messages: PromptMessage[] = [];
 
-    // Add system message if system rules are present
-    if (prompt.systemRules) {
-      messages.push({
-        role: "system",
-        content: { type: "text", text: prompt.systemRules },
-      });
-    }
-
     // Add user message with rendered template
     messages.push({
       role: "user",

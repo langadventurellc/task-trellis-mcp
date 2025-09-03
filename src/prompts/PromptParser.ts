@@ -6,7 +6,7 @@ import { PromptArgument } from "./PromptArgument";
 
 /**
  * Parses a markdown prompt file with YAML frontmatter into a TrellisPrompt object.
- * Extracts frontmatter metadata, processes system rules, and validates the structure.
+ * Extracts frontmatter metadata and validates the structure.
  */
 export async function parsePromptFile(
   filePath: string,
@@ -16,14 +16,8 @@ export async function parsePromptFile(
     const promptName = generatePromptName(filePath);
 
     const { frontmatter, body } = extractFrontmatterAndBody(fileContent);
-    const { rules, cleanContent } = extractSystemRules(body);
 
-    const promptData = buildPromptData(
-      promptName,
-      frontmatter,
-      rules,
-      cleanContent,
-    );
+    const promptData = buildPromptData(promptName, frontmatter, body);
     validatePromptData(promptData, filePath);
 
     return promptData;
@@ -35,36 +29,6 @@ export async function parsePromptFile(
 }
 
 // Helper functions (private, not exported)
-
-/**
- * Extracts and removes <rules>...</rules> blocks from content.
- * Returns both the extracted rules and the cleaned content.
- */
-function extractSystemRules(content: string): {
-  rules: string | undefined;
-  cleanContent: string;
-} {
-  const rulesRegex = /<rules>([\s\S]*?)<\/rules>/gi;
-  const matches = content.match(rulesRegex);
-
-  if (!matches || matches.length === 0) {
-    return { rules: undefined, cleanContent: content };
-  }
-
-  // Extract content from all rules blocks
-  const rulesContent = matches
-    .map((match) => match.replace(/<\/?rules>/gi, "").trim())
-    .filter((rule) => rule.length > 0)
-    .join("\n\n");
-
-  // Remove all rules blocks from content
-  const cleanContent = content.replace(rulesRegex, "").trim();
-
-  return {
-    rules: rulesContent.length > 0 ? rulesContent : undefined,
-    cleanContent,
-  };
-}
 
 /**
  * Validates that parsed prompt data meets all requirements.
@@ -169,7 +133,6 @@ function generatePromptName(filePath: string): string {
 function buildPromptData(
   name: string,
   frontmatter: Record<string, unknown>,
-  systemRules: string | undefined,
   userTemplate: string,
 ): TrellisPrompt {
   // Build arguments array with default if not specified
@@ -184,7 +147,6 @@ function buildPromptData(
         ? frontmatter.description
         : "",
     arguments: args,
-    systemRules,
     userTemplate,
   };
 }

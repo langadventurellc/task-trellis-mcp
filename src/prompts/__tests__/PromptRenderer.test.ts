@@ -25,22 +25,21 @@ describe("PromptRenderer", () => {
       expect(result[0].content.text).toBe("Hello, world!");
     });
 
-    it("should include system message when systemRules is present", () => {
+    it("should return only user message when no system rules", () => {
       const prompt: TrellisPrompt = {
         name: "test",
         description: "Test prompt",
         arguments: [],
-        userTemplate: "User message",
-        systemRules: "System rules",
+        userTemplate: "User message with <rules>inline rules</rules>",
       };
 
       const result = renderer.renderPrompt(prompt, {});
 
-      expect(result).toHaveLength(2);
-      expect(result[0].role).toBe("system");
-      expect(result[0].content.text).toBe("System rules");
-      expect(result[1].role).toBe("user");
-      expect(result[1].content.text).toBe("User message");
+      expect(result).toHaveLength(1);
+      expect(result[0].role).toBe("user");
+      expect(result[0].content.text).toBe(
+        "User message with <rules>inline rules</rules>",
+      );
     });
 
     it("should throw error for missing required arguments", () => {
@@ -388,19 +387,16 @@ describe("PromptRenderer", () => {
         name: "test",
         description: "Test prompt",
         arguments: [],
-        userTemplate: "Test",
-        systemRules: "Rules",
+        userTemplate: "Test with <rules>inline rules</rules>",
       };
 
       const result = renderer.renderPrompt(prompt, {});
 
       // Type assertion to ensure proper typing
       const messages: PromptMessage[] = result;
-      expect(messages).toHaveLength(2);
-      expect(messages[0].role).toBe("system");
+      expect(messages).toHaveLength(1);
+      expect(messages[0].role).toBe("user");
       expect(messages[0].content.type).toBe("text");
-      expect(messages[1].role).toBe("user");
-      expect(messages[1].content.type).toBe("text");
     });
   });
 });

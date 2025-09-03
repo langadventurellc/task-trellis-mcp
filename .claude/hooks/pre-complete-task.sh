@@ -17,7 +17,7 @@ fi
 echo "✅ Quality checks passed"
 
 echo "🧪 Running tests..."
-if ! npm run test:all; then
+if ! npm run test; then
     echo "❌ Tests failed - fix issues before completing task" >&2
     exit 2
 fi
