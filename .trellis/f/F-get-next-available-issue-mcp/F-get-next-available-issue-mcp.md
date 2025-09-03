@@ -1,14 +1,26 @@
 ---
 id: F-get-next-available-issue-mcp
 title: Get Next Available Issue MCP Tool
-status: open
+status: in-progress
 priority: medium
 parent: none
 prerequisites: []
-affectedFiles: {}
+affectedFiles:
+  src/services/local/getNextAvailableIssue.ts: Created new service function that
+    finds the next available issue without claiming it, supporting optional
+    scope and issueType filtering with priority-based sorting
+  src/services/local/__tests__/getNextAvailableIssue.test.ts:
+    Added comprehensive
+    unit test suite covering basic functionality, type filtering (single and
+    array), scope filtering, priority sorting, error scenarios, repository
+    integration, and utility integration with 100% coverage
 log: []
 schema: v1.0
-childrenIds: []
+childrenIds:
+  - T-create-comprehensive-end-to
+  - T-create-get-next-available
+  - T-create-getnextavailableissue
+  - T-register-get-next-available
 created: 2025-09-02T23:30:31.575Z
 updated: 2025-09-02T23:30:31.575Z
 ---
