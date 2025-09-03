@@ -151,7 +151,32 @@ For each task, call the Task Trellis MCP `create_issue` tool:
 
 **For standalone tasks**: Simply omit the `parent` parameter entirely.
 
-### 6. Output Format
+### 6. Verify Created Project
+
+Call the `issue-verifier` sub-agent to validate the created project:
+
+**Prepare verification inputs:**
+
+- Original specifications from `$ARGUMENTS`
+- Created issue ID(s) from the MCP response
+- Any additional context gathered during requirement gathering phase
+
+**Call the verifier:**
+
+```
+Verify the created project for completeness and correctness:
+- Original requirements: [Include the original $ARGUMENTS specifications]
+- Created issue ID(s): [issue-id from MCP response]
+- Additional context: [Include any clarifications, decisions, or requirements gathered during the interactive Q&A phase]
+```
+
+**Review verification results:**
+
+- If verdict is `APPROVED`: Proceed to output format
+- If verdict is `NEEDS REVISION`: Update the project using MCP based on recommendations
+- If verdict is `REJECTED`: Recreate the project addressing critical issues
+
+### 7. Output Format
 
 After successful creation:
 

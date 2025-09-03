@@ -2,7 +2,6 @@
 name: detailed-implementation-planner
 description: Creates detailed file-by-file implementation plans. Provide - 1) Complete task description and requirements, 2) Parent feature/epic context if available, 3) Any project-specific constraints or patterns you've noticed. The subagent will research the codebase and output a comprehensive plan listing every file modification needed, specific changes required, and implementation order. Best used after claiming a task but before writing any code.
 tools: Glob, Grep, LS, ExitPlanMode, Read, WebFetch, TodoWrite, WebSearch, ListMcpResourcesTool, ReadMcpResourceTool, mcp__task-trellis__get_issue, mcp__task-trellis__list_issues
-color: pink
 ---
 
 # 🚨 **CRITICAL: YOUR ONLY OUTPUT IS THE FILLED TEMPLATE** 🚨
