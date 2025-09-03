@@ -25,17 +25,17 @@ Full documentation is available in the [docs](docs/index.md) folder.
 
 | Prompt                                                                                                  | Result                                                                                                 |
 | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| Use Trellis to create a project for (my project details)                                                | _project created with epics, features and tasks defined and dependencies identified_                   |
+| /task-trellis:create-project (my project details)                                                       | _project created with epics, features and tasks defined and dependencies identified_                   |
 | Complete the next available task                                                                        | _next open task with dependencies satisfied is claimed and worked on_                                  |
 | Work on all of the tasks for feature F-my-feature                                                       | _all tasks for the specified feature are claimed and worked on_                                        |
 | Show me all open tasks in (my project)                                                                  | _list of all open tasks in the specified project_                                                      |
 | After working on (feature), there's a bug. Look at what changed and fix it.                             | _bug identified by examining all the files that were modified while working on that feature and fixed_ |
-| Create a new feature (feature details). Look at (other feature) and follow the same pattern             | _new feature created by mirroring the pattern of the other feature_                                    |
+| /task-trellis:create-features (feature details). Look at (other feature) and follow the same pattern    | _new feature created by mirroring the pattern of the other feature_                                    |
 | (after finding issue with design) Update all tasks in F-my-feature and update the design specifications | _all tasks in the specified feature are updated to reflect the new design specifications_              |
 
 _... and much more!_
 
-See [Included Prompts](prompts) for included MCP prompts.
+See [Prompt Packages](docs/prompts.md) for included MCP prompts.
 
 ## Why Task Trellis?
 
@@ -77,7 +77,7 @@ See full documentation at [Task Trellis MCP Documentation](docs/index.md)
 
 ### Basic Workflow
 
-[Included Prompts](prompts)
+[Prompt Packages](docs/prompts.md)
 
 1. **Create Tasks**
    - Determine your starting point based on the expected size of your project
@@ -121,6 +121,7 @@ See [installation instructions](docs/installation.md).
 
 - **claim_task** - Claim available tasks for execution with automatic priority ordering
 - **complete_task** - Mark tasks complete with file change documentation
+- **get_next_available_issue** - Use this tool to find the next available issue that's ready to work on.
 - **append_issue_log** - Add progress notes and status updates to task history (occurs automatically on task completion)
 - **append_modified_files** - Record files modified during task execution with change descriptions (occurs automatically on task completion)
 
