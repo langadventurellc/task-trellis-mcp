@@ -1,13 +1,18 @@
 ---
 id: T-register-get-next-available
 title: Register get_next_available_issue tool with MCP server and update exports
-status: open
+status: done
 priority: medium
 parent: F-get-next-available-issue-mcp
 prerequisites:
   - T-create-get-next-available
 affectedFiles: {}
-log: []
+log:
+  - Task was already completed in a previous implementation cycle. Verified that
+    the get_next_available_issue tool is fully integrated into the MCP server
+    with proper exports, imports, registration, and handler implementation. All
+    integration points specified in the task description are correctly
+    implemented following existing MCP tool patterns.
 schema: v1.0
 childrenIds: []
 created: 2025-09-03T00:37:03.417Z

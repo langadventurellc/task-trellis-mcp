@@ -1,7 +1,7 @@
 ---
 id: F-get-next-available-issue-mcp
 title: Get Next Available Issue MCP Tool
-status: in-progress
+status: done
 priority: medium
 parent: none
 prerequisites: []
@@ -27,13 +27,13 @@ affectedFiles:
   src/tools/__tests__/claimTaskTool.test.ts: Added getNextAvailableIssue mock method to maintain test compatibility
   src/tools/__tests__/completeTaskTool.test.ts: Added getNextAvailableIssue mock method to maintain test compatibility
   src/tools/__tests__/listObjectsTool.test.ts: Added getNextAvailableIssue mock method to maintain test compatibility
-log: []
+log:
+  - "Auto-completed: All child tasks are complete"
 schema: v1.0
 childrenIds:
-  - T-create-comprehensive-end-to
   - T-create-get-next-available
-  - T-register-get-next-available
   - T-create-getnextavailableissue
+  - T-register-get-next-available
 created: 2025-09-02T23:30:31.575Z
 updated: 2025-09-02T23:30:31.575Z
 ---
