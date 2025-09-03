@@ -30,7 +30,7 @@
   },
   "scripts": {
     "build": "tsc && npm run copy-prompts",
-    "copy-prompts": "mkdir -p dist/resources/prompts && cp -r prompts/basic dist/resources/prompts/",
+    "copy-prompts": "mkdir -p dist/resources && cp -r resources dist/resources/",
     "dev": "tsc --watch",
     "start": "node dist/server.js",
     "serve": "npm run build && npm run start",

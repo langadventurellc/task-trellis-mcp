@@ -1,7 +1,7 @@
 import * as fs from "fs/promises";
 import * as path from "path";
-import { TrellisPrompt } from "./TrellisPrompt.js";
 import { parsePromptFile } from "./PromptParser.js";
+import { TrellisPrompt } from "./TrellisPrompt.js";
 
 /**
  * Manages the lifecycle and caching of prompt templates
@@ -28,8 +28,8 @@ export class PromptManager {
       __dirname,
       "..",
       "resources",
-      "prompts",
       "basic",
+      "prompts",
     );
 
     if (!(await this.checkDirectoryExists(promptsDir))) {
