@@ -8,6 +8,8 @@ permissions:
   contents: read
   pull-requests: write
   packages: read
+  issues: write
+  actions: read
 
 jobs:
   claude-review:
@@ -29,12 +31,13 @@ jobs:
         run: npm ci
 
       - name: Claude Code Review
-        uses: anthropics/claude-code-action@beta
+        uses: anthropics/claude-code-action@v1
         with:
+          track_progress: true
           github_token: ${{ secrets.GITHUB_TOKEN }}
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          allowed_tools: "View,GlobTool,GrepTool,BatchTool"
-          direct_prompt: |
+          claude_args: "--allowedTools View,GlobTool,GrepTool,BatchTool"
+          prompt: |
             Please review only the code changes in this pull request and provide feedback.
 
             IMPORTANT: Check the current CI status first. If all CI checks are passing (SUCCESS), ignore any historical comments about code quality failures. Only address current, real issues.
