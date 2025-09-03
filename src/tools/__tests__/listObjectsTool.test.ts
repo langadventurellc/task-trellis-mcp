@@ -24,6 +24,7 @@ describe("listObjectsTool", () => {
       createObject: jest.fn(),
       updateObject: jest.fn(),
       claimTask: jest.fn(),
+      getNextAvailableIssue: jest.fn(),
       completeTask: jest.fn(),
       listObjects: jest.fn(),
       appendObjectLog: jest.fn(),

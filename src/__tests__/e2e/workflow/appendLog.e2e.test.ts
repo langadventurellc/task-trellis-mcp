@@ -43,7 +43,7 @@ describe("E2E Workflow - appendObjectLog", () => {
         createObjectContent(taskData),
       );
 
-      const result = await client.callTool("append_object_log", {
+      const result = await client.callTool("append_issue_log", {
         id: "T-log-test",
         contents: "Progress update: 50% complete",
       });
@@ -66,7 +66,7 @@ describe("E2E Workflow - appendObjectLog", () => {
       });
       const projectId = result.content[0].text.match(/ID: (P-[a-z-]+)/)![1];
 
-      const logResult = await client.callTool("append_object_log", {
+      const logResult = await client.callTool("append_issue_log", {
         id: projectId,
         contents: "Project milestone reached",
       });
@@ -97,7 +97,7 @@ describe("E2E Workflow - appendObjectLog", () => {
       });
       const epicId = epicResult.content[0].text.match(/ID: (E-[a-z-]+)/)![1];
 
-      const logResult = await client.callTool("append_object_log", {
+      const logResult = await client.callTool("append_issue_log", {
         id: epicId,
         contents: "Epic progress note",
       });
@@ -118,7 +118,7 @@ describe("E2E Workflow - appendObjectLog", () => {
       });
       const featureId = result.content[0].text.match(/ID: (F-[a-z-]+)/)![1];
 
-      const logResult = await client.callTool("append_object_log", {
+      const logResult = await client.callTool("append_issue_log", {
         id: featureId,
         contents: "Feature implementation note",
       });
@@ -155,7 +155,7 @@ describe("E2E Workflow - appendObjectLog", () => {
 "Quoted text" and 'single quotes'
 Special chars: @#$%^&*()`;
 
-      await client.callTool("append_object_log", {
+      await client.callTool("append_issue_log", {
         id: "T-format-test",
         contents: specialContent,
       });
@@ -181,7 +181,7 @@ Special chars: @#$%^&*()`;
         createObjectContent(taskData),
       );
 
-      const result = await client.callTool("append_object_log", {
+      const result = await client.callTool("append_issue_log", {
         id: "T-empty-log",
         contents: "",
       });
@@ -198,7 +198,7 @@ Special chars: @#$%^&*()`;
 
   describe("Error Handling", () => {
     it("should fail to append log to non-existent object", async () => {
-      const result = await client.callTool("append_object_log", {
+      const result = await client.callTool("append_issue_log", {
         id: "T-nonexistent",
         contents: "This should fail",
       });
@@ -207,7 +207,7 @@ Special chars: @#$%^&*()`;
     });
 
     it("should handle invalid object IDs", async () => {
-      const result = await client.callTool("append_object_log", {
+      const result = await client.callTool("append_issue_log", {
         id: "invalid-id-format",
         contents: "Invalid ID test",
       });
@@ -232,12 +232,12 @@ Special chars: @#$%^&*()`;
         createObjectContent(taskData),
       );
 
-      await client.callTool("append_object_log", {
+      await client.callTool("append_issue_log", {
         id: "T-chronological",
         contents: "Entry 3",
       });
 
-      await client.callTool("append_object_log", {
+      await client.callTool("append_issue_log", {
         id: "T-chronological",
         contents: "Entry 4",
       });

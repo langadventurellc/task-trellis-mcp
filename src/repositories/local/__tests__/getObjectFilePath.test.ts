@@ -1,12 +1,12 @@
 import { join } from "path";
 import {
+  TrellisObject,
   TrellisObjectPriority,
   TrellisObjectStatus,
   TrellisObjectType,
-  TrellisObject,
 } from "../../../models";
-import { getObjectFilePath } from "../getObjectFilePath";
 import * as getObjectByIdModule from "../getObjectById";
+import { getObjectFilePath } from "../getObjectFilePath";
 
 // Mock the getObjectById function
 jest.mock("../getObjectById");
@@ -22,7 +22,7 @@ describe("getObjectFilePath", () => {
   const createMockObject = (
     id: string,
     type: TrellisObjectType,
-    parent?: string,
+    parent: string | null = null,
     status: TrellisObjectStatus = TrellisObjectStatus.OPEN,
   ): TrellisObject => ({
     id,

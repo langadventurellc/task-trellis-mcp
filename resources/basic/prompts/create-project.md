@@ -1,31 +1,10 @@
 ---
 description: Create a new project in the Trellis task management system by analyzing specifications and gathering requirements
-argument-hint: [project specifications or path to spec file]
 ---
 
 # Create Project Trellis Command
 
 Create a new project in the Trellis task management system by analyzing specifications provided and gathering additional requirements as needed.
-
-## MCP Server Setup
-
-Ensure the Task Trellis MCP server is properly configured. If the server needs activation, use:
-
-- `activate` tool with `mode: "local"` and `projectRoot: "/path/to/project"`
-- **Note**: If the `activate` tool is not available, the server was already configured correctly via command line arguments (`--mode local --projectRootFolder /path/to/project`) and no activation is needed.
-
-The system creates a `.trellis` folder inside the project root for task storage.
-
-## Trellis System Overview
-
-The Trellis task management system organizes work in a hierarchical structure:
-
-- **Projects**: Large-scale initiatives or products (e.g., "E-commerce Platform Redesign")
-- **Epics**: Major work streams within a project (e.g., "User Authentication", "Payment Processing")
-- **Features**: Specific functionality within epics (e.g., "Login Form", "Password Reset")
-- **Tasks**: Atomic units of work, 1-2 hours each (e.g., "Create user model", "Add email validation")
-
-This hierarchy enables parallel development, clear dependencies, and manageable work units.
 
 ## Goal
 
@@ -140,15 +119,9 @@ After successful creation:
 
 📝 Project Summary:
 [First paragraph of description]
-
-The project has been initialized in the task trellis system.
-
-Next steps:
-Use /create-epics to break down this project into major work streams.
 ```
 
 <rules>
-  <critical>Never directly access `.trellis/` directory directly</critical>
   <critical>Use MCP tools for all operations (create_issue, get_issue, activate, etc.)</critical>
   <critical>Continue asking questions until you have a complete understanding of the requirements</critical>
   <critical>Ask one question at a time with specific options</critical>

@@ -55,6 +55,7 @@ describe("checkPrerequisitesComplete", () => {
     status,
     priority: TrellisObjectPriority.MEDIUM,
     prerequisites,
+    parent: null,
     affectedFiles: new Map(),
     log: [],
     schema: "v1.0",

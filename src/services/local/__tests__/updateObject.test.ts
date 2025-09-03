@@ -782,7 +782,7 @@ describe("updateObject", () => {
     it("should not call updateParentHierarchy when object has no parent", async () => {
       const mockTask = createMockObject(TrellisObjectType.TASK, {
         status: TrellisObjectStatus.OPEN,
-        parent: undefined,
+        parent: null,
       });
       mockRepository.getObjectById.mockResolvedValue(mockTask);
       mockRepository.saveObject.mockResolvedValue();
@@ -799,7 +799,7 @@ describe("updateObject", () => {
       );
 
       expect(mockUpdateParentHierarchy).toHaveBeenCalledWith(
-        undefined,
+        null,
         mockRepository,
       );
     });

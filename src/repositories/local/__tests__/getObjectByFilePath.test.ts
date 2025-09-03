@@ -1,10 +1,10 @@
-import { getObjectByFilePath } from "../getObjectByFilePath";
-import {
-  TrellisObjectType,
-  TrellisObjectStatus,
-  TrellisObjectPriority,
-} from "../../../models";
 import path from "path";
+import {
+  TrellisObjectPriority,
+  TrellisObjectStatus,
+  TrellisObjectType,
+} from "../../../models";
+import { getObjectByFilePath } from "../getObjectByFilePath";
 
 describe("getObjectByFilePath", () => {
   const testDataRoot = path.join(__dirname, "schema1_0", ".trellis");
@@ -26,7 +26,7 @@ describe("getObjectByFilePath", () => {
         title: "Setup Database Connection",
         status: TrellisObjectStatus.OPEN,
         priority: TrellisObjectPriority.HIGH,
-        parent: undefined,
+        parent: null,
         prerequisites: [],
         affectedFiles: new Map(),
         log: [],
@@ -54,7 +54,7 @@ describe("getObjectByFilePath", () => {
         title: "User Authentication Feature",
         status: TrellisObjectStatus.IN_PROGRESS,
         priority: TrellisObjectPriority.HIGH,
-        parent: undefined,
+        parent: null,
         prerequisites: [],
         affectedFiles: new Map(),
         log: [],
@@ -87,7 +87,7 @@ describe("getObjectByFilePath", () => {
         title: "Project Initialization",
         status: TrellisObjectStatus.DONE,
         priority: TrellisObjectPriority.HIGH,
-        parent: undefined,
+        parent: null,
         prerequisites: [],
         affectedFiles: new Map(),
         log: [],

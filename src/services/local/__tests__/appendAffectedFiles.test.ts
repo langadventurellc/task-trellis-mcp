@@ -1,11 +1,11 @@
 import {
   TrellisObject,
-  TrellisObjectType,
-  TrellisObjectStatus,
   TrellisObjectPriority,
+  TrellisObjectStatus,
+  TrellisObjectType,
 } from "../../../models";
-import { appendAffectedFiles } from "../appendAffectedFiles";
 import { Repository } from "../../../repositories";
+import { appendAffectedFiles } from "../appendAffectedFiles";
 
 describe("appendAffectedFiles service function", () => {
   const createMockTrellisObject = (
@@ -36,7 +36,7 @@ describe("appendAffectedFiles service function", () => {
 
   it("should add new files to empty affectedFiles map", async () => {
     const repository = createMockRepository();
-    const trellisObject = createMockTrellisObject({ parent: undefined });
+    const trellisObject = createMockTrellisObject({ parent: null });
     const filesChanged = {
       "src/components/Button.tsx": "Added new button component",
       "src/utils/helpers.ts": "Created utility functions",
@@ -60,7 +60,7 @@ describe("appendAffectedFiles service function", () => {
     ]);
     const trellisObject = createMockTrellisObject({
       affectedFiles: existingAffectedFiles,
-      parent: undefined,
+      parent: null,
     });
     const filesChanged = {
       "src/new.ts": "New file added",
@@ -85,7 +85,7 @@ describe("appendAffectedFiles service function", () => {
     ]);
     const trellisObject = createMockTrellisObject({
       affectedFiles: existingAffectedFiles,
-      parent: undefined,
+      parent: null,
     });
     const filesChanged = {
       "src/components/Button.tsx": "Added click handler",
@@ -110,7 +110,7 @@ describe("appendAffectedFiles service function", () => {
     ]);
     const trellisObject = createMockTrellisObject({
       affectedFiles: existingAffectedFiles,
-      parent: undefined,
+      parent: null,
     });
     const filesChanged = {
       "src/existing.ts": "Updated functionality",
@@ -139,7 +139,7 @@ describe("appendAffectedFiles service function", () => {
     ]);
     const trellisObject = createMockTrellisObject({
       affectedFiles: existingAffectedFiles,
-      parent: undefined,
+      parent: null,
     });
     const filesChanged = {};
 
@@ -153,7 +153,7 @@ describe("appendAffectedFiles service function", () => {
 
   it("should handle files with empty descriptions", async () => {
     const repository = createMockRepository();
-    const trellisObject = createMockTrellisObject({ parent: undefined });
+    const trellisObject = createMockTrellisObject({ parent: null });
     const filesChanged = {
       "src/empty.ts": "",
       "src/normal.ts": "Normal description",
@@ -175,7 +175,7 @@ describe("appendAffectedFiles service function", () => {
     ]);
     const trellisObject = createMockTrellisObject({
       affectedFiles: existingAffectedFiles,
-      parent: undefined,
+      parent: null,
     });
     const filesChanged = {
       "src/test.ts": "",
@@ -193,7 +193,7 @@ describe("appendAffectedFiles service function", () => {
     const repository = createMockRepository();
     const parentObject = createMockTrellisObject({
       id: "F-parent-feature",
-      parent: undefined,
+      parent: null,
     });
     const childObject = createMockTrellisObject({
       id: "T-child-task",
@@ -222,7 +222,7 @@ describe("appendAffectedFiles service function", () => {
     const repository = createMockRepository();
     const grandparentObject = createMockTrellisObject({
       id: "P-grandparent-project",
-      parent: undefined,
+      parent: null,
     });
     const parentObject = createMockTrellisObject({
       id: "F-parent-feature",

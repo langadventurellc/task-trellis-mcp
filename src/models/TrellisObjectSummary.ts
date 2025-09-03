@@ -8,7 +8,7 @@ export interface TrellisObjectSummary {
   title: string;
   status: TrellisObjectStatus;
   priority: TrellisObjectPriority;
-  parent?: string;
+  parent: string | null;
   prerequisites: string[];
   childrenIds: string[];
   created: string;

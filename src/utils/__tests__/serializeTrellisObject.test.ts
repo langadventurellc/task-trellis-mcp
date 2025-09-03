@@ -78,6 +78,7 @@ describe("serializeTrellisObject", () => {
       type: TrellisObjectType.PROJECT,
       created: "2025-01-15T10:00:00Z",
       updated: "2025-01-15T10:00:00Z",
+      parent: null,
     };
 
     const result = serializeTrellisObject(trellisObject);
@@ -116,6 +117,7 @@ describe("serializeTrellisObject", () => {
       type: TrellisObjectType.PROJECT,
       created: "2025-01-15T10:00:00Z",
       updated: "2025-01-15T10:00:00Z",
+      parent: null,
     };
 
     const result = serializeTrellisObject(trellisObject);
@@ -150,6 +152,7 @@ describe("serializeTrellisObject", () => {
       type: TrellisObjectType.PROJECT,
       created: "2025-01-15T10:00:00Z",
       updated: "2025-01-15T10:00:00Z",
+      parent: null,
     };
 
     const result = serializeTrellisObject(trellisObject);
@@ -193,6 +196,7 @@ describe("serializeTrellisObject", () => {
       type: TrellisObjectType.PROJECT,
       created: "2025-01-15T10:00:00Z",
       updated: "2025-01-15T10:00:00Z",
+      parent: null,
     };
 
     const result = serializeTrellisObject(trellisObject);
@@ -226,6 +230,7 @@ describe("serializeTrellisObject", () => {
       type: TrellisObjectType.PROJECT,
       created: "2025-01-15T10:00:00Z",
       updated: "2025-01-15T10:00:00Z",
+      parent: null,
     };
 
     const result = serializeTrellisObject(trellisObject);
@@ -255,14 +260,15 @@ describe("serializeTrellisObject", () => {
       type: TrellisObjectType.PROJECT,
       created: "2025-01-15T10:00:00Z",
       updated: "2025-01-15T10:00:00Z",
+      parent: null,
     };
 
     const result = serializeTrellisObject(trellisObject);
     const yamlPart = result.split("---\n")[1];
     const parsedYaml = parse(yamlPart);
 
-    // parent should be undefined or null in YAML
-    expect(parsedYaml.parent).toBeUndefined();
+    // parent should be "none" when undefined
+    expect(parsedYaml.parent).toBe("none");
     expect(parsedYaml.id).toBe("no-parent-test");
   });
 });

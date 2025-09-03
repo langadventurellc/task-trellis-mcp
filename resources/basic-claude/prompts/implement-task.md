@@ -1,31 +1,10 @@
 ---
 description: Claim and implement a task following Research and Plan → Implement workflow
-argument-hint: [task-id] --worktree [worktree-path] --scope [issue-id] --force [additional context or instructions]
 ---
 
 # Implement Task Command
 
 Claim and implement the next available task from the backlog using the Trellis task management system with the Research and Plan → Implement workflow.
-
-## MCP Server Setup
-
-Ensure the Task Trellis MCP server is properly configured. The server can be activated with:
-
-- `activate` tool with `mode: "local"` and `projectRoot: "/path/to/project"` (if not configured via command line)
-- Or started with command line arguments: `--mode local --projectRootFolder /path/to/project`
-
-This creates a `.trellis` folder inside the project root for task storage.
-
-### Trellis System Overview
-
-The Trellis task management system organizes work in a hierarchical structure:
-
-- **Projects**: Large-scale initiatives or products (e.g., "E-commerce Platform Redesign")
-- **Epics**: Major work streams within a project (e.g., "User Authentication", "Payment Processing")
-- **Features**: Specific functionality within epics (e.g., "Login Form", "Password Reset")
-- **Tasks**: Atomic units of work, 1-2 hours each (e.g., "Create user model", "Add email validation")
-
-This hierarchy enables parallel development, clear dependencies, and manageable work units.
 
 ## Goal
 
@@ -53,12 +32,21 @@ Claims are made against the current working directory's task trellis system (tas
 
 ### 2. Research and Planning Phase (MANDATORY)
 
-**Never skip research - understand before coding:**
+**Delegate research to planner, but verify critical details:**
 
-The research phase is critical for understanding the context and requirements before writing any code. During this phase:
+The research phase uses the Implementation Plan Generator subagent to analyze the codebase and create a detailed plan, but you must verify key assumptions before implementation.
 
-- **Read parent issues for context**: Use MCP `get_issue` to read the parent feature (if it has one) for additional context, specifications, and requirements that may not be fully detailed in the task description.
-- **Research**: Review the task requirements and related materials to identify key considerations, potential challenges, and relevant patterns or practices. Analyze the existing codebase for similar implementations or patterns. If necessary, perform external research via MCP tools or web searches.
+- **Read parent issues for context**: Use MCP `get_issue` to read the parent feature (if it has one) for context and requirements. Do not continue until you have claimed or loaded an already claimed task.
+- **Generate Implementation Plan**: Use the Implementation Plan Generator subagent, providing:
+  - The task description and requirements
+  - Parent issue context you've gathered
+  - Any project-specific constraints or standards
+- **CRITICAL - If No Response From Subagent**: **STOP IMMEDIATELY** and alert the user
+- **CRITICAL - Verify the Plan**: Before implementing, spot-check the plan for accuracy:
+  - Verify 2-3 key file paths actually exist where the plan says they do
+  - Confirm at least one pattern/convention the plan identified
+  - Check that any imports or dependencies the plan references are real
+  - If the plan makes assumptions, verify at least the most critical ones
 
 ```
 📚 Research Phase for T-create-user-model
@@ -130,14 +118,6 @@ Files changed:
 
 ```
 🎯 Task Complete: T-create-user-model
-
-Next available task:
-- T-add-user-validation: Add validation rules for user model
-  (Depends on the task you just completed)
-
-Run /implement-task again to claim and implement the next task.
-
-Note: Your completed task has unblocked dependent tasks!
 ```
 
 **STOP!** - Do not proceed. Complete one task and one task only. Do not implement another task.
@@ -182,22 +162,12 @@ During implementation, ensure:
 - **Documentation**: Comment complex logic
 - **Quality Checks**: All must pass before completion
 
-## Communication Standards
-
-### Suggesting Improvements:
-
-"The current approach works, but I notice [observation].
-Would you like me to [specific improvement]?"
-
-## Common Implementation Patterns
-
 ## Workflow Guidelines
 
 - Always follow Research and Plan → Implement
 - Run quality checks after each major change
 - Write tests alongside implementation
 - Commit only when all checks pass
-- Document decisions in code comments
 
 <rules>
   <critical>ALWAYS follow Research and Plan → Implement workflow</critical>

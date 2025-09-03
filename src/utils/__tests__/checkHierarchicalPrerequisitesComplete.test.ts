@@ -1,7 +1,7 @@
 import { TrellisObject } from "../../models/TrellisObject";
-import { TrellisObjectType } from "../../models/TrellisObjectType";
-import { TrellisObjectStatus } from "../../models/TrellisObjectStatus";
 import { TrellisObjectPriority } from "../../models/TrellisObjectPriority";
+import { TrellisObjectStatus } from "../../models/TrellisObjectStatus";
+import { TrellisObjectType } from "../../models/TrellisObjectType";
 import { Repository } from "../../repositories/Repository";
 import { checkHierarchicalPrerequisitesComplete } from "../checkHierarchicalPrerequisitesComplete";
 import { checkPrerequisitesComplete } from "../checkPrerequisitesComplete";
@@ -26,7 +26,7 @@ describe("checkHierarchicalPrerequisitesComplete", () => {
 
   const createMockObject = (
     id: string,
-    parent?: string,
+    parent: string | null = null,
     prerequisites: string[] = [],
   ): TrellisObject => ({
     id,

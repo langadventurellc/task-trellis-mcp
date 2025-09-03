@@ -430,8 +430,33 @@ Test body content`;
 
     const result = deserializeTrellisObject(markdownString);
 
-    expect(result.parent).toBeUndefined();
+    expect(result.parent).toBeNull();
     expect(result.id).toBe("P-no-parent-test");
     expect(result.title).toBe("No Parent Test");
+  });
+
+  it("should handle markdown with parent set to 'none'", () => {
+    const markdownString = `---
+id: P-none-parent-test
+title: None Parent Test
+status: open
+priority: medium
+parent: none
+prerequisites: []
+affectedFiles: {}
+log: []
+schema: v1.0
+childrenIds: []
+created: "2025-01-15T10:00:00Z"
+updated: "2025-01-15T10:00:00Z"
+---
+
+Test body content with parent set to 'none'`;
+
+    const result = deserializeTrellisObject(markdownString);
+
+    expect(result.parent).toBeNull();
+    expect(result.id).toBe("P-none-parent-test");
+    expect(result.title).toBe("None Parent Test");
   });
 });

@@ -43,6 +43,7 @@ describe("pruneClosed", () => {
       title: `Test ${id}`,
       status,
       priority: TrellisObjectPriority.MEDIUM,
+      parent: null,
       prerequisites: [],
       affectedFiles: new Map(),
       log: [],

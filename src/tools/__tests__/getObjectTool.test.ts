@@ -1,10 +1,10 @@
-import { Repository } from "../../repositories/Repository";
 import {
   TrellisObject,
-  TrellisObjectType,
-  TrellisObjectStatus,
   TrellisObjectPriority,
+  TrellisObjectStatus,
+  TrellisObjectType,
 } from "../../models";
+import { Repository } from "../../repositories/Repository";
 import { handleGetObject } from "../getObjectTool";
 
 describe("getObjectTool", () => {
@@ -141,6 +141,7 @@ describe("getObjectTool", () => {
         body: "This is a test project",
         created: "2025-01-15T10:00:00Z",
         updated: "2025-01-15T10:00:00Z",
+        parent: null,
       };
 
       mockRepository.getObjectById.mockResolvedValue(projectObject);

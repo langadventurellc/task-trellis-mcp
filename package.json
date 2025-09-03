@@ -29,7 +29,8 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run copy-prompts",
+    "copy-prompts": "mkdir -p dist/resources && cp -r resources dist/",
     "dev": "tsc --watch",
     "start": "node dist/server.js",
     "serve": "npm run build && npm run start",

@@ -24,6 +24,7 @@ describe("sortTrellisObjects", () => {
     type: TrellisObjectType.TASK,
     created: "2025-01-15T10:00:00Z",
     updated: "2025-01-15T10:00:00Z",
+    parent: null,
   });
 
   it("should sort objects by priority: high, medium, low", () => {

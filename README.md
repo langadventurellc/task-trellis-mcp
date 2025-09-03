@@ -35,7 +35,7 @@ Full documentation is available in the [docs](docs/index.md) folder.
 
 _... and much more!_
 
-See [Sample Prompts](docs/sample_prompts/index.md) for battle-tested prompts (written as Claude Code slash commands).
+See [Included Prompts](prompts) for included MCP prompts.
 
 ## Why Task Trellis?
 
@@ -77,7 +77,7 @@ See full documentation at [Task Trellis MCP Documentation](docs/index.md)
 
 ### Basic Workflow
 
-See sample prompts (written as Claude Code slash commands): [Sample Prompts](docs/sample_prompts/index.md)
+[Included Prompts](prompts)
 
 1. **Create Tasks**
    - Determine your starting point based on the expected size of your project

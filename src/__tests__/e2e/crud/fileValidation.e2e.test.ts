@@ -48,7 +48,7 @@ describe("E2E File Validation", () => {
       expect(file.yaml).toHaveProperty("priority");
       expect(file.yaml).toHaveProperty("prerequisites");
       expect(file.yaml).toHaveProperty("schema");
-      expect(file.yaml).not.toHaveProperty("parent"); // Projects don't have parents
+      expect(file.yaml.parent).toBe("none"); // Projects don't have parents
     });
 
     it("should validate all object types have correct YAML structure", async () => {
@@ -120,7 +120,7 @@ describe("E2E File Validation", () => {
 
       expect(file.yaml.prerequisites).toEqual([]);
       expect(file.body).toBe("");
-      expect(file.yaml.parent).toBeUndefined();
+      expect(file.yaml.parent).toBe("none");
     });
   });
 
@@ -174,13 +174,13 @@ describe("E2E File Validation", () => {
       const taskId = createResult.content[0].text.match(/ID: (T-[a-z-]+)/)![1];
 
       // Add multi-line log entries
-      await client.callTool("append_object_log", {
+      await client.callTool("append_issue_log", {
         id: taskId,
         contents:
           "Multi-line entry:\n- Point 1\n- Point 2\n  - Nested point\n- Point 3",
       });
 
-      await client.callTool("append_object_log", {
+      await client.callTool("append_issue_log", {
         id: taskId,
         contents: "Another entry with:\n\nParagraph breaks\n\nAnd formatting",
       });

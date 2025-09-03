@@ -10,7 +10,7 @@ import { ValidationErrorCodes } from "./ValidationErrorCodes.js";
  * @throws {ValidationError} When parent ID is provided but parent doesn't exist
  */
 export async function validateParentExists(
-  parentId: string | undefined,
+  parentId: string | null,
   repository: Repository,
 ): Promise<void> {
   // If no parent is specified, validation passes

@@ -14,6 +14,7 @@ describe("completeTaskTool", () => {
       createObject: jest.fn(),
       updateObject: jest.fn(),
       claimTask: jest.fn(),
+      getNextAvailableIssue: jest.fn(),
       listObjects: jest.fn(),
       appendObjectLog: jest.fn(),
       pruneClosed: jest.fn(),

@@ -20,7 +20,7 @@ describe("completeTask service function", () => {
     title: "Test Task",
     status: TrellisObjectStatus.IN_PROGRESS,
     priority: TrellisObjectPriority.MEDIUM,
-    parent: undefined,
+    parent: null,
     prerequisites: [],
     affectedFiles: new Map(),
     log: [],
@@ -84,7 +84,7 @@ describe("completeTask service function", () => {
     title: "Test Project",
     status,
     priority: TrellisObjectPriority.MEDIUM,
-    parent: undefined,
+    parent: null,
     prerequisites: [],
     affectedFiles: new Map(),
     log: [],
@@ -612,7 +612,7 @@ describe("completeTask service function", () => {
     });
 
     it("should handle task with no parent", async () => {
-      const mockTask = createMockTask({ parent: undefined });
+      const mockTask = createMockTask({ parent: null });
 
       mockRepository.getObjectById.mockImplementation((id) => {
         if (id === mockTask.id) return Promise.resolve(mockTask);

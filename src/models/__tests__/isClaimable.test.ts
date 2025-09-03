@@ -19,6 +19,7 @@ describe("isClaimable", () => {
     body: "Test body",
     created: "2025-01-15T10:00:00Z",
     updated: "2025-01-15T10:00:00Z",
+    parent: null,
   });
 
   describe("claimable states", () => {

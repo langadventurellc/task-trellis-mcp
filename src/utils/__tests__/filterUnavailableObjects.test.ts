@@ -12,7 +12,7 @@ describe("filterUnavailableObjects", () => {
     id: string,
     status: TrellisObjectStatus,
     prerequisites: string[] = [],
-    parent?: string,
+    parent: string | null = null,
   ): TrellisObject => ({
     id,
     title: `Task ${id}`,
