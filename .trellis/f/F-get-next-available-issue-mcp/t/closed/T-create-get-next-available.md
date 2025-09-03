@@ -1,13 +1,35 @@
 ---
 id: T-create-get-next-available
 title: Create get_next_available_issue MCP tool definition with schema and handler
-status: open
+status: done
 priority: high
 parent: F-get-next-available-issue-mcp
 prerequisites:
   - T-create-getnextavailableissue
-affectedFiles: {}
-log: []
+affectedFiles:
+  src/services/TaskTrellisService.ts: Added getNextAvailableIssue method signature to interface
+  src/services/local/LocalTaskTrellisService.ts:
+    Implemented getNextAvailableIssue
+    method with error handling and JSON formatting
+  src/tools/getNextAvailableIssueTool.ts: Created complete MCP tool definition
+    with Zod schema validation and handler function
+  src/tools/index.ts: Added exports for getNextAvailableIssueTool and handleGetNextAvailableIssue
+  src/server.ts: Added imports and registered get_next_available_issue tool case
+    in handler switch
+  src/__tests__/serverStartup.test.ts: Added getNextAvailableIssue mock method to maintain test compatibility
+  src/tools/__tests__/claimTaskTool.test.ts: Added getNextAvailableIssue mock method to maintain test compatibility
+  src/tools/__tests__/completeTaskTool.test.ts: Added getNextAvailableIssue mock method to maintain test compatibility
+  src/tools/__tests__/listObjectsTool.test.ts: Added getNextAvailableIssue mock method to maintain test compatibility
+log:
+  - "Successfully implemented the get_next_available_issue MCP tool. The
+    implementation includes: (1) Added getNextAvailableIssue method to
+    TaskTrellisService interface and LocalTaskTrellisService implementation, (2)
+    Created comprehensive MCP tool definition with proper Zod validation schema,
+    (3) Registered tool in server.ts with appropriate handler, (4) Updated all
+    test mocks to maintain compatibility, (5) All quality checks pass (lint,
+    format, type-check) and all 745 tests pass. The tool allows AI agents to
+    preview the next available issue without claiming it, supporting optional
+    scope and issueType filtering parameters."
 schema: v1.0
 childrenIds: []
 created: 2025-09-03T00:36:48.297Z

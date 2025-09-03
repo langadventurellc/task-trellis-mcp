@@ -14,13 +14,26 @@ affectedFiles:
     unit test suite covering basic functionality, type filtering (single and
     array), scope filtering, priority sorting, error scenarios, repository
     integration, and utility integration with 100% coverage
+  src/services/TaskTrellisService.ts: Added getNextAvailableIssue method signature to interface
+  src/services/local/LocalTaskTrellisService.ts:
+    Implemented getNextAvailableIssue
+    method with error handling and JSON formatting
+  src/tools/getNextAvailableIssueTool.ts: Created complete MCP tool definition
+    with Zod schema validation and handler function
+  src/tools/index.ts: Added exports for getNextAvailableIssueTool and handleGetNextAvailableIssue
+  src/server.ts: Added imports and registered get_next_available_issue tool case
+    in handler switch
+  src/__tests__/serverStartup.test.ts: Added getNextAvailableIssue mock method to maintain test compatibility
+  src/tools/__tests__/claimTaskTool.test.ts: Added getNextAvailableIssue mock method to maintain test compatibility
+  src/tools/__tests__/completeTaskTool.test.ts: Added getNextAvailableIssue mock method to maintain test compatibility
+  src/tools/__tests__/listObjectsTool.test.ts: Added getNextAvailableIssue mock method to maintain test compatibility
 log: []
 schema: v1.0
 childrenIds:
   - T-create-comprehensive-end-to
   - T-create-get-next-available
-  - T-create-getnextavailableissue
   - T-register-get-next-available
+  - T-create-getnextavailableissue
 created: 2025-09-02T23:30:31.575Z
 updated: 2025-09-02T23:30:31.575Z
 ---

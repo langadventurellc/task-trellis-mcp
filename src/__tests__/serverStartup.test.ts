@@ -27,6 +27,7 @@ const mockService: jest.Mocked<TaskTrellisService> = {
   appendObjectLog: jest.fn(),
   appendModifiedFiles: jest.fn(),
   claimTask: jest.fn(),
+  getNextAvailableIssue: jest.fn(),
   completeTask: jest.fn(),
   pruneClosed: jest.fn(),
 };

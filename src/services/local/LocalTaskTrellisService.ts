@@ -66,6 +66,38 @@ export class LocalTaskTrellisService implements TaskTrellisService {
     return claimTask(repository, scope, taskId, force);
   }
 
+  async getNextAvailableIssue(
+    repository: Repository,
+    scope?: string,
+    issueType?: TrellisObjectType | TrellisObjectType[],
+  ): Promise<{ content: Array<{ type: string; text: string }> }> {
+    try {
+      const { getNextAvailableIssue } = await import("./getNextAvailableIssue");
+      const foundIssue = await getNextAvailableIssue(
+        repository,
+        scope,
+        issueType,
+      );
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(foundIssue, null, 2),
+          },
+        ],
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error finding next available issue: ${error instanceof Error ? error.message : "Unknown error"}`,
+          },
+        ],
+      };
+    }
+  }
+
   async completeTask(
     repository: Repository,
     serverConfig: ServerConfig,

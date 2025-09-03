@@ -47,6 +47,15 @@ export interface TaskTrellisService {
   ): Promise<{ content: Array<{ type: string; text: string }> }>;
 
   /**
+   * Gets the next available issue without claiming it
+   */
+  getNextAvailableIssue(
+    repository: Repository,
+    scope?: string,
+    issueType?: TrellisObjectType | TrellisObjectType[],
+  ): Promise<{ content: Array<{ type: string; text: string }> }>;
+
+  /**
    * Completes a task in the task trellis system
    */
   completeTask(

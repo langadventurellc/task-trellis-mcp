@@ -21,6 +21,7 @@ import {
   completeTaskTool,
   createObjectTool,
   deleteObjectTool,
+  getNextAvailableIssueTool,
   getObjectTool,
   handleAppendModifiedFiles,
   handleAppendObjectLog,
@@ -28,6 +29,7 @@ import {
   handleCompleteTask,
   handleCreateObject,
   handleDeleteObject,
+  handleGetNextAvailableIssue,
   handleGetObject,
   handleListObjects,
   handleUpdateObject,
@@ -165,6 +167,7 @@ server.setRequestHandler(ListToolsRequestSchema, () => {
     appendObjectLogTool,
     appendModifiedFilesTool,
     claimTaskTool,
+    getNextAvailableIssueTool,
     completeTaskTool,
   ];
 
@@ -250,6 +253,8 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
       return handleAppendModifiedFiles(_getService(), repository, args);
     case "claim_task":
       return handleClaimTask(_getService(), repository, args);
+    case "get_next_available_issue":
+      return handleGetNextAvailableIssue(_getService(), repository, args);
     case "complete_task":
       return handleCompleteTask(_getService(), repository, args, serverConfig);
     case "activate":
