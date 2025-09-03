@@ -64,17 +64,14 @@ describe("validateObjectCreation", () => {
   });
 
   it("should pass validation for object without parent", async () => {
-    const objectWithoutParent = { ...testObject, parent: undefined };
+    const objectWithoutParent = { ...testObject, parent: null };
     mockValidateParentExists.mockResolvedValue(undefined);
 
     await expect(
       validateObjectCreation(objectWithoutParent, mockRepository),
     ).resolves.toBeUndefined();
 
-    expect(mockValidateParentExists).toHaveBeenCalledWith(
-      undefined,
-      mockRepository,
-    );
+    expect(mockValidateParentExists).toHaveBeenCalledWith(null, mockRepository);
     expect(mockValidateParentExists).toHaveBeenCalledTimes(1);
   });
 
@@ -107,7 +104,7 @@ describe("validateObjectCreation", () => {
       {
         type: TrellisObjectType.PROJECT,
         id: "P-project-123",
-        parent: undefined,
+        parent: null,
       },
       {
         type: TrellisObjectType.EPIC,

@@ -168,9 +168,7 @@ export function deserializeTrellisObject(
     status: toStatus(fm.status),
     priority: toPriority(fm.priority),
     parent:
-      typeof fm.parent === "string" && fm.parent !== "none"
-        ? fm.parent
-        : undefined,
+      typeof fm.parent === "string" && fm.parent !== "none" ? fm.parent : null,
     prerequisites: toStringArray(fm.prerequisites),
     affectedFiles: affectedFilesMap,
     log: toStringArray(fm.log),

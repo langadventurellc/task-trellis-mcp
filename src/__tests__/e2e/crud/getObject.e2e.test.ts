@@ -84,7 +84,7 @@ describe("E2E CRUD - getObject", () => {
       expect(object.title).toBe("Test Project");
       expect(object.status).toBe("open");
       expect(object.priority).toBe("high");
-      expect(object.parent).toBeUndefined();
+      expect(object.parent).toBeNull();
       expect(object.prerequisites).toEqual(["P-dep1", "P-dep2"]);
       expect(object.affectedFiles).toEqual({ "src/index.ts": "Initial setup" });
       expect(object.log).toEqual(["Created project", "Updated priority"]);
@@ -144,7 +144,7 @@ describe("E2E CRUD - getObject", () => {
       const object = parseGetObjectResponse(result.content[0].text as string);
       expect(object.id).toBe("F-standalone-feature");
       expect(object.type).toBe("feature");
-      expect(object.parent).toBeUndefined();
+      expect(object.parent).toBeNull();
     });
 
     it("should retrieve a task with various statuses", async () => {
@@ -264,7 +264,7 @@ describe("E2E CRUD - getObject", () => {
         projectResult.content[0].text as string,
       );
       expect(project.childrenIds).toContain(epicId);
-      expect(project.parent).toBeUndefined();
+      expect(project.parent).toBeNull();
 
       const epicResult = await client.callTool("get_issue", { id: epicId });
       const epic = parseGetObjectResponse(epicResult.content[0].text as string);

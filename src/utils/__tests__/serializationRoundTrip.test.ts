@@ -27,6 +27,7 @@ describe("TrellisObject Serialization/Deserialization Integration Tests", () => 
         type: TrellisObjectType.TASK,
         created: "2025-01-15T10:00:00Z",
         updated: "2025-01-15T10:00:00Z",
+        parent: null,
       };
 
       const serialized = serializeTrellisObject(original);
@@ -98,6 +99,7 @@ Additional section with --- delimiters for testing.`;
         type: TrellisObjectType.TASK,
         created: "2025-01-15T10:00:00Z",
         updated: "2025-01-15T10:00:00Z",
+        parent: null,
       };
 
       const serialized = serializeTrellisObject(original);
@@ -121,6 +123,7 @@ Additional section with --- delimiters for testing.`;
         type: TrellisObjectType.TASK,
         created: "2025-01-15T10:00:00Z",
         updated: "2025-01-15T10:00:00Z",
+        parent: null,
       };
 
       const serialized = serializeTrellisObject(original);
@@ -172,6 +175,7 @@ console.log(greeting);
         type: TrellisObjectType.TASK,
         created: "2025-01-15T10:00:00Z",
         updated: "2025-01-15T10:00:00Z",
+        parent: null,
       };
 
       const serialized = serializeTrellisObject(original);
@@ -229,6 +233,7 @@ The parser should handle all of this correctly.`;
         type: TrellisObjectType.TASK,
         created: "2025-01-15T10:00:00Z",
         updated: "2025-01-15T10:00:00Z",
+        parent: null,
       };
 
       const serialized = serializeTrellisObject(original);
@@ -293,6 +298,7 @@ ${"Final section content repeated multiple times to test large content handling.
         type: TrellisObjectType.TASK,
         created: "2025-01-15T10:00:00Z",
         updated: "2025-01-15T10:00:00Z",
+        parent: null,
       };
 
       const serialized = serializeTrellisObject(original);
@@ -326,6 +332,7 @@ ${"Final section content repeated multiple times to test large content handling.
         type: TrellisObjectType.TASK,
         created: "2025-01-15T10:00:00Z",
         updated: "2025-01-15T10:00:00Z",
+        parent: null,
       };
 
       const serialized = serializeTrellisObject(original);
@@ -360,6 +367,7 @@ ${"Final section content repeated multiple times to test large content handling.
         type: TrellisObjectType.FEATURE,
         created: "2025-01-15T10:00:00Z",
         updated: "2025-01-15T10:00:00Z",
+        parent: null,
       };
 
       const serialized = serializeTrellisObject(original);
@@ -389,6 +397,7 @@ ${"Final section content repeated multiple times to test large content handling.
         type: TrellisObjectType.EPIC,
         created: "2025-01-15T10:00:00Z",
         updated: "2025-01-15T10:00:00Z",
+        parent: null,
       };
 
       const serialized = serializeTrellisObject(original);
@@ -415,6 +424,7 @@ ${"Final section content repeated multiple times to test large content handling.
           type: TrellisObjectType.TASK,
           created: "2025-01-15T10:00:00Z",
           updated: "2025-01-15T10:00:00Z",
+          parent: null,
         },
         {
           id: "P-seq-2",
@@ -436,6 +446,7 @@ ${"Final section content repeated multiple times to test large content handling.
           type: TrellisObjectType.PROJECT,
           created: "2025-01-15T10:00:00Z",
           updated: "2025-01-15T10:00:00Z",
+          parent: null,
         },
         {
           id: "F-seq-3",
@@ -451,6 +462,7 @@ ${"Final section content repeated multiple times to test large content handling.
           type: TrellisObjectType.FEATURE,
           created: "2025-01-15T10:00:00Z",
           updated: "2025-01-15T10:00:00Z",
+          parent: null,
         },
       ];
 
@@ -486,13 +498,14 @@ ${"Final section content repeated multiple times to test large content handling.
         type: TrellisObjectType.TASK,
         created: "2025-01-15T10:00:00Z",
         updated: "2025-01-15T10:00:00Z",
+        parent: null,
       };
 
       const serialized = serializeTrellisObject(original);
       const deserialized = deserializeTrellisObject(serialized);
 
       expect(deserialized).toEqual(original);
-      expect(deserialized.parent).toBeUndefined();
+      expect(deserialized.parent).toBeNull();
     });
   });
 });

@@ -10,7 +10,7 @@ import { Repository } from "../repositories";
  * @param visitedIds - Set of visited IDs to prevent infinite recursion
  */
 export async function updateParentHierarchy(
-  parentId: string | undefined,
+  parentId: string | null,
   repository: Repository,
   visitedIds: Set<string> = new Set(),
 ): Promise<void> {

@@ -1,7 +1,7 @@
 import { TrellisObject } from "../../models/TrellisObject";
-import { TrellisObjectType } from "../../models/TrellisObjectType";
-import { TrellisObjectStatus } from "../../models/TrellisObjectStatus";
 import { TrellisObjectPriority } from "../../models/TrellisObjectPriority";
+import { TrellisObjectStatus } from "../../models/TrellisObjectStatus";
+import { TrellisObjectType } from "../../models/TrellisObjectType";
 import { Repository } from "../../repositories/Repository";
 import { updateParentHierarchy } from "../updateParentHierarchy";
 
@@ -22,7 +22,7 @@ describe("updateParentHierarchy", () => {
   const createMockObject = (
     id: string,
     status: TrellisObjectStatus = TrellisObjectStatus.OPEN,
-    parent?: string,
+    parent: string | null = null,
   ): TrellisObject => ({
     id,
     type: TrellisObjectType.TASK,
@@ -42,7 +42,7 @@ describe("updateParentHierarchy", () => {
 
   describe("when parentId is undefined", () => {
     it("should return early without making any repository calls", async () => {
-      await updateParentHierarchy(undefined, mockRepository);
+      await updateParentHierarchy(null, mockRepository);
 
       expect(mockRepository.getObjectById).not.toHaveBeenCalled();
       expect(mockRepository.saveObject).not.toHaveBeenCalled();

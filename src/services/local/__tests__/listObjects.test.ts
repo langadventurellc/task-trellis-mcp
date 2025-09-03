@@ -38,6 +38,7 @@ describe("listObjects", () => {
       body: "Project 1 body",
       created: "2025-01-15T10:00:00Z",
       updated: "2025-01-15T10:00:00Z",
+      parent: null,
     },
     {
       id: "T-task-1",

@@ -1,8 +1,8 @@
 import { isOpen } from "../isOpen";
 import { TrellisObject } from "../TrellisObject";
+import { TrellisObjectPriority } from "../TrellisObjectPriority";
 import { TrellisObjectStatus } from "../TrellisObjectStatus";
 import { TrellisObjectType } from "../TrellisObjectType";
-import { TrellisObjectPriority } from "../TrellisObjectPriority";
 
 describe("isOpen", () => {
   const createMockObject = (status: TrellisObjectStatus): TrellisObject => ({
@@ -19,6 +19,7 @@ describe("isOpen", () => {
     body: "Test body",
     created: "2025-01-15T10:00:00Z",
     updated: "2025-01-15T10:00:00Z",
+    parent: null,
   });
 
   describe("open states", () => {
@@ -58,6 +59,7 @@ describe("isOpen", () => {
         title: "Test Epic",
         status: TrellisObjectStatus.DRAFT,
         priority: TrellisObjectPriority.HIGH,
+        parent: null,
         prerequisites: [],
         affectedFiles: new Map(),
         log: [],

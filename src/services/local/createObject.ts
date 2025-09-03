@@ -12,7 +12,7 @@ export async function createObject(
   repository: Repository,
   type: TrellisObjectType,
   title: string,
-  parent?: string,
+  parent: string | null = null,
   priority: TrellisObjectPriority = TrellisObjectPriority.MEDIUM,
   status: TrellisObjectStatus = TrellisObjectStatus.OPEN,
   prerequisites: string[] = [],

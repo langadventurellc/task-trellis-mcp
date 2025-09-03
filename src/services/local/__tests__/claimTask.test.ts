@@ -66,6 +66,7 @@ describe("claimTask service function", () => {
     title: "Test Project",
     status: TrellisObjectStatus.OPEN,
     priority: TrellisObjectPriority.HIGH,
+    parent: null,
     prerequisites: [],
     affectedFiles: new Map(),
     log: [],

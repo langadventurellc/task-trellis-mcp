@@ -93,7 +93,7 @@ describe("getNextAvailableIssue service function", () => {
     title: "Test Project",
     status: TrellisObjectStatus.OPEN,
     priority: TrellisObjectPriority.MEDIUM,
-    parent: undefined,
+    parent: null,
     prerequisites: [],
     affectedFiles: new Map(),
     log: [],

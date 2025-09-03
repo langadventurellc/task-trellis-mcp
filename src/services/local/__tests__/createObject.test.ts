@@ -49,6 +49,7 @@ describe("createObject", () => {
       body: "Existing project body",
       created: "2025-01-15T10:00:00Z",
       updated: "2025-01-15T10:00:00Z",
+      parent: null,
     },
   ];
 
@@ -78,7 +79,7 @@ describe("createObject", () => {
         title: "Test Task",
         status: TrellisObjectStatus.OPEN,
         priority: TrellisObjectPriority.MEDIUM,
-        parent: undefined,
+        parent: null,
         prerequisites: [],
         body: "",
       }),
@@ -91,7 +92,7 @@ describe("createObject", () => {
         title: "Test Task",
         status: TrellisObjectStatus.OPEN,
         priority: TrellisObjectPriority.MEDIUM,
-        parent: undefined,
+        parent: null,
         prerequisites: [],
         affectedFiles: new Map(),
         log: [],
@@ -138,7 +139,7 @@ describe("createObject", () => {
         title: "New Project",
         status: TrellisObjectStatus.IN_PROGRESS,
         priority: TrellisObjectPriority.HIGH,
-        parent: undefined,
+        parent: null,
         prerequisites: ["P-dependency1", "P-dependency2"],
         body: "This is a new project description",
       }),
@@ -151,7 +152,7 @@ describe("createObject", () => {
         title: "New Project",
         status: TrellisObjectStatus.IN_PROGRESS,
         priority: TrellisObjectPriority.HIGH,
-        parent: undefined,
+        parent: null,
         prerequisites: ["P-dependency1", "P-dependency2"],
         body: "This is a new project description",
       }),
@@ -281,6 +282,7 @@ describe("createObject", () => {
         body: "",
         created: "2025-01-15T10:00:00Z",
         updated: "2025-01-15T10:00:00Z",
+        parent: null,
       },
       {
         id: "F-feature-1",
@@ -296,6 +298,7 @@ describe("createObject", () => {
         body: "",
         created: "2025-01-15T10:00:00Z",
         updated: "2025-01-15T10:00:00Z",
+        parent: null,
       },
     ];
 

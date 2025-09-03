@@ -18,7 +18,7 @@ describe("appendModifiedFiles service function", () => {
     title: "Test Task",
     status: TrellisObjectStatus.IN_PROGRESS,
     priority: TrellisObjectPriority.MEDIUM,
-    parent: undefined,
+    parent: null,
     prerequisites: [],
     affectedFiles: new Map(),
     log: [],

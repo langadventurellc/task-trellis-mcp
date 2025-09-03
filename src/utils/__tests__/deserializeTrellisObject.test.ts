@@ -430,7 +430,7 @@ Test body content`;
 
     const result = deserializeTrellisObject(markdownString);
 
-    expect(result.parent).toBeUndefined();
+    expect(result.parent).toBeNull();
     expect(result.id).toBe("P-no-parent-test");
     expect(result.title).toBe("No Parent Test");
   });
@@ -455,7 +455,7 @@ Test body content with parent set to 'none'`;
 
     const result = deserializeTrellisObject(markdownString);
 
-    expect(result.parent).toBeUndefined();
+    expect(result.parent).toBeNull();
     expect(result.id).toBe("P-none-parent-test");
     expect(result.title).toBe("None Parent Test");
   });

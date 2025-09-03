@@ -26,7 +26,7 @@ describe("validateParentExists", () => {
 
   it("should pass validation when no parent is specified", async () => {
     await expect(
-      validateParentExists(undefined, mockRepository),
+      validateParentExists(null, mockRepository),
     ).resolves.toBeUndefined();
 
     expect(mockRepository.getObjectById).not.toHaveBeenCalled();
@@ -47,6 +47,7 @@ describe("validateParentExists", () => {
       body: "Parent project description",
       created: "2025-01-15T10:00:00Z",
       updated: "2025-01-15T10:00:00Z",
+      parent: null,
     };
 
     mockRepository.getObjectById.mockResolvedValue(mockParentObject);
