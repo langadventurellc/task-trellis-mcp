@@ -8,6 +8,7 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { Command } from "commander";
 import fs from "fs";
+import { promises as fsPromises } from "fs";
 import path from "path";
 import { ServerConfig } from "./configuration";
 import { LocalRepository, Repository } from "./repositories";
@@ -313,8 +314,57 @@ async function startServer() {
     }
   }
 
+  // Copy basic-claude agents if conditions are met
+  if (options.promptPackage === "basic-claude" && options.projectRootFolder) {
+    try {
+      console.warn("Starting copy of basic-claude agents...");
+      await copyBasicClaudeAgents(options.projectRootFolder);
+    } catch (error) {
+      console.error(
+        `Agent copy failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      // Don't exit - continue starting server even if copy fails
+    }
+  }
+
   // Start the main server
   await runServer();
+}
+
+async function copyBasicClaudeAgents(projectRootFolder: string): Promise<void> {
+  const sourceDir = path.join(__dirname, "../resources/basic-claude/agents");
+  const targetDir = path.join(projectRootFolder, ".claude", "agents");
+
+  try {
+    // Check if source directory exists
+    await fsPromises.access(sourceDir);
+
+    // Create target directory if it doesn't exist
+    await fsPromises.mkdir(targetDir, { recursive: true });
+
+    // Read all files from source directory
+    const files = await fsPromises.readdir(sourceDir);
+
+    // Copy each file
+    for (const file of files) {
+      const sourcePath = path.join(sourceDir, file);
+      const targetPath = path.join(targetDir, file);
+
+      // Read source file content
+      const content = await fsPromises.readFile(sourcePath, "utf8");
+
+      // Write to target location
+      await fsPromises.writeFile(targetPath, content, "utf8");
+    }
+
+    console.warn(
+      `Successfully copied ${files.length} agent file(s) from ${sourceDir} to ${targetDir}`,
+    );
+  } catch (error) {
+    throw new Error(
+      `Failed to copy basic-claude agents: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
 }
 
 startServer().catch((error) => {

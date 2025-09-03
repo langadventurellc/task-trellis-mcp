@@ -1,9 +1,24 @@
 import { TaskTrellisService } from "../services/TaskTrellisService";
 import { Repository } from "../repositories";
+import { promises as fsPromises } from "fs";
 
 // Mock the entire server file
 jest.mock("@modelcontextprotocol/sdk/server/index.js");
 jest.mock("@modelcontextprotocol/sdk/server/stdio.js");
+
+// Mock fs/promises
+jest.mock("fs", () => ({
+  ...jest.requireActual("fs"),
+  promises: {
+    access: jest.fn(),
+    mkdir: jest.fn(),
+    readdir: jest.fn().mockResolvedValue([]),
+    readFile: jest.fn(),
+    writeFile: jest.fn(),
+  },
+}));
+
+const mockFsPromises = fsPromises as jest.Mocked<typeof fsPromises>;
 
 // Mock console methods
 const consoleSpy = {
@@ -208,6 +223,128 @@ describe("Server Startup Auto-Prune Integration", () => {
   });
 });
 
+describe("Server Startup Basic-Claude Agents Copying Integration", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    consoleSpy.warn.mockClear();
+    consoleSpy.error.mockClear();
+    mockFsPromises.access.mockClear();
+    mockFsPromises.mkdir.mockClear();
+    mockFsPromises.readdir.mockClear();
+    mockFsPromises.readFile.mockClear();
+    mockFsPromises.writeFile.mockClear();
+  });
+
+  afterEach(() => {
+    jest.resetModules();
+  });
+
+  describe("conditional execution", () => {
+    it("should copy agents when both conditions are met", async () => {
+      const options = {
+        promptPackage: "basic-claude",
+        projectRootFolder: "/test/project",
+      };
+
+      mockFsPromises.access.mockResolvedValue(undefined);
+      mockFsPromises.mkdir.mockResolvedValue(undefined);
+      (mockFsPromises.readdir as jest.Mock).mockResolvedValue([
+        "implementation-planner.md",
+      ]);
+      mockFsPromises.readFile.mockResolvedValue("mock file content");
+      mockFsPromises.writeFile.mockResolvedValue(undefined);
+
+      const { startServer } = createStartServerWithAgentCopy(options);
+
+      await startServer();
+
+      expect(consoleSpy.warn).toHaveBeenCalledWith(
+        "Starting copy of basic-claude agents...",
+      );
+      expect(mockFsPromises.access).toHaveBeenCalled();
+      expect(mockFsPromises.mkdir).toHaveBeenCalled();
+      expect(mockFsPromises.readdir).toHaveBeenCalled();
+      expect(mockFsPromises.writeFile).toHaveBeenCalled();
+    });
+
+    it("should skip copying when promptPackage is not basic-claude", async () => {
+      const options = {
+        promptPackage: "basic",
+        projectRootFolder: "/test/project",
+      };
+
+      const { startServer } = createStartServerWithAgentCopy(options);
+
+      await startServer();
+
+      expect(consoleSpy.warn).not.toHaveBeenCalledWith(
+        "Starting copy of basic-claude agents...",
+      );
+      expect(mockFsPromises.access).not.toHaveBeenCalled();
+    });
+
+    it("should skip copying when projectRootFolder is not provided", async () => {
+      const options = {
+        promptPackage: "basic-claude",
+        projectRootFolder: undefined,
+      };
+
+      const { startServer } = createStartServerWithAgentCopy(options);
+
+      await startServer();
+
+      expect(consoleSpy.warn).not.toHaveBeenCalledWith(
+        "Starting copy of basic-claude agents...",
+      );
+      expect(mockFsPromises.access).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("error handling", () => {
+    it("should continue startup when copying fails", async () => {
+      const options = {
+        promptPackage: "basic-claude",
+        projectRootFolder: "/test/project",
+      };
+
+      mockFsPromises.access.mockRejectedValue(
+        new Error("Source directory not found"),
+      );
+
+      const { startServer } = createStartServerWithAgentCopy(options);
+
+      await startServer();
+
+      expect(consoleSpy.warn).toHaveBeenCalledWith(
+        "Starting copy of basic-claude agents...",
+      );
+      expect(consoleSpy.error).toHaveBeenCalledWith(
+        expect.stringContaining(
+          "Agent copy failed: Source directory not found",
+        ),
+      );
+    });
+
+    it("should handle mkdir failures gracefully", async () => {
+      const options = {
+        promptPackage: "basic-claude",
+        projectRootFolder: "/test/project",
+      };
+
+      mockFsPromises.access.mockResolvedValue(undefined);
+      mockFsPromises.mkdir.mockRejectedValue(new Error("Permission denied"));
+
+      const { startServer } = createStartServerWithAgentCopy(options);
+
+      await startServer();
+
+      expect(consoleSpy.error).toHaveBeenCalledWith(
+        expect.stringContaining("Agent copy failed:"),
+      );
+    });
+  });
+});
+
 /**
  * Helper function to create a startServer function with a specific server config
  * This simulates the server startup logic with auto-prune integration
@@ -235,6 +372,74 @@ function createStartServerWithConfig(serverConfig: { autoPrune: number }) {
           `Auto-prune failed: ${error instanceof Error ? error.message : String(error)}`,
         );
         // Don't exit - continue starting server even if prune fails
+      }
+    }
+
+    // Start the main server
+    await mockRunServer();
+  };
+
+  return { startServer, mockRunServer };
+}
+
+/**
+ * Helper function to create a startServer function with agent copying functionality
+ * This simulates the server startup logic with basic-claude agents copying
+ */
+function createStartServerWithAgentCopy(options: {
+  promptPackage: string;
+  projectRootFolder: string | undefined;
+}) {
+  // Mock runServer to avoid actual server connection
+  const mockRunServer = jest.fn().mockResolvedValue(undefined);
+
+  // Mock copyBasicClaudeAgents function behavior
+  const mockCopyBasicClaudeAgents = async (
+    projectRootFolder: string,
+  ): Promise<void> => {
+    // Check if source directory exists
+    await mockFsPromises.access("/mock/source/path");
+
+    // Create target directory if it doesn't exist
+    await mockFsPromises.mkdir(`${projectRootFolder}/.claude/agents`, {
+      recursive: true,
+    });
+
+    // Read all files from source directory
+    const files = await mockFsPromises.readdir("/mock/source/path");
+
+    // Copy each file
+    for (const file of files) {
+      // Read source file content
+      const content = await mockFsPromises.readFile(
+        `/mock/source/path/${file}`,
+        "utf8",
+      );
+
+      // Write to target location
+      await mockFsPromises.writeFile(
+        `${projectRootFolder}/.claude/agents/${file}`,
+        content,
+        "utf8",
+      );
+    }
+
+    console.warn(
+      `Successfully copied ${files.length} agent file(s) from /mock/source/path to ${projectRootFolder}/.claude/agents`,
+    );
+  };
+
+  const startServer = async () => {
+    // Copy basic-claude agents if conditions are met
+    if (options.promptPackage === "basic-claude" && options.projectRootFolder) {
+      try {
+        console.warn("Starting copy of basic-claude agents...");
+        await mockCopyBasicClaudeAgents(options.projectRootFolder);
+      } catch (error) {
+        console.error(
+          `Agent copy failed: ${error instanceof Error ? error.message : String(error)}`,
+        );
+        // Don't exit - continue starting server even if copy fails
       }
     }
 

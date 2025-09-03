@@ -7,5 +7,5 @@ if git diff --staged --name-only | grep -E '\.(ts|tsx|js|jsx)$' > /dev/null; the
   echo "Code files detected, running quality checks..."
   npm run lint
   npm run type-check
-  npm test
+  npm run test:all
 fi
