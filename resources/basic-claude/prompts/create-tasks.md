@@ -173,8 +173,10 @@ Verify the created project for completeness and correctness:
 **Review verification results:**
 
 - If verdict is `APPROVED`: Proceed to output format
-- If verdict is `NEEDS REVISION`: Update the project using MCP based on recommendations
-- If verdict is `REJECTED`: Recreate the project addressing critical issues
+- If verdict is `NEEDS REVISION`: Evaluate the feedback and, if applicable, update the project using MCP based on recommendations
+- If verdict is `REJECTED`: Evaluate the feedback and, if applicable, recreate the project addressing critical issues
+
+If you're not 100% sure of the correctness of the feedback, **STOP** and ask the user for clarification.
 
 ### 7. Output Format
 
