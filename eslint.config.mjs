@@ -19,6 +19,8 @@ const eslintConfig = [
       '**/node_modules/**',
       '**/coverage/**',
       '**/dist/**',
+      '**/scratch/**',
+      '**/template/**',
     ],
   },
 
