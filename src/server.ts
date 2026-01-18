@@ -8,7 +8,6 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { Command } from "commander";
 import fs from "fs";
-import { promises as fsPromises } from "fs";
 import path from "path";
 import { ServerConfig } from "./configuration";
 import { LocalRepository, Repository } from "./repositories";
@@ -37,7 +36,6 @@ import {
   listObjectsTool,
   updateObjectTool,
 } from "./tools";
-import { registerPromptHandlers } from "./prompts/registry.js";
 
 // Parse command line arguments
 const program = new Command();
@@ -55,11 +53,6 @@ program
     "--auto-prune <days>",
     "Auto-prune closed issues older than N days (0=disabled)",
     "0",
-  )
-  .option(
-    "--prompt-package <package>",
-    "Prompt package to load (none, basic, basic-claude)",
-    "basic",
   );
 
 program.parse();
@@ -69,7 +62,6 @@ interface CliOptions {
   projectRootFolder?: string;
   autoCompleteParent: boolean;
   autoPrune: string;
-  promptPackage: string;
 }
 
 const options = program.opts<CliOptions>();
@@ -85,15 +77,6 @@ if (isNaN(autoPruneValue)) {
 if (autoPruneValue < 0) {
   console.error(
     `Error: --auto-prune must be a non-negative number, got ${autoPruneValue}`,
-  );
-  process.exit(1);
-}
-
-// Validate prompt package argument
-const validPromptPackages = ["none", "basic", "basic-claude"];
-if (!validPromptPackages.includes(options.promptPackage)) {
-  console.error(
-    `Error: --prompt-package must be one of: ${validPromptPackages.join(", ")}, got "${options.promptPackage}"`,
   );
   process.exit(1);
 }
@@ -168,7 +151,6 @@ Essential for AI agents working on complex, multi-step software projects where s
   {
     capabilities: {
       tools: {},
-      prompts: {},
     },
   },
 );
@@ -280,14 +262,6 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
 });
 
 async function runServer() {
-  // Register prompt handlers conditionally based on package selection
-  if (options.promptPackage === "none") {
-    console.warn("Prompts disabled via --prompt-package none");
-  } else {
-    console.warn(`Loading prompts from package: ${options.promptPackage}`);
-    await registerPromptHandlers(server, options.promptPackage);
-  }
-
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }
@@ -314,57 +288,8 @@ async function startServer() {
     }
   }
 
-  // Copy basic-claude agents if conditions are met
-  if (options.promptPackage === "basic-claude" && options.projectRootFolder) {
-    try {
-      console.warn("Starting copy of basic-claude agents...");
-      await copyBasicClaudeAgents(options.projectRootFolder);
-    } catch (error) {
-      console.error(
-        `Agent copy failed: ${error instanceof Error ? error.message : String(error)}`,
-      );
-      // Don't exit - continue starting server even if copy fails
-    }
-  }
-
   // Start the main server
   await runServer();
-}
-
-async function copyBasicClaudeAgents(projectRootFolder: string): Promise<void> {
-  const sourceDir = path.join(__dirname, "../resources/basic-claude/agents");
-  const targetDir = path.join(projectRootFolder, ".claude", "agents");
-
-  try {
-    // Check if source directory exists
-    await fsPromises.access(sourceDir);
-
-    // Create target directory if it doesn't exist
-    await fsPromises.mkdir(targetDir, { recursive: true });
-
-    // Read all files from source directory
-    const files = await fsPromises.readdir(sourceDir);
-
-    // Copy each file
-    for (const file of files) {
-      const sourcePath = path.join(sourceDir, file);
-      const targetPath = path.join(targetDir, file);
-
-      // Read source file content
-      const content = await fsPromises.readFile(sourcePath, "utf8");
-
-      // Write to target location
-      await fsPromises.writeFile(targetPath, content, "utf8");
-    }
-
-    console.warn(
-      `Successfully copied ${files.length} agent file(s) from ${sourceDir} to ${targetDir}`,
-    );
-  } catch (error) {
-    throw new Error(
-      `Failed to copy basic-claude agents: ${error instanceof Error ? error.message : String(error)}`,
-    );
-  }
 }
 
 startServer().catch((error) => {

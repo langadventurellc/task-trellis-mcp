@@ -35,8 +35,6 @@ Full documentation is available in the [docs](docs/index.md) folder.
 
 _... and much more!_
 
-See [Prompt Packages](docs/prompts.md) for included MCP prompts.
-
 ## Why Task Trellis?
 
 ### Without Task Trellis
@@ -76,8 +74,6 @@ See [Prompt Packages](docs/prompts.md) for included MCP prompts.
 See full documentation at [Task Trellis MCP Documentation](docs/index.md)
 
 ### Basic Workflow
-
-[Prompt Packages](docs/prompts.md)
 
 1. **Create Tasks**
    - Determine your starting point based on the expected size of your project
