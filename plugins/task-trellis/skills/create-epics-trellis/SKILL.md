@@ -74,15 +74,7 @@ Key areas to clarify:
 - **Phases**: Should there be phase-based epics (MVP, Enhancement, etc.)?
 - **Non-functional**: How to handle security, performance, monitoring as epics?
 
-**Example questioning approach:**
-
-```
-How should the authentication system be organized as an epic?
-Options:
-- A) Separate epic for all authentication (login, registration, password reset)
-- B) Integrate authentication into each functional epic
-- C) Split into multiple epics (core auth, advanced features, integrations)
-```
+**When in doubt, ask.** Use the AskUserQuestion tool to clarify requirements. Agents tend to be overconfident about what they can infer - a human developer would ask more questions, not fewer. If you're making assumptions, stop and ask instead.
 
 Continue until the epic structure:
 

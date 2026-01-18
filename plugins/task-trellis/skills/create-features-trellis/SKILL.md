@@ -82,15 +82,7 @@ Key areas to clarify:
 - **Testing Strategy**: How can features be tested independently?
 - **Integration Points**: Where do features interface with each other?
 
-**Example questioning approach:**
-
-```
-How should the user registration feature be scoped?
-Options:
-- A) Basic registration only (email, password, confirmation)
-- B) Full registration with profile setup and email verification
-- C) Registration with social login integration included
-```
+**When in doubt, ask.** Use the AskUserQuestion tool to clarify requirements. Agents tend to be overconfident about what they can infer - a human developer would ask more questions, not fewer. If you're making assumptions, stop and ask instead.
 
 Continue until the feature structure:
 

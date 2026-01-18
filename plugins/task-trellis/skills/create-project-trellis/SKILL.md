@@ -66,15 +66,7 @@ Key areas to explore:
 - **Timeline & Phases**: Are there specific deadlines or phase requirements?
 - **Success Metrics**: How will project success be measured?
 
-**Example questioning approach:**
-
-```
-How should user authentication be handled in this project?
-Options:
-- A) Use existing authentication system (specify integration points)
-- B) Implement new authentication mechanism (specify requirements)
-- C) No authentication needed for this project
-```
+**When in doubt, ask.** Use the AskUserQuestion tool to clarify requirements. Agents tend to be overconfident about what they can infer - a human developer would ask more questions, not fewer. If you're making assumptions, stop and ask instead.
 
 Continue asking clarifying questions until you have enough information to create a comprehensive project description that would enable another agent to:
 

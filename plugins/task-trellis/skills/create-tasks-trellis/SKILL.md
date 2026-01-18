@@ -85,15 +85,7 @@ Key areas to clarify:
   - If specifically requested, do create separate tasks for performance tests. But, do not add tasks for performance tests unless specifically requested by the user.
 - **Security Implementation**: How to handle validation and authorization?
 
-**Example questioning approach:**
-
-```
-How should the user model validation be implemented?
-Options:
-- A) Basic field validation only (required fields, data types)
-- B) Advanced validation with custom rules and error messages
-- C) Validation with integration to existing validation framework
-```
+**When in doubt, ask.** Use the AskUserQuestion tool to clarify requirements. Agents tend to be overconfident about what they can infer - a human developer would ask more questions, not fewer. If you're making assumptions, stop and ask instead.
 
 Continue until the task structure:
 
