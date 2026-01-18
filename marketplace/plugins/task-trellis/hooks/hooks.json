@@ -7,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PROJECT_DIR}/plugin/hooks/scripts/pre-complete-task.sh"
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/pre-complete-task.sh"
           }
         ]
       }
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'cd \"$(git rev-parse --show-toplevel)\" && .claude/hooks/post-edit-task.sh'"
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/post-edit-task.sh"
           }
         ]
       }
