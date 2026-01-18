@@ -1,0 +1,16 @@
+{
+  "description": "Task Trellis quality validation hooks",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__task-trellis__complete_task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PROJECT_DIR}/plugin/hooks/scripts/pre-complete-task.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

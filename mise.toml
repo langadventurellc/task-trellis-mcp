@@ -1,0 +1,73 @@
+#:schema https://mise.jdx.dev/schema/mise.json
+min_version = "2024.11.0"
+
+[tools]
+node = "22.16.0"
+
+[env]
+NODE_ENV = "development"
+_.path = ["{{config_root}}/node_modules/.bin"]
+
+[tasks.build]
+description = "Compile TypeScript to JavaScript"
+run = "tsc"
+sources = ["src/**/*.ts", "tsconfig.json"]
+outputs = ["dist/"]
+
+[tasks.dev]
+description = "Watch mode compilation"
+run = "tsc --watch"
+
+[tasks.start]
+description = "Start the compiled server"
+run = "node dist/server.js"
+depends = ["build"]
+
+[tasks.serve]
+description = "Build and start the server"
+run = "node dist/server.js"
+depends = ["build"]
+
+[tasks.test]
+description = "Run unit tests"
+run = "jest"
+alias = "t"
+
+[tasks."test:watch"]
+description = "Run tests in watch mode"
+run = "jest --watch"
+
+[tasks."test:e2e"]
+description = "Run end-to-end tests"
+run = "jest --testMatch=\"<rootDir>/src/**/__tests__/**/*.e2e.test.ts\" --testPathIgnorePatterns=\"/node_modules/\" --testTimeout=30000"
+depends = ["build"]
+
+[tasks."test:all"]
+description = "Run all tests"
+run = "jest --testMatch=\"<rootDir>/src/**/__tests__/**/*.test.ts\" --testMatch=\"<rootDir>/src/**/__tests__/**/*.e2e.test.ts\" --testPathIgnorePatterns=\"/node_modules/\" --testTimeout=30000"
+depends = ["build"]
+
+[tasks.lint]
+description = "Run ESLint and fix issues"
+run = "eslint . --ext .ts,.tsx,.js,.jsx --fix"
+alias = "l"
+
+[tasks.format]
+description = "Format code with Prettier"
+run = "prettier --write \"**/*.{js,jsx,ts,tsx,md,json}\" --log-level silent"
+alias = "f"
+
+[tasks."type-check"]
+description = "Run TypeScript type checking"
+run = "tsc --noEmit"
+alias = "tc"
+
+[tasks.quality]
+description = "Run all quality checks (lint, format, type-check)"
+depends = ["lint", "format", "type-check"]
+run = "echo 'All quality checks passed'"
+
+[tasks.inspector]
+description = "Run MCP Inspector"
+run = "npx @modelcontextprotocol/inspector node dist/server.js -- --projectRootFolder {{config_root}}/temp"
+depends = ["build"]
