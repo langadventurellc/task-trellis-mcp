@@ -1,5 +1,5 @@
 ---
-name: implement-task-trellis
+name: issue-implementation
 description: This skill should be used when the user asks to "implement task", "claim task", "work on task", "start working", or mentions implementing or claiming a Trellis task. Claims and implements a task following Research and Plan -> Implement workflow.
 allowed-tools:
   - mcp__task-trellis__claim_task

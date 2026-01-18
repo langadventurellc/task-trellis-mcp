@@ -1,5 +1,5 @@
 ---
-name: detailed-implementation-planner
+name: issue-implementation-planner
 description: This skill should be used when the user asks to "create implementation plan", "plan the implementation", "detailed plan", "file-by-file plan", or mentions needing a comprehensive implementation plan before coding. Creates detailed file-by-file implementation plans by researching the codebase and outputting specific changes needed.
 context: fork
 agent: general-purpose

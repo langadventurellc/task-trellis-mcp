@@ -1,5 +1,5 @@
 ---
-name: create-project-trellis
+name: project-creation
 description: This skill should be used when the user asks to "create a project", "new trellis project", "start a project", "set up project management", or mentions creating a new project in Trellis. Creates a new project in the Trellis task management system by analyzing specifications and gathering requirements.
 allowed-tools:
   - mcp__task-trellis__create_issue

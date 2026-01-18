@@ -1,5 +1,5 @@
 ---
-name: create-features-trellis
+name: features-creation
 description: This skill should be used when the user asks to "create features", "create a feature", "new feature", "break down epic into features", "decompose epic", or mentions creating features. Supports both standalone feature creation and breaking down an epic into specific features by analyzing specifications and gathering requirements.
 allowed-tools:
   - mcp__task-trellis__create_issue
