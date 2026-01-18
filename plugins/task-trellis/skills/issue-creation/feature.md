@@ -1,19 +1,4 @@
----
-name: features-creation
-description: This skill should be used when the user asks to "create features", "create a feature", "new feature", "break down epic into features", "decompose epic", or mentions creating features. Supports both standalone feature creation and breaking down an epic into specific features by analyzing specifications and gathering requirements.
-allowed-tools:
-  - mcp__task-trellis__create_issue
-  - mcp__task-trellis__get_issue
-  - mcp__task-trellis__update_issue
-  - mcp__task-trellis__list_issues
-  - Task
-  - Glob
-  - Grep
-  - Read
-  - AskUserQuestion
----
-
-# Create Features Command
+# Create Features
 
 Break down an epic into specific features using the Trellis task management system by analyzing the epic specification and gathering additional requirements as needed. Do not attempt to create multiple features in parallel. Do them sequentially one at a time.
 
