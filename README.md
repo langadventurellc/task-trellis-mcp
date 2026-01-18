@@ -33,8 +33,6 @@ Full documentation is available in the [docs](docs/index.md) folder.
 | /task-trellis:create-features (feature details). Look at (other feature) and follow the same pattern    | _new feature created by mirroring the pattern of the other feature_                                    |
 | (after finding issue with design) Update all tasks in F-my-feature and update the design specifications | _all tasks in the specified feature are updated to reflect the new design specifications_              |
 
-_... and much more!_
-
 ## Why Task Trellis?
 
 ### Without Task Trellis
