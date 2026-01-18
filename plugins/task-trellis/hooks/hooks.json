@@ -1,0 +1,27 @@
+{
+  "description": "Task Trellis quality validation hooks",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__task-trellis__complete_task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/pre-complete-task.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|MultiEdit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/post-edit-task.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
