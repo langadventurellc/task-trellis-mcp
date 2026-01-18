@@ -104,19 +104,7 @@ For each epic, use `create_issue` with type `"epic"`, the generated title and de
 
 **For standalone epics**: Omit the `parent` parameter.
 
-### 6. Verify Created Epics
-
-Use the `issue-creation-review` skill to validate the created epics. Provide the original specifications, created issue ID(s), and any context gathered during requirements gathering.
-
-**Review verification results:**
-
-- If verdict is `APPROVED`: Proceed to output format
-- If verdict is `NEEDS REVISION`: Evaluate feedback and update the epics if applicable
-- If verdict is `REJECTED`: Evaluate feedback and recreate the epics if applicable
-
-If you're uncertain about the feedback, **STOP** and ask the user for clarification.
-
-### 7. Output Format
+### 6. Output Format
 
 After successful creation:
 

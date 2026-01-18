@@ -101,19 +101,7 @@ Based on gathered information:
 
 Create the project using `create_issue` with type `"project"`, the generated title and description. Set status to `"open"` or `"draft"` based on user preference.
 
-### 6. Verify Created Project
-
-Use the `issue-creation-review` skill to validate the created project. Provide the original specifications, created issue ID(s), and any context gathered during requirements gathering.
-
-**Review verification results:**
-
-- If verdict is `APPROVED`: Proceed to output format
-- If verdict is `NEEDS REVISION`: Evaluate feedback and update the project if applicable
-- If verdict is `REJECTED`: Evaluate feedback and recreate the project if applicable
-
-If you're uncertain about the feedback, **STOP** and ask the user for clarification.
-
-### 7. Output Format
+### 6. Output Format
 
 After successful creation:
 

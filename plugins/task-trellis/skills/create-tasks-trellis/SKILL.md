@@ -140,19 +140,7 @@ For each task, use `create_issue` with type `"task"`, the generated title and de
 
 **For standalone tasks**: Omit the `parent` parameter.
 
-### 6. Verify Created Tasks
-
-Use the `issue-creation-review` skill to validate the created tasks. Provide the original specifications, created issue ID(s), and any context gathered during requirements gathering.
-
-**Review verification results:**
-
-- If verdict is `APPROVED`: Proceed to output format
-- If verdict is `NEEDS REVISION`: Evaluate feedback and update the tasks if applicable
-- If verdict is `REJECTED`: Evaluate feedback and recreate the tasks if applicable
-
-If you're uncertain about the feedback, **STOP** and ask the user for clarification.
-
-### 7. Output Format
+### 6. Output Format
 
 After successful creation:
 
