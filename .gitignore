@@ -4,6 +4,10 @@ temp/
 scratch/
 template/
 
+# mise local overrides
+mise.local.toml
+mise.*.local.toml
+
 # Logs
 logs
 *.log

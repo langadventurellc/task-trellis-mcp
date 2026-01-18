@@ -10,35 +10,56 @@ An MCP (Model Context Protocol) server for Task Trellis, a task management appli
 
 ## Development
 
+This project uses [mise](https://mise.jdx.dev/) for tool version management and task running.
+
+### Setup
+
+```bash
+# Install mise (if not already installed)
+curl https://mise.run | sh
+
+# Install tools and activate environment
+mise install
+```
+
 ### Quality checks
 
 **IMPORTANT** Run the following commands to ensure code quality after every change. Fix all issues as soon as possible.
 
-- `npm run quality` - Run linting, formatting, and type checks
-- `npm test` - Run unit tests to ensure functionality
+- `mise run quality` - Run linting, formatting, and type checks
+- `mise run test` - Run unit tests to ensure functionality
 
 ### Commands
 
 #### Development & Build
 
-| Command         | Description                                         |
-| --------------- | --------------------------------------------------- |
-| `npm run build` | Compile TypeScript to JavaScript                    |
-| `npm run dev`   | Watch mode compilation with TypeScript (do not run) |
-| `npm start`     | Start the compiled server (do not run)              |
-| `npm run serve` | Build and start the server (do not run)             |
+| Command          | Description                                         |
+| ---------------- | --------------------------------------------------- |
+| `mise run build` | Compile TypeScript to JavaScript                    |
+| `mise run dev`   | Watch mode compilation with TypeScript (do not run) |
+| `mise run start` | Start the compiled server (do not run)              |
+| `mise run serve` | Build and start the server (do not run)             |
 
 #### Testing & Quality
 
-| Command              | Description                                           |
-| -------------------- | ----------------------------------------------------- |
-| `npm test`           | Run unit tests with Jest                              |
-| `npm run test:e2e`   | Run end-to-end tests with Jest                        |
-| `npm run test:watch` | Run tests in watch mode (do not run)                  |
-| `npm run lint`       | Run ESLint and fix issues automatically               |
-| `npm run format`     | Format all TypeScript, JavaScript, and Markdown files |
-| `npm run type-check` | Run TypeScript type checks without emitting files     |
-| `npm run quality`    | Run all quality checks (lint, format, type-check)     |
+| Command               | Description                                           |
+| --------------------- | ----------------------------------------------------- |
+| `mise run test`       | Run unit tests with Jest                              |
+| `mise run test:e2e`   | Run end-to-end tests with Jest                        |
+| `mise run test:watch` | Run tests in watch mode (do not run)                  |
+| `mise run lint`       | Run ESLint and fix issues automatically               |
+| `mise run format`     | Format all TypeScript, JavaScript, and Markdown files |
+| `mise run type-check` | Run TypeScript type checks without emitting files     |
+| `mise run quality`    | Run all quality checks (lint, format, type-check)     |
+
+#### Task Aliases
+
+| Alias | Full Command          |
+| ----- | --------------------- |
+| `t`   | `mise run test`       |
+| `l`   | `mise run lint`       |
+| `f`   | `mise run format`     |
+| `tc`  | `mise run type-check` |
 
 ## Architecture
 
