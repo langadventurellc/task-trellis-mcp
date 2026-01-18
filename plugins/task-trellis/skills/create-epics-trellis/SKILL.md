@@ -91,58 +91,30 @@ For each epic, create:
 - **Description**: Comprehensive explanation including:
   - Purpose and goals
   - Major components and deliverables
-  - **Detailed Acceptance Criteria**: Specific, measurable requirements that define epic completion, including:
-    - Functional deliverables with clear success metrics
-    - Integration requirements with other epics or external systems
-    - Performance and quality standards specific to this epic
-    - Security and compliance requirements
-    - User experience and usability criteria
-    - Testing and validation requirements
+  - **Acceptance Criteria**: Specific, measurable requirements as applicable (functional deliverables, integration requirements, quality standards, security/compliance needs)
   - Technical considerations
   - Dependencies on other epics
   - Estimated scale (number of features)
   - **User Stories** - Key user scenarios this epic addresses
-  - **Non-functional Requirements** - Performance, security, scalability considerations specific to this epic
+  - **Non-functional Requirements** - Performance, security, scalability considerations as applicable
 
 ### 5. Create Epics Using MCP
 
-For each epic, call the Task Trellis MCP `create_issue` tool:
+For each epic, use `create_issue` with type `"epic"`, the generated title and description, and set `parent` to the project ID. Include `prerequisites` for any epic dependencies. Set status to `"open"` or `"draft"` based on user preference.
 
-- `type`: Set to `"epic"`
-- `parent`: The project ID
-- `title`: Generated epic title
-- `status`: Set to `"open"` (default, ready to begin work) or `"draft"` unless specified
-- `prerequisites`: List of epic IDs that must complete first
-- `description`: Comprehensive epic description with all elements from step 4
+**For standalone epics**: Omit the `parent` parameter.
 
-**For standalone epics**: Simply omit the `parent` parameter entirely.
+### 6. Verify Created Epics
 
-### 6. Verify Created Project
-
-Use the `verify-issue` skill (via Task tool with forked context) to validate the created project:
-
-**Prepare verification inputs:**
-
-- Original specifications from `$ARGUMENTS`
-- Created issue ID(s) from the MCP response
-- Any additional context gathered during requirement gathering phase
-
-**Call the verifier:**
-
-```
-Verify the created project for completeness and correctness:
-- Original requirements: [Include the original $ARGUMENTS specifications]
-- Created issue ID(s): [issue-id from MCP response]
-- Additional context: [Include any clarifications, decisions, or requirements gathered during the interactive Q&A phase]
-```
+Use the `issue-creation-review` skill to validate the created epics. Provide the original specifications, created issue ID(s), and any context gathered during requirements gathering.
 
 **Review verification results:**
 
 - If verdict is `APPROVED`: Proceed to output format
-- If verdict is `NEEDS REVISION`: Evaluate the feedback and, if applicable, update the project using MCP based on recommendations
-- If verdict is `REJECTED`: Evaluate the feedback and, if applicable, recreate the project addressing critical issues
+- If verdict is `NEEDS REVISION`: Evaluate feedback and update the epics if applicable
+- If verdict is `REJECTED`: Evaluate feedback and recreate the epics if applicable
 
-If you're not 100% sure of the correctness of the feedback, **STOP** and ask the user for clarification.
+If you're uncertain about the feedback, **STOP** and ask the user for clarification.
 
 ### 7. Output Format
 
@@ -188,19 +160,3 @@ When creating epics, follow these guidelines:
 - **Minimal coupling** - Epics should interact through clean interfaces, not internal dependencies
 - **High cohesion** - Related functionality should be grouped within the same epic
 - **Clean interfaces** - Define clear contracts between epics for data and functionality exchange
-
-## Question Guidelines
-
-Ask questions that:
-
-- **Clarify epic boundaries**: What functionality belongs together?
-- **Identify dependencies**: What must be built first?
-- **Consider team structure**: Can epics be worked on in parallel?
-- **Plan for phases**: MVP vs full implementation?
-- **Address non-functionals**: Where do performance/security requirements fit?
-
-<rules>
-  <critical>Use MCP tools for all operations (create_issue, get_issue, etc.)</critical>
-  <critical>Continue asking questions until you have complete understanding of epic boundaries</critical>
-  <important>Epic descriptions must be detailed enough for feature creation</important>
-</rules>
