@@ -1,5 +1,5 @@
 ---
-name: create-project-trellis
+name: project-creation
 description: This skill should be used when the user asks to "create a project", "new trellis project", "start a project", "set up project management", or mentions creating a new project in Trellis. Creates a new project in the Trellis task management system by analyzing specifications and gathering requirements.
 allowed-tools:
   - mcp__task-trellis__create_issue
@@ -54,11 +54,16 @@ Use this structured approach:
 - **Clarify boundaries** - understand where one component ends and another begins
 - **Continue until complete** - don't stop until you have full understanding
 
-Key areas to explore:
+Key areas to explore (prioritize based on project scale):
+
+**Essential for all projects:**
 
 - **Functional Requirements**: What specific capabilities must the system provide?
 - **Technical Architecture**: What technologies, frameworks, and patterns should be used?
 - **Integration Points**: What external systems or APIs need to be integrated?
+
+**Important for larger projects:**
+
 - **User Types**: Who will use this system and what are their needs?
 - **Performance Requirements**: What are the response time, load, and scaling needs?
 - **Security Requirements**: What authentication, authorization, and data protection is needed?
@@ -66,15 +71,7 @@ Key areas to explore:
 - **Timeline & Phases**: Are there specific deadlines or phase requirements?
 - **Success Metrics**: How will project success be measured?
 
-**Example questioning approach:**
-
-```
-How should user authentication be handled in this project?
-Options:
-- A) Use existing authentication system (specify integration points)
-- B) Implement new authentication mechanism (specify requirements)
-- C) No authentication needed for this project
-```
+**When in doubt, ask.** Use the AskUserQuestion tool to clarify requirements. Agents tend to be overconfident about what they can infer - a human developer would ask more questions, not fewer. If you're making assumptions, stop and ask instead.
 
 Continue asking clarifying questions until you have enough information to create a comprehensive project description that would enable another agent to:
 
@@ -97,54 +94,14 @@ Based on gathered information:
   - Non-functional requirements (performance, security, etc.)
   - Integration requirements
   - Deployment strategy
-  - **Detailed Acceptance Criteria**: Specific, measurable requirements that define feature completion, including:
-    - Functional behavior with specific input/output expectations
-    - User interface requirements and interaction patterns
-    - Data validation and error handling criteria
-    - Integration points with other features or systems
-    - Performance benchmarks and response time requirements
-    - Security validation and access control requirements
-    - Browser/platform compatibility requirements
-    - Accessibility and usability standards
+  - **Acceptance Criteria**: Specific, measurable requirements as applicable to the project type (e.g., functional behavior, performance benchmarks, security requirements, compatibility needs)
   - Any other context needed for epic creation
 
 ### 5. Create Project Using MCP
 
-Call the Task Trellis MCP `create_issue` tool to create the project with the following parameters:
+Create the project using `create_issue` with type `"project"`, the generated title and description. Set status to `"open"` or `"draft"` based on user preference.
 
-- `type`: Set to `"project"`
-- `title`: The generated project title
-- `status`: Set to `"open"` (default, ready to begin work) or `"draft"` unless specified
-- `description`: The comprehensive project description generated in the previous step
-
-### 6. Verify Created Project
-
-Use the `verify-issue` skill (via Task tool with forked context) to validate the created project:
-
-**Prepare verification inputs:**
-
-- Original specifications from `$ARGUMENTS`
-- Created issue ID(s) from the MCP response
-- Any additional context gathered during requirement gathering phase
-
-**Call the verifier:**
-
-```
-Verify the created project for completeness and correctness:
-- Original requirements: [Include the original $ARGUMENTS specifications]
-- Created issue ID(s): [issue-id from MCP response]
-- Additional context: [Include any clarifications, decisions, or requirements gathered during the interactive Q&A phase]
-```
-
-**Review verification results:**
-
-- If verdict is `APPROVED`: Proceed to output format
-- If verdict is `NEEDS REVISION`: Evaluate the feedback and, if applicable, update the project using MCP based on recommendations
-- If verdict is `REJECTED`: Evaluate the feedback and, if applicable, recreate the project addressing critical issues
-
-If you're not 100% sure of the correctness of the feedback, **STOP** and ask the user for clarification.
-
-### 7. Output Format
+### 6. Output Format
 
 After successful creation:
 
@@ -158,9 +115,3 @@ Status: [actual-status]
 Project Summary:
 [First paragraph of description]
 ```
-
-<rules>
-  <critical>Use MCP tools for all operations (create_issue, get_issue, activate, etc.)</critical>
-  <critical>Continue asking questions until you have a complete understanding of the requirements</critical>
-  <critical>Ask one question at a time with specific options</critical>
-</rules>

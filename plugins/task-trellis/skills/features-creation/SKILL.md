@@ -1,6 +1,6 @@
 ---
-name: create-features-trellis
-description: This skill should be used when the user asks to "create features", "break down epic into features", "decompose epic", or mentions creating features from an epic. Breaks down an epic into specific features by analyzing the epic specification.
+name: features-creation
+description: This skill should be used when the user asks to "create features", "create a feature", "new feature", "break down epic into features", "decompose epic", or mentions creating features. Supports both standalone feature creation and breaking down an epic into specific features by analyzing specifications and gathering requirements.
 allowed-tools:
   - mcp__task-trellis__create_issue
   - mcp__task-trellis__get_issue
@@ -82,15 +82,7 @@ Key areas to clarify:
 - **Testing Strategy**: How can features be tested independently?
 - **Integration Points**: Where do features interface with each other?
 
-**Example questioning approach:**
-
-```
-How should the user registration feature be scoped?
-Options:
-- A) Basic registration only (email, password, confirmation)
-- B) Full registration with profile setup and email verification
-- C) Registration with social login integration included
-```
+**When in doubt, ask.** Use the AskUserQuestion tool to clarify requirements. Agents tend to be overconfident about what they can infer - a human developer would ask more questions, not fewer. If you're making assumptions, stop and ask instead.
 
 Continue until the feature structure:
 
@@ -107,21 +99,13 @@ For each feature, create:
 - **Description**: Comprehensive explanation including:
   - Purpose and functionality
   - Key components to implement
-  - **Detailed Acceptance Criteria**: Specific, measurable requirements that define feature completion, including:
-    - Functional behavior with specific input/output expectations
-    - User interface requirements and interaction patterns
-    - Data validation and error handling criteria
-    - Integration points with other features or systems
-    - Performance benchmarks and response time requirements
-    - Security validation and access control requirements
-    - Browser/platform compatibility requirements
-    - Accessibility and usability standards
+  - **Acceptance Criteria**: Specific, measurable requirements as applicable to the feature type (functional behavior, UI requirements, validation criteria, integration points, performance/security needs)
   - Technical requirements
   - Dependencies on other features
   - **Implementation Guidance** - Technical approach and patterns to follow
   - **Testing Requirements** - How to verify the feature works correctly
-  - **Security Considerations** - Input validation, authorization, data protection needs
-  - **Performance Requirements** - Response times, resource usage constraints
+  - **Security Considerations** - Input validation, authorization, data protection needs as applicable
+  - **Performance Requirements** - Response times, resource usage constraints as applicable
 
 **Feature Granularity Guidelines:**
 
@@ -133,45 +117,11 @@ Each feature should be sized appropriately for task breakdown:
 
 ### 5. Create Features Using MCP
 
-For each feature, call the Task Trellis MCP `create_issue` tool:
+For each feature, use `create_issue` with type `"feature"`, the generated title and description, and set `parent` to the epic ID if applicable. Include `prerequisites` for any feature dependencies. Set status to `"open"` or `"draft"` based on user preference.
 
-- `type`: Set to `"feature"`
-- `parent`: The epic ID (optional - omit for standalone features)
-- `title`: Generated feature title
-- `status`: Set to `"open"` (default, ready to begin work) or `"draft"` unless specified
-- `prerequisites`: List of feature IDs that must complete first
-- `description`: Comprehensive feature description with all elements from step 4
+**For standalone features**: Omit the `parent` parameter.
 
-**For standalone features**: Simply omit the `parent` parameter entirely.
-
-### 6. Verify Created Project
-
-Use the `verify-issue` skill (via Task tool with forked context) to validate the created project:
-
-**Prepare verification inputs:**
-
-- Original specifications from `$ARGUMENTS`
-- Created issue ID(s) from the MCP response
-- Any additional context gathered during requirement gathering phase
-
-**Call the verifier:**
-
-```
-Verify the created project for completeness and correctness:
-- Original requirements: [Include the original $ARGUMENTS specifications]
-- Created issue ID(s): [issue-id from MCP response]
-- Additional context: [Include any clarifications, decisions, or requirements gathered during the interactive Q&A phase]
-```
-
-**Review verification results:**
-
-- If verdict is `APPROVED`: Proceed to output format
-- If verdict is `NEEDS REVISION`: Evaluate the feedback and, if applicable, update the project using MCP based on recommendations
-- If verdict is `REJECTED`: Evaluate the feedback and, if applicable, recreate the project addressing critical issues
-
-If you're not 100% sure of the correctness of the feedback, **STOP** and ask the user for clarification.
-
-### 7. Output Format
+### 6. Output Format
 
 After successful creation:
 
@@ -191,20 +141,3 @@ Created Features:
 Feature Summary:
 - Total Features: [N]
 ```
-
-## Question Guidelines
-
-Ask questions that:
-
-- **Define feature scope**: What's included vs excluded?
-- **Clarify technical approach**: Specific technologies or patterns?
-- **Identify dependencies**: Build order and integration points?
-- **Consider testing**: How to verify feature completeness?
-
-<rules>
-  <critical>Use MCP tools for all operations (create_issue, get_issue, etc.)</critical>
-  <critical>Ask one question at a time with specific options</critical>
-  <critical>Continue asking questions until you have complete understanding of feature boundaries</critical>
-  <important>Feature descriptions must be detailed enough for task creation</important>
-  <important>Include implementation guidance and testing requirements</important>
-</rules>

@@ -1,6 +1,6 @@
 ---
-name: create-tasks-trellis
-description: This skill should be used when the user asks to "create tasks", "break down feature into tasks", "decompose feature", or mentions creating tasks from a feature. Breaks down a feature into specific, actionable tasks (1-2 hours each).
+name: tasks-creation
+description: This skill should be used when the user asks to "create tasks", "create a task", "new task", "break down feature into tasks", "decompose feature", or mentions creating tasks. Supports both standalone task creation and breaking down a feature into specific, actionable tasks (1-2 hours each) by analyzing specifications and gathering requirements.
 allowed-tools:
   - mcp__task-trellis__create_issue
   - mcp__task-trellis__get_issue
@@ -85,15 +85,7 @@ Key areas to clarify:
   - If specifically requested, do create separate tasks for performance tests. But, do not add tasks for performance tests unless specifically requested by the user.
 - **Security Implementation**: How to handle validation and authorization?
 
-**Example questioning approach:**
-
-```
-How should the user model validation be implemented?
-Options:
-- A) Basic field validation only (required fields, data types)
-- B) Advanced validation with custom rules and error messages
-- C) Validation with integration to existing validation framework
-```
+**When in doubt, ask.** Use the AskUserQuestion tool to clarify requirements. Agents tend to be overconfident about what they can infer - a human developer would ask more questions, not fewer. If you're making assumptions, stop and ask instead.
 
 Continue until the task structure:
 
@@ -115,13 +107,7 @@ For each task, create:
     - File paths and component locations where work should be done
   - **Specific implementation requirements**: What exactly needs to be built
   - **Technical approach to follow**: Step-by-step guidance on implementation
-  - **Detailed Acceptance Criteria**: Specific, measurable requirements that define project success, including:
-    - Functional deliverables with clear success metrics
-    - Performance benchmarks (response times, throughput, capacity)
-    - Security requirements and compliance standards
-    - User experience criteria and usability standards
-    - Integration testing requirements with external systems
-    - Deployment and operational readiness criteria
+  - **Acceptance Criteria**: Specific, measurable requirements as applicable (functional deliverables, performance benchmarks, security requirements, testing expectations)
   - **Dependencies on other tasks**: Prerequisites and sequencing
   - **Security considerations**: Validation, authorization, and protection requirements
   - **Testing requirements**: Specific tests to write and coverage expectations
@@ -150,46 +136,11 @@ Group tasks logically:
 
 ### 5. Create Tasks Using MCP
 
-For each task, call the Task Trellis MCP `create_issue` tool:
+For each task, use `create_issue` with type `"task"`, the generated title and description, and set `parent` to the feature ID if applicable. Include `prerequisites` for task dependencies. Set `priority` based on criticality (high for blockers/security-critical, medium for standard work, low for enhancements). Set status to `"open"` or `"draft"` based on user preference.
 
-- `type`: Set to `"task"`
-- `parent`: The feature ID (optional - omit for standalone tasks)
-- `title`: Generated task title
-- `status`: Set to `"open"` (default, ready to claim) or `"draft"`
-- `priority`: Based on criticality and dependencies (`"high"`, `"medium"`, or `"low"`)
-- `prerequisites`: List of task IDs that must complete first
-- `description`: Comprehensive task description
+**For standalone tasks**: Omit the `parent` parameter.
 
-**For standalone tasks**: Simply omit the `parent` parameter entirely.
-
-### 6. Verify Created Project
-
-Use the `verify-issue` skill (via Task tool with forked context) to validate the created project:
-
-**Prepare verification inputs:**
-
-- Original specifications from `$ARGUMENTS`
-- Created issue ID(s) from the MCP response
-- Any additional context gathered during requirement gathering phase
-
-**Call the verifier:**
-
-```
-Verify the created project for completeness and correctness:
-- Original requirements: [Include the original $ARGUMENTS specifications]
-- Created issue ID(s): [issue-id from MCP response]
-- Additional context: [Include any clarifications, decisions, or requirements gathered during the interactive Q&A phase]
-```
-
-**Review verification results:**
-
-- If verdict is `APPROVED`: Proceed to output format
-- If verdict is `NEEDS REVISION`: Evaluate the feedback and, if applicable, update the project using MCP based on recommendations
-- If verdict is `REJECTED`: Evaluate the feedback and, if applicable, recreate the project addressing critical issues
-
-If you're not 100% sure of the correctness of the feedback, **STOP** and ask the user for clarification.
-
-### 7. Output Format
+### 6. Output Format
 
 After successful creation:
 
@@ -235,29 +186,3 @@ Common task patterns:
 - **API Endpoint**: Implement with input validation, error handling, tests, and docs
 - **Frontend Component**: Create with interactivity, state handling, tests, and docs
 - **Security**: Input validation, authorization, rate limiting with tests and docs
-
-## Question Guidelines
-
-Ask questions that:
-
-- **Clarify implementation**: Specific libraries or approaches?
-- **Define boundaries**: What's included in each task?
-- **Identify prerequisites**: What must be built first?
-- **Confirm testing strategy**: What types of tests are needed?
-
-## Priority Assignment
-
-Assign priorities based on:
-
-- **High**: Blocking other work, security-critical, core functionality
-- **Medium**: Standard implementation tasks
-- **Low**: Enhancements, optimizations, nice-to-have features
-
-<rules>
-  <critical>Use MCP tools for all operations (create_issue, get_issue, etc.)</critical>
-  <critical>Each task must be completable in 1-2 hours</critical>
-  <critical>Ask one question at a time with specific options</critical>
-  <critical>Continue asking questions until you have complete understanding of task boundaries</critical>
-  <important>Include testing and documentation within implementation tasks</important>
-  <important>Add security validation with tests where applicable</important>
-</rules>
