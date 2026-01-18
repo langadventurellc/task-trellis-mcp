@@ -1,6 +1,6 @@
 ---
 name: create-epics-trellis
-description: This skill should be used when the user asks to "create epics", "break down project into epics", "decompose project", or mentions creating epics from a project. Breaks down a project into major epics by analyzing the project specification.
+description: This skill should be used when the user asks to "create epics", "create an epic", "new epic", "break down project into epics", "decompose project", or mentions creating epics. Supports both standalone epic creation and breaking down a project into major epics by analyzing specifications and gathering requirements.
 allowed-tools:
   - mcp__task-trellis__create_issue
   - mcp__task-trellis__get_issue
@@ -201,7 +201,6 @@ Ask questions that:
 
 <rules>
   <critical>Use MCP tools for all operations (create_issue, get_issue, etc.)</critical>
-  <critical>Ask one question at a time with specific options</critical>
   <critical>Continue asking questions until you have complete understanding of epic boundaries</critical>
   <important>Epic descriptions must be detailed enough for feature creation</important>
 </rules>

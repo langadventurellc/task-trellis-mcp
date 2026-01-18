@@ -1,6 +1,6 @@
 ---
 name: create-tasks-trellis
-description: This skill should be used when the user asks to "create tasks", "break down feature into tasks", "decompose feature", or mentions creating tasks from a feature. Breaks down a feature into specific, actionable tasks (1-2 hours each).
+description: This skill should be used when the user asks to "create tasks", "create a task", "new task", "break down feature into tasks", "decompose feature", or mentions creating tasks. Supports both standalone task creation and breaking down a feature into specific, actionable tasks (1-2 hours each) by analyzing specifications and gathering requirements.
 allowed-tools:
   - mcp__task-trellis__create_issue
   - mcp__task-trellis__get_issue
@@ -248,7 +248,6 @@ Assign priorities based on:
 <rules>
   <critical>Use MCP tools for all operations (create_issue, get_issue, etc.)</critical>
   <critical>Each task must be completable in 1-2 hours</critical>
-  <critical>Ask one question at a time with specific options</critical>
   <critical>Continue asking questions until you have complete understanding of task boundaries</critical>
   <important>Include testing and documentation within implementation tasks</important>
   <important>Add security validation with tests where applicable</important>

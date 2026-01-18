@@ -154,5 +154,4 @@ Project Summary:
 <rules>
   <critical>Use MCP tools for all operations (create_issue, get_issue, activate, etc.)</critical>
   <critical>Continue asking questions until you have a complete understanding of the requirements</critical>
-  <critical>Ask one question at a time with specific options</critical>
 </rules>
