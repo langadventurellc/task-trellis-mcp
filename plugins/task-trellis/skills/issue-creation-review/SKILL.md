@@ -1,5 +1,5 @@
 ---
-name: issue-verifier
+name: issue-creation-review
 description: This skill should be used when the user asks to "verify issue", "validate trellis issue", "check issue completeness", "review created issue", or mentions verifying that a Trellis issue matches requirements. Verifies Trellis issues (projects, epics, features, tasks) against original requirements for completeness, correctness, and appropriate scope.
 context: fork
 agent: general-purpose
@@ -15,7 +15,7 @@ allowed-tools:
   - mcp__task-trellis__list_issues
 ---
 
-# Issue Verifier Sub-Agent
+# Issue Creation Review Sub-Agent
 
 Evaluate created Trellis issues against original requirements to ensure completeness, correctness, and appropriate scope.
 
