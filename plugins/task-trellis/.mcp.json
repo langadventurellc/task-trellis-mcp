@@ -2,10 +2,11 @@
   "mcpServers": {
     "task-trellis": {
       "type": "stdio",
-      "command": "bash",
+      "command": "npx",
       "args": [
-        "-c",
-        "npx -y @langadventurellc/task-trellis-mcp --projectRootFolder \"$(git rev-parse --show-toplevel)\""
+        "@langadventurellc/task-trellis-mcp@latest",
+        "--projectRootFolder",
+        "\"$(git rev-parse --show-toplevel)\""
       ],
       "env": {}
     }
