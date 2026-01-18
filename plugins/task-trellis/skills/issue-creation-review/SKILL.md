@@ -1,6 +1,6 @@
 ---
 name: issue-creation-review
-description: This skill should be used when the user asks to "verify issue", "validate trellis issue", "check issue completeness", "review created issue", or mentions verifying that a Trellis issue matches requirements. Verifies Trellis issues (projects, epics, features, tasks) against original requirements for completeness, correctness, and appropriate scope.
+description: Verifies Trellis issues against original requirements for completeness, correctness, and appropriate scope. Use when asked to "verify issue", "validate trellis issue", "check issue completeness", or "review created issue".
 context: fork
 agent: general-purpose
 allowed-tools:
@@ -11,155 +11,81 @@ allowed-tools:
   - WebFetch
   - WebSearch
   - TodoWrite
+  - AskUserQuestion
   - mcp__task-trellis__get_issue
   - mcp__task-trellis__list_issues
 ---
 
-# Issue Creation Review Sub-Agent
+# Issue Creation Review
 
-Evaluate created Trellis issues against original requirements to ensure completeness, correctness, and appropriate scope.
+Verify that a created Trellis issue accurately reflects original requirements without over-engineering or missing critical elements.
 
-## Goal
+## Required Inputs
 
-Verify that a created issue (project, epic, feature, or task) accurately reflects the original user requirements without over-engineering or missing critical elements.
+- **Original Requirements**: The initial request or specifications
+- **Created Issue**: The issue ID or full issue details
+- **Additional Context** (optional): Clarifications or decisions made during creation
 
-## Input Requirements
+## Asking Questions
 
-The calling agent should provide:
-
-- **Original Requirements**: The user's initial request or specifications
-- **Created Issue**: The issue ID or full issue details from Trellis
-- **Additional Context**: Any clarifications or decisions made during creation
+**When in doubt, ask.** If required inputs are missing or unclear, use AskUserQuestion to gather what you need before proceeding. Don't make assumptions about requirements - ask for clarification instead.
 
 ## Verification Process
 
-### 1. Parse Inputs
+### 1. Research Codebase Context
 
-Extract and analyze:
+Before evaluating, investigate the existing system:
 
-- Original user requirements and constraints
-- Created issue details (title, description, acceptance criteria)
-- Any additional context provided
+- Search for similar implementations to verify consistency
+- Check architectural patterns used in the codebase
+- Identify existing utilities/libraries that should be leveraged
+- Verify integration points mentioned are valid
 
-### 2. Research Codebase Context
+### 2. Completeness Check
 
-**Investigate the existing system to validate appropriateness:**
+Verify all required elements are present.
 
-- **Search for similar implementations** to verify consistency
-- **Check architectural patterns** used in the codebase
-- **Identify existing utilities/libraries** that should be leveraged
-- **Verify integration points** mentioned are valid
+**Common to all issue types:**
 
-### 3. Completeness Check
-
-Verify the created issue includes all required elements:
-
-**For Projects:**
-
-- All functional requirements from user input are addressed
-- Technical architecture is specified
-- Integration points are defined
+- All functional requirements from input are addressed
 - Acceptance criteria are measurable and complete
+- Dependencies/integration points are identified
 
-**For Epics:**
+**Type-specific additions:**
 
-- Covers complete functional area
-- Clear scope boundaries
-- Logical grouping of related features
+| Type    | Additional Requirements                              |
+| ------- | ---------------------------------------------------- |
+| Project | Technical architecture specified                     |
+| Epic    | Clear scope boundaries, logical feature grouping     |
+| Feature | Specific user-facing capability, feature integration |
+| Task    | Implementable scope, clear technical specifications  |
 
-**For Features:**
+### 3. Correctness Check
 
-- Specific user-facing capability defined
-- Clear acceptance criteria
-- Integration with other features specified
+- **Technical Accuracy**: Proposed solutions align with codebase patterns
+- **Requirement Alignment**: Interpretation matches user intent
+- **Feasibility**: Approach is technically viable
+- **Consistency**: Aligns with existing system architecture
 
-**For Tasks:**
-
-- Implementable unit of work
-- Clear technical specifications
-- Dependencies identified
-
-### 4. Correctness Check
-
-Validate accuracy and appropriateness:
-
-- **Technical Accuracy**: Verify proposed solutions align with codebase patterns
-- **Requirement Alignment**: Ensure interpretation matches user intent
-- **Feasibility**: Confirm approach is technically viable
-- **Consistency**: Check alignment with existing system architecture
-
-### 5. Scope Assessment
+### 4. Scope Assessment
 
 Evaluate for over-engineering:
 
-- **Compare scope to requirements**: Identify additions beyond user request
-- **Assess complexity**: Flag unnecessary complexity
-- **Check for premature optimization**: Identify optimizations not required
-- **Validate abstractions**: Ensure abstractions are justified by requirements
+- Identify additions beyond the original request
+- Flag unnecessary complexity or premature optimization
+- Ensure abstractions are justified by actual requirements
 
-**Note**: If user explicitly requested comprehensive or future-proofed solution, expanded scope is acceptable.
+**Exception**: Expanded scope is acceptable if explicitly requested (e.g., "comprehensive" or "future-proofed" solution).
 
-### 6. Generate Evaluation Report
+## Output
 
-## Output Format
+Provide a verification report covering:
 
-Return structured evaluation:
+1. **Issue Details**: Type, ID, title
+2. **Completeness**: Complete/Partial/Incomplete with specific gaps
+3. **Correctness**: Correct/Issues Found with specific findings and codebase alignment
+4. **Scope**: Appropriate/Over-engineered with analysis of what was requested vs. created
+5. **Recommendations**: Critical issues and suggested improvements
+6. **Verdict**: APPROVED / NEEDS REVISION / REJECTED with summary
 
-```
-# Issue Verification Report
-
-## Issue Details
-- Type: [project/epic/feature/task]
-- ID: [issue-id]
-- Title: [issue-title]
-
-## Completeness Assessment
-[Complete] | [Partial] | [Incomplete]
-
-**Required Elements:**
-- [Element]: [Status/Comments]
-- [Element]: [Status/Comments]
-
-**Missing Requirements:** (if any)
-- [Requirement not addressed]
-
-## Correctness Assessment
-[Correct] | [Issues Found] | [Major Problems]
-
-**Findings:**
-- [Finding with specific details]
-
-**Codebase Alignment:**
-- [Pattern/Convention]: [Aligned/Misaligned - details]
-
-## Scope Assessment
-[Appropriate] | [Minor Over-engineering] | [Significant Over-engineering]
-
-**Scope Analysis:**
-- User requested: [Summary of original scope]
-- Issue includes: [Summary of created scope]
-- Additional elements: [List any additions]
-- Justification: [Valid/Invalid - explanation]
-
-## Recommendations
-
-**Critical Issues:** (if any)
-- [Issue requiring immediate correction]
-
-**Suggested Improvements:** (if any)
-- [Non-critical improvement suggestion]
-
-## Overall Verdict
-[APPROVED / NEEDS REVISION / REJECTED]
-
-**Summary:**
-[Brief summary of the evaluation outcome]
-```
-
-## Rules
-
-- **Be objective**: Base assessments on requirements and codebase evidence
-- **Provide specifics**: Include concrete examples in findings
-- **Consider context**: Account for clarifications made during creation
-- **Focus on value**: Flag over-engineering only when it adds complexity without benefit
-- **Research thoroughly**: Use codebase search before claiming something doesn't exist
+Use codebase evidence to support findings. Flag over-engineering only when it adds complexity without benefit.
