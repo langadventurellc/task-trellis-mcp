@@ -11,7 +11,6 @@ allowed-tools:
   - WebFetch
   - WebSearch
   - TodoWrite
-  - AskUserQuestion
   - mcp__task-trellis__get_issue
   - mcp__task-trellis__list_issues
 ---
@@ -29,9 +28,44 @@ Provide a thorough code review of task implementation changes, ensuring the code
 - **Task ID**: The Trellis task ID that was implemented (e.g., "T-add-user-validation")
 - **Additional Context** (optional): Any decisions or constraints from implementation
 
-## Asking Questions
+## When You Need Clarification
 
-**When in doubt, ask.** If the task ID is missing or you need clarification about implementation context, use AskUserQuestion to gather what you need. Don't make assumptions about what was intended.
+This skill runs as a subagent and cannot ask the user questions directly. If you encounter situations where clarification is needed before proceeding effectively, **return early** with:
+
+1. **Questions**: List each question that needs to be answered
+2. **Context Collected**: Summarize what you've learned so far (task details, files examined, findings to date)
+3. **Instructions for Caller**: Tell the caller to:
+   - Get answers to the listed questions from the user
+   - Re-invoke this skill with the original inputs plus the answers
+
+### Example Early Return Format
+
+```
+## Clarification Needed
+
+I need additional information before I can complete this review effectively.
+
+### Questions
+1. [First question that needs an answer]
+2. [Second question if applicable]
+
+### Context Collected So Far
+- **Task**: [Task ID and title if retrieved]
+- **Files Identified**: [List of files found]
+- **Preliminary Findings**: [Any observations made before hitting the blocker]
+
+### Next Steps
+To continue this review:
+1. Get answers to the questions above from the user
+2. Re-run this skill with: `/issue-implementation-review [Task ID] --context "[answers and any additional context]"`
+```
+
+### When to Return Early
+
+- Task ID is missing or invalid
+- Multiple tasks match ambiguous criteria
+- Implementation approach is unclear and critical to the review
+- You find conflicting requirements that need human judgment
 
 ## Review Process
 
