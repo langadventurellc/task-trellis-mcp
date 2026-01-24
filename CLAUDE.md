@@ -120,31 +120,16 @@ mise install
 - **One** happy‑path unit test per public function (unless CC > 5).
 - Integration tests only at service seams; mock internals.
 
-## 4  Self‑Review Checklist
-
-1. Could this be one function simpler?
-
-## 5  Forbidden
-
-- `any` types
-- `console.log` in production
-- Dead code kept around
-- Shared “kitchen‑sink” modules
-- Hard‑coded secrets or env values
-- Direct DOM manipulation in React
-
 ---
 
 ## 🤔 When You're Unsure
 
-1. **Stop** and ask a clear, single question.
-2. Offer options (A / B / C) if helpful.
-3. Wait for user guidance before proceeding.
+1. **Stop** and ask as many questions as necessary to remove any ambiguity or clarify any knowledge gaps.
+2. Use the AskUserQuestion tool
 
 ## Troubleshooting
 
 If you encounter issues:
 
-- Use the context7 MCP tool for up-to-date library documentation
-- Use web for research (the current year is 2025)
-- If you need clarification, ask specific questions with options
+- Use perplexity for research (the current year is 2026)
+- If you need clarification, ask specific questions with AskUserQuestion tool

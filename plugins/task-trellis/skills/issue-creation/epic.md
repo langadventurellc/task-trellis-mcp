@@ -1,19 +1,4 @@
----
-name: epics-creation
-description: This skill should be used when the user asks to "create epics", "create an epic", "new epic", "break down project into epics", "decompose project", or mentions creating epics. Supports both standalone epic creation and breaking down a project into major epics by analyzing specifications and gathering requirements.
-allowed-tools:
-  - mcp__task-trellis__create_issue
-  - mcp__task-trellis__get_issue
-  - mcp__task-trellis__update_issue
-  - mcp__task-trellis__list_issues
-  - Task
-  - Glob
-  - Grep
-  - Read
-  - AskUserQuestion
----
-
-# Create Epics Command
+# Create Epics
 
 Break down a project into major epics using the Trellis task management system by analyzing the project specification and gathering additional requirements as needed. Do not attempt to create multiple epics in parallel. Do them sequentially one at a time.
 

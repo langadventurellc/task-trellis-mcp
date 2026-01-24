@@ -11,7 +11,6 @@ allowed-tools:
   - WebFetch
   - WebSearch
   - TodoWrite
-  - AskUserQuestion
   - mcp__task-trellis__get_issue
   - mcp__task-trellis__list_issues
 ---
@@ -26,9 +25,32 @@ Verify that a created Trellis issue accurately reflects original requirements wi
 - **Created Issue**: The issue ID or full issue details
 - **Additional Context** (optional): Clarifications or decisions made during creation
 
-## Asking Questions
+## Handling Missing Information
 
-**When in doubt, ask.** If required inputs are missing or unclear, use AskUserQuestion to gather what you need before proceeding. Don't make assumptions about requirements - ask for clarification instead.
+**This skill runs as a sub-agent and cannot ask questions directly.** If required inputs are missing or unclear, you must return a structured response requesting clarification instead of proceeding with assumptions.
+
+When information is missing or ambiguous, return the following structure:
+
+```
+## Clarification Needed
+
+### Questions
+1. [Specific question about missing/unclear information]
+2. [Additional questions as needed]
+
+### Context Collected So Far
+- [Summary of what you've already determined]
+- [Relevant codebase findings]
+- [Partial analysis completed]
+
+### Instructions for Caller
+1. Gather answers to the questions above from the user
+2. Re-invoke this skill with the original inputs plus the following additional context:
+   - Answers to questions: [list the questions by number]
+   - Previously collected context: [reference this section]
+```
+
+**Do not make assumptions** about requirements, scope decisions, or implementation details when critical information is missing.
 
 ## Verification Process
 

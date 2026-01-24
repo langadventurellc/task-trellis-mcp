@@ -13,7 +13,6 @@ allowed-tools:
   - TodoWrite
   - mcp__task-trellis__get_issue
   - mcp__task-trellis__list_issues
-  - AskUserQuestion
 ---
 
 # Implementation Plan Generator
