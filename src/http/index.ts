@@ -3,9 +3,9 @@ import path from "node:path";
 import { httpServer } from "../httpServer";
 import { landingPageHandler } from "./landingPage";
 import {
-  childrenPartialHandler,
   detailPartialHandler,
   projectTreeHandler,
+  searchHandler,
 } from "./projectTreePage";
 import { createRouter } from "./router";
 
@@ -29,8 +29,8 @@ router.get("/_styles.css", (_req, res) => {
 router.get("/projects/:key", (req, res, params) =>
   projectTreeHandler(req, res, params),
 );
-router.get("/projects/:key/issues/:id/children", (req, res, params) =>
-  childrenPartialHandler(req, res, params),
+router.get("/projects/:key/issues/search", (req, res, params) =>
+  searchHandler(req, res, params),
 );
 router.get("/projects/:key/issues/:id/detail", (req, res, params) =>
   detailPartialHandler(req, res, params),

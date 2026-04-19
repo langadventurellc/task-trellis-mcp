@@ -1,17 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { join } from "node:path";
-import { resolveDataDir } from "../../configuration/resolveDataDir";
-import { LocalRepository } from "../../repositories/local/LocalRepository";
 import { escapeHtml } from "../escapeHtml";
+import { makeRepo } from "./makeRepo";
 import { renderDetail } from "./renderDetail";
-
-function makeRepo(key: string): LocalRepository {
-  return new LocalRepository({
-    planningRootFolder: join(resolveDataDir(), "projects", key) + "/",
-    autoCompleteParent: false,
-    autoPrune: 0,
-  });
-}
 
 /** Handles GET /projects/:key/issues/:id/detail — HTMX partial for detail pane. */
 export async function detailPartialHandler(

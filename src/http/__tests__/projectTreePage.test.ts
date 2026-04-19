@@ -1,6 +1,8 @@
+jest.mock("node:fs");
 jest.mock("../../configuration/resolveDataDir");
 jest.mock("../../repositories/local/LocalRepository");
 
+import fs from "node:fs";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { resolveDataDir } from "../../configuration/resolveDataDir";
 import {
@@ -10,8 +12,9 @@ import {
 } from "../../models";
 import { LocalRepository } from "../../repositories/local/LocalRepository";
 import {
-  childrenPartialHandler,
   detailPartialHandler,
+  projectTreeHandler,
+  searchHandler,
 } from "../projectTreePage";
 
 const mockResolveDataDir = resolveDataDir as jest.MockedFunction<
@@ -20,11 +23,12 @@ const mockResolveDataDir = resolveDataDir as jest.MockedFunction<
 const MockedLocalRepository = LocalRepository as jest.MockedClass<
   typeof LocalRepository
 >;
+const mockExistsSync = fs.existsSync as jest.Mock;
 
 const makeRes = () =>
   ({ writeHead: jest.fn(), end: jest.fn() }) as unknown as ServerResponse;
 
-const makeReq = () => ({}) as IncomingMessage;
+const makeReq = (url = "/") => ({ url }) as IncomingMessage;
 
 function makeObj(overrides: Record<string, unknown> = {}) {
   return {
@@ -46,47 +50,173 @@ function makeObj(overrides: Record<string, unknown> = {}) {
   };
 }
 
-describe("childrenPartialHandler", () => {
-  let mockGetChildrenOf: jest.Mock;
+describe("projectTreeHandler", () => {
+  let mockGetObjects: jest.Mock;
 
   beforeEach(() => {
     jest.resetAllMocks();
-    mockGetChildrenOf = jest.fn().mockResolvedValue([]);
+    mockGetObjects = jest.fn().mockResolvedValue([]);
     MockedLocalRepository.mockImplementation(
-      () =>
-        ({ getChildrenOf: mockGetChildrenOf }) as unknown as LocalRepository,
+      () => ({ getObjects: mockGetObjects }) as unknown as LocalRepository,
+    );
+    mockResolveDataDir.mockReturnValue("/test/data");
+    mockExistsSync.mockReturnValue(true);
+  });
+
+  it("returns 404 when project directory does not exist", async () => {
+    mockExistsSync.mockReturnValue(false);
+
+    const res = makeRes();
+    await projectTreeHandler(makeReq(), res, { key: "missing-proj" });
+
+    expect((res.writeHead as jest.Mock).mock.calls[0][0]).toBe(404);
+  });
+
+  it("renders full page with appShell, sidebar, and meta bar", async () => {
+    mockGetObjects.mockResolvedValue([
+      makeObj({
+        id: "T-one",
+        title: "Task One",
+        status: TrellisObjectStatus.OPEN,
+      }),
+      makeObj({
+        id: "T-two",
+        title: "Task Two",
+        status: TrellisObjectStatus.IN_PROGRESS,
+      }),
+      makeObj({
+        id: "T-three",
+        title: "Task Three",
+        status: TrellisObjectStatus.DONE,
+      }),
+    ]);
+
+    const res = makeRes();
+    await projectTreeHandler(makeReq(), res, { key: "my-proj" });
+
+    expect((res.writeHead as jest.Mock).mock.calls[0][0]).toBe(200);
+    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
+    expect(html).toContain("<!DOCTYPE html>");
+    expect(html).toContain("Task One");
+    expect(html).toContain('id="issue-tree"');
+    expect(html).toContain('hx-trigger="refreshTree from:body"');
+    expect(html).toContain("/projects/my-proj/issues/search");
+    expect(html).toContain("3 issues · 1 open · 1 in-progress · 1 done");
+  });
+
+  it("renders search input wired to search endpoint", async () => {
+    mockGetObjects.mockResolvedValue([]);
+
+    const res = makeRes();
+    await projectTreeHandler(makeReq(), res, { key: "my-proj" });
+
+    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
+    expect(html).toContain('hx-get="/projects/my-proj/issues/search"');
+    expect(html).toContain('hx-trigger="keyup changed delay:200ms"');
+    expect(html).toContain('id="detail"');
+  });
+
+  it("renders tree nodes with kind letter and correct status/priority classes", async () => {
+    mockGetObjects.mockResolvedValue([
+      makeObj({
+        id: "T-alpha",
+        title: "Alpha",
+        type: TrellisObjectType.TASK,
+        status: TrellisObjectStatus.IN_PROGRESS,
+        priority: TrellisObjectPriority.MEDIUM,
+        childrenIds: ["T-child"],
+      }),
+    ]);
+
+    const res = makeRes();
+    await projectTreeHandler(makeReq(), res, { key: "my-proj" });
+
+    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
+    expect(html).toContain('class="kind">T<');
+    expect(html).toContain("status-dot progress");
+    expect(html).toContain("priority-bar med");
+    expect(html).toContain("chevron");
+  });
+});
+
+describe("searchHandler", () => {
+  let mockGetObjects: jest.Mock;
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+    mockGetObjects = jest.fn().mockResolvedValue([]);
+    MockedLocalRepository.mockImplementation(
+      () => ({ getObjects: mockGetObjects }) as unknown as LocalRepository,
     );
     mockResolveDataDir.mockReturnValue("/test/data");
   });
 
-  it("returns child node HTML when children exist", async () => {
-    mockGetChildrenOf.mockResolvedValue([
-      makeObj({ id: "T-child-1", title: "Child One" }),
+  it("returns full tree when q is absent", async () => {
+    mockGetObjects.mockResolvedValue([
+      makeObj({ id: "T-one", title: "One", parent: null }),
     ]);
 
     const res = makeRes();
-    await childrenPartialHandler(makeReq(), res, {
+    await searchHandler(makeReq("/projects/my-proj/issues/search"), res, {
       key: "my-proj",
-      id: "T-parent",
     });
 
-    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
-    expect(html).toContain("Child One");
-    expect(html).toContain("T-child-1");
     expect((res.writeHead as jest.Mock).mock.calls[0][0]).toBe(200);
+    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
+    expect(html).toContain("One");
   });
 
-  it("returns empty <div> when no children", async () => {
-    mockGetChildrenOf.mockResolvedValue([]);
+  it("filters results by case-insensitive title match", async () => {
+    mockGetObjects.mockResolvedValue([
+      makeObj({ id: "T-auth", title: "Auth Login" }),
+      makeObj({ id: "T-other", title: "Other Task" }),
+    ]);
 
     const res = makeRes();
-    await childrenPartialHandler(makeReq(), res, {
-      key: "my-proj",
-      id: "T-parent",
-    });
+    await searchHandler(
+      makeReq("/projects/my-proj/issues/search?q=auth"),
+      res,
+      { key: "my-proj" },
+    );
 
     const html = (res.end as jest.Mock).mock.calls[0][0] as string;
-    expect(html).toBe("<div></div>");
+    expect(html).toContain("Auth Login");
+    expect(html).not.toContain("Other Task");
+  });
+
+  it("filters by id and body as well as title", async () => {
+    mockGetObjects.mockResolvedValue([
+      makeObj({ id: "T-xyz", title: "Some Task", body: "contains keyword" }),
+      makeObj({ id: "T-abc", title: "Another" }),
+      makeObj({ id: "match-id", title: "By ID" }),
+    ]);
+
+    const res = makeRes();
+    await searchHandler(
+      makeReq("/projects/my-proj/issues/search?q=keyword"),
+      res,
+      { key: "my-proj" },
+    );
+
+    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
+    expect(html).toContain("Some Task");
+    expect(html).not.toContain("Another");
+  });
+
+  it("returns no-results message when nothing matches", async () => {
+    mockGetObjects.mockResolvedValue([
+      makeObj({ id: "T-one", title: "Unrelated" }),
+    ]);
+
+    const res = makeRes();
+    await searchHandler(
+      makeReq("/projects/my-proj/issues/search?q=zzznomatch"),
+      res,
+      { key: "my-proj" },
+    );
+
+    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
+    expect(html).toContain("No results found");
   });
 });
 

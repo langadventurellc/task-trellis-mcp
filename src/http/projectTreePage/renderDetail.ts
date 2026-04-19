@@ -12,7 +12,7 @@ export function renderDetail(key: string, obj: TrellisObject): string {
       ? `<ul>${obj.prerequisites
           .map(
             (p) =>
-              `<li><span hx-get="/projects/${escapeHtml(key)}/issues/${escapeHtml(p)}/detail" hx-target="#detail-pane" hx-swap="innerHTML" style="cursor:pointer;text-decoration:underline">${escapeHtml(p)}</span></li>`,
+              `<li><span hx-get="/projects/${escapeHtml(key)}/issues/${escapeHtml(p)}/detail" hx-target="#detail" hx-swap="innerHTML" style="cursor:pointer;text-decoration:underline">${escapeHtml(p)}</span></li>`,
           )
           .join("")}</ul>`
       : "<p>None</p>";
