@@ -7,6 +7,8 @@ import {
   createChildSubmitHandler,
   createTopFormHandler,
   createTopSubmitHandler,
+  deleteFormHandler,
+  deleteSubmitHandler,
   detailViewHandler,
   editFormHandler,
   editSubmitHandler,
@@ -58,6 +60,12 @@ router.post("/projects/:key/issues", (req, res, params) =>
 );
 router.post("/projects/:key/issues/:id/children", (req, res, params) =>
   createChildSubmitHandler(req, res, params),
+);
+router.get("/projects/:key/issues/:id/delete", (req, res, params) =>
+  deleteFormHandler(req, res, params),
+);
+router.delete("/projects/:key/issues/:id", (req, res, params) =>
+  deleteSubmitHandler(req, res, params),
 );
 
 httpServer.on("request", (req, res) => router.dispatch(req, res));

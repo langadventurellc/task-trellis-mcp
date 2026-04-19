@@ -63,7 +63,8 @@ export async function projectTreeHandler(
   </div>
 </aside>`;
 
-  const body = `<div class="app-layout">
+  const body = `<div id="modal"></div>
+<div class="app-layout">
   ${sidebar}
   <main class="detail-pane">
     <div id="detail"></div>
