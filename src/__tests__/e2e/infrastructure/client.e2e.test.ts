@@ -17,25 +17,7 @@ describe("E2E Infrastructure - Client", () => {
     testEnv?.cleanup();
   });
 
-  it("should call activate tool successfully", async () => {
-    const result = await client.callTool("activate", {
-      mode: "local",
-      projectRoot: testEnv.projectRoot,
-    });
-
-    expect(result).toBeDefined();
-    expect(result.content).toBeDefined();
-    expect(result.content[0].type).toBe("text");
-    expect(result.content[0].text).toContain("Activated in local mode");
-  });
-
   it("should create an object via MCP protocol", async () => {
-    // First activate the server
-    await client.callTool("activate", {
-      mode: "local",
-      projectRoot: testEnv.projectRoot,
-    });
-
     // Create a project
     const result = await client.callTool("create_issue", {
       type: "project",
@@ -53,12 +35,6 @@ describe("E2E Infrastructure - Client", () => {
   });
 
   it("should list objects after creation", async () => {
-    // Activate and create a project
-    await client.callTool("activate", {
-      mode: "local",
-      projectRoot: testEnv.projectRoot,
-    });
-
     await client.callTool("create_issue", {
       type: "project",
       title: "Test Project",

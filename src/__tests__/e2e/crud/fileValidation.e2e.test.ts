@@ -15,11 +15,6 @@ describe("E2E File Validation", () => {
     testEnv.setup();
     client = new McpTestClient(testEnv.projectRoot);
     await client.connect();
-
-    await client.callTool("activate", {
-      mode: "local",
-      projectRoot: testEnv.projectRoot,
-    });
   }, 30000);
 
   afterEach(async () => {

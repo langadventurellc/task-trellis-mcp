@@ -16,7 +16,7 @@ This is a **breaking change**. No migration. No backwards-compatibility shims.
 
 ## Scope
 
-- Affects **local mode only**. The existing `remote` mode (`ServerConfig.mode = "remote"`, calls a remote API) is untouched.
+- Affects the local file-based storage path only.
 - Affects the MCP server itself. The companion `task-trellis-teams` plugin's `.mcp.json` will need a follow-up edit (separate repo) to pass the project path.
 
 ---
@@ -101,6 +101,5 @@ None. Existing in-repo `.trellis/` folders are ignored. If the user wants to kee
 - Same repo cloned in two locations (same `origin`) → ONE shared directory.
 - A non-git project directory works without error (path-hash fallback).
 - `TRELLIS_DATA_DIR=/tmp/foo` redirects all writes to `/tmp/foo/projects/<key>/`.
-- Remote mode behavior is unchanged.
 - `mise run quality` and `mise run test` pass.
 - README updated. Companion `task-trellis-teams` plugin's `.mcp.json` updated to pass `${CLAUDE_PROJECT_DIR}`.

@@ -4,16 +4,21 @@ import {
   CallToolResultSchema,
   ListToolsResultSchema,
 } from "@modelcontextprotocol/sdk/types.js";
+import fs from "fs";
+import path from "path";
+import { resolveProjectKey } from "../../configuration/resolveProjectKey";
 import { TestEnvironment } from "./utils";
 
 describe("E2E Auto-Prune Feature", () => {
   let testEnv: TestEnvironment;
   let client: Client | null = null;
   let transport: StdioClientTransport | null = null;
+  let dataRoot: string;
 
   beforeEach(() => {
     testEnv = new TestEnvironment();
     testEnv.setup();
+    dataRoot = path.join(testEnv.projectRoot, "data");
   });
 
   afterEach(async () => {
@@ -28,10 +33,19 @@ describe("E2E Auto-Prune Feature", () => {
     testEnv?.cleanup();
   });
 
+  function getTrellisRoot(): string {
+    return path.join(
+      dataRoot,
+      "projects",
+      resolveProjectKey(testEnv.projectRoot),
+    );
+  }
+
   async function startServerWithArgs(args: string[]): Promise<void> {
     transport = new StdioClientTransport({
       command: "node",
       args: ["dist/server.js", ...args],
+      env: { ...process.env, TRELLIS_DATA_DIR: dataRoot },
     });
 
     client = new Client(
@@ -66,12 +80,10 @@ describe("E2E Auto-Prune Feature", () => {
     const ageInMs = daysOld * 24 * 60 * 60 * 1000;
     const pastDate = new Date(Date.now() - ageInMs);
 
-    // Generate a unique ID based on title
     const prefix = type.charAt(0).toUpperCase();
     const slug = title.toLowerCase().replace(/\s+/g, "-");
     const objectId = `${prefix}-${slug}`;
 
-    // Create the markdown content with past timestamps
     const markdownContent = `---
 id: ${objectId}
 title: ${title}
@@ -88,26 +100,23 @@ ${parent ? `parent: ${parent}` : ""}
 Test object created for auto-prune testing.
 `;
 
-    // Create the appropriate directory structure and file
-    const fs = require("fs");
-    const path = require("path");
-
+    const trellisRoot = getTrellisRoot();
     let filePath: string;
     if (type === "task") {
       const statusDir = status === "done" ? "closed" : "open";
-      const dir = path.join(testEnv.projectRoot, ".trellis", "t", statusDir);
+      const dir = path.join(trellisRoot, "t", statusDir);
       fs.mkdirSync(dir, { recursive: true });
       filePath = path.join(dir, `${objectId}.md`);
     } else if (type === "feature") {
-      const dir = path.join(testEnv.projectRoot, ".trellis", "f", objectId);
+      const dir = path.join(trellisRoot, "f", objectId);
       fs.mkdirSync(dir, { recursive: true });
       filePath = path.join(dir, `${objectId}.md`);
     } else if (type === "epic") {
-      const dir = path.join(testEnv.projectRoot, ".trellis", "e", objectId);
+      const dir = path.join(trellisRoot, "e", objectId);
       fs.mkdirSync(dir, { recursive: true });
       filePath = path.join(dir, `${objectId}.md`);
     } else if (type === "project") {
-      const dir = path.join(testEnv.projectRoot, ".trellis", "p", objectId);
+      const dir = path.join(trellisRoot, "p", objectId);
       fs.mkdirSync(dir, { recursive: true });
       filePath = path.join(dir, `${objectId}.md`);
     } else {
@@ -122,9 +131,7 @@ Test object created for auto-prune testing.
     it("should delete closed objects older than threshold", async () => {
       // Start server with auto-prune disabled first to set up objects
       await startServerWithArgs([
-        "--mode",
-        "local",
-        "--projectRootFolder",
+        "--projectDir",
         testEnv.projectRoot,
         "--auto-prune",
         "0",
@@ -146,9 +153,7 @@ Test object created for auto-prune testing.
 
       // Start server with auto-prune threshold of 7 days
       await startServerWithArgs([
-        "--mode",
-        "local",
-        "--projectRootFolder",
+        "--projectDir",
         testEnv.projectRoot,
         "--auto-prune",
         "7",
@@ -169,9 +174,7 @@ Test object created for auto-prune testing.
     it("should not delete any objects when auto-prune is disabled", async () => {
       // Start server with auto-prune disabled
       await startServerWithArgs([
-        "--mode",
-        "local",
-        "--projectRootFolder",
+        "--projectDir",
         testEnv.projectRoot,
         "--auto-prune",
         "0",
@@ -191,9 +194,7 @@ Test object created for auto-prune testing.
       await transport!.close();
 
       await startServerWithArgs([
-        "--mode",
-        "local",
-        "--projectRootFolder",
+        "--projectDir",
         testEnv.projectRoot,
         "--auto-prune",
         "0",
@@ -215,9 +216,7 @@ Test object created for auto-prune testing.
     it("should not delete closed parent with open child", async () => {
       // Start server with auto-prune disabled to set up hierarchy
       await startServerWithArgs([
-        "--mode",
-        "local",
-        "--projectRootFolder",
+        "--projectDir",
         testEnv.projectRoot,
         "--auto-prune",
         "0",
@@ -247,9 +246,7 @@ Test object created for auto-prune testing.
       await transport!.close();
 
       await startServerWithArgs([
-        "--mode",
-        "local",
-        "--projectRootFolder",
+        "--projectDir",
         testEnv.projectRoot,
         "--auto-prune",
         "7",
@@ -269,9 +266,7 @@ Test object created for auto-prune testing.
     it("should delete closed parent with closed children", async () => {
       // Start server with auto-prune disabled to set up hierarchy
       await startServerWithArgs([
-        "--mode",
-        "local",
-        "--projectRootFolder",
+        "--projectDir",
         testEnv.projectRoot,
         "--auto-prune",
         "0",
@@ -299,9 +294,7 @@ Test object created for auto-prune testing.
       await transport!.close();
 
       await startServerWithArgs([
-        "--mode",
-        "local",
-        "--projectRootFolder",
+        "--projectDir",
         testEnv.projectRoot,
         "--auto-prune",
         "7",
@@ -321,9 +314,7 @@ Test object created for auto-prune testing.
     it("should handle multi-level hierarchy with open descendant", async () => {
       // Start server with auto-prune disabled to set up complex hierarchy
       await startServerWithArgs([
-        "--mode",
-        "local",
-        "--projectRootFolder",
+        "--projectDir",
         testEnv.projectRoot,
         "--auto-prune",
         "0",
@@ -362,9 +353,7 @@ Test object created for auto-prune testing.
       await transport!.close();
 
       await startServerWithArgs([
-        "--mode",
-        "local",
-        "--projectRootFolder",
+        "--projectDir",
         testEnv.projectRoot,
         "--auto-prune",
         "7",
@@ -387,9 +376,7 @@ Test object created for auto-prune testing.
     it("should handle various auto-prune day values", async () => {
       // Test with large value
       await startServerWithArgs([
-        "--mode",
-        "local",
-        "--projectRootFolder",
+        "--projectDir",
         testEnv.projectRoot,
         "--auto-prune",
         "365",
@@ -418,9 +405,7 @@ Test object created for auto-prune testing.
         }
 
         await startServerWithArgs([
-          "--mode",
-          "local",
-          "--projectRootFolder",
+          "--projectDir",
           testEnv.projectRoot,
           "--auto-prune",
           value,
@@ -440,9 +425,7 @@ Test object created for auto-prune testing.
     it("should run auto-prune before accepting requests", async () => {
       // Create old objects first
       await startServerWithArgs([
-        "--mode",
-        "local",
-        "--projectRootFolder",
+        "--projectDir",
         testEnv.projectRoot,
         "--auto-prune",
         "0",
@@ -455,9 +438,7 @@ Test object created for auto-prune testing.
 
       // Start with auto-prune enabled - auto-prune should run during startup
       await startServerWithArgs([
-        "--mode",
-        "local",
-        "--projectRootFolder",
+        "--projectDir",
         testEnv.projectRoot,
         "--auto-prune",
         "7",
@@ -477,9 +458,7 @@ Test object created for auto-prune testing.
       // Start server with auto-prune in a directory with potential permission issues
       // This should not crash the server
       await startServerWithArgs([
-        "--mode",
-        "local",
-        "--projectRootFolder",
+        "--projectDir",
         testEnv.projectRoot,
         "--auto-prune",
         "7",
@@ -499,9 +478,7 @@ Test object created for auto-prune testing.
     it("should handle complex object hierarchy with mixed statuses and ages", async () => {
       // Start server with auto-prune disabled to set up complex scenario
       await startServerWithArgs([
-        "--mode",
-        "local",
-        "--projectRootFolder",
+        "--projectDir",
         testEnv.projectRoot,
         "--auto-prune",
         "0",
@@ -561,9 +538,7 @@ Test object created for auto-prune testing.
       await transport!.close();
 
       await startServerWithArgs([
-        "--mode",
-        "local",
-        "--projectRootFolder",
+        "--projectDir",
         testEnv.projectRoot,
         "--auto-prune",
         "7",
@@ -590,9 +565,7 @@ Test object created for auto-prune testing.
     it("should be idempotent on multiple runs", async () => {
       // Create test objects
       await startServerWithArgs([
-        "--mode",
-        "local",
-        "--projectRootFolder",
+        "--projectDir",
         testEnv.projectRoot,
         "--auto-prune",
         "0",
@@ -606,9 +579,7 @@ Test object created for auto-prune testing.
       await transport!.close();
 
       await startServerWithArgs([
-        "--mode",
-        "local",
-        "--projectRootFolder",
+        "--projectDir",
         testEnv.projectRoot,
         "--auto-prune",
         "7",
@@ -625,9 +596,7 @@ Test object created for auto-prune testing.
       await transport!.close();
 
       await startServerWithArgs([
-        "--mode",
-        "local",
-        "--projectRootFolder",
+        "--projectDir",
         testEnv.projectRoot,
         "--auto-prune",
         "7",
@@ -650,9 +619,7 @@ Test object created for auto-prune testing.
     it("should handle reasonable data volumes efficiently", async () => {
       // Start server and create multiple objects
       await startServerWithArgs([
-        "--mode",
-        "local",
-        "--projectRootFolder",
+        "--projectDir",
         testEnv.projectRoot,
         "--auto-prune",
         "0",
@@ -674,9 +641,7 @@ Test object created for auto-prune testing.
       await transport!.close();
 
       await startServerWithArgs([
-        "--mode",
-        "local",
-        "--projectRootFolder",
+        "--projectDir",
         testEnv.projectRoot,
         "--auto-prune",
         "10",
@@ -699,9 +664,7 @@ Test object created for auto-prune testing.
     it("should handle edge case with zero objects", async () => {
       // Start server with auto-prune on empty project
       await startServerWithArgs([
-        "--mode",
-        "local",
-        "--projectRootFolder",
+        "--projectDir",
         testEnv.projectRoot,
         "--auto-prune",
         "7",

@@ -18,6 +18,7 @@ Full documentation is available in the [docs](docs/index.md) folder.
 - [Core Benefits](#core-benefits)
 - [Usage](#usage)
 - [Installation and Configuration](#installation-and-configuration)
+- [Configuration](#configuration)
 - [Available Tools](#available-tools)
 - [Troubleshooting](#troubleshooting)
 
@@ -100,6 +101,51 @@ See full documentation at [Task Trellis MCP Documentation](docs/index.md)
 
 See [installation instructions](docs/installation.md).
 
+## Configuration
+
+### CLI Flags and Environment Variables
+
+| Flag / Env var         | Description                                               | Required |
+| ---------------------- | --------------------------------------------------------- | -------- |
+| `--projectDir <path>`  | Override the project directory (default: `process.cwd()`) | No       |
+| `$TRELLIS_PROJECT_DIR` | Same as `--projectDir`; used when the flag is not passed  | No       |
+| `$TRELLIS_DATA_DIR`    | Override the shared data root (default: `~/.trellis`)     | No       |
+| `$TRELLIS_UI_PORT`     | Override the browser UI port (default: `3717`)            | No       |
+
+The MCP server resolves the project directory in this order: `--projectDir` flag → `$TRELLIS_PROJECT_DIR` → current working directory. Since Claude Code launches MCP servers with the workspace as CWD, no flag is normally needed.
+
+### Shared Data Directory Layout
+
+Data is stored in `~/.trellis/` (shared across all sessions), not inside the repo directory.
+
+```
+~/.trellis/
+  projects/
+    <12-char-key>/        ← sha1(gitOriginUrl or absolutePath).slice(0,12)
+      p/ e/ f/ t/         ← issues (unchanged internal layout)
+      meta.json           ← { "label": "<gitOriginUrl or absolutePath>" }
+```
+
+### Browser UI
+
+When the first Claude Code session starts the MCP server, it binds `http://127.0.0.1:3717` and logs:
+
+```
+Task Trellis UI: http://127.0.0.1:3717
+```
+
+- Subsequent sessions detect the port is taken and run STDIO-only.
+- The UI shows all projects under `~/.trellis/projects/` and supports creating, editing, and deleting issues directly in the browser.
+- When the leader session exits, the port is released automatically.
+
+### Breaking Changes
+
+> **Breaking change:** `--projectRootFolder` has been removed. Use `--projectDir` instead.
+>
+> **Breaking change:** The `activate` MCP tool has been removed. The project directory defaults to the current working directory; override with `--projectDir` or `$TRELLIS_PROJECT_DIR`.
+>
+> **Note:** Data previously stored in `<repo>/.trellis/` is not migrated automatically. Move or recreate your data under `~/.trellis/`.
+
 ## Available Tools
 
 ### Core Issue Management
@@ -121,7 +167,6 @@ See [installation instructions](docs/installation.md).
 
 ### System Management
 
-- **activate** - Initialize the task system (if not configured via command line)
 - **prune_closed** - Clean up old completed/cancelled issues for maintenance
 
 ## Troubleshooting
@@ -131,7 +176,7 @@ See [installation instructions](docs/installation.md).
 **Configuration issues:**
 
 - Validate JSON syntax in MCP client configuration
-- Ensure absolute paths are used for `--projectRootFolder`
+- Ensure absolute paths are used for `--projectDir`
 - Restart your MCP client after configuration changes
 
 ### Getting Help

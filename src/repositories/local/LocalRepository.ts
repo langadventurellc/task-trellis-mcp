@@ -18,9 +18,6 @@ export class LocalRepository implements Repository {
    * @param config - Server configuration containing local repository settings
    */
   constructor(private config: ServerConfig) {
-    if (config.mode !== "local") {
-      throw new Error("LocalRepository requires mode to be 'local'");
-    }
     if (!config.planningRootFolder) {
       throw new Error(
         "LocalRepository requires planningRootFolder to be configured",
@@ -61,6 +58,11 @@ export class LocalRepository implements Repository {
   }
 
   async saveObject(trellisObject: TrellisObject): Promise<void> {
+    const { writeProjectMeta } = await import("./writeProjectMeta");
+    await writeProjectMeta(
+      this.config.planningRootFolder!,
+      this.config.projectLabel,
+    );
     const { saveObject: saveObjectImpl } = await import("./saveObject");
     await saveObjectImpl(trellisObject, this.config.planningRootFolder!);
   }

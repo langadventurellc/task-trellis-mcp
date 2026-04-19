@@ -30,7 +30,6 @@ describe("completeTaskTool", () => {
     };
 
     mockServerConfig = {
-      mode: "local",
       autoCompleteParent: true,
       autoPrune: 0,
     };
@@ -89,7 +88,6 @@ describe("completeTaskTool", () => {
       };
 
       const serverConfig: ServerConfig = {
-        mode: "local",
         planningRootFolder: "/test",
         autoCompleteParent: true,
         autoPrune: 0,

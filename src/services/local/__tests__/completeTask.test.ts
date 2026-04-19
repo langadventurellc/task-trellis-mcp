@@ -105,7 +105,6 @@ describe("completeTask service function", () => {
     };
 
     mockServerConfig = {
-      mode: "local",
       autoCompleteParent: true,
       autoPrune: 0,
     };
@@ -376,14 +375,12 @@ describe("completeTask service function", () => {
 
   describe("auto-complete parent functionality", () => {
     const serverConfigWithAutoComplete: ServerConfig = {
-      mode: "local",
       planningRootFolder: "/test",
       autoCompleteParent: true,
       autoPrune: 0,
     };
 
     const serverConfigWithoutAutoComplete: ServerConfig = {
-      mode: "local",
       planningRootFolder: "/test",
       autoCompleteParent: false,
       autoPrune: 0,

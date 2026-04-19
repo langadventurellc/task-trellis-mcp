@@ -2,8 +2,7 @@
 
 ## CLI Arguments
 
-- **--mode <mode>**: Server mode. `local` or `remote` (default: `local`) (`remote` not yet supported)
-- **--projectRootFolder <path>**: Project root folder path (typically, the root of your repository, but can be in a shared folder for collaboration)
+- **--projectDir <path>**: Absolute path to the project directory for this MCP session. Can also be set via `$TRELLIS_PROJECT_DIR`. Required.
 - **--no-auto-complete-parent**: Disable automatic completion of parent issues (features, epics, projects) when the last task of a feature is completed
 - **--auto-prune <days>**: Auto-prune closed objects older than N days (default: `0` = disabled). Set to a positive number to automatically delete completed tasks and closed issues after the specified number of days
 
@@ -12,7 +11,7 @@
 The easiest way to install Task Trellis MCP in Claude Code:
 
 ```bash
-claude mcp add @langadventurellc/task-trellis-mcp --projectRootFolder "$(pwd)"
+claude mcp add @langadventurellc/task-trellis-mcp --projectDir "$(pwd)"
 ```
 
 ## VS Code with GitHub Copilot
@@ -27,7 +26,7 @@ Add Task Trellis to your VS Code settings. Open your `.vscode/mcp.json` file and
       "args": [
         "-y",
         "@langadventurellc/task-trellis-mcp",
-        "--projectRootFolder",
+        "--projectDir",
         "${workspaceFolder}"
       ]
     }
@@ -49,7 +48,7 @@ Add to `.cursor/mcp.json` or `~/.cursor/mcp.json`:
       "args": [
         "-y",
         "@langadventurellc/task-trellis-mcp",
-        "--projectRootFolder",
+        "--projectDir",
         "${workspaceFolder}"
       ]
     }
@@ -71,7 +70,7 @@ Add Task Trellis to `~/.codeium/windsurf/mcp_config.json`:
       "args": [
         "-y",
         "@langadventurellc/task-trellis-mcp",
-        "--projectRootFolder",
+        "--projectDir",
         "${workspaceRoot}"
       ]
     }
@@ -93,7 +92,7 @@ See [Windsurf MCP documentation](https://docs.windsurf.com/windsurf/cascade/mcp)
       "args": [
         "-y",
         "@langadventurellc/task-trellis-mcp",
-        "--projectRootFolder",
+        "--projectDir",
         "${workspaceFolder}"
       ]
     }
@@ -115,7 +114,7 @@ For any MCP-compatible client, use this configuration:
       "args": [
         "-y",
         "@langadventurellc/task-trellis-mcp",
-        "--projectRootFolder",
+        "--projectDir",
         "/absolute/path/to/project"
       ]
     }
@@ -129,19 +128,20 @@ After installation, test that Task Trellis is working by asking your AI assistan
 
 > "Create a new project called 'My Test Project'"
 
-If configured correctly, the AI should respond with a confirmation and create the project structure in your specified project root folder.
+If configured correctly, the AI should respond with a confirmation and create the project structure under `~/.trellis/`.
 
 # Configuration Options
 
 The Task Trellis MCP server supports these command-line options:
 
-- `--mode <mode>` - Server mode (default: "local")
-  - `local` - Use local file-based storage
-  - `remote` - Use remote repository (planned feature)
+- `--projectDir <path>` - Absolute path to the project directory
+  - Data is stored under `~/.trellis/projects/<key>/` (shared across all sessions), not inside the repo
+  - Can be set via the `$TRELLIS_PROJECT_DIR` environment variable instead
+  - Example: `--projectDir /path/to/my-project`
 
-- `--projectRootFolder <path>` - Project root folder path
-  - Creates a `.trellis` folder inside the project root for task storage
-  - Example: `--projectRootFolder /path/to/my-project` creates `/path/to/my-project/.trellis/`
+- `$TRELLIS_DATA_DIR` - Override the shared data root (default: `~/.trellis`)
+
+- `$TRELLIS_UI_PORT` - Override the browser UI port (default: `3717`)
 
 - `--auto-prune <days>` - Auto-prune closed objects (default: "0" = disabled)
   - Automatically deletes completed tasks and closed issues older than the specified number of days
@@ -161,9 +161,7 @@ The Task Trellis MCP server supports these command-line options:
       "command": "npx",
       "args": [
         "@langadventurellc/task-trellis-mcp",
-        "--mode",
-        "local",
-        "--projectRootFolder",
+        "--projectDir",
         "/path/to/your/project",
         "--auto-prune",
         "30",
@@ -173,3 +171,7 @@ The Task Trellis MCP server supports these command-line options:
   }
 }
 ```
+
+# Browser UI
+
+When the first MCP session starts, it binds a local browser UI at `http://127.0.0.1:3717` (port overridable via `$TRELLIS_UI_PORT`). Subsequent sessions run STDIO-only and share the same leader's data. The UI shows all projects under `~/.trellis/projects/` and supports creating, editing, and deleting issues directly in the browser.

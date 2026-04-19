@@ -14,12 +14,6 @@ describe("E2E CRUD - createObject", () => {
     testEnv.setup();
     client = new McpTestClient(testEnv.projectRoot);
     await client.connect();
-
-    // Activate server in local mode
-    await client.callTool("activate", {
-      mode: "local",
-      projectRoot: testEnv.projectRoot,
-    });
   }, 30000);
 
   afterEach(async () => {

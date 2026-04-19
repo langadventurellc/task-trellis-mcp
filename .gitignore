@@ -3,6 +3,7 @@ src/repositories/local/__tests__/temp
 temp/
 scratch/
 template/
+.trellis/
 
 # mise local overrides
 mise.local.toml

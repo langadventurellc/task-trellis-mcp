@@ -11,66 +11,62 @@ Project (Top-level container)
 
 ## File Storage
 
-Task Trellis uses a local file-based storage system with different hierarchy patterns:
+Task Trellis stores data in `~/.trellis/projects/<key>/` — shared across all sessions, not inside the repo. The `<key>` is a 12-character SHA-1 hash of the project's git remote URL (or its absolute path for non-git projects).
 
 ### Full Project Hierarchy
 
 ```
-your-project/
-└── .trellis/
-    └── p/
-        └── P-project-id/
-            └── e/
-                └── E-epic-id/
-                    └── f/
-                        └── F-feature-id/
-                            └── t/
-                                ├── open/
-                                │   └── T-task-id.md
-                                └── closed/
-                                    └── T-completed-task-id.md
+~/.trellis/projects/<key>/
+└── p/
+    └── P-project-id/
+        └── e/
+            └── E-epic-id/
+                └── f/
+                    └── F-feature-id/
+                        └── t/
+                            ├── open/
+                            │   └── T-task-id.md
+                            └── closed/
+                                └── T-completed-task-id.md
 ```
 
 ### Epic-Parent Hierarchy
 
 ```
-your-project/
-└── .trellis/
-    └── e/
-        └── E-epic-id/
-            └── f/
-                └── F-feature-id/
-                    └── t/
-                        ├── open/
-                        │   └── T-task-id.md
-                        └── closed/
-                            └── T-completed-task-id.md
+~/.trellis/projects/<key>/
+└── e/
+    └── E-epic-id/
+        └── f/
+            └── F-feature-id/
+                └── t/
+                    ├── open/
+                    │   └── T-task-id.md
+                    └── closed/
+                        └── T-completed-task-id.md
 ```
 
 ### Feature-Parent Hierarchy
 
 ```
-your-project/
-└── .trellis/
-    └── f/
-        └── F-feature-id/
-            └── t/
-                ├── open/
-                │   └── T-task-id.md
-                └── closed/
-                    └── T-completed-task-id.md
+~/.trellis/projects/<key>/
+└── f/
+    └── F-feature-id/
+        └── t/
+            ├── open/
+            │   └── T-task-id.md
+            └── closed/
+                └── T-completed-task-id.md
 ```
 
 ### Standalone Tasks
 
 ```
-your-project/
-└── .trellis/
-    └── t/
-        ├── open/
-        │   └── T-task-id.md
-        └── closed/
-            └── T-completed-task-id.md
+~/.trellis/projects/<key>/
+└── t/
+    ├── open/
+    │   └── T-task-id.md
+    └── closed/
+        └── T-completed-task-id.md
 ```
 
 Each issue is stored as a Markdown file with YAML frontmatter metadata and content body.

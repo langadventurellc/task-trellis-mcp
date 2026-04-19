@@ -44,7 +44,6 @@ async function checkObjectDependencies(
 ): Promise<void> {
   const { LocalRepository } = await import("./LocalRepository");
   const config: ServerConfig = {
-    mode: "local",
     planningRootFolder: planningRoot,
     autoCompleteParent: false,
     autoPrune: 0,

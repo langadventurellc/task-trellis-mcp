@@ -9,12 +9,18 @@ import {
 import { Command } from "commander";
 import fs from "fs";
 import path from "path";
-import { ServerConfig } from "./configuration";
+import type { Server as HttpServer } from "node:http";
+import { createHttpServer } from "./httpServer";
+import {
+  ServerConfig,
+  resolveDataDir,
+  resolveProjectKey,
+  resolveProjectLabel,
+} from "./configuration";
 import { LocalRepository, Repository } from "./repositories";
 import { TaskTrellisService } from "./services/TaskTrellisService";
 import { LocalTaskTrellisService } from "./services/local/LocalTaskTrellisService";
 import {
-  activateTool,
   appendModifiedFilesTool,
   appendObjectLogTool,
   claimTaskTool,
@@ -43,8 +49,7 @@ program
   .name("task-trellis-mcp")
   .description("Task Trellis MCP Server")
   .version("1.0.0")
-  .option("--mode <mode>", "Server mode", "local")
-  .option("--projectRootFolder <path>", "Project root folder path")
+  .option("--projectDir <path>", "Project directory path")
   .option(
     "--no-auto-complete-parent",
     "Disable automatic completion of parent tasks",
@@ -58,8 +63,7 @@ program
 program.parse();
 
 interface CliOptions {
-  mode?: string;
-  projectRootFolder?: string;
+  projectDir?: string;
   autoCompleteParent: boolean;
   autoPrune: string;
 }
@@ -81,6 +85,9 @@ if (autoPruneValue < 0) {
   process.exit(1);
 }
 
+const projectDir =
+  options.projectDir ?? process.env.TRELLIS_PROJECT_DIR ?? process.cwd();
+
 // Read version from package.json
 function getPackageVersion(): string {
   try {
@@ -100,30 +107,24 @@ function getPackageVersion(): string {
 
 const packageVersion = getPackageVersion();
 
-// Create server config - always create with at least mode set
+// Create server config
 const serverConfig: ServerConfig = {
-  mode: options.mode === "remote" ? "remote" : "local",
   autoCompleteParent: options.autoCompleteParent,
   autoPrune: autoPruneValue,
-  ...(options.projectRootFolder && typeof options.projectRootFolder === "string"
-    ? { planningRootFolder: path.join(options.projectRootFolder, ".trellis") }
-    : {}),
+  planningRootFolder: path.join(
+    resolveDataDir(),
+    "projects",
+    resolveProjectKey(projectDir),
+  ),
+  projectLabel: resolveProjectLabel(projectDir),
 };
 
 function getRepository(): Repository {
-  if (serverConfig.mode === "local") {
-    return new LocalRepository(serverConfig);
-  } else {
-    throw new Error("Remote repository not yet implemented");
-  }
+  return new LocalRepository(serverConfig);
 }
 
 function _getService(): TaskTrellisService {
-  if (serverConfig.mode === "local") {
-    return new LocalTaskTrellisService();
-  } else {
-    throw new Error("Remote task service not yet implemented");
-  }
+  return new LocalTaskTrellisService();
 }
 
 const server = new Server(
@@ -144,7 +145,7 @@ Key capabilities:
 - Flexible scope-based task filtering and claiming
 - System maintenance tools for pruning completed work
 
-The server supports both local file-based storage and configurable remote repositories, making it suitable for individual development workflows and team collaboration. Tasks are automatically validated for readiness based on prerequisites and status, enabling autonomous agent operation while maintaining work quality and proper sequencing.
+Tasks are automatically validated for readiness based on prerequisites and status, enabling autonomous agent operation while maintaining work quality and proper sequencing.
 
 Essential for AI agents working on complex, multi-step software projects where systematic task breakdown, dependency management, and progress tracking are critical for successful completion.`,
   },
@@ -169,68 +170,11 @@ server.setRequestHandler(ListToolsRequestSchema, () => {
     completeTaskTool,
   ];
 
-  // Only include activate tool if server is not properly configured from command line
-  // (i.e., local mode without projectRootFolder specified)
-  if (serverConfig.mode === "local" && !serverConfig.planningRootFolder) {
-    tools.push(activateTool);
-  }
-
   return { tools };
 });
 
-// eslint-disable-next-line statement-count/function-statement-count-warn
 server.setRequestHandler(CallToolRequestSchema, (request) => {
   const { name: toolName, arguments: args } = request.params;
-
-  // Validate that local mode requires planning root folder for all tools except activate
-  if (
-    serverConfig.mode === "local" &&
-    !serverConfig.planningRootFolder &&
-    toolName !== "activate"
-  ) {
-    return {
-      content: [
-        {
-          type: "text",
-          text: "Planning root folder is not configured. Please call the 'activate' tool with the project's root folder first.",
-        },
-      ],
-    };
-  }
-
-  if (toolName === "activate") {
-    const { mode, projectRoot, apiToken, url, remoteProjectId } = args as {
-      mode: "local" | "remote";
-      projectRoot?: string;
-      apiToken?: string;
-      url?: string;
-      remoteProjectId?: string;
-    };
-
-    // Update server config based on activate parameters
-    serverConfig.mode = mode;
-
-    if (mode === "local" && projectRoot) {
-      serverConfig.planningRootFolder = path.join(projectRoot, ".trellis");
-    } else if (mode === "remote") {
-      if (url) serverConfig.remoteRepositoryUrl = url;
-      if (apiToken) serverConfig.remoteRepositoryApiToken = apiToken;
-      if (remoteProjectId) serverConfig.remoteProjectId = remoteProjectId;
-    }
-
-    return {
-      content: [
-        {
-          type: "text",
-          text: `Activated in ${mode} mode. Server config updated: ${JSON.stringify(
-            serverConfig,
-            null,
-            2,
-          )}`,
-        },
-      ],
-    };
-  }
 
   const repository = getRepository();
 
@@ -255,7 +199,6 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
       return handleGetNextAvailableIssue(_getService(), repository, args);
     case "complete_task":
       return handleCompleteTask(_getService(), repository, args, serverConfig);
-    case "activate":
     default:
       throw new Error(`Unknown tool: ${toolName}`);
   }
@@ -266,7 +209,51 @@ async function runServer() {
   await server.connect(transport);
 }
 
+const UI_TAKEOVER_POLL_MS = 10_000;
+
+function tryBindHttpServer(port: number): Promise<HttpServer | null> {
+  return new Promise((resolve) => {
+    const server = createHttpServer();
+    const onError = (err: NodeJS.ErrnoException) => {
+      if (err.code !== "EADDRINUSE") {
+        console.error("HTTP server error:", err.message);
+      }
+      server.removeListener("listening", onListening);
+      resolve(null);
+    };
+    const onListening = () => {
+      server.removeListener("error", onError);
+      resolve(server);
+    };
+    server.once("error", onError);
+    server.once("listening", onListening);
+    server.listen(port, "127.0.0.1");
+  });
+}
+
+function scheduleUiTakeover(port: number): void {
+  const timer = setInterval(() => {
+    void tryBindHttpServer(port).then((server) => {
+      if (server) {
+        clearInterval(timer);
+        console.warn(`Task Trellis UI: http://127.0.0.1:${port} (took over)`);
+      }
+    });
+  }, UI_TAKEOVER_POLL_MS);
+  timer.unref();
+}
+
 async function startServer() {
+  const uiPort = parseInt(process.env.TRELLIS_UI_PORT ?? "3717", 10);
+
+  const server = await tryBindHttpServer(uiPort);
+  if (server) {
+    console.warn(`Task Trellis UI: http://127.0.0.1:${uiPort}`);
+  } else {
+    console.warn("UI already served by another instance");
+    scheduleUiTakeover(uiPort);
+  }
+
   // Auto-prune closed objects if enabled
   if (serverConfig.autoPrune > 0) {
     try {

@@ -23,7 +23,6 @@ describe("updateObjectTool", () => {
     };
 
     mockServerConfig = {
-      mode: "local",
       autoCompleteParent: true,
       autoPrune: 0,
     };
@@ -222,7 +221,6 @@ describe("updateObjectTool", () => {
     it("should pass serverConfig to service when provided", async () => {
       mockService.updateObject.mockResolvedValue(mockResult);
       const serverConfig: ServerConfig = {
-        mode: "local",
         autoCompleteParent: true,
         autoPrune: 0,
       };

@@ -10,8 +10,8 @@ _.path = ["{{config_root}}/node_modules/.bin"]
 
 [tasks.build]
 description = "Compile TypeScript to JavaScript"
-run = "tsc"
-sources = ["src/**/*.ts", "tsconfig.json"]
+run = "tsc && cp src/http/htmx.min.js dist/http/htmx.min.js && cp src/http/styles.css dist/http/styles.css"
+sources = ["src/**/*.ts", "src/http/htmx.min.js", "src/http/styles.css", "tsconfig.json"]
 outputs = ["dist/"]
 
 [tasks.dev]
@@ -69,5 +69,5 @@ run = "echo 'All quality checks passed'"
 
 [tasks.inspector]
 description = "Run MCP Inspector"
-run = "npx @modelcontextprotocol/inspector node dist/server.js -- --projectRootFolder {{config_root}}/temp"
+run = "npx @modelcontextprotocol/inspector node dist/server.js -- --projectDir {{config_root}}/temp"
 depends = ["build"]
