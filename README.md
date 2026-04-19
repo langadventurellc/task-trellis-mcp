@@ -105,12 +105,14 @@ See [installation instructions](docs/installation.md).
 
 ### CLI Flags and Environment Variables
 
-| Flag / Env var         | Description                                                 | Required            |
-| ---------------------- | ----------------------------------------------------------- | ------------------- |
-| `--projectDir <path>`  | Absolute path to the project directory for this MCP session | Yes (local mode)    |
-| `$TRELLIS_PROJECT_DIR` | Same as `--projectDir`; used when the flag is not passed    | Yes if flag omitted |
-| `$TRELLIS_DATA_DIR`    | Override the shared data root (default: `~/.trellis`)       | No                  |
-| `$TRELLIS_UI_PORT`     | Override the browser UI port (default: `3717`)              | No                  |
+| Flag / Env var         | Description                                               | Required |
+| ---------------------- | --------------------------------------------------------- | -------- |
+| `--projectDir <path>`  | Override the project directory (default: `process.cwd()`) | No       |
+| `$TRELLIS_PROJECT_DIR` | Same as `--projectDir`; used when the flag is not passed  | No       |
+| `$TRELLIS_DATA_DIR`    | Override the shared data root (default: `~/.trellis`)     | No       |
+| `$TRELLIS_UI_PORT`     | Override the browser UI port (default: `3717`)            | No       |
+
+The MCP server resolves the project directory in this order: `--projectDir` flag → `$TRELLIS_PROJECT_DIR` → current working directory. Since Claude Code launches MCP servers with the workspace as CWD, no flag is normally needed.
 
 ### Shared Data Directory Layout
 
@@ -140,7 +142,7 @@ Task Trellis UI: http://127.0.0.1:3717
 
 > **Breaking change:** `--projectRootFolder` has been removed. Use `--projectDir` instead.
 >
-> **Breaking change:** The `activate` MCP tool has been removed. Configure the project directory via the `--projectDir` CLI flag or the `$TRELLIS_PROJECT_DIR` environment variable.
+> **Breaking change:** The `activate` MCP tool has been removed. The project directory defaults to the current working directory; override with `--projectDir` or `$TRELLIS_PROJECT_DIR`.
 >
 > **Note:** Data previously stored in `<repo>/.trellis/` is not migrated automatically. Move or recreate your data under `~/.trellis/`.
 

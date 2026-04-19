@@ -3,7 +3,7 @@
     "task-trellis": {
       "type": "stdio",
       "command": "node",
-      "args": ["dist/server.js", "--projectDir", "${CLAUDE_PROJECT_DIR}"],
+      "args": ["dist/server.js"],
       "env": {}
     }
   }

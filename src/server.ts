@@ -88,14 +88,8 @@ if (autoPruneValue < 0) {
 }
 
 const mode = options.mode === "remote" ? "remote" : "local";
-const projectDir = options.projectDir ?? process.env.TRELLIS_PROJECT_DIR;
-
-if (mode === "local" && !projectDir) {
-  console.error(
-    "Error: --projectDir or $TRELLIS_PROJECT_DIR is required in local mode",
-  );
-  process.exit(1);
-}
+const projectDir =
+  options.projectDir ?? process.env.TRELLIS_PROJECT_DIR ?? process.cwd();
 
 // Read version from package.json
 function getPackageVersion(): string {
@@ -121,16 +115,12 @@ const serverConfig: ServerConfig = {
   mode,
   autoCompleteParent: options.autoCompleteParent,
   autoPrune: autoPruneValue,
-  ...(projectDir
-    ? {
-        planningRootFolder: path.join(
-          resolveDataDir(),
-          "projects",
-          resolveProjectKey(projectDir),
-        ),
-        projectLabel: resolveProjectLabel(projectDir),
-      }
-    : {}),
+  planningRootFolder: path.join(
+    resolveDataDir(),
+    "projects",
+    resolveProjectKey(projectDir),
+  ),
+  projectLabel: resolveProjectLabel(projectDir),
 };
 
 function getRepository(): Repository {
