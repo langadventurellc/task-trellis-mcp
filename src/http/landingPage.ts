@@ -4,8 +4,19 @@ import { join } from "node:path";
 import { resolveDataDir } from "../configuration/resolveDataDir";
 import { TrellisObjectStatus, isOpen } from "../models";
 import { LocalRepository } from "../repositories/local/LocalRepository";
+import { appShell } from "./appShell";
 import { escapeHtml } from "./escapeHtml";
-import { page } from "./layout";
+
+const HEADER = `<header class="landing-header">
+    <div class="brand">
+      <div class="brand-mark">TT</div>
+      <div class="brand-name">Task Trellis</div>
+    </div>
+    <button class="icon-btn" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode" type="button">
+      <svg class="theme-icon-light"><use href="#i-moon"/></svg>
+      <svg class="theme-icon-dark"><use href="#i-sun"/></svg>
+    </button>
+  </header>`;
 
 /** Handles GET / — lists all Trellis projects with issue counts. */
 export async function landingPageHandler(
@@ -23,12 +34,14 @@ export async function landingPageHandler(
     // directory does not exist yet — fall through to empty state
   }
 
-  let body: string;
+  let content: string;
 
   if (keys.length === 0) {
-    body = `<h1>Task Trellis</h1>\n<p>No projects found under ${escapeHtml(projectsDir)}.</p>`;
+    content = `<div class="landing-empty">
+      <p>No projects found under <code>${escapeHtml(projectsDir)}</code>.</p>
+    </div>`;
   } else {
-    const items = await Promise.all(
+    const cards = await Promise.all(
       keys.map(async (key) => {
         let label = key;
         try {
@@ -56,13 +69,36 @@ export async function landingPageHandler(
           (o) => o.status === TrellisObjectStatus.DONE,
         ).length;
 
-        return `<li><a href="/projects/${escapeHtml(key)}">${escapeHtml(label)}</a> — ${open} open, ${inProgress} in-progress, ${done} done</li>`;
+        const keyEsc = escapeHtml(key);
+        const labelEsc = escapeHtml(label);
+        const keyLine =
+          label === key ? "" : `<div class="project-card-key">${keyEsc}</div>`;
+
+        return `<a href="/projects/${keyEsc}" class="project-card">
+          <div class="project-card-head">
+            <div class="project-card-label">${labelEsc}</div>
+            ${keyLine}
+          </div>
+          <div class="project-card-stats">
+            <span class="badge status-open">${open} open</span>
+            <span class="badge status-progress">${inProgress} in-progress</span>
+            <span class="badge status-done">${done} done</span>
+          </div>
+        </a>`;
       }),
     );
 
-    body = `<h1>Task Trellis</h1>\n<ul>\n${items.join("\n")}\n</ul>`;
+    content = `<div class="project-list">${cards.join("\n")}</div>`;
   }
 
+  const body = `<div class="landing">
+  ${HEADER}
+  <main class="landing-body">
+    <h1 class="landing-title">Projects</h1>
+    ${content}
+  </main>
+</div>`;
+
   res.writeHead(200, { "Content-Type": "text/html" });
-  res.end(page("Task Trellis — Projects", body));
+  res.end(appShell("Task Trellis \u2014 Projects", body));
 }
