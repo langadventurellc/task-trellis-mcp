@@ -6,7 +6,10 @@ type Handler = (
   params: Record<string, string>,
 ) => void | Promise<void>;
 
+type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
+
 interface Route {
+  method: HttpMethod;
   pattern: string;
   segments: string[];
   handler: Handler;
@@ -14,8 +17,11 @@ interface Route {
 
 function matchRoute(
   route: Route,
+  method: string,
   pathname: string,
 ): Record<string, string> | null {
+  if (route.method !== method) return null;
+
   const incoming = pathname.split("/").filter(Boolean);
   const pattern = route.segments;
 
@@ -33,23 +39,46 @@ function matchRoute(
   return params;
 }
 
+function addRoute(
+  routes: Route[],
+  method: HttpMethod,
+  pattern: string,
+  handler: Handler,
+): void {
+  routes.push({
+    method,
+    pattern,
+    segments: pattern.split("/").filter(Boolean),
+    handler,
+  });
+}
+
 export function createRouter() {
   const routes: Route[] = [];
 
   return {
     get(pattern: string, handler: Handler): void {
-      routes.push({
-        pattern,
-        segments: pattern.split("/").filter(Boolean),
-        handler,
-      });
+      addRoute(routes, "GET", pattern, handler);
+    },
+
+    post(pattern: string, handler: Handler): void {
+      addRoute(routes, "POST", pattern, handler);
+    },
+
+    put(pattern: string, handler: Handler): void {
+      addRoute(routes, "PUT", pattern, handler);
+    },
+
+    delete(pattern: string, handler: Handler): void {
+      addRoute(routes, "DELETE", pattern, handler);
     },
 
     dispatch(req: IncomingMessage, res: ServerResponse): void {
       const pathname = new URL(req.url ?? "/", "http://localhost").pathname;
+      const method = req.method ?? "GET";
 
       for (const route of routes) {
-        const params = matchRoute(route, pathname);
+        const params = matchRoute(route, method, pathname);
         if (params !== null) {
           void Promise.resolve(route.handler(req, res, params));
           return;

@@ -10,8 +10,8 @@ _.path = ["{{config_root}}/node_modules/.bin"]
 
 [tasks.build]
 description = "Compile TypeScript to JavaScript"
-run = "tsc && cp src/http/htmx.min.js dist/http/htmx.min.js"
-sources = ["src/**/*.ts", "src/http/htmx.min.js", "tsconfig.json"]
+run = "tsc && cp src/http/htmx.min.js dist/http/htmx.min.js && cp src/http/styles.css dist/http/styles.css"
+sources = ["src/**/*.ts", "src/http/htmx.min.js", "src/http/styles.css", "tsconfig.json"]
 outputs = ["dist/"]
 
 [tasks.dev]

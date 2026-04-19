@@ -10,6 +10,7 @@ import {
 import { createRouter } from "./router";
 
 const htmxContent = fs.readFileSync(path.join(__dirname, "htmx.min.js"));
+const cssContent = fs.readFileSync(path.join(__dirname, "styles.css"));
 
 const router = createRouter();
 
@@ -18,6 +19,11 @@ router.get("/", (req, res) => landingPageHandler(req, res));
 router.get("/_htmx.js", (_req, res) => {
   res.writeHead(200, { "Content-Type": "application/javascript" });
   res.end(htmxContent);
+});
+
+router.get("/_styles.css", (_req, res) => {
+  res.writeHead(200, { "Content-Type": "text/css" });
+  res.end(cssContent);
 });
 
 router.get("/projects/:key", (req, res, params) =>
