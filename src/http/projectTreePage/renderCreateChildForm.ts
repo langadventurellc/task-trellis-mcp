@@ -6,6 +6,7 @@ import {
 import { escapeHtml } from "../escapeHtml";
 import { priorityRadios } from "./priorityRadios";
 import { statusRadios } from "./statusRadios";
+import { typeLabel } from "./typeLabel";
 
 type CreateChildFields = {
   title?: string;
@@ -26,10 +27,10 @@ export function renderCreateChildForm(
   const errorBanner = error ? `<div class="error-banner">${error}</div>` : "";
   const status = fields.status ?? TrellisObjectStatus.DRAFT;
   const priority = fields.priority ?? TrellisObjectPriority.MEDIUM;
-  const typeLabel = childType.charAt(0).toUpperCase() + childType.slice(1);
+  const label = typeLabel(childType);
   return `<div data-view="create">
   ${errorBanner}
-  <p>Creating: <span class="badge type-${escapeHtml(childType)}">${escapeHtml(typeLabel)}</span></p>
+  <p>Creating: <span class="badge type-${escapeHtml(childType)}">${escapeHtml(label)}</span></p>
   <form hx-post="/projects/${escapeHtml(key)}/issues/${escapeHtml(parentId)}/children" hx-target="#detail" hx-swap="innerHTML">
     <label>Title
       <input type="text" name="title" value="${escapeHtml(fields.title ?? "")}" required />

@@ -1,5 +1,4 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import type { ServerConfig } from "../../configuration";
 import {
   TrellisObjectPriority,
   TrellisObjectStatus,
@@ -9,12 +8,10 @@ import { appendObjectLog } from "../../services/local/appendObjectLog";
 import { updateObject } from "../../services/local/updateObject";
 import { escapeHtml } from "../escapeHtml";
 import { readFormBody } from "../readFormBody";
-import { makeRepo } from "./makeRepo";
+import { makeRepo, SERVER_CONFIG } from "./makeRepo";
 import { parsePrereqs } from "./parsePrereqs";
 import { renderEditForm } from "./renderEditForm";
 import { renderDetailView } from "./renderDetailView";
-
-const SERVER_CONFIG: ServerConfig = { autoCompleteParent: false, autoPrune: 0 };
 
 function parseEditFields(form: URLSearchParams, obj: TrellisObject) {
   return {

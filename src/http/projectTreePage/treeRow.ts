@@ -1,16 +1,7 @@
 import type { TrellisObject } from "../../models";
 import { escapeHtml } from "../escapeHtml";
-
-function statusDotClass(status: string): string {
-  if (status === "in-progress") return "progress";
-  if (status === "wont-do") return "wontdo";
-  return status;
-}
-
-function priorityBarClass(priority: string): string {
-  if (priority === "medium") return "med";
-  return priority;
-}
+import { priorityCssClass } from "./priorityCssClass";
+import { statusCssClass } from "./statusCssClass";
 
 /** Renders a single tree row with inline --indent CSS variable for depth. */
 export function treeRow(
@@ -25,5 +16,5 @@ export function treeRow(
   hx-get="/projects/${escapeHtml(key)}/issues/${escapeHtml(obj.id)}/detail"
   hx-target="#detail"
   hx-swap="innerHTML"
-><span class="kind">${escapeHtml(kindLetter)}</span><span class="status-dot ${escapeHtml(statusDotClass(obj.status))}"></span><span class="priority-bar ${escapeHtml(priorityBarClass(obj.priority))}"></span>${chevron}<span class="row-title">${escapeHtml(obj.title)}</span></div>`;
+><span class="kind">${escapeHtml(kindLetter)}</span><span class="status-dot ${escapeHtml(statusCssClass(obj.status))}"></span><span class="priority-bar ${escapeHtml(priorityCssClass(obj.priority))}"></span>${chevron}<span class="row-title">${escapeHtml(obj.title)}</span></div>`;
 }

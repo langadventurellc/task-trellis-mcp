@@ -174,4 +174,4 @@ The Task Trellis MCP server supports these command-line options:
 
 # Browser UI
 
-When the first MCP session starts, it binds a local browser UI at `http://127.0.0.1:3717` (port overridable via `$TRELLIS_UI_PORT`). Subsequent sessions run STDIO-only and share the same leader's data. The UI is read-only and shows all projects under `~/.trellis/projects/`.
+When the first MCP session starts, it binds a local browser UI at `http://127.0.0.1:3717` (port overridable via `$TRELLIS_UI_PORT`). Subsequent sessions run STDIO-only and share the same leader's data. The UI shows all projects under `~/.trellis/projects/` and supports creating, editing, and deleting issues directly in the browser.

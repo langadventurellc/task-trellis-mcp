@@ -1,30 +1,13 @@
 import { TrellisObjectType, type TrellisObject } from "../../models";
 import type { Repository } from "../../repositories/Repository";
 import { escapeHtml } from "../escapeHtml";
-
-function statusCssClass(status: string): string {
-  if (status === "in-progress") return "progress";
-  if (status === "wont-do") return "wontdo";
-  return status;
-}
+import { priorityCssClass } from "./priorityCssClass";
+import { statusCssClass } from "./statusCssClass";
+import { STATUS_LABELS } from "./statusLabels";
+import { typeLabel } from "./typeLabel";
 
 function statusLabel(status: string): string {
-  const labels: Record<string, string> = {
-    draft: "Draft",
-    open: "Open",
-    "in-progress": "In Progress",
-    done: "Done",
-    "wont-do": "Won't Do",
-  };
-  return labels[status] ?? status;
-}
-
-function priorityCssClass(priority: string): string {
-  return priority === "medium" ? "med" : priority;
-}
-
-function typeLabel(type: string): string {
-  return type.charAt(0).toUpperCase() + type.slice(1);
+  return STATUS_LABELS.find(([v]) => v === status)?.[1] ?? status;
 }
 
 async function buildBreadcrumbs(

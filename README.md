@@ -135,7 +135,7 @@ Task Trellis UI: http://127.0.0.1:3717
 ```
 
 - Subsequent sessions detect the port is taken and run STDIO-only.
-- The UI is read-only; it shows all projects under `~/.trellis/projects/`.
+- The UI shows all projects under `~/.trellis/projects/` and supports creating, editing, and deleting issues directly in the browser.
 - When the leader session exits, the port is released automatically.
 
 ### Breaking Changes
