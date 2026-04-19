@@ -3,11 +3,7 @@
     "task-trellis": {
       "type": "stdio",
       "command": "node",
-      "args": [
-        "dist/server.js",
-        "--projectRootFolder",
-        "/Users/zach/code/task-trellis-mcp"
-      ],
+      "args": ["dist/server.js", "--projectDir", "${CLAUDE_PROJECT_DIR}"],
       "env": {}
     }
   }

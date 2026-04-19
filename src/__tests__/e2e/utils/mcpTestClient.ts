@@ -25,7 +25,7 @@ export class McpTestClient {
       "dist/server.js",
       "--mode",
       "local",
-      "--projectRootFolder",
+      "--projectDir",
       this.projectRoot,
     ];
 
@@ -37,6 +37,7 @@ export class McpTestClient {
     this.transport = new StdioClientTransport({
       command: "node",
       args,
+      env: { ...(process.env as Record<string, string>) },
     });
 
     // Create and connect client

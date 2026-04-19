@@ -1,5 +1,7 @@
 import * as fs from "fs/promises";
 import * as path from "path";
+import { resolveDataDir } from "../../../configuration/resolveDataDir";
+import { resolveProjectKey } from "../../../configuration/resolveProjectKey";
 import type { HierarchyOptions } from "./HierarchyOptions";
 
 /**
@@ -50,7 +52,12 @@ export async function createObjectFile(
     }
   }
 
-  const filePath = path.join(projectRoot, ".trellis", relativePath);
+  const projectDataDir = path.join(
+    resolveDataDir(),
+    "projects",
+    resolveProjectKey(projectRoot),
+  );
+  const filePath = path.join(projectDataDir, relativePath);
   const dirPath = path.dirname(filePath);
   await fs.mkdir(dirPath, { recursive: true });
   await fs.writeFile(filePath, content, "utf-8");

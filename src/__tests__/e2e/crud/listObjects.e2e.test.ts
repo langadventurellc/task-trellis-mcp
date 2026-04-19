@@ -15,12 +15,6 @@ describe("E2E CRUD - listObjects", () => {
     testEnv.setup();
     client = new McpTestClient(testEnv.projectRoot);
     await client.connect();
-
-    // Activate server in local mode
-    await client.callTool("activate", {
-      mode: "local",
-      projectRoot: testEnv.projectRoot,
-    });
   }, 30000);
 
   afterEach(async () => {
@@ -1030,8 +1024,7 @@ describe("E2E CRUD - listObjects", () => {
       const fs = await import("fs/promises");
       const path = await import("path");
       const invalidPath = path.join(
-        testEnv.projectRoot,
-        ".trellis",
+        testEnv.projectDataDir,
         "t",
         "open",
         "T-invalid.md",

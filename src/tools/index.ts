@@ -1,4 +1,3 @@
-export { activateTool, handleActivate } from "./activateTool.js";
 export {
   appendModifiedFilesTool,
   handleAppendModifiedFiles,

@@ -16,16 +16,10 @@ export class ServerProcess {
       // Spawn the server process with local mode and project root
       this.process = spawn(
         "node",
-        [
-          this.serverPath,
-          "--mode",
-          "local",
-          "--projectRootFolder",
-          projectRoot,
-        ],
+        [this.serverPath, "--mode", "local", "--projectDir", projectRoot],
         {
           stdio: ["pipe", "pipe", "pipe"],
-          env: { ...process.env, NODE_ENV: "test" },
+          env: { ...process.env, NODE_ENV: "test", TRELLIS_UI_PORT: "0" },
         },
       );
 

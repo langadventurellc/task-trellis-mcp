@@ -61,6 +61,11 @@ export class LocalRepository implements Repository {
   }
 
   async saveObject(trellisObject: TrellisObject): Promise<void> {
+    const { writeProjectMeta } = await import("./writeProjectMeta");
+    await writeProjectMeta(
+      this.config.planningRootFolder!,
+      this.config.projectLabel,
+    );
     const { saveObject: saveObjectImpl } = await import("./saveObject");
     await saveObjectImpl(trellisObject, this.config.planningRootFolder!);
   }

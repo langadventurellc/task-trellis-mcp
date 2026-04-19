@@ -16,10 +16,6 @@ describe("E2E Workflow - completeTask", () => {
     testEnv.setup();
     client = new McpTestClient(testEnv.projectRoot, false); // Disable auto-complete for regular client
     await client.connect();
-    await client.callTool("activate", {
-      mode: "local",
-      projectRoot: testEnv.projectRoot,
-    });
   }, 30000);
 
   afterEach(async () => {
@@ -178,10 +174,6 @@ describe("E2E Workflow - completeTask", () => {
       // Create a separate client with auto-complete enabled (default behavior)
       autoCompleteClient = new McpTestClient(testEnv.projectRoot); // No parameter means use default (auto-complete enabled)
       await autoCompleteClient.connect();
-      await autoCompleteClient.callTool("activate", {
-        mode: "local",
-        projectRoot: testEnv.projectRoot,
-      });
     }, 30000);
 
     afterEach(async () => {

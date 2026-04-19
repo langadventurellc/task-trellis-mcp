@@ -18,12 +18,6 @@ describe("E2E CRUD - getObject", () => {
     testEnv.setup();
     client = new McpTestClient(testEnv.projectRoot);
     await client.connect();
-
-    // Activate server in local mode
-    await client.callTool("activate", {
-      mode: "local",
-      projectRoot: testEnv.projectRoot,
-    });
   }, 30000);
 
   afterEach(async () => {
@@ -466,8 +460,7 @@ describe("E2E CRUD - getObject", () => {
       const corruptedContent =
         "---\ninvalid yaml: [unclosed\n---\n\nBody content";
       const filePath = path.join(
-        testEnv.projectRoot,
-        ".trellis",
+        testEnv.projectDataDir,
         "p",
         "P-corrupted",
         "P-corrupted.md",
@@ -496,8 +489,7 @@ id: P-incomplete
 Body content`;
 
       const filePath = path.join(
-        testEnv.projectRoot,
-        ".trellis",
+        testEnv.projectDataDir,
         "p",
         "P-incomplete",
         "P-incomplete.md",
@@ -596,8 +588,7 @@ updated: "2024-01-01T00:00:00.000Z"
 `;
 
       const filePath = path.join(
-        testEnv.projectRoot,
-        ".trellis",
+        testEnv.projectDataDir,
         "p",
         "P-minimal",
         "P-minimal.md",

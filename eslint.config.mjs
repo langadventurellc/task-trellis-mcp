@@ -21,6 +21,7 @@ const eslintConfig = [
       '**/dist/**',
       '**/scratch/**',
       '**/template/**',
+      '**/htmx.min.js',
     ],
   },
 
