@@ -1,3 +1,8 @@
-import http from "node:http";
+import http, { type Server } from "node:http";
+import { wireRoutes } from "./http";
 
-export const httpServer = http.createServer();
+export function createHttpServer(): Server {
+  const server = http.createServer();
+  wireRoutes(server);
+  return server;
+}

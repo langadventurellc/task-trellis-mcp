@@ -9,8 +9,8 @@ import {
 import { Command } from "commander";
 import fs from "fs";
 import path from "path";
-import "./http";
-import { httpServer } from "./httpServer";
+import type { Server as HttpServer } from "node:http";
+import { createHttpServer } from "./httpServer";
 import {
   ServerConfig,
   resolveDataDir,
@@ -209,23 +209,50 @@ async function runServer() {
   await server.connect(transport);
 }
 
+const UI_TAKEOVER_POLL_MS = 10_000;
+
+function tryBindHttpServer(port: number): Promise<HttpServer | null> {
+  return new Promise((resolve) => {
+    const server = createHttpServer();
+    const onError = (err: NodeJS.ErrnoException) => {
+      if (err.code !== "EADDRINUSE") {
+        console.error("HTTP server error:", err.message);
+      }
+      server.removeListener("listening", onListening);
+      resolve(null);
+    };
+    const onListening = () => {
+      server.removeListener("error", onError);
+      resolve(server);
+    };
+    server.once("error", onError);
+    server.once("listening", onListening);
+    server.listen(port, "127.0.0.1");
+  });
+}
+
+function scheduleUiTakeover(port: number): void {
+  const timer = setInterval(() => {
+    void tryBindHttpServer(port).then((server) => {
+      if (server) {
+        clearInterval(timer);
+        console.warn(`Task Trellis UI: http://127.0.0.1:${port} (took over)`);
+      }
+    });
+  }, UI_TAKEOVER_POLL_MS);
+  timer.unref();
+}
+
 async function startServer() {
   const uiPort = parseInt(process.env.TRELLIS_UI_PORT ?? "3717", 10);
 
-  await new Promise<void>((resolve) => {
-    httpServer.on("error", (err: NodeJS.ErrnoException) => {
-      if (err.code === "EADDRINUSE") {
-        console.warn("UI already served by another instance");
-      } else {
-        console.error("HTTP server error:", err.message);
-      }
-      resolve();
-    });
-    httpServer.listen(uiPort, "127.0.0.1", () => {
-      console.warn(`Task Trellis UI: http://127.0.0.1:${uiPort}`);
-      resolve();
-    });
-  });
+  const server = await tryBindHttpServer(uiPort);
+  if (server) {
+    console.warn(`Task Trellis UI: http://127.0.0.1:${uiPort}`);
+  } else {
+    console.warn("UI already served by another instance");
+    scheduleUiTakeover(uiPort);
+  }
 
   // Auto-prune closed objects if enabled
   if (serverConfig.autoPrune > 0) {
