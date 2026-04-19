@@ -22,7 +22,7 @@ Task Trellis works with issues that are projects, epics, features or tasks.
 
 Depending on the size of the effort, you can choose to start with any of the above issue types. The larger the effort, the more likely you should start with a project or epic to properly organize the work. Smaller efforts can begin with features or just tasks for simple one-off efforts or for bugs. Once you have your tasks defined, you can easily manage and track their progress through the Task Trellis MCP tools.
 
-Currently, all Task Trellis issues are stored as markdown files in the `.trellis` folder in the root of your project. This makes it unsuitable for projects with multiple developers, but a remote option is in development now and should be available soon. You can configure the storage location using command-line arguments, so you could use a shared network drive. See [Installation](installation.md#configuration-options)
+Currently, all Task Trellis issues are stored as markdown files in `~/.trellis/projects/<key>/`, shared across all sessions on your machine. This makes it unsuitable for projects with multiple developers. You can override the storage root with `$TRELLIS_DATA_DIR` to point to a shared network drive. See [Installation](installation.md#configuration-options)
 
 ## Prerequisites & Dependencies
 

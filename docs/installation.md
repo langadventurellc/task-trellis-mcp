@@ -2,8 +2,7 @@
 
 ## CLI Arguments
 
-- **--mode <mode>**: Server mode. `local` or `remote` (default: `local`) (`remote` not yet supported)
-- **--projectDir <path>**: Absolute path to the project directory for this MCP session. Can also be set via `$TRELLIS_PROJECT_DIR`. Required in local mode.
+- **--projectDir <path>**: Absolute path to the project directory for this MCP session. Can also be set via `$TRELLIS_PROJECT_DIR`. Required.
 - **--no-auto-complete-parent**: Disable automatic completion of parent issues (features, epics, projects) when the last task of a feature is completed
 - **--auto-prune <days>**: Auto-prune closed objects older than N days (default: `0` = disabled). Set to a positive number to automatically delete completed tasks and closed issues after the specified number of days
 
@@ -135,10 +134,6 @@ If configured correctly, the AI should respond with a confirmation and create th
 
 The Task Trellis MCP server supports these command-line options:
 
-- `--mode <mode>` - Server mode (default: "local")
-  - `local` - Use local file-based storage
-  - `remote` - Use remote repository (planned feature)
-
 - `--projectDir <path>` - Absolute path to the project directory
   - Data is stored under `~/.trellis/projects/<key>/` (shared across all sessions), not inside the repo
   - Can be set via the `$TRELLIS_PROJECT_DIR` environment variable instead
@@ -166,8 +161,6 @@ The Task Trellis MCP server supports these command-line options:
       "command": "npx",
       "args": [
         "@langadventurellc/task-trellis-mcp",
-        "--mode",
-        "local",
         "--projectDir",
         "/path/to/your/project",
         "--auto-prune",

@@ -43,7 +43,6 @@ export async function landingPageHandler(
         }
 
         const repo = new LocalRepository({
-          mode: "local",
           planningRootFolder: join(projectsDir, key) + "/",
           autoCompleteParent: false,
           autoPrune: 0,

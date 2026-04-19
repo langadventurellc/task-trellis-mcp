@@ -7,7 +7,6 @@ import { renderDetail } from "./renderDetail";
 
 function makeRepo(key: string): LocalRepository {
   return new LocalRepository({
-    mode: "local",
     planningRootFolder: join(resolveDataDir(), "projects", key) + "/",
     autoCompleteParent: false,
     autoPrune: 0,

@@ -57,29 +57,8 @@ describe("E2E Configuration - Command Line Arguments", () => {
     );
   }
 
-  it("should start server with --mode local", async () => {
-    await startServerWithArgs([
-      "--mode",
-      "local",
-      "--projectDir",
-      testEnv.projectRoot,
-    ]);
-
-    const toolsResponse = await client!.request(
-      { method: "tools/list" },
-      ListToolsResultSchema,
-    );
-    expect(toolsResponse).toBeDefined();
-    expect(Array.isArray(toolsResponse.tools)).toBe(true);
-  });
-
   it("should start server with --projectDir", async () => {
-    await startServerWithArgs([
-      "--mode",
-      "local",
-      "--projectDir",
-      testEnv.projectRoot,
-    ]);
+    await startServerWithArgs(["--projectDir", testEnv.projectRoot]);
 
     // Should be able to use tools without activation
     const response = await callTool("list_issues", { type: "project" });
@@ -88,12 +67,7 @@ describe("E2E Configuration - Command Line Arguments", () => {
   });
 
   it("should preserve server configuration between tool calls", async () => {
-    await startServerWithArgs([
-      "--mode",
-      "local",
-      "--projectDir",
-      testEnv.projectRoot,
-    ]);
+    await startServerWithArgs(["--projectDir", testEnv.projectRoot]);
 
     // First tool call
     await callTool("create_issue", {
@@ -113,8 +87,6 @@ describe("E2E Configuration - Command Line Arguments", () => {
   describe("--auto-prune argument", () => {
     it("should accept valid numeric values", async () => {
       await startServerWithArgs([
-        "--mode",
-        "local",
         "--projectDir",
         testEnv.projectRoot,
         "--auto-prune",
@@ -131,8 +103,6 @@ describe("E2E Configuration - Command Line Arguments", () => {
 
     it("should accept zero value (disabled)", async () => {
       await startServerWithArgs([
-        "--mode",
-        "local",
         "--projectDir",
         testEnv.projectRoot,
         "--auto-prune",
@@ -147,12 +117,7 @@ describe("E2E Configuration - Command Line Arguments", () => {
     });
 
     it("should default to 0 when not specified", async () => {
-      await startServerWithArgs([
-        "--mode",
-        "local",
-        "--projectDir",
-        testEnv.projectRoot,
-      ]);
+      await startServerWithArgs(["--projectDir", testEnv.projectRoot]);
 
       const toolsResponse = await client!.request(
         { method: "tools/list" },
@@ -163,8 +128,6 @@ describe("E2E Configuration - Command Line Arguments", () => {
 
     it("should accept large numeric values", async () => {
       await startServerWithArgs([
-        "--mode",
-        "local",
         "--projectDir",
         testEnv.projectRoot,
         "--auto-prune",

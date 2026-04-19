@@ -52,7 +52,6 @@ describe("updateObject", () => {
     };
 
     mockServerConfig = {
-      mode: "local",
       autoCompleteParent: true,
       autoPrune: 0,
     };
@@ -814,7 +813,6 @@ describe("updateObject", () => {
       mockAutoCompleteParentHierarchy.mockResolvedValue();
 
       const serverConfig: ServerConfig = {
-        mode: "local",
         autoCompleteParent: true,
         autoPrune: 0,
       };
@@ -850,7 +848,6 @@ describe("updateObject", () => {
       mockAutoCompleteParentHierarchy.mockResolvedValue();
 
       const serverConfig: ServerConfig = {
-        mode: "local",
         autoCompleteParent: true,
         autoPrune: 0,
       };
@@ -934,7 +931,6 @@ describe("updateObject", () => {
       const consoleSpy = jest.spyOn(console, "warn").mockImplementation();
 
       const serverConfig: ServerConfig = {
-        mode: "local",
         autoCompleteParent: true,
         autoPrune: 0,
       };
@@ -973,7 +969,6 @@ describe("updateObject", () => {
       mockAutoCompleteParentHierarchy.mockResolvedValue();
 
       const serverConfig: ServerConfig = {
-        mode: "local",
         autoCompleteParent: true,
         autoPrune: 0,
       };
@@ -1008,7 +1003,6 @@ describe("updateObject", () => {
       mockRepository.saveObject.mockResolvedValue();
 
       const serverConfig: ServerConfig = {
-        mode: "local",
         autoCompleteParent: false,
         autoPrune: 0,
       };

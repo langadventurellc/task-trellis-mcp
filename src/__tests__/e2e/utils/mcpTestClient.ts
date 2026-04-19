@@ -21,13 +21,7 @@ export class McpTestClient {
     if (this.connected) return;
 
     // Create transport that will spawn the server process
-    const args = [
-      "dist/server.js",
-      "--mode",
-      "local",
-      "--projectDir",
-      this.projectRoot,
-    ];
+    const args = ["dist/server.js", "--projectDir", this.projectRoot];
 
     // Since auto-complete is now the default, only add flag to disable it
     if (this.autoCompleteParent === false) {

@@ -49,7 +49,6 @@ program
   .name("task-trellis-mcp")
   .description("Task Trellis MCP Server")
   .version("1.0.0")
-  .option("--mode <mode>", "Server mode", "local")
   .option("--projectDir <path>", "Project directory path")
   .option(
     "--no-auto-complete-parent",
@@ -64,7 +63,6 @@ program
 program.parse();
 
 interface CliOptions {
-  mode?: string;
   projectDir?: string;
   autoCompleteParent: boolean;
   autoPrune: string;
@@ -87,7 +85,6 @@ if (autoPruneValue < 0) {
   process.exit(1);
 }
 
-const mode = options.mode === "remote" ? "remote" : "local";
 const projectDir =
   options.projectDir ?? process.env.TRELLIS_PROJECT_DIR ?? process.cwd();
 
@@ -112,7 +109,6 @@ const packageVersion = getPackageVersion();
 
 // Create server config
 const serverConfig: ServerConfig = {
-  mode,
   autoCompleteParent: options.autoCompleteParent,
   autoPrune: autoPruneValue,
   planningRootFolder: path.join(
@@ -124,19 +120,11 @@ const serverConfig: ServerConfig = {
 };
 
 function getRepository(): Repository {
-  if (serverConfig.mode === "local") {
-    return new LocalRepository(serverConfig);
-  } else {
-    throw new Error("Remote repository not yet implemented");
-  }
+  return new LocalRepository(serverConfig);
 }
 
 function _getService(): TaskTrellisService {
-  if (serverConfig.mode === "local") {
-    return new LocalTaskTrellisService();
-  } else {
-    throw new Error("Remote task service not yet implemented");
-  }
+  return new LocalTaskTrellisService();
 }
 
 const server = new Server(
@@ -157,7 +145,7 @@ Key capabilities:
 - Flexible scope-based task filtering and claiming
 - System maintenance tools for pruning completed work
 
-The server supports both local file-based storage and configurable remote repositories, making it suitable for individual development workflows and team collaboration. Tasks are automatically validated for readiness based on prerequisites and status, enabling autonomous agent operation while maintaining work quality and proper sequencing.
+Tasks are automatically validated for readiness based on prerequisites and status, enabling autonomous agent operation while maintaining work quality and proper sequencing.
 
 Essential for AI agents working on complex, multi-step software projects where systematic task breakdown, dependency management, and progress tracking are critical for successful completion.`,
   },

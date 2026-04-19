@@ -9,7 +9,6 @@ import { treeNode } from "./treeNode";
 
 function makeRepo(key: string): LocalRepository {
   return new LocalRepository({
-    mode: "local",
     planningRootFolder: join(resolveDataDir(), "projects", key) + "/",
     autoCompleteParent: false,
     autoPrune: 0,
