@@ -6,6 +6,8 @@ export function renderFlatFragment(
   key: string,
   objects: TrellisObject[],
 ): string {
-  if (objects.length === 0) return "<p>No results found.</p>";
+  if (objects.length === 0) {
+    return '<p class="empty" style="padding:12px 16px;">No results found.</p>';
+  }
   return objects.map((o) => treeRow(key, o, 0)).join("\n");
 }

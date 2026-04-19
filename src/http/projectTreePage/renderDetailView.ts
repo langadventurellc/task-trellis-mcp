@@ -10,6 +10,13 @@ function statusLabel(status: string): string {
   return STATUS_LABELS.find(([v]) => v === status)?.[1] ?? status;
 }
 
+function priorityLabel(priority: string): string {
+  if (priority === "high") return "High priority";
+  if (priority === "medium") return "Medium priority";
+  if (priority === "low") return "Low priority";
+  return priority;
+}
+
 async function buildBreadcrumbs(
   key: string,
   obj: TrellisObject,
@@ -27,10 +34,10 @@ async function buildBreadcrumbs(
     .map(
       (c) =>
         `<a hx-get="/projects/${escapeHtml(key)}/issues/${escapeHtml(c.id)}/detail" hx-target="#detail" hx-swap="innerHTML">${escapeHtml(c.title)}</a>` +
-        `<span class="sep"> / </span>`,
+        `<span class="sep">\u203A</span>`,
     )
     .join("");
-  return `<nav class="breadcrumbs">${links}<span class="current">${escapeHtml(obj.title)}</span></nav>`;
+  return `<div class="crumbs">${links}<span class="current">${escapeHtml(obj.title)}</span></div>`;
 }
 
 async function buildPrerequisites(
@@ -38,19 +45,20 @@ async function buildPrerequisites(
   repo: Repository,
 ): Promise<string> {
   if (obj.prerequisites.length === 0) {
-    return `<p class="empty-state">No prerequisites.</p>`;
+    return `<p class="empty">No prerequisites.</p>`;
   }
   const items = await Promise.all(
     obj.prerequisites.map(async (prereqId) => {
       const prereq = await repo.getObjectById(prereqId);
-      const title = prereq ? escapeHtml(prereq.title) : escapeHtml(prereqId);
+      const sdotClass = prereq ? statusCssClass(prereq.status) : "draft";
+      const name = prereq ? escapeHtml(prereq.title) : "";
       const badge = prereq
-        ? ` <span class="badge status-${escapeHtml(statusCssClass(prereq.status))}">${escapeHtml(statusLabel(prereq.status))}</span>`
+        ? `<span class="badge status-${escapeHtml(statusCssClass(prereq.status))}" style="margin-left:auto;"><span class="mini-dot"></span>${escapeHtml(statusLabel(prereq.status))}</span>`
         : "";
-      return `<li><span class="id-chip">${escapeHtml(prereqId)}</span> ${title}${badge}</li>`;
+      return `<li><span class="sdot ${escapeHtml(sdotClass)}"></span><span class="id">${escapeHtml(prereqId)}</span><span class="name">${name}</span>${badge}</li>`;
     }),
   );
-  return `<ul>${items.join("")}</ul>`;
+  return `<ul class="prereq-list">${items.join("")}</ul>`;
 }
 
 /** Renders the detail pane HTML fragment for a Trellis object. */
@@ -60,40 +68,60 @@ export async function renderDetailView(
   repo: Repository,
 ): Promise<string> {
   const breadcrumbs = await buildBreadcrumbs(key, obj, repo);
+  const keyEsc = escapeHtml(key);
+  const idEsc = escapeHtml(obj.id);
 
   const addChildHidden =
     obj.type === TrellisObjectType.TASK ? ` style="display:none"` : "";
   const titleRow = `<div class="title-row">
-  <h2>${escapeHtml(obj.title)}</h2>
-  <button hx-get="/projects/${escapeHtml(key)}/issues/${escapeHtml(obj.id)}/edit" hx-target="#detail" hx-swap="innerHTML">Edit</button>
-  <button${addChildHidden} hx-get="/projects/${escapeHtml(key)}/issues/${escapeHtml(obj.id)}/children/new" hx-target="#detail" hx-swap="innerHTML">Add child</button>
-  <button hx-get="/projects/${escapeHtml(key)}/issues/${escapeHtml(obj.id)}/delete" hx-target="#modal" hx-swap="innerHTML">Delete</button>
+  <h1 class="title">${escapeHtml(obj.title)}</h1>
+  <div class="actions">
+    <button class="btn" type="button"
+      hx-get="/projects/${keyEsc}/issues/${idEsc}/edit" hx-target="#detail" hx-swap="innerHTML">
+      <svg><use href="#i-edit"/></svg> Edit
+    </button>
+    <button class="btn" type="button"${addChildHidden}
+      hx-get="/projects/${keyEsc}/issues/${idEsc}/children/new" hx-target="#detail" hx-swap="innerHTML">
+      <svg><use href="#i-plus"/></svg> Add child
+    </button>
+    <button class="btn danger" type="button"
+      hx-get="/projects/${keyEsc}/issues/${idEsc}/delete" hx-target="#modal" hx-swap="innerHTML">
+      <svg><use href="#i-trash"/></svg> Delete
+    </button>
+  </div>
 </div>`;
 
-  const badgesRow = `<div class="badges-row">
-  <span class="badge type-${escapeHtml(obj.type)}">${escapeHtml(typeLabel(obj.type))}</span>
-  <span class="badge status-${escapeHtml(statusCssClass(obj.status))}">${escapeHtml(statusLabel(obj.status))}</span>
-  <span class="badge priority-${escapeHtml(priorityCssClass(obj.priority))}">${escapeHtml(priorityCssClass(obj.priority))}</span>
-  <span class="id-chip">${escapeHtml(obj.id)}</span>
+  const statusClass = statusCssClass(obj.status);
+  const priorityClass = priorityCssClass(obj.priority);
+  const badgesRow = `<div class="badges">
+  <span class="badge kind">${escapeHtml(typeLabel(obj.type))}</span>
+  <span class="badge status-${escapeHtml(statusClass)}"><span class="mini-dot"></span>${escapeHtml(statusLabel(obj.status))}</span>
+  <span class="badge priority ${escapeHtml(priorityClass)}">${escapeHtml(priorityLabel(obj.priority))}</span>
+  <span class="id-chip">${idEsc}</span>
 </div>`;
 
   const description = obj.body
     ? `<div class="prose">${escapeHtml(obj.body)}</div>`
-    : `<div class="prose"><p class="empty-state">No description.</p></div>`;
+    : `<p class="empty">No description.</p>`;
 
   const prerequisites = await buildPrerequisites(obj, repo);
 
   const log =
     obj.log.length > 0
-      ? `<ul>${obj.log.map((entry) => `<li class="entry">${escapeHtml(entry)}</li>`).join("")}</ul>`
-      : `<p class="empty-state">No log entries.</p>`;
+      ? `<ul class="log-list">${obj.log
+          .map(
+            (entry) =>
+              `<li><span class="entry">${escapeHtml(entry)}</span></li>`,
+          )
+          .join("")}</ul>`
+      : `<p class="empty">No log entries.</p>`;
 
-  let filesList = `<p class="empty-state">No modified files.</p>`;
+  let filesList = `<p class="empty">No modified files.</p>`;
   if (obj.affectedFiles instanceof Map && obj.affectedFiles.size > 0) {
-    filesList = `<ul>${[...obj.affectedFiles.entries()]
+    filesList = `<ul class="prereq-list">${[...obj.affectedFiles.entries()]
       .map(
         ([filePath, desc]) =>
-          `<li><span class="file-path">${escapeHtml(filePath)}</span> <span class="file-desc">${escapeHtml(desc)}</span></li>`,
+          `<li><span class="id">${escapeHtml(filePath)}</span><span class="name">${escapeHtml(desc)}</span></li>`,
       )
       .join("")}</ul>`;
   }
@@ -102,18 +130,21 @@ export async function renderDetailView(
   ${breadcrumbs}
   ${titleRow}
   ${badgesRow}
-  <section class="description">${description}</section>
-  <section class="prerequisites">
-    <h3>Prerequisites</h3>
+  <div class="field-group">
+    <div class="field-label">Description</div>
+    ${description}
+  </div>
+  <div class="field-group">
+    <div class="field-label">Prerequisites</div>
     ${prerequisites}
-  </section>
-  <section class="log">
-    <h3>Log</h3>
+  </div>
+  <div class="field-group">
+    <div class="field-label">Log</div>
     ${log}
-  </section>
-  <section class="modified-files">
-    <h3>Modified Files</h3>
+  </div>
+  <div class="field-group">
+    <div class="field-label">Modified files</div>
     ${filesList}
-  </section>
+  </div>
 </div>`;
 }

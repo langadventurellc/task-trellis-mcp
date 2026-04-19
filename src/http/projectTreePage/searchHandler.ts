@@ -1,8 +1,9 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { URL } from "node:url";
 import type { TrellisObject } from "../../models";
-import { renderFlatFragment } from "./renderFlatFragment";
 import { makeRepo } from "./makeRepo";
+import { metaBar } from "./metaBar";
+import { renderFlatFragment } from "./renderFlatFragment";
 import { renderTreeFragment } from "./renderTreeFragment";
 
 function matchesQuery(obj: TrellisObject, q: string): boolean {
@@ -14,7 +15,7 @@ function matchesQuery(obj: TrellisObject, q: string): boolean {
   );
 }
 
-/** Handles GET /projects/:key/issues/search?q=… — returns filtered or full tree HTML fragment. */
+/** Handles GET /projects/:key/issues/search?q=… — returns filtered or full tree + OOB meta. */
 export async function searchHandler(
   req: IncomingMessage,
   res: ServerResponse,
@@ -27,13 +28,15 @@ export async function searchHandler(
   const repo = makeRepo(key);
   const allObjects = await repo.getObjects(true);
 
-  const html = q
+  const tree = q
     ? renderFlatFragment(
         key,
         allObjects.filter((o) => matchesQuery(o, q)),
       )
     : renderTreeFragment(key, allObjects);
 
+  const metaOob = `<div class="tree-meta" id="tree-meta" hx-swap-oob="true">${metaBar(allObjects)}</div>`;
+
   res.writeHead(200, { "Content-Type": "text/html" });
-  res.end(html);
+  res.end(`${tree}\n${metaOob}`);
 }

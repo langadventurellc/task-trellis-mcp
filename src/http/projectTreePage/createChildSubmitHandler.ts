@@ -97,6 +97,9 @@ export async function createChildSubmitHandler(
     result.content[0]?.text ?? "",
     id,
   );
-  res.writeHead(200, { "Content-Type": "text/html" });
+  res.writeHead(200, {
+    "Content-Type": "text/html",
+    "HX-Trigger": "refreshTree",
+  });
   res.end(await renderDetailView(key, toRender!, repo));
 }

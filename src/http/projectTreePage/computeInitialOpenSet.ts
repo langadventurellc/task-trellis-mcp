@@ -1,0 +1,16 @@
+import { TrellisObjectStatus, type TrellisObject } from "../../models";
+
+/** IDs of rows that should start expanded: ancestors of any in-progress issue. */
+export function computeInitialOpenSet(objects: TrellisObject[]): Set<string> {
+  const byId = new Map(objects.map((o) => [o.id, o]));
+  const open = new Set<string>();
+  for (const o of objects) {
+    if (o.status !== TrellisObjectStatus.IN_PROGRESS) continue;
+    let parentId = o.parent;
+    while (parentId && !open.has(parentId)) {
+      open.add(parentId);
+      parentId = byId.get(parentId)?.parent ?? null;
+    }
+  }
+  return open;
+}

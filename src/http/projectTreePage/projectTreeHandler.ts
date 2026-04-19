@@ -2,28 +2,13 @@ import { existsSync } from "node:fs";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { join } from "node:path";
 import { resolveDataDir } from "../../configuration/resolveDataDir";
-import { TrellisObjectStatus } from "../../models";
-import type { TrellisObject } from "../../models";
 import { appShell } from "../appShell";
 import { escapeHtml } from "../escapeHtml";
 import { makeRepo } from "./makeRepo";
+import { metaBar } from "./metaBar";
 import { renderTreeFragment } from "./renderTreeFragment";
 
-function metaBar(objects: TrellisObject[]): string {
-  const total = objects.length;
-  const open = objects.filter(
-    (o) => o.status === TrellisObjectStatus.OPEN,
-  ).length;
-  const inProgress = objects.filter(
-    (o) => o.status === TrellisObjectStatus.IN_PROGRESS,
-  ).length;
-  const done = objects.filter(
-    (o) => o.status === TrellisObjectStatus.DONE,
-  ).length;
-  return `${total} issues · ${open} open · ${inProgress} in-progress · ${done} done`;
-}
-
-/** Handles GET /projects/:key — full project page with sidebar tree, meta counts, and empty detail pane. */
+/** Handles GET /projects/:key — full app shell with sidebar tree, meta counts, and empty detail pane. */
 export async function projectTreeHandler(
   _req: IncomingMessage,
   res: ServerResponse,
@@ -40,34 +25,54 @@ export async function projectTreeHandler(
   const repo = makeRepo(key);
   const allObjects = await repo.getObjects(true);
   const treeHtml = renderTreeFragment(key, allObjects);
+  const keyEsc = escapeHtml(key);
 
   const sidebar = `<aside class="sidebar">
-  <header class="brand"><a href="/">Task Trellis</a></header>
-  <input
-    type="text"
-    name="q"
-    placeholder="Search issues\u2026"
-    hx-get="/projects/${escapeHtml(key)}/issues/search"
-    hx-target="#issue-tree"
-    hx-trigger="keyup changed delay:200ms"
-    hx-params="q"
-  >
-  <p class="meta">${metaBar(allObjects)}</p>
-  <div
+  <div class="sidebar-header">
+    <div class="brand">
+      <div class="brand-mark">TT</div>
+      <div>
+        <div class="brand-name"><a href="/" style="text-decoration:none;color:inherit;">Task Trellis</a></div>
+        <div class="brand-repo">${keyEsc}</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:2px;">
+      <button class="icon-btn" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode" type="button">
+        <svg class="theme-icon-light"><use href="#i-moon"/></svg>
+        <svg class="theme-icon-dark"><use href="#i-sun"/></svg>
+      </button>
+      <button class="icon-btn" title="New top-level issue" type="button"
+        hx-get="/projects/${keyEsc}/issues/new" hx-target="#detail" hx-swap="innerHTML">
+        <svg><use href="#i-plus"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="search">
+    <svg><use href="#i-search"/></svg>
+    <input type="text" name="q" placeholder="Search issues\u2026"
+      hx-get="/projects/${keyEsc}/issues/search"
+      hx-target="#issue-tree"
+      hx-trigger="keyup changed delay:200ms"
+      hx-params="q" />
+  </div>
+
+  <div class="tree-meta" id="tree-meta">${metaBar(allObjects)}</div>
+
+  <nav class="tree"
     id="issue-tree"
     hx-trigger="refreshTree from:body"
-    hx-get="/projects/${escapeHtml(key)}/issues/search"
-    hx-swap="innerHTML"
-  >
+    hx-get="/projects/${keyEsc}/issues/search"
+    hx-swap="innerHTML">
     ${treeHtml}
-  </div>
+  </nav>
 </aside>`;
 
-  const body = `<div id="modal"></div>
-<div class="app-layout">
+  const body = `<div class="app">
   ${sidebar}
-  <main class="detail-pane">
-    <div id="detail"></div>
+  <main class="main">
+    <div class="detail" id="detail"></div>
+    <div id="modal"></div>
   </main>
 </div>`;
 

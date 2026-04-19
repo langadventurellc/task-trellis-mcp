@@ -96,12 +96,17 @@ export async function createTopSubmitHandler(
   );
   const newObj = await resolveCreatedObj(repo, result.content[0]?.text ?? "");
 
+  const okHeaders = {
+    "Content-Type": "text/html",
+    "HX-Trigger": "refreshTree",
+  };
+
   if (!newObj) {
-    res.writeHead(200, { "Content-Type": "text/html" });
+    res.writeHead(200, okHeaders);
     res.end(`<div data-view="view"><p>Created successfully.</p></div>`);
     return;
   }
 
-  res.writeHead(200, { "Content-Type": "text/html" });
+  res.writeHead(200, okHeaders);
   res.end(await renderDetailView(key, newObj, repo));
 }

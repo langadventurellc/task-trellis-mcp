@@ -85,6 +85,9 @@ export async function editSubmitHandler(
   }
 
   const updated = (await repo.getObjectById(id)) as TrellisObject;
-  res.writeHead(200, { "Content-Type": "text/html" });
+  res.writeHead(200, {
+    "Content-Type": "text/html",
+    "HX-Trigger": "refreshTree",
+  });
   res.end(await renderDetailView(key, updated, repo));
 }

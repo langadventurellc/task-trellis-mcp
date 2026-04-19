@@ -101,7 +101,8 @@ describe("projectTreeHandler", () => {
     expect(html).toContain('id="issue-tree"');
     expect(html).toContain('hx-trigger="refreshTree from:body"');
     expect(html).toContain("/projects/my-proj/issues/search");
-    expect(html).toContain("3 issues · 1 open · 1 in-progress · 1 done");
+    expect(html).toContain("<strong>3</strong> issues");
+    expect(html).toContain("1 open · 1 in-progress · 1 done");
   });
 
   it("renders search input wired to search endpoint", async () => {
@@ -133,9 +134,9 @@ describe("projectTreeHandler", () => {
 
     const html = (res.end as jest.Mock).mock.calls[0][0] as string;
     expect(html).toContain('class="kind">T<');
-    expect(html).toContain("status-dot progress");
-    expect(html).toContain("priority-bar med");
-    expect(html).toContain("chevron");
+    expect(html).toContain("sdot progress");
+    expect(html).toContain("pbar med");
+    expect(html).toContain('class="chev"');
   });
 });
 
@@ -164,6 +165,23 @@ describe("searchHandler", () => {
     expect((res.writeHead as jest.Mock).mock.calls[0][0]).toBe(200);
     const html = (res.end as jest.Mock).mock.calls[0][0] as string;
     expect(html).toContain("One");
+  });
+
+  it("emits OOB tree-meta update alongside tree fragment", async () => {
+    mockGetObjects.mockResolvedValue([
+      makeObj({ id: "T-one", status: TrellisObjectStatus.OPEN }),
+      makeObj({ id: "T-two", status: TrellisObjectStatus.DONE }),
+    ]);
+
+    const res = makeRes();
+    await searchHandler(makeReq("/projects/my-proj/issues/search"), res, {
+      key: "my-proj",
+    });
+
+    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
+    expect(html).toContain('id="tree-meta"');
+    expect(html).toContain('hx-swap-oob="true"');
+    expect(html).toContain("<strong>2</strong> issues");
   });
 
   it("filters results by case-insensitive title match", async () => {
@@ -272,8 +290,8 @@ describe("detailViewHandler", () => {
     expect(html).toContain("The body text");
     expect(html).toContain("status-progress");
     expect(html).toContain("In Progress");
-    expect(html).toContain("priority-med");
-    expect(html).toContain("med");
+    expect(html).toContain("priority med");
+    expect(html).toContain("Medium priority");
     expect(html).toContain("Task");
     expect(html).toContain('data-view="view"');
   });
@@ -389,8 +407,8 @@ describe("detailViewHandler", () => {
     });
 
     const html = (res.end as jest.Mock).mock.calls[0][0] as string;
-    expect(html).toContain('<li class="entry">First log entry</li>');
-    expect(html).toContain('<li class="entry">Second log entry</li>');
+    expect(html).toContain('<span class="entry">First log entry</span>');
+    expect(html).toContain('<span class="entry">Second log entry</span>');
   });
 
   it("renders affectedFiles with path and description", async () => {

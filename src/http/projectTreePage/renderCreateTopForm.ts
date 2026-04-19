@@ -19,11 +19,12 @@ function typeRadios(selected: string): string {
     ["feature", "Feature"],
     ["task", "Task"],
   ]
-    .map(
-      ([value, label]) =>
-        `<label><input type="radio" name="type" value="${value}"${selected === value ? " checked" : ""} required /> ${label}</label>`,
-    )
-    .join("\n");
+    .map(([value, label]) => {
+      const id = `t-${value}`;
+      const checked = selected === value ? " checked" : "";
+      return `<input type="radio" id="${id}" name="type" value="${value}"${checked} required><label for="${id}">${label}</label>`;
+    })
+    .join("");
 }
 
 /** Renders the data-view="create" form fragment for a new top-level issue. */
@@ -32,34 +33,53 @@ export function renderCreateTopForm(
   fields: CreateTopFields = {},
   error?: string,
 ): string {
-  const errorBanner = error ? `<div class="error-banner">${error}</div>` : "";
+  const keyEsc = escapeHtml(key);
+  const errorBanner = error
+    ? `<div class="error-banner" style="padding:10px 12px;margin-bottom:12px;border:1px solid var(--danger);background:var(--danger-tint);color:var(--danger);border-radius:6px;font-size:13px;">${escapeHtml(error)}</div>`
+    : "";
   const status = fields.status ?? TrellisObjectStatus.DRAFT;
   const priority = fields.priority ?? TrellisObjectPriority.MEDIUM;
   return `<div data-view="create">
   ${errorBanner}
-  <form hx-post="/projects/${escapeHtml(key)}/issues" hx-target="#detail" hx-swap="innerHTML">
-    <fieldset>
-      <legend>Type</legend>
-      ${typeRadios(fields.type ?? "")}
-    </fieldset>
-    <label>Title
-      <input type="text" name="title" value="${escapeHtml(fields.title ?? "")}" required />
-    </label>
-    <fieldset>
-      <legend>Status</legend>
-      ${statusRadios(status)}
-    </fieldset>
-    <fieldset>
-      <legend>Priority</legend>
-      ${priorityRadios(priority)}
-    </fieldset>
-    <label>Body
-      <textarea name="body">${escapeHtml(fields.body ?? "")}</textarea>
-    </label>
-    <label>Prerequisites (comma-separated IDs)
-      <input type="text" name="prerequisites" value="${escapeHtml(fields.prerequisites ?? "")}" />
-    </label>
-    <button type="submit">Create</button>
+  <form class="form-card" hx-post="/projects/${keyEsc}/issues" hx-target="#detail" hx-swap="innerHTML">
+    <div class="form-header">
+      <h2>New top-level issue</h2>
+      <span class="dim">${keyEsc}</span>
+    </div>
+    <div class="form-grid">
+      <div class="fld">
+        <label>Type</label>
+        <div class="seg">${typeRadios(fields.type ?? "")}</div>
+      </div>
+      <div class="fld">
+        <label for="top-title">Title</label>
+        <input id="top-title" type="text" name="title" value="${escapeHtml(fields.title ?? "")}" required autofocus />
+      </div>
+      <div class="form-row">
+        <div class="fld">
+          <label>Status</label>
+          <div class="seg">${statusRadios(status, "ts")}</div>
+        </div>
+        <div class="fld">
+          <label>Priority</label>
+          <div class="seg">${priorityRadios(priority, "tp")}</div>
+        </div>
+      </div>
+      <div class="fld">
+        <label for="top-body">Body</label>
+        <textarea id="top-body" name="body">${escapeHtml(fields.body ?? "")}</textarea>
+      </div>
+      <div class="fld">
+        <label for="top-prereqs">Prerequisites</label>
+        <input id="top-prereqs" type="text" name="prerequisites" value="${escapeHtml(fields.prerequisites ?? "")}" placeholder="Comma-separated issue IDs (optional)" />
+      </div>
+    </div>
+    <div class="form-footer">
+      <div class="left"></div>
+      <div class="right">
+        <button type="submit" class="btn primary"><svg><use href="#i-plus"/></svg> Create issue</button>
+      </div>
+    </div>
   </form>
 </div>`;
 }

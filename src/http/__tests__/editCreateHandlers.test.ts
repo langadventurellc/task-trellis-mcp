@@ -215,7 +215,12 @@ describe("editSubmitHandler", () => {
       "done",
       true,
     );
-    expect((res.writeHead as jest.Mock).mock.calls[0][0]).toBe(200);
+    const [status, headers] = (res.writeHead as jest.Mock).mock.calls[0] as [
+      number,
+      Record<string, string>,
+    ];
+    expect(status).toBe(200);
+    expect(headers["HX-Trigger"]).toBe("refreshTree");
   });
 
   it("calls appendObjectLog when log_entry is non-empty", async () => {
@@ -437,7 +442,12 @@ describe("createChildSubmitHandler", () => {
       [],
       "",
     );
-    expect((res.writeHead as jest.Mock).mock.calls[0][0]).toBe(200);
+    const [status, headers] = (res.writeHead as jest.Mock).mock.calls[0] as [
+      number,
+      Record<string, string>,
+    ];
+    expect(status).toBe(200);
+    expect(headers["HX-Trigger"]).toBe("refreshTree");
     const html = (res.end as jest.Mock).mock.calls[0][0] as string;
     expect(html).toContain('data-view="view"');
     expect(html).toContain("New Task");
@@ -533,7 +543,12 @@ describe("createTopSubmitHandler", () => {
       [],
       "Some description",
     );
-    expect((res.writeHead as jest.Mock).mock.calls[0][0]).toBe(200);
+    const [status, headers] = (res.writeHead as jest.Mock).mock.calls[0] as [
+      number,
+      Record<string, string>,
+    ];
+    expect(status).toBe(200);
+    expect(headers["HX-Trigger"]).toBe("refreshTree");
     const html = (res.end as jest.Mock).mock.calls[0][0] as string;
     expect(html).toContain('data-view="view"');
   });
