@@ -3,7 +3,7 @@ import path from "node:path";
 import { httpServer } from "../httpServer";
 import { landingPageHandler } from "./landingPage";
 import {
-  detailPartialHandler,
+  detailViewHandler,
   projectTreeHandler,
   searchHandler,
 } from "./projectTreePage";
@@ -33,7 +33,7 @@ router.get("/projects/:key/issues/search", (req, res, params) =>
   searchHandler(req, res, params),
 );
 router.get("/projects/:key/issues/:id/detail", (req, res, params) =>
-  detailPartialHandler(req, res, params),
+  detailViewHandler(req, res, params),
 );
 
 httpServer.on("request", (req, res) => router.dispatch(req, res));

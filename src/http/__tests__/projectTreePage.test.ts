@@ -12,7 +12,7 @@ import {
 } from "../../models";
 import { LocalRepository } from "../../repositories/local/LocalRepository";
 import {
-  detailPartialHandler,
+  detailViewHandler,
   projectTreeHandler,
   searchHandler,
 } from "../projectTreePage";
@@ -220,7 +220,7 @@ describe("searchHandler", () => {
   });
 });
 
-describe("detailPartialHandler", () => {
+describe("detailViewHandler", () => {
   let mockGetObjectById: jest.Mock;
 
   beforeEach(() => {
@@ -233,20 +233,36 @@ describe("detailPartialHandler", () => {
     mockResolveDataDir.mockReturnValue("/test/data");
   });
 
-  it("renders body, status, prerequisites, and log fields", async () => {
+  it("returns 404 for unknown IDs", async () => {
+    mockGetObjectById.mockResolvedValue(null);
+
+    const res = makeRes();
+    await detailViewHandler(makeReq(), res, {
+      key: "my-proj",
+      id: "T-missing",
+    });
+
+    expect((res.writeHead as jest.Mock).mock.calls[0][0]).toBe(404);
+    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
+    expect(html).toContain("Not found");
+    expect(html).toContain("T-missing");
+  });
+
+  it("renders title, badges, and description", async () => {
     mockGetObjectById.mockResolvedValue(
       makeObj({
         id: "T-detail",
         title: "Detail Task",
         body: "The body text",
         status: TrellisObjectStatus.IN_PROGRESS,
-        prerequisites: ["T-prereq-1"],
-        log: ["2026-01-01T00:00:00Z Task logged"],
+        priority: TrellisObjectPriority.MEDIUM,
+        type: TrellisObjectType.TASK,
+        parent: null,
       }),
     );
 
     const res = makeRes();
-    await detailPartialHandler(makeReq(), res, {
+    await detailViewHandler(makeReq(), res, {
       key: "my-proj",
       id: "T-detail",
     });
@@ -254,23 +270,173 @@ describe("detailPartialHandler", () => {
     const html = (res.end as jest.Mock).mock.calls[0][0] as string;
     expect(html).toContain("Detail Task");
     expect(html).toContain("The body text");
-    expect(html).toContain("in-progress");
-    expect(html).toContain("T-prereq-1");
-    expect(html).toContain("Task logged");
+    expect(html).toContain("status-progress");
+    expect(html).toContain("In Progress");
+    expect(html).toContain("priority-med");
+    expect(html).toContain("med");
+    expect(html).toContain("Task");
+    expect(html).toContain('data-view="view"');
   });
 
-  it("returns Not found fragment for unknown IDs", async () => {
-    mockGetObjectById.mockResolvedValue(null);
+  it("hides Add child button for task type", async () => {
+    mockGetObjectById.mockResolvedValue(
+      makeObj({ id: "T-task", type: TrellisObjectType.TASK, parent: null }),
+    );
 
     const res = makeRes();
-    await detailPartialHandler(makeReq(), res, {
+    await detailViewHandler(makeReq(), res, { key: "my-proj", id: "T-task" });
+
+    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
+    expect(html).toContain('style="display:none"');
+    expect(html).toContain("Add child");
+  });
+
+  it("shows Add child button for non-task types", async () => {
+    mockGetObjectById.mockResolvedValue(
+      makeObj({
+        id: "F-feat",
+        type: TrellisObjectType.FEATURE,
+        parent: null,
+      }),
+    );
+
+    const res = makeRes();
+    await detailViewHandler(makeReq(), res, { key: "my-proj", id: "F-feat" });
+
+    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
+    expect(html).not.toContain('style="display:none"');
+    expect(html).toContain("Add child");
+  });
+
+  it("renders breadcrumbs with ancestor links", async () => {
+    mockGetObjectById.mockImplementation((id: string) => {
+      if (id === "T-child")
+        return Promise.resolve(
+          makeObj({ id: "T-child", title: "Child Task", parent: "F-parent" }),
+        );
+      if (id === "F-parent")
+        return Promise.resolve(
+          makeObj({
+            id: "F-parent",
+            title: "Parent Feature",
+            type: TrellisObjectType.FEATURE,
+            parent: null,
+          }),
+        );
+      return Promise.resolve(null);
+    });
+
+    const res = makeRes();
+    await detailViewHandler(makeReq(), res, {
       key: "my-proj",
-      id: "T-missing",
+      id: "T-child",
     });
 
     const html = (res.end as jest.Mock).mock.calls[0][0] as string;
-    expect(html).toContain("Not found");
-    expect(html).toContain("T-missing");
-    expect((res.writeHead as jest.Mock).mock.calls[0][0]).toBe(200);
+    expect(html).toContain("Parent Feature");
+    expect(html).toContain('hx-get="/projects/my-proj/issues/F-parent/detail"');
+    expect(html).toContain("Child Task");
+  });
+
+  it("renders prerequisites with resolved titles and status badges", async () => {
+    mockGetObjectById.mockImplementation((id: string) => {
+      if (id === "T-detail")
+        return Promise.resolve(
+          makeObj({
+            id: "T-detail",
+            title: "Detail Task",
+            prerequisites: ["T-prereq-1"],
+            parent: null,
+          }),
+        );
+      if (id === "T-prereq-1")
+        return Promise.resolve(
+          makeObj({
+            id: "T-prereq-1",
+            title: "Prereq One",
+            status: TrellisObjectStatus.DONE,
+            parent: null,
+          }),
+        );
+      return Promise.resolve(null);
+    });
+
+    const res = makeRes();
+    await detailViewHandler(makeReq(), res, {
+      key: "my-proj",
+      id: "T-detail",
+    });
+
+    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
+    expect(html).toContain("T-prereq-1");
+    expect(html).toContain("Prereq One");
+    expect(html).toContain("Done");
+  });
+
+  it("renders log entries as list items without timestamps", async () => {
+    mockGetObjectById.mockResolvedValue(
+      makeObj({
+        id: "T-logged",
+        log: ["First log entry", "Second log entry"],
+        parent: null,
+      }),
+    );
+
+    const res = makeRes();
+    await detailViewHandler(makeReq(), res, {
+      key: "my-proj",
+      id: "T-logged",
+    });
+
+    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
+    expect(html).toContain('<li class="entry">First log entry</li>');
+    expect(html).toContain('<li class="entry">Second log entry</li>');
+  });
+
+  it("renders affectedFiles with path and description", async () => {
+    const files = new Map([
+      ["src/foo.ts", "Added foo feature"],
+      ["src/bar.ts", "Updated bar"],
+    ]);
+    mockGetObjectById.mockResolvedValue(
+      makeObj({ id: "T-files", affectedFiles: files, parent: null }),
+    );
+
+    const res = makeRes();
+    await detailViewHandler(makeReq(), res, {
+      key: "my-proj",
+      id: "T-files",
+    });
+
+    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
+    expect(html).toContain("src/foo.ts");
+    expect(html).toContain("Added foo feature");
+    expect(html).toContain("src/bar.ts");
+    expect(html).toContain("Updated bar");
+  });
+
+  it("renders empty states when sections have no content", async () => {
+    mockGetObjectById.mockResolvedValue(
+      makeObj({
+        id: "T-empty",
+        body: "",
+        prerequisites: [],
+        log: [],
+        affectedFiles: new Map(),
+        parent: null,
+      }),
+    );
+
+    const res = makeRes();
+    await detailViewHandler(makeReq(), res, {
+      key: "my-proj",
+      id: "T-empty",
+    });
+
+    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
+    expect(html).toContain("No description.");
+    expect(html).toContain("No prerequisites.");
+    expect(html).toContain("No log entries.");
+    expect(html).toContain("No modified files.");
   });
 });
