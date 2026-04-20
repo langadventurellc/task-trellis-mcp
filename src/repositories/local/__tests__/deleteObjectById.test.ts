@@ -1,5 +1,5 @@
 import { join } from "path";
-import { cp, rm, access, readdir, writeFile } from "fs/promises";
+import { cp, rm, access, readdir, writeFile, mkdir } from "fs/promises";
 import { constants } from "fs";
 import { TrellisObjectType } from "../../../models";
 import { deleteObjectById } from "../deleteObjectById";
@@ -331,6 +331,74 @@ This task depends on T-setup-database.
       await expect(
         deleteObjectById("T-setup-database", "/non/existent/path"),
       ).rejects.toThrow();
+    });
+  });
+
+  describe("Attachment cleanup", () => {
+    it("should remove project attachments/ subfolder as part of recursive folder delete", async () => {
+      const attachmentsPath = join(
+        testPlanningRoot,
+        "p",
+        "P-ecommerce-platform",
+        "attachments",
+      );
+      await mkdir(attachmentsPath, { recursive: true });
+      await writeFile(join(attachmentsPath, "spec.pdf"), "data");
+
+      await deleteObjectById("P-ecommerce-platform", testPlanningRoot);
+
+      await expect(access(attachmentsPath, constants.F_OK)).rejects.toThrow();
+    });
+
+    it("should remove attachments folder when deleting a parented task", async () => {
+      const attachmentsPath = join(
+        testPlanningRoot,
+        "f",
+        "F-user-authentication",
+        "t",
+        "attachments",
+        "T-implement-login",
+      );
+      await mkdir(attachmentsPath, { recursive: true });
+      await writeFile(join(attachmentsPath, "notes.txt"), "data");
+
+      await deleteObjectById("T-implement-login", testPlanningRoot);
+
+      const result = await getObjectById("T-implement-login", testPlanningRoot);
+      expect(result).toBeNull();
+      await expect(access(attachmentsPath, constants.F_OK)).rejects.toThrow();
+      // Parent feature folder still exists
+      const featureFolderPath = join(
+        testPlanningRoot,
+        "f",
+        "F-user-authentication",
+      );
+      await expect(
+        access(featureFolderPath, constants.F_OK),
+      ).resolves.not.toThrow();
+    });
+
+    it("should remove attachments folder when deleting a standalone task", async () => {
+      const attachmentsPath = join(
+        testPlanningRoot,
+        "t",
+        "attachments",
+        "T-setup-database",
+      );
+      await mkdir(attachmentsPath, { recursive: true });
+      await writeFile(join(attachmentsPath, "notes.txt"), "data");
+
+      await deleteObjectById("T-setup-database", testPlanningRoot);
+
+      const result = await getObjectById("T-setup-database", testPlanningRoot);
+      expect(result).toBeNull();
+      await expect(access(attachmentsPath, constants.F_OK)).rejects.toThrow();
+    });
+
+    it("should not throw when task attachments folder does not exist", async () => {
+      await expect(
+        deleteObjectById("T-implement-login", testPlanningRoot),
+      ).resolves.not.toThrow();
     });
   });
 

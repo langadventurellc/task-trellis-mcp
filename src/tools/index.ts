@@ -18,3 +18,8 @@ export { getObjectTool, handleGetObject } from "./getObjectTool.js";
 export { getUiInfoTool, handleGetUiInfo } from "./getUiInfoTool.js";
 export { handleListObjects, listObjectsTool } from "./listObjectsTool.js";
 export { handleUpdateObject, updateObjectTool } from "./updateObjectTool.js";
+export { addAttachmentTool, handleAddAttachment } from "./addAttachmentTool.js";
+export {
+  handleRemoveAttachment,
+  removeAttachmentTool,
+} from "./removeAttachmentTool.js";

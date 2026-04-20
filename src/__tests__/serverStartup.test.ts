@@ -33,6 +33,10 @@ const mockRepository: jest.Mocked<Repository> = {
   saveObject: jest.fn(),
   deleteObject: jest.fn(),
   getChildrenOf: jest.fn(),
+  getAttachmentsFolder: jest.fn(),
+  listAttachments: jest.fn(),
+  copyAttachment: jest.fn(),
+  deleteAttachment: jest.fn(),
 };
 
 const mockService: jest.Mocked<TaskTrellisService> = {
@@ -45,6 +49,8 @@ const mockService: jest.Mocked<TaskTrellisService> = {
   getNextAvailableIssue: jest.fn(),
   completeTask: jest.fn(),
   pruneClosed: jest.fn(),
+  addAttachment: jest.fn(),
+  removeAttachment: jest.fn(),
 };
 
 // Mock the repository and service getter functions
