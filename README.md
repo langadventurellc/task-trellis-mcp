@@ -165,6 +165,10 @@ Task Trellis UI: http://127.0.0.1:3717
 - **append_issue_log** - Add progress notes and status updates to task history (occurs automatically on task completion)
 - **append_modified_files** - Record files modified during task execution with change descriptions (occurs automatically on task completion)
 
+### Browser UI
+
+- **get_ui_info** - Returns the URL and port of the Task Trellis browser UI; use when the user asks about the UI or wants to view issues in a browser
+
 ### System Management
 
 - **prune_closed** - Clean up old completed/cancelled issues for maintenance
