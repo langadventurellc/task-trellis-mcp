@@ -66,6 +66,7 @@ export async function renderDetailView(
   key: string,
   obj: TrellisObject,
   repo: Repository,
+  attachments: string[] = [],
 ): Promise<string> {
   const breadcrumbs = await buildBreadcrumbs(key, obj, repo);
   const keyEsc = escapeHtml(key);
@@ -126,6 +127,19 @@ export async function renderDetailView(
       .join("")}</ul>`;
   }
 
+  const attachmentsList =
+    attachments.length > 0
+      ? `<div class="field-group">
+    <div class="field-label">Attachments</div>
+    <ul class="prereq-list">${attachments
+      .map(
+        (name) =>
+          `<li><a href="/projects/${keyEsc}/issues/${idEsc}/attachments/${encodeURIComponent(name)}">${escapeHtml(name)}</a></li>`,
+      )
+      .join("")}</ul>
+  </div>`
+      : "";
+
   return `<div data-view="view">
   ${breadcrumbs}
   ${titleRow}
@@ -134,6 +148,7 @@ export async function renderDetailView(
     <div class="field-label">Description</div>
     ${description}
   </div>
+  ${attachmentsList}
   <div class="field-group">
     <div class="field-label">Prerequisites</div>
     ${prerequisites}

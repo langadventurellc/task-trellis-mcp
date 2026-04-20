@@ -7,6 +7,7 @@ import {
   isRequiredForOtherObjects,
 } from "../../utils";
 import { findMarkdownFiles } from "./findMarkdownFiles";
+import { getAttachmentsFolder } from "./getAttachmentsFolder";
 
 interface FoundObject {
   filePath: string;
@@ -70,6 +71,7 @@ async function deleteAssociatedFolder(
     return;
   }
 
+  // rm -rf on the object folder also removes the attachments/ subfolder within it.
   const associatedFolderPath = dirname(filePath);
 
   try {
@@ -108,6 +110,23 @@ export async function deleteObjectById(
     await checkObjectDependencies(object, planningRoot);
   }
 
+  // Resolve task attachments folder before deletion. Best-effort: tolerate a
+  // broken parent chain (e.g., orphaned child during prune) — cleanup is skipped
+  // when the path can't be computed.
+  let taskAttachmentsFolder: string | null = null;
+  if (id.startsWith("T-")) {
+    try {
+      taskAttachmentsFolder = await getAttachmentsFolder(id, planningRoot);
+    } catch {
+      taskAttachmentsFolder = null;
+    }
+  }
+
   await deleteObjectFile(filePath);
+  // For P/E/F, deleteAssociatedFolder rm -rf covers the attachments/ subfolder.
   await deleteAssociatedFolder(id, filePath);
+
+  if (taskAttachmentsFolder) {
+    await rm(taskAttachmentsFolder, { recursive: true, force: true });
+  }
 }

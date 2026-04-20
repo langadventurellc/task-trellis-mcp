@@ -240,13 +240,18 @@ describe("searchHandler", () => {
 
 describe("detailViewHandler", () => {
   let mockGetObjectById: jest.Mock;
+  let mockListAttachments: jest.Mock;
 
   beforeEach(() => {
     jest.resetAllMocks();
     mockGetObjectById = jest.fn().mockResolvedValue(null);
+    mockListAttachments = jest.fn().mockResolvedValue([]);
     MockedLocalRepository.mockImplementation(
       () =>
-        ({ getObjectById: mockGetObjectById }) as unknown as LocalRepository,
+        ({
+          getObjectById: mockGetObjectById,
+          listAttachments: mockListAttachments,
+        }) as unknown as LocalRepository,
     );
     mockResolveDataDir.mockReturnValue("/test/data");
   });
@@ -456,5 +461,45 @@ describe("detailViewHandler", () => {
     expect(html).toContain("No prerequisites.");
     expect(html).toContain("No log entries.");
     expect(html).toContain("No modified files.");
+  });
+
+  it("renders attachment links when attachments are present", async () => {
+    mockGetObjectById.mockResolvedValue(
+      makeObj({ id: "T-attach", title: "Attach Task", parent: null }),
+    );
+    mockListAttachments.mockResolvedValue(["diagram.png", "notes.txt"]);
+
+    const res = makeRes();
+    await detailViewHandler(makeReq(), res, {
+      key: "my-proj",
+      id: "T-attach",
+    });
+
+    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
+    expect(html).toContain("Attachments");
+    expect(html).toContain(
+      'href="/projects/my-proj/issues/T-attach/attachments/diagram.png"',
+    );
+    expect(html).toContain(
+      'href="/projects/my-proj/issues/T-attach/attachments/notes.txt"',
+    );
+    expect(html).toContain("diagram.png");
+    expect(html).toContain("notes.txt");
+  });
+
+  it("renders no attachments section when list is empty", async () => {
+    mockGetObjectById.mockResolvedValue(
+      makeObj({ id: "T-noattach", parent: null }),
+    );
+    mockListAttachments.mockResolvedValue([]);
+
+    const res = makeRes();
+    await detailViewHandler(makeReq(), res, {
+      key: "my-proj",
+      id: "T-noattach",
+    });
+
+    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
+    expect(html).not.toContain("Attachments");
   });
 });

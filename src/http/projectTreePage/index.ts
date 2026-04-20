@@ -1,3 +1,4 @@
+export { attachmentHandler } from "./attachmentHandler";
 export { createChildFormHandler } from "./createChildFormHandler";
 export { createChildSubmitHandler } from "./createChildSubmitHandler";
 export { createTopFormHandler } from "./createTopFormHandler";

@@ -49,6 +49,10 @@ describe("updateObject", () => {
       saveObject: jest.fn(),
       deleteObject: jest.fn(),
       getChildrenOf: jest.fn(),
+      getAttachmentsFolder: jest.fn(),
+      listAttachments: jest.fn(),
+      copyAttachment: jest.fn(),
+      deleteAttachment: jest.fn(),
     };
 
     mockServerConfig = {

@@ -160,4 +160,22 @@ export class LocalTaskTrellisService implements TaskTrellisService {
     const { appendModifiedFiles } = await import("./appendModifiedFiles");
     return appendModifiedFiles(repository, id, filesChanged);
   }
+
+  async addAttachment(
+    repository: Repository,
+    id: string,
+    sourcePath: string,
+  ): Promise<{ content: Array<{ type: string; text: string }> }> {
+    const { addAttachment } = await import("./addAttachment");
+    return addAttachment(repository, id, sourcePath);
+  }
+
+  async removeAttachment(
+    repository: Repository,
+    id: string,
+    filename: string,
+  ): Promise<{ content: Array<{ type: string; text: string }> }> {
+    const { removeAttachment } = await import("./removeAttachment");
+    return removeAttachment(repository, id, filename);
+  }
 }

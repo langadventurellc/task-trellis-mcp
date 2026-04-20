@@ -42,6 +42,21 @@ class MockRepository implements Repository {
     );
     return Promise.resolve(children);
   }
+  async getAttachmentsFolder(_id: string): Promise<string> {
+    return Promise.resolve("");
+  }
+
+  async listAttachments(_id: string): Promise<string[]> {
+    return Promise.resolve([]);
+  }
+
+  async copyAttachment(_id: string, _sourcePath: string): Promise<string> {
+    return Promise.resolve("");
+  }
+
+  async deleteAttachment(_id: string, _filename: string): Promise<void> {
+    return Promise.resolve();
+  }
 }
 
 describe("isRequiredForOtherObjects", () => {
@@ -318,6 +333,10 @@ describe("isRequiredForOtherObjects", () => {
       saveObject: jest.fn(),
       deleteObject: jest.fn(),
       getChildrenOf: jest.fn(),
+      getAttachmentsFolder: jest.fn(),
+      listAttachments: jest.fn(),
+      copyAttachment: jest.fn(),
+      deleteAttachment: jest.fn(),
     };
 
     await expect(

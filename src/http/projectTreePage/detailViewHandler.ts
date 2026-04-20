@@ -19,6 +19,7 @@ export async function detailViewHandler(
     return;
   }
 
+  const attachments = await repo.listAttachments(id);
   res.writeHead(200, { "Content-Type": "text/html" });
-  res.end(await renderDetailView(key, obj, repo));
+  res.end(await renderDetailView(key, obj, repo, attachments));
 }

@@ -21,6 +21,7 @@ import { LocalRepository, Repository } from "./repositories";
 import { TaskTrellisService } from "./services/TaskTrellisService";
 import { LocalTaskTrellisService } from "./services/local/LocalTaskTrellisService";
 import {
+  addAttachmentTool,
   appendModifiedFilesTool,
   appendObjectLogTool,
   claimTaskTool,
@@ -30,6 +31,7 @@ import {
   getNextAvailableIssueTool,
   getObjectTool,
   getUiInfoTool,
+  handleAddAttachment,
   handleAppendModifiedFiles,
   handleAppendObjectLog,
   handleClaimTask,
@@ -40,8 +42,10 @@ import {
   handleGetObject,
   handleGetUiInfo,
   handleListObjects,
+  handleRemoveAttachment,
   handleUpdateObject,
   listObjectsTool,
+  removeAttachmentTool,
   updateObjectTool,
 } from "./tools";
 
@@ -173,6 +177,8 @@ server.setRequestHandler(ListToolsRequestSchema, () => {
     getNextAvailableIssueTool,
     completeTaskTool,
     getUiInfoTool,
+    addAttachmentTool,
+    removeAttachmentTool,
   ];
 
   return { tools };
@@ -206,6 +212,10 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
       return handleCompleteTask(_getService(), repository, args, serverConfig);
     case "get_ui_info":
       return handleGetUiInfo(projectDir);
+    case "add_attachment":
+      return handleAddAttachment(_getService(), repository, args);
+    case "remove_attachment":
+      return handleRemoveAttachment(_getService(), repository, args);
     default:
       throw new Error(`Unknown tool: ${toolName}`);
   }

@@ -104,4 +104,18 @@ export interface TaskTrellisService {
     id: string,
     filesChanged: Record<string, string>,
   ): Promise<{ content: Array<{ type: string; text: string }> }>;
+
+  /** Copies a file into the managed attachments folder for an issue. */
+  addAttachment(
+    repository: Repository,
+    id: string,
+    sourcePath: string,
+  ): Promise<{ content: Array<{ type: string; text: string }> }>;
+
+  /** Deletes a named file from the managed attachments folder for an issue. */
+  removeAttachment(
+    repository: Repository,
+    id: string,
+    filename: string,
+  ): Promise<{ content: Array<{ type: string; text: string }> }>;
 }

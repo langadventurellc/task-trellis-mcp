@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { landingPageHandler } from "./landingPage";
 import {
+  attachmentHandler,
   createChildFormHandler,
   createChildSubmitHandler,
   createTopFormHandler,
@@ -46,6 +47,10 @@ function buildRouter() {
   );
   router.get("/projects/:key/issues/:id/detail", (req, res, params) =>
     detailViewHandler(req, res, params),
+  );
+  router.get(
+    "/projects/:key/issues/:id/attachments/:filename",
+    (req, res, params) => attachmentHandler(req, res, params),
   );
   router.get("/projects/:key/issues/:id/edit", (req, res, params) =>
     editFormHandler(req, res, params),

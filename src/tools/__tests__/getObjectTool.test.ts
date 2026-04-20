@@ -17,6 +17,10 @@ describe("getObjectTool", () => {
       saveObject: jest.fn(),
       deleteObject: jest.fn(),
       getChildrenOf: jest.fn(),
+      getAttachmentsFolder: jest.fn(),
+      listAttachments: jest.fn().mockResolvedValue([]),
+      copyAttachment: jest.fn(),
+      deleteAttachment: jest.fn(),
     };
   });
 
@@ -46,14 +50,48 @@ describe("getObjectTool", () => {
       });
 
       expect(mockRepository.getObjectById).toHaveBeenCalledWith("T-test-task");
+      expect(mockRepository.listAttachments).toHaveBeenCalledWith(
+        "T-test-task",
+      );
       expect(result).toEqual({
         content: [
           {
             type: "text",
-            text: `Retrieved object: ${JSON.stringify(mockTrellisObject, null, 2)}`,
+            text: `Retrieved object: ${JSON.stringify(
+              { ...mockTrellisObject, affectedFiles: {}, attachments: [] },
+              null,
+              2,
+            )}`,
           },
         ],
       });
+    });
+
+    it("should include populated attachments when files exist", async () => {
+      mockRepository.getObjectById.mockResolvedValue(mockTrellisObject);
+      mockRepository.listAttachments.mockResolvedValue([
+        "notes.pdf",
+        "diagram.png",
+      ]);
+
+      const result = await handleGetObject(mockRepository, {
+        id: "T-test-task",
+      });
+
+      expect(result.content[0].text).toContain('"attachments"');
+      expect(result.content[0].text).toContain("notes.pdf");
+      expect(result.content[0].text).toContain("diagram.png");
+    });
+
+    it("should include empty attachments array when folder is absent", async () => {
+      mockRepository.getObjectById.mockResolvedValue(mockTrellisObject);
+      mockRepository.listAttachments.mockResolvedValue([]);
+
+      const result = await handleGetObject(mockRepository, {
+        id: "T-test-task",
+      });
+
+      expect(result.content[0].text).toContain('"attachments": []');
     });
 
     it("should return not found message when object does not exist", async () => {
@@ -153,9 +191,8 @@ describe("getObjectTool", () => {
       expect(mockRepository.getObjectById).toHaveBeenCalledWith(
         "P-test-project",
       );
-      expect(result.content[0].text).toContain(
-        JSON.stringify(projectObject, null, 2),
-      );
+      expect(result.content[0].text).toContain('"attachments": []');
+      expect(result.content[0].text).toContain("P-test-project");
     });
   });
 });

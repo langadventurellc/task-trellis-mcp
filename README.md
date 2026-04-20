@@ -165,6 +165,13 @@ Task Trellis UI: http://127.0.0.1:3717
 - **append_issue_log** - Add progress notes and status updates to task history (occurs automatically on task completion)
 - **append_modified_files** - Record files modified during task execution with change descriptions (occurs automatically on task completion)
 
+### Attachment Management
+
+- **add_attachment** - Copy a file into the managed attachments folder for an issue (errors if the issue or source file does not exist, or a file with the same name already exists)
+- **remove_attachment** - Delete a named file from an issue's attachments folder (errors if the issue or file does not exist)
+
+Attachments are returned as a list of filenames when calling **get_issue** and are linked in the browser UI detail view.
+
 ### Browser UI
 
 - **get_ui_info** - Returns the URL and port of the Task Trellis browser UI; use when the user asks about the UI or wants to view issues in a browser

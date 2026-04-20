@@ -19,6 +19,8 @@ describe("completeTaskTool", () => {
       appendObjectLog: jest.fn(),
       pruneClosed: jest.fn(),
       appendModifiedFiles: jest.fn(),
+      addAttachment: jest.fn(),
+      removeAttachment: jest.fn(),
     };
 
     mockRepository = {
@@ -27,6 +29,10 @@ describe("completeTaskTool", () => {
       saveObject: jest.fn(),
       deleteObject: jest.fn(),
       getChildrenOf: jest.fn(),
+      getAttachmentsFolder: jest.fn(),
+      listAttachments: jest.fn(),
+      copyAttachment: jest.fn(),
+      deleteAttachment: jest.fn(),
     };
 
     mockServerConfig = {
