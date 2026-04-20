@@ -57,8 +57,63 @@ export async function handleAppendModifiedFiles(
 ): Promise<{ content: Array<{ type: string; text: string }> }> {
   const { id, filesChanged } = args as {
     id: string;
-    filesChanged: Record<string, string>;
+    filesChanged: unknown;
   };
 
-  return await service.appendModifiedFiles(repository, id, filesChanged);
+  if (
+    typeof filesChanged !== "object" ||
+    filesChanged === null ||
+    Array.isArray(filesChanged)
+  ) {
+    return {
+      content: [
+        {
+          type: "text",
+          text: "filesChanged must be a plain object mapping file paths to descriptions",
+        },
+      ],
+    };
+  }
+
+  const entries = Object.entries(filesChanged as Record<string, unknown>);
+
+  if (entries.length > 500) {
+    return {
+      content: [
+        {
+          type: "text",
+          text: `filesChanged exceeds maximum of 500 entries (got ${entries.length})`,
+        },
+      ],
+    };
+  }
+
+  for (const [key] of entries) {
+    if (key.length < 2) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `filesChanged contains invalid key "${key}": keys must be at least 2 characters long`,
+          },
+        ],
+      };
+    }
+    if (/^\d+$/.test(key)) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `filesChanged contains invalid key "${key}": numeric-string keys are not allowed`,
+          },
+        ],
+      };
+    }
+  }
+
+  return await service.appendModifiedFiles(
+    repository,
+    id,
+    filesChanged as Record<string, string>,
+  );
 }

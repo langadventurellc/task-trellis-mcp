@@ -77,7 +77,7 @@ export async function attachmentHandler(
     return;
   }
 
-  const folder = await repo.getAttachmentsFolder(id);
+  const folder = await repo.getAttachmentsFolder(obj);
   const filePath = join(folder, filename);
 
   try {

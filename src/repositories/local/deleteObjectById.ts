@@ -116,7 +116,10 @@ export async function deleteObjectById(
   let taskAttachmentsFolder: string | null = null;
   if (id.startsWith("T-")) {
     try {
-      taskAttachmentsFolder = await getAttachmentsFolder(id, planningRoot);
+      taskAttachmentsFolder = await getAttachmentsFolder(
+        foundObject.object,
+        planningRoot,
+      );
     } catch {
       taskAttachmentsFolder = null;
     }

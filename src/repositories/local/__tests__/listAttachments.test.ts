@@ -1,4 +1,10 @@
 import * as fsp from "fs/promises";
+import {
+  TrellisObject,
+  TrellisObjectPriority,
+  TrellisObjectStatus,
+  TrellisObjectType,
+} from "../../../models";
 import * as getAttachmentsFolderModule from "../getAttachmentsFolder";
 import { listAttachments } from "../listAttachments";
 
@@ -27,6 +33,23 @@ const makeDirents = (
     parentPath: "",
   })) as unknown as ReadDirResult;
 
+const makeObj = (id: string): TrellisObject => ({
+  id,
+  type: TrellisObjectType.FEATURE,
+  title: `Test ${id}`,
+  status: TrellisObjectStatus.OPEN,
+  priority: TrellisObjectPriority.MEDIUM,
+  parent: null,
+  prerequisites: [],
+  affectedFiles: new Map(),
+  log: [],
+  schema: "1.0",
+  childrenIds: [],
+  body: "",
+  created: "2025-01-15T10:00:00Z",
+  updated: "2025-01-15T10:00:00Z",
+});
+
 describe("listAttachments", () => {
   const root = "/planning";
   const folder = "/planning/f/F-feat/attachments";
@@ -44,7 +67,7 @@ describe("listAttachments", () => {
       ]),
     );
 
-    const result = await listAttachments("F-feat", root);
+    const result = await listAttachments(makeObj("F-feat"), root);
     expect(result).toEqual(["report.pdf", "image.png"]);
   });
 
@@ -52,7 +75,7 @@ describe("listAttachments", () => {
     mockReaddir.mockRejectedValueOnce(
       Object.assign(new Error("ENOENT"), { code: "ENOENT" }),
     );
-    const result = await listAttachments("F-feat", root);
+    const result = await listAttachments(makeObj("F-feat"), root);
     expect(result).toEqual([]);
   });
 
@@ -64,7 +87,7 @@ describe("listAttachments", () => {
       ]),
     );
 
-    const result = await listAttachments("F-feat", root);
+    const result = await listAttachments(makeObj("F-feat"), root);
     expect(result).toEqual(["report.pdf"]);
   });
 });

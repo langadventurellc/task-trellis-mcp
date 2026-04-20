@@ -1,6 +1,5 @@
 import { readdir, stat } from "node:fs/promises";
 import { dirname, join, basename } from "node:path";
-import { getObjectByFilePath } from "./getObjectByFilePath";
 
 /**
  * Determines the child folders based on the object type prefix
@@ -8,16 +7,12 @@ import { getObjectByFilePath } from "./getObjectByFilePath";
 function getChildFolders(parentDir: string, objectPrefix: string): string[] {
   switch (objectPrefix) {
     case "P":
-      // Projects have epics in e/ subfolder
       return [join(parentDir, "e")];
     case "E":
-      // Epics have features in f/ subfolder
       return [join(parentDir, "f")];
     case "F":
-      // Features have tasks in t/open/ and t/closed/ subfolders
       return [join(parentDir, "t", "open"), join(parentDir, "t", "closed")];
     default:
-      // Tasks (T) and unknown types have no children
       return [];
   }
 }
@@ -36,26 +31,14 @@ async function scanFolderForChildren(folder: string): Promise<string[]> {
       const stats = await stat(fullPath);
 
       if (stats.isDirectory()) {
-        // For P, E, F objects, the markdown file is inside a folder with the same name
-        // e.g., e/E-epic-name/E-epic-name.md
-        const mdFilePath = join(fullPath, `${entry}.md`);
-        try {
-          const mdStats = await stat(mdFilePath);
-          if (mdStats.isFile()) {
-            const childObject = await getObjectByFilePath(mdFilePath);
-            children.push(childObject.id);
-          }
-        } catch {
-          // File doesn't exist, skip
-        }
+        // For P, E, F objects, the directory name is the child id
+        children.push(entry);
       } else if (stats.isFile() && entry.endsWith(".md")) {
-        // For tasks in open/closed folders, the markdown files are directly in those folders
-        const childObject = await getObjectByFilePath(fullPath);
-        children.push(childObject.id);
+        // For tasks in open/closed folders, strip .md to get the id
+        children.push(entry.replace(/\.md$/i, ""));
       }
     }
   } catch (error) {
-    // Folder doesn't exist or can't be read, skip silently
     if (error instanceof Error && "code" in error && error.code !== "ENOENT") {
       console.error(`Warning: Could not read directory ${folder}:`, error);
     }

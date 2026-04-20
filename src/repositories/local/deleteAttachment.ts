@@ -1,6 +1,7 @@
 import { access, unlink } from "fs/promises";
 import { join } from "path";
 import { getAttachmentsFolder } from "./getAttachmentsFolder";
+import { getObjectById } from "./getObjectById";
 
 /**
  * Deletes a named file from the issue's attachments folder.
@@ -11,8 +12,9 @@ export async function deleteAttachment(
   filename: string,
   planningRoot: string,
 ): Promise<void> {
-  // getAttachmentsFolder throws if issue not found
-  const folder = await getAttachmentsFolder(id, planningRoot);
+  const obj = await getObjectById(id, planningRoot);
+  if (!obj) throw new Error(`Object with ID '${id}' not found`);
+  const folder = await getAttachmentsFolder(obj, planningRoot);
   const filePath = join(folder, filename);
 
   try {
