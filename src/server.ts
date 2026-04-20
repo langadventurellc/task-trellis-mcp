@@ -29,6 +29,7 @@ import {
   deleteObjectTool,
   getNextAvailableIssueTool,
   getObjectTool,
+  getUiInfoTool,
   handleAppendModifiedFiles,
   handleAppendObjectLog,
   handleClaimTask,
@@ -37,6 +38,7 @@ import {
   handleDeleteObject,
   handleGetNextAvailableIssue,
   handleGetObject,
+  handleGetUiInfo,
   handleListObjects,
   handleUpdateObject,
   listObjectsTool,
@@ -147,7 +149,9 @@ Key capabilities:
 
 Tasks are automatically validated for readiness based on prerequisites and status, enabling autonomous agent operation while maintaining work quality and proper sequencing.
 
-Essential for AI agents working on complex, multi-step software projects where systematic task breakdown, dependency management, and progress tracking are critical for successful completion.`,
+Essential for AI agents working on complex, multi-step software projects where systematic task breakdown, dependency management, and progress tracking are critical for successful completion.
+
+A browser UI is also available; call get_ui_info to retrieve its URL whenever the user asks about it.`,
   },
   {
     capabilities: {
@@ -168,6 +172,7 @@ server.setRequestHandler(ListToolsRequestSchema, () => {
     claimTaskTool,
     getNextAvailableIssueTool,
     completeTaskTool,
+    getUiInfoTool,
   ];
 
   return { tools };
@@ -199,6 +204,8 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
       return handleGetNextAvailableIssue(_getService(), repository, args);
     case "complete_task":
       return handleCompleteTask(_getService(), repository, args, serverConfig);
+    case "get_ui_info":
+      return handleGetUiInfo(projectDir);
     default:
       throw new Error(`Unknown tool: ${toolName}`);
   }

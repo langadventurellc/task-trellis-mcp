@@ -15,5 +15,6 @@ export {
   handleGetNextAvailableIssue,
 } from "./getNextAvailableIssueTool.js";
 export { getObjectTool, handleGetObject } from "./getObjectTool.js";
+export { getUiInfoTool, handleGetUiInfo } from "./getUiInfoTool.js";
 export { handleListObjects, listObjectsTool } from "./listObjectsTool.js";
 export { handleUpdateObject, updateObjectTool } from "./updateObjectTool.js";
