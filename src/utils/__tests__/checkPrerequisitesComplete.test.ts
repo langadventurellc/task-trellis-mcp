@@ -42,11 +42,11 @@ class MockRepository implements Repository {
     );
     return Promise.resolve(children);
   }
-  async getAttachmentsFolder(_id: string): Promise<string> {
+  async getAttachmentsFolder(_obj: TrellisObject): Promise<string> {
     return Promise.resolve("");
   }
 
-  async listAttachments(_id: string): Promise<string[]> {
+  async listAttachments(_obj: TrellisObject): Promise<string[]> {
     return Promise.resolve([]);
   }
 

@@ -68,7 +68,11 @@ export async function renderDetailView(
   repo: Repository,
   attachments: string[] = [],
 ): Promise<string> {
-  const breadcrumbs = await buildBreadcrumbs(key, obj, repo);
+  const [breadcrumbs, prerequisites] = await Promise.all([
+    buildBreadcrumbs(key, obj, repo),
+    buildPrerequisites(obj, repo),
+  ]);
+
   const keyEsc = escapeHtml(key);
   const idEsc = escapeHtml(obj.id);
 
@@ -104,8 +108,6 @@ export async function renderDetailView(
   const description = obj.body
     ? `<div class="prose">${escapeHtml(obj.body)}</div>`
     : `<p class="empty">No description.</p>`;
-
-  const prerequisites = await buildPrerequisites(obj, repo);
 
   const log =
     obj.log.length > 0

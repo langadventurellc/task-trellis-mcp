@@ -1,14 +1,15 @@
 import { readdir } from "fs/promises";
+import { type TrellisObject } from "../../models";
 import { getAttachmentsFolder } from "./getAttachmentsFolder";
 
 /** Returns filenames of all attachments for an issue. Returns [] if no folder exists or the parent chain is broken. */
 export async function listAttachments(
-  id: string,
+  obj: TrellisObject,
   planningRoot: string,
 ): Promise<string[]> {
   let folder: string;
   try {
-    folder = await getAttachmentsFolder(id, planningRoot);
+    folder = await getAttachmentsFolder(obj, planningRoot);
   } catch {
     return [];
   }

@@ -283,4 +283,70 @@ describe("appendAffectedFiles service function", () => {
       "Orphaned feature",
     );
   });
+
+  describe("input validation", () => {
+    it("should throw for string filesChanged and not mutate affectedFiles", async () => {
+      const repository = createMockRepository();
+      const trellisObject = createMockTrellisObject({ parent: null });
+
+      await expect(
+        appendAffectedFiles(
+          repository,
+          trellisObject,
+          '{"src/x":"y"}' as unknown as Record<string, string>,
+        ),
+      ).rejects.toThrow(/plain object/);
+
+      expect(trellisObject.affectedFiles.size).toBe(0);
+    });
+
+    it("should throw for array filesChanged and not mutate affectedFiles", async () => {
+      const repository = createMockRepository();
+      const trellisObject = createMockTrellisObject({ parent: null });
+
+      await expect(
+        appendAffectedFiles(repository, trellisObject, [
+          "src/x",
+        ] as unknown as Record<string, string>),
+      ).rejects.toThrow(/plain object/);
+
+      expect(trellisObject.affectedFiles.size).toBe(0);
+    });
+
+    it("should throw for numeric-string key and not mutate affectedFiles", async () => {
+      const repository = createMockRepository();
+      const trellisObject = createMockTrellisObject({ parent: null });
+
+      await expect(
+        appendAffectedFiles(repository, trellisObject, { "12": "a" }),
+      ).rejects.toThrow(/numeric-string/);
+
+      expect(trellisObject.affectedFiles.size).toBe(0);
+    });
+
+    it("should throw for single-character key and not mutate affectedFiles", async () => {
+      const repository = createMockRepository();
+      const trellisObject = createMockTrellisObject({ parent: null });
+
+      await expect(
+        appendAffectedFiles(repository, trellisObject, { x: "a" }),
+      ).rejects.toThrow(/at least 2 characters/);
+
+      expect(trellisObject.affectedFiles.size).toBe(0);
+    });
+
+    it("should throw for 501-entry object and not mutate affectedFiles", async () => {
+      const repository = createMockRepository();
+      const trellisObject = createMockTrellisObject({ parent: null });
+      const filesChanged = Object.fromEntries(
+        Array.from({ length: 501 }, (_, i) => [`src/file${i}.ts`, "desc"]),
+      );
+
+      await expect(
+        appendAffectedFiles(repository, trellisObject, filesChanged),
+      ).rejects.toThrow(/500 entries/);
+
+      expect(trellisObject.affectedFiles.size).toBe(0);
+    });
+  });
 });

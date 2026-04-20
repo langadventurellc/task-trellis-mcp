@@ -58,7 +58,7 @@ export async function handleGetObject(repository: Repository, args: unknown) {
     const serializedObject = {
       ...object,
       affectedFiles: Object.fromEntries(object.affectedFiles),
-      attachments: await repository.listAttachments(id),
+      attachments: await repository.listAttachments(object),
     };
 
     return {

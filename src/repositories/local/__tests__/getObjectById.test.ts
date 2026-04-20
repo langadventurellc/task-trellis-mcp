@@ -1,4 +1,11 @@
+jest.mock("fs/promises", () => {
+  const actual =
+    jest.requireActual<typeof import("fs/promises")>("fs/promises");
+  return { ...actual, readFile: jest.fn(actual.readFile) };
+});
+
 import { join } from "path";
+import { readFile } from "fs/promises";
 import {
   TrellisObjectPriority,
   TrellisObjectStatus,
@@ -67,5 +74,16 @@ describe("getObjectById", () => {
       "/non/existent/path",
     );
     expect(result).toBeNull();
+  });
+
+  it("should not read child files when fetching a parent with children", async () => {
+    const mockReadFile = readFile as jest.MockedFunction<typeof readFile>;
+    mockReadFile.mockClear();
+
+    await getObjectById("P-ecommerce-platform", testPlanningRoot);
+
+    const readPaths = mockReadFile.mock.calls.map((c) => c[0] as string);
+    expect(readPaths.some((p) => p.includes("E-product-catalog"))).toBe(false);
+    expect(readPaths.some((p) => p.includes("E-user-management"))).toBe(false);
   });
 });

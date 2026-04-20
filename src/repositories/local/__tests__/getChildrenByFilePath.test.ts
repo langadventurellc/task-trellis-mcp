@@ -1,4 +1,11 @@
+jest.mock("fs/promises", () => {
+  const actual =
+    jest.requireActual<typeof import("fs/promises")>("fs/promises");
+  return { ...actual, readFile: jest.fn(actual.readFile) };
+});
+
 import { getChildrenByFilePath } from "../getChildrenByFilePath";
+import { readFile } from "fs/promises";
 import path from "path";
 
 describe("getChildrenByFilePath", () => {
@@ -175,6 +182,23 @@ describe("getChildrenByFilePath", () => {
       const children = await getChildrenByFilePath(taskPath);
 
       expect(children).toEqual([]);
+    });
+  });
+
+  describe("No file reads", () => {
+    it("should not call readFile when listing children", async () => {
+      const mockReadFile = readFile as jest.MockedFunction<typeof readFile>;
+      mockReadFile.mockClear();
+      const projectPath = path.join(
+        testDataRoot,
+        "p",
+        "P-ecommerce-platform",
+        "P-ecommerce-platform.md",
+      );
+
+      await getChildrenByFilePath(projectPath);
+
+      expect(mockReadFile).not.toHaveBeenCalled();
     });
   });
 

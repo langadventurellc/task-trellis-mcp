@@ -51,7 +51,7 @@ describe("getObjectTool", () => {
 
       expect(mockRepository.getObjectById).toHaveBeenCalledWith("T-test-task");
       expect(mockRepository.listAttachments).toHaveBeenCalledWith(
-        "T-test-task",
+        mockTrellisObject,
       );
       expect(result).toEqual({
         content: [

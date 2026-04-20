@@ -1,6 +1,7 @@
 import { access, copyFile, mkdir } from "fs/promises";
 import { basename, join } from "path";
 import { getAttachmentsFolder } from "./getAttachmentsFolder";
+import { getObjectById } from "./getObjectById";
 
 /**
  * Copies a file into the managed attachments folder for an issue.
@@ -19,8 +20,9 @@ export async function copyAttachment(
     throw new Error(`Source file '${sourcePath}' does not exist`);
   }
 
-  // getAttachmentsFolder throws if issue not found
-  const folder = await getAttachmentsFolder(id, planningRoot);
+  const obj = await getObjectById(id, planningRoot);
+  if (!obj) throw new Error(`Object with ID '${id}' not found`);
+  const folder = await getAttachmentsFolder(obj, planningRoot);
   const filename = basename(sourcePath);
   const destPath = join(folder, filename);
 

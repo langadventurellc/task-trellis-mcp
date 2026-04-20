@@ -263,4 +263,64 @@ describe("appendModifiedFilesTool", () => {
       );
     });
   });
+
+  describe("input validation", () => {
+    it("should reject string filesChanged and not call service", async () => {
+      const result = await handleAppendModifiedFiles(
+        mockService,
+        mockRepository,
+        { id: "T-test", filesChanged: '{"src/x":"y"}' },
+      );
+
+      expect(result.content[0].text).toMatch(/plain object/);
+      expect(appendModifiedFilesSpy).not.toHaveBeenCalled();
+    });
+
+    it("should reject array filesChanged and not call service", async () => {
+      const result = await handleAppendModifiedFiles(
+        mockService,
+        mockRepository,
+        { id: "T-test", filesChanged: ["src/x"] },
+      );
+
+      expect(result.content[0].text).toMatch(/plain object/);
+      expect(appendModifiedFilesSpy).not.toHaveBeenCalled();
+    });
+
+    it("should reject numeric-string key and not call service", async () => {
+      const result = await handleAppendModifiedFiles(
+        mockService,
+        mockRepository,
+        { id: "T-test", filesChanged: { "12": "a" } },
+      );
+
+      expect(result.content[0].text).toMatch(/numeric-string/);
+      expect(appendModifiedFilesSpy).not.toHaveBeenCalled();
+    });
+
+    it("should reject single-character key and not call service", async () => {
+      const result = await handleAppendModifiedFiles(
+        mockService,
+        mockRepository,
+        { id: "T-test", filesChanged: { x: "a" } },
+      );
+
+      expect(result.content[0].text).toMatch(/at least 2 characters/);
+      expect(appendModifiedFilesSpy).not.toHaveBeenCalled();
+    });
+
+    it("should reject 501-entry object and not call service", async () => {
+      const filesChanged = Object.fromEntries(
+        Array.from({ length: 501 }, (_, i) => [`src/file${i}.ts`, "desc"]),
+      );
+      const result = await handleAppendModifiedFiles(
+        mockService,
+        mockRepository,
+        { id: "T-test", filesChanged },
+      );
+
+      expect(result.content[0].text).toMatch(/500 entries/);
+      expect(appendModifiedFilesSpy).not.toHaveBeenCalled();
+    });
+  });
 });

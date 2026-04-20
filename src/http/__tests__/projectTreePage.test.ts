@@ -502,4 +502,44 @@ describe("detailViewHandler", () => {
     const html = (res.end as jest.Mock).mock.calls[0][0] as string;
     expect(html).not.toContain("Attachments");
   });
+
+  it("initiates breadcrumb and prerequisite fetches concurrently", async () => {
+    const calls: string[] = [];
+    const pendingResolvers: Array<() => void> = [];
+
+    mockGetObjectById.mockImplementation((id: string) => {
+      calls.push(id);
+      if (id === "T-concurrent") {
+        return Promise.resolve(
+          makeObj({
+            id: "T-concurrent",
+            parent: "F-parent",
+            prerequisites: ["T-prereq"],
+          }),
+        );
+      }
+      return new Promise<null>((resolve) => {
+        pendingResolvers.push(() => resolve(null));
+      });
+    });
+
+    const promise = detailViewHandler(makeReq(), makeRes(), {
+      key: "my-proj",
+      id: "T-concurrent",
+    });
+
+    // Flush microtasks until both concurrent calls are initiated
+    for (let i = 0; i < 20; i++) {
+      await Promise.resolve();
+      if (calls.includes("F-parent") && calls.includes("T-prereq")) break;
+    }
+
+    // Both breadcrumb ancestor and prerequisite lookups started before either resolved
+    expect(calls).toContain("F-parent");
+    expect(calls).toContain("T-prereq");
+    expect(pendingResolvers).toHaveLength(2);
+
+    pendingResolvers.forEach((r) => r());
+    await promise;
+  });
 });

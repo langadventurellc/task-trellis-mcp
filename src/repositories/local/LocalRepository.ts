@@ -72,14 +72,14 @@ export class LocalRepository implements Repository {
     await deleteObjectById(id, this.config.planningRootFolder!, force);
   }
 
-  async getAttachmentsFolder(id: string): Promise<string> {
+  async getAttachmentsFolder(obj: TrellisObject): Promise<string> {
     const { getAttachmentsFolder } = await import("./getAttachmentsFolder.js");
-    return getAttachmentsFolder(id, this.config.planningRootFolder!);
+    return getAttachmentsFolder(obj, this.config.planningRootFolder!);
   }
 
-  async listAttachments(id: string): Promise<string[]> {
+  async listAttachments(obj: TrellisObject): Promise<string[]> {
     const { listAttachments } = await import("./listAttachments.js");
-    return listAttachments(id, this.config.planningRootFolder!);
+    return listAttachments(obj, this.config.planningRootFolder!);
   }
 
   async copyAttachment(id: string, sourcePath: string): Promise<string> {

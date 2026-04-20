@@ -1,5 +1,5 @@
 import { join } from "path";
-import { TrellisObjectType } from "../../models/TrellisObjectType";
+import { type TrellisObject, TrellisObjectType } from "../../models";
 import { getObjectById } from "./getObjectById";
 
 function epicFolder(id: string, parent: string | null, root: string): string {
@@ -55,25 +55,22 @@ async function taskFolder(
 /**
  * Returns the managed attachments folder path for any issue type.
  * Traverses the parent chain for tasks and features to build the correct path.
- * Throws if the issue does not exist.
+ * Accepts a pre-loaded object to avoid redundant getObjectById calls.
  */
 export async function getAttachmentsFolder(
-  id: string,
+  obj: TrellisObject,
   planningRoot: string,
 ): Promise<string> {
-  const obj = await getObjectById(id, planningRoot);
-  if (!obj) throw new Error(`Object with ID '${id}' not found`);
-
   switch (obj.type) {
     case TrellisObjectType.PROJECT:
-      return join(planningRoot, "p", id, "attachments");
+      return join(planningRoot, "p", obj.id, "attachments");
     case TrellisObjectType.EPIC:
-      return epicFolder(id, obj.parent, planningRoot);
+      return epicFolder(obj.id, obj.parent, planningRoot);
     case TrellisObjectType.FEATURE:
-      if (!obj.parent) return join(planningRoot, "f", id, "attachments");
-      return featureFolder(id, obj.parent, planningRoot);
+      if (!obj.parent) return join(planningRoot, "f", obj.id, "attachments");
+      return featureFolder(obj.id, obj.parent, planningRoot);
     case TrellisObjectType.TASK:
-      return taskFolder(id, obj.parent, planningRoot);
+      return taskFolder(obj.id, obj.parent, planningRoot);
     default:
       throw new Error(`Unknown object type: ${String(obj.type)}`);
   }
