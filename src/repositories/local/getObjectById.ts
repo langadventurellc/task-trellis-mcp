@@ -1,42 +1,36 @@
 import { readFile } from "fs/promises";
 import { TrellisObject } from "../../models";
 import { deserializeTrellisObject } from "../../utils/deserializeTrellisObject";
-import { findMarkdownFiles } from "./findMarkdownFiles";
 import { getChildrenByFilePath } from "./getChildrenByFilePath";
+import { RepoIndex } from "./RepoIndex";
 
 /**
- * Gets a TrellisObject by its ID by searching through markdown files
- * @param id The ID of the object to find
- * @param planningRoot The root directory to search for markdown files
- * @returns Promise resolving to the TrellisObject with the matching ID, or null if not found
- * @throws Error if file reading fails
+ * Gets a TrellisObject by its ID using the RepoIndex cache.
+ *
+ * On a warm hit: single file read, no directory scan. On a miss: repopulates
+ * the index (detecting external writes from other MCP instances) and retries.
  */
 export async function getObjectById(
   id: string,
   planningRoot: string,
 ): Promise<TrellisObject | null> {
-  // Find all markdown files in the planning root
-  const markdownFiles = await findMarkdownFiles(planningRoot);
-
-  // Search through each markdown file to find the one with the matching ID
-  for (const filePath of markdownFiles) {
-    try {
-      const fileContent = await readFile(filePath, "utf-8");
-      const trellisObject = deserializeTrellisObject(fileContent);
-
-      // Check if this object has the ID we're looking for
-      if (trellisObject.id === id) {
-        // Populate children using the file path
-        trellisObject.childrenIds = await getChildrenByFilePath(filePath);
-        return trellisObject;
-      }
-    } catch (error) {
-      // Skip files that can't be deserialized (might not be valid Trellis objects)
-      console.error(`Warning: Could not deserialize file ${filePath}:`, error);
-      continue;
-    }
+  let entry = await RepoIndex.lookup(planningRoot, id);
+  if (!entry) {
+    await RepoIndex.populate(planningRoot);
+    entry = await RepoIndex.lookup(planningRoot, id);
   }
+  if (!entry) return null;
 
-  // If we get here, no object with the given ID was found
-  return null;
+  try {
+    const fileContent = await readFile(entry.filePath, "utf-8");
+    const trellisObject = deserializeTrellisObject(fileContent);
+    trellisObject.childrenIds = await getChildrenByFilePath(entry.filePath);
+    return trellisObject;
+  } catch (error) {
+    console.error(
+      `Warning: Could not deserialize file ${entry.filePath}:`,
+      error,
+    );
+    return null;
+  }
 }

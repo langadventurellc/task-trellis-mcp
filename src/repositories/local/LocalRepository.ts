@@ -65,11 +65,15 @@ export class LocalRepository implements Repository {
     );
     const { saveObject: saveObjectImpl } = await import("./saveObject");
     await saveObjectImpl(trellisObject, this.config.planningRootFolder!);
+    const { RepoIndex } = await import("./RepoIndex");
+    RepoIndex.invalidate(this.config.planningRootFolder!, trellisObject.id);
   }
 
   async deleteObject(id: string, force?: boolean): Promise<void> {
     const { deleteObjectById } = await import("./deleteObjectById");
     await deleteObjectById(id, this.config.planningRootFolder!, force);
+    const { RepoIndex } = await import("./RepoIndex");
+    RepoIndex.invalidate(this.config.planningRootFolder!, id);
   }
 
   async getAttachmentsFolder(obj: TrellisObject): Promise<string> {
