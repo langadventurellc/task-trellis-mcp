@@ -66,6 +66,7 @@ describe("createObjectTool", () => {
         TrellisObjectStatus.OPEN,
         [],
         "",
+        undefined,
       );
       expect(result).toEqual(mockResult);
     });
@@ -96,6 +97,7 @@ describe("createObjectTool", () => {
         TrellisObjectStatus.IN_PROGRESS,
         ["P-dependency1", "P-dependency2"],
         "This is a new project description",
+        undefined,
       );
       expect(result).toEqual(mockResult);
     });
@@ -118,6 +120,7 @@ describe("createObjectTool", () => {
         TrellisObjectStatus.OPEN,
         [],
         "",
+        undefined,
       );
     });
 
@@ -148,6 +151,7 @@ describe("createObjectTool", () => {
           TrellisObjectStatus.OPEN,
           [],
           "",
+          undefined,
         );
       }
     });
@@ -184,6 +188,7 @@ describe("createObjectTool", () => {
           testCase.expectedStatus,
           [],
           "",
+          undefined,
         );
       }
     });
@@ -215,6 +220,7 @@ describe("createObjectTool", () => {
           TrellisObjectStatus.OPEN,
           [],
           "",
+          undefined,
         );
       }
     });
@@ -237,6 +243,7 @@ describe("createObjectTool", () => {
         TrellisObjectStatus.OPEN,
         ["T-setup", "T-config", "F-auth"],
         "",
+        undefined,
       );
     });
 
@@ -262,6 +269,7 @@ describe("createObjectTool", () => {
         TrellisObjectStatus.OPEN,
         [],
         "",
+        undefined,
       );
     });
   });

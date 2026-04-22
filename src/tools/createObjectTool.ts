@@ -49,7 +49,9 @@ Best practices:
 - Follow the hierarchy constraints for proper organization
 - Set appropriate status based on current work state
 - Define prerequisites to ensure proper task ordering
-- Include detailed descriptions to provide context for the work`,
+- Include detailed descriptions to provide context for the work
+
+Optional \`externalIssueId\` (e.g., a Jira key) can be provided for top-level issues. When set on a child issue, the field is silently dropped and a warning is included in the response.`,
   inputSchema: {
     type: "object",
     properties: {
@@ -88,6 +90,11 @@ Best practices:
         type: "string",
         description: "Description of the issue",
       },
+      externalIssueId: {
+        type: "string",
+        description:
+          "Optional external system identifier (e.g., a Jira key). Only stored on top-level issues (no parent). Silently dropped with a warning when provided on a child issue.",
+      },
     },
     required: ["type", "title"],
   },
@@ -106,6 +113,7 @@ export async function handleCreateObject(
     status = "open",
     prerequisites = [],
     description = "",
+    externalIssueId,
   } = args as {
     type: string;
     title: string;
@@ -114,6 +122,7 @@ export async function handleCreateObject(
     status?: string;
     prerequisites?: string[];
     description?: string;
+    externalIssueId?: string;
   };
 
   // Delegate to service layer
@@ -126,5 +135,6 @@ export async function handleCreateObject(
     status as TrellisObjectStatus,
     prerequisites,
     description,
+    externalIssueId,
   );
 }

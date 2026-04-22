@@ -19,6 +19,7 @@ function convertToSummary(obj: TrellisObject): TrellisObjectSummary {
     childrenIds: obj.childrenIds,
     created: obj.created,
     updated: obj.updated,
+    externalIssueId: obj.externalIssueId,
   };
 }
 

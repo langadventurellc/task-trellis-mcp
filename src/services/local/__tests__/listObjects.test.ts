@@ -288,6 +288,38 @@ describe("listObjects", () => {
         ],
       });
     });
+
+    it("should include externalIssueId in summary when set on object", async () => {
+      const objectWithExternalId: TrellisObject = {
+        ...mockObjects[0],
+        externalIssueId: "JIRA-42",
+      };
+      mockRepository.getObjects.mockResolvedValue([objectWithExternalId]);
+
+      const result = await listObjects(
+        mockRepository,
+        TrellisObjectType.PROJECT,
+      );
+
+      const summaries = JSON.parse(
+        result.content[0].text,
+      ) as TrellisObjectSummary[];
+      expect(summaries[0].externalIssueId).toBe("JIRA-42");
+    });
+
+    it("should omit externalIssueId from summary when absent on object", async () => {
+      mockRepository.getObjects.mockResolvedValue([mockObjects[0]]);
+
+      const result = await listObjects(
+        mockRepository,
+        TrellisObjectType.PROJECT,
+      );
+
+      const summaries = JSON.parse(
+        result.content[0].text,
+      ) as TrellisObjectSummary[];
+      expect(summaries[0].externalIssueId).toBeUndefined();
+    });
   });
 
   describe("error handling", () => {

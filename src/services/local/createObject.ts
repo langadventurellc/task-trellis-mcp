@@ -17,6 +17,7 @@ export async function createObject(
   status: TrellisObjectStatus = TrellisObjectStatus.OPEN,
   prerequisites: string[] = [],
   description: string = "",
+  externalIssueId?: string,
 ): Promise<{ content: Array<{ type: string; text: string }> }> {
   // Get existing objects to generate unique ID
   const existingObjects = await repository.getObjects(true);
@@ -24,6 +25,9 @@ export async function createObject(
 
   // Generate unique ID
   const id = generateUniqueId(title, type, existingIds);
+
+  const droppedExternalIssueId = parent != null && !!externalIssueId;
+  const shouldStoreExternalIssueId = parent == null && !!externalIssueId;
 
   // Create TrellisObject with current timestamp
   const now = new Date().toISOString();
@@ -42,6 +46,7 @@ export async function createObject(
     created: now,
     updated: now,
     body: description,
+    ...(shouldStoreExternalIssueId ? { externalIssueId } : {}),
   };
 
   // Validate object before saving
@@ -50,12 +55,16 @@ export async function createObject(
   // Save through repository
   await repository.saveObject(trellisObject);
 
-  return {
-    content: [
-      {
-        type: "text",
-        text: `Created object with ID: ${id}`,
-      },
-    ],
-  };
+  const content: Array<{ type: string; text: string }> = [
+    { type: "text", text: `Created object with ID: ${id}` },
+  ];
+
+  if (droppedExternalIssueId) {
+    content.push({
+      type: "text",
+      text: "Warning: externalIssueId ignored (only allowed on top-level issues)",
+    });
+  }
+
+  return { content };
 }

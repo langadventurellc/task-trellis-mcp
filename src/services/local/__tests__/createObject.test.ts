@@ -509,4 +509,71 @@ describe("createObject", () => {
       }),
     );
   });
+
+  it("should store externalIssueId on top-level create", async () => {
+    mockGenerateUniqueId.mockReturnValue("T-top-level");
+
+    const result = await createObject(
+      mockRepository,
+      TrellisObjectType.TASK,
+      "Top Level Task",
+      undefined,
+      TrellisObjectPriority.MEDIUM,
+      TrellisObjectStatus.OPEN,
+      [],
+      "",
+      "JIRA-42",
+    );
+
+    expect(mockRepository.saveObject).toHaveBeenCalledWith(
+      expect.objectContaining({ externalIssueId: "JIRA-42" }),
+    );
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].text).toBe("Created object with ID: T-top-level");
+  });
+
+  it("should drop externalIssueId and warn on child create", async () => {
+    mockGenerateUniqueId.mockReturnValue("T-child-task");
+
+    const result = await createObject(
+      mockRepository,
+      TrellisObjectType.TASK,
+      "Child Task",
+      "F-parent",
+      TrellisObjectPriority.MEDIUM,
+      TrellisObjectStatus.OPEN,
+      [],
+      "",
+      "JIRA-99",
+    );
+
+    expect(
+      mockRepository.saveObject.mock.calls[0][0].externalIssueId,
+    ).toBeUndefined();
+    expect(result.content).toHaveLength(2);
+    expect(result.content[1].text).toBe(
+      "Warning: externalIssueId ignored (only allowed on top-level issues)",
+    );
+  });
+
+  it("should omit externalIssueId when empty string on top-level", async () => {
+    mockGenerateUniqueId.mockReturnValue("T-empty-ext");
+
+    const result = await createObject(
+      mockRepository,
+      TrellisObjectType.TASK,
+      "Empty ExternalId Task",
+      undefined,
+      TrellisObjectPriority.MEDIUM,
+      TrellisObjectStatus.OPEN,
+      [],
+      "",
+      "",
+    );
+
+    expect(
+      mockRepository.saveObject.mock.calls[0][0].externalIssueId,
+    ).toBeUndefined();
+    expect(result.content).toHaveLength(1);
+  });
 });

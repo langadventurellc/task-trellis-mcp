@@ -48,7 +48,7 @@ Usage patterns:
 - Multiple statuses: status=['open', 'in-progress']
 - Multiple priorities: priority=['high', 'medium']
 
-The results provide issue summaries (TrellisObjectSummary instances) containing id, type, title, status, priority, parent, prerequisites, childrenIds, created, and updated fields to enable efficient filtering and further operations.`,
+The results provide issue summaries (TrellisObjectSummary instances) containing id, type, title, status, priority, parent, prerequisites, childrenIds, created, updated, and externalIssueId (when set) fields to enable efficient filtering and further operations.`,
   inputSchema: {
     type: "object",
     properties: {

@@ -17,6 +17,7 @@ export class LocalTaskTrellisService implements TaskTrellisService {
     status: TrellisObjectStatus = TrellisObjectStatus.OPEN,
     prerequisites: string[] = [],
     description: string = "",
+    externalIssueId?: string,
   ): Promise<{ content: Array<{ type: string; text: string }> }> {
     const { createObject } = await import("./createObject");
     return createObject(
@@ -28,6 +29,7 @@ export class LocalTaskTrellisService implements TaskTrellisService {
       status,
       prerequisites,
       description,
+      externalIssueId,
     );
   }
 

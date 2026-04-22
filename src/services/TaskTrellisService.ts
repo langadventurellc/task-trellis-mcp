@@ -19,6 +19,7 @@ export interface TaskTrellisService {
     status?: TrellisObjectStatus,
     prerequisites?: string[],
     description?: string,
+    externalIssueId?: string,
   ): Promise<{ content: Array<{ type: string; text: string }> }>;
 
   /**
