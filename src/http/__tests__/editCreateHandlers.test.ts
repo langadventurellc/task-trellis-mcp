@@ -214,6 +214,7 @@ describe("editSubmitHandler", () => {
       "new body",
       "done",
       true,
+      undefined,
     );
     const [status, headers] = (res.writeHead as jest.Mock).mock.calls[0] as [
       number,
@@ -542,6 +543,7 @@ describe("createTopSubmitHandler", () => {
       "open",
       [],
       "Some description",
+      undefined,
     );
     const [status, headers] = (res.writeHead as jest.Mock).mock.calls[0] as [
       number,

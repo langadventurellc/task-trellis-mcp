@@ -142,6 +142,14 @@ export async function renderDetailView(
   </div>`
       : "";
 
+  const externalIssueIdSection =
+    obj.parent === null && obj.externalIssueId
+      ? `<div class="field-group">
+  <div class="field-label">External issue ID</div>
+  <div class="prose">${escapeHtml(obj.externalIssueId)}</div>
+</div>`
+      : "";
+
   return `<div data-view="view">
   ${breadcrumbs}
   ${titleRow}
@@ -150,6 +158,7 @@ export async function renderDetailView(
     <div class="field-label">Description</div>
     ${description}
   </div>
+  ${externalIssueIdSection}
   ${attachmentsList}
   <div class="field-group">
     <div class="field-label">Prerequisites</div>

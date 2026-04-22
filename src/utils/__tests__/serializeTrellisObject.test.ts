@@ -271,4 +271,55 @@ describe("serializeTrellisObject", () => {
     expect(parsedYaml.parent).toBe("none");
     expect(parsedYaml.id).toBe("no-parent-test");
   });
+
+  it("should include externalIssueId in frontmatter when set", () => {
+    const trellisObject: TrellisObject = {
+      id: "ext-id-test",
+      title: "External ID Test",
+      status: TrellisObjectStatus.OPEN,
+      priority: TrellisObjectPriority.MEDIUM,
+      prerequisites: [],
+      affectedFiles: new Map(),
+      log: [],
+      schema: "v1.0",
+      childrenIds: [],
+      body: "Test content",
+      type: TrellisObjectType.PROJECT,
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
+      parent: null,
+      externalIssueId: "JIRA-42",
+    };
+
+    const result = serializeTrellisObject(trellisObject);
+    const yamlPart = result.split("---\n")[1];
+    const parsedYaml = parse(yamlPart);
+
+    expect(parsedYaml.externalIssueId).toBe("JIRA-42");
+  });
+
+  it("should omit externalIssueId from frontmatter when undefined", () => {
+    const trellisObject: TrellisObject = {
+      id: "no-ext-id-test",
+      title: "No External ID Test",
+      status: TrellisObjectStatus.OPEN,
+      priority: TrellisObjectPriority.MEDIUM,
+      prerequisites: [],
+      affectedFiles: new Map(),
+      log: [],
+      schema: "v1.0",
+      childrenIds: [],
+      body: "Test content",
+      type: TrellisObjectType.PROJECT,
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
+      parent: null,
+    };
+
+    const result = serializeTrellisObject(trellisObject);
+    const yamlPart = result.split("---\n")[1];
+    const parsedYaml = parse(yamlPart);
+
+    expect(parsedYaml.externalIssueId).toBeUndefined();
+  });
 });

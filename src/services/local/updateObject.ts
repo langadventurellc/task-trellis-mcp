@@ -21,6 +21,7 @@ export async function updateObject(
   body?: string,
   status?: TrellisObjectStatus,
   force: boolean = false,
+  externalIssueId?: string,
 ): Promise<{ content: Array<{ type: string; text: string }> }> {
   try {
     // Load the existing object
@@ -36,6 +37,10 @@ export async function updateObject(
       };
     }
 
+    // externalIssueId is only allowed on top-level issues (no parent)
+    const droppedExternalIssueId =
+      existingObject.parent !== null && externalIssueId !== undefined;
+
     // Create updated object with new properties, ensuring proper typing
     const updatedObject: TrellisObject = {
       ...existingObject,
@@ -44,6 +49,10 @@ export async function updateObject(
       ...(prerequisites && { prerequisites }),
       ...(body && { body }),
       ...(status && { status }),
+      ...(externalIssueId !== undefined &&
+        !droppedExternalIssueId && {
+          externalIssueId: externalIssueId || undefined,
+        }),
     };
 
     // Validate status transition
@@ -82,18 +91,25 @@ export async function updateObject(
       }
     }
 
-    return {
-      content: [
-        {
-          type: "text",
-          text: `Successfully updated object: ${JSON.stringify(
-            updatedObject,
-            null,
-            2,
-          )}`,
-        },
-      ],
-    };
+    const content: Array<{ type: string; text: string }> = [
+      {
+        type: "text",
+        text: `Successfully updated object: ${JSON.stringify(
+          updatedObject,
+          null,
+          2,
+        )}`,
+      },
+    ];
+
+    if (droppedExternalIssueId) {
+      content.push({
+        type: "text",
+        text: "Warning: externalIssueId ignored (only allowed on top-level issues)",
+      });
+    }
+
+    return { content };
   } catch (error) {
     return {
       content: [

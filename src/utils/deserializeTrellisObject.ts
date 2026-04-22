@@ -177,6 +177,9 @@ export function deserializeTrellisObject(
     created: fm.created as string,
     updated: fm.updated as string,
     body: bodyContent,
+    ...(typeof fm.externalIssueId === "string"
+      ? { externalIssueId: fm.externalIssueId }
+      : {}),
   };
 
   return trellisObject;

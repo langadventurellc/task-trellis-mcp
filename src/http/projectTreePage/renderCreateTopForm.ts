@@ -10,6 +10,7 @@ type CreateTopFields = {
   priority?: string;
   body?: string;
   prerequisites?: string;
+  externalIssueId?: string;
 };
 
 function typeRadios(selected: string): string {
@@ -39,6 +40,10 @@ export function renderCreateTopForm(
     : "";
   const status = fields.status ?? TrellisObjectStatus.DRAFT;
   const priority = fields.priority ?? TrellisObjectPriority.MEDIUM;
+  const externalIdField = `<div class="fld">
+    <label for="top-external-id">External issue ID <span style="color:var(--text-subtle);font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+    <input id="top-external-id" type="text" name="externalIssueId" value="${escapeHtml(fields.externalIssueId ?? "")}" placeholder="e.g., JIRA-42" />
+  </div>`;
   return `<div data-view="create">
   ${errorBanner}
   <form class="form-card" hx-post="/projects/${keyEsc}/issues" hx-target="#detail" hx-swap="innerHTML">
@@ -73,6 +78,7 @@ export function renderCreateTopForm(
         <label for="top-prereqs">Prerequisites</label>
         <input id="top-prereqs" type="text" name="prerequisites" value="${escapeHtml(fields.prerequisites ?? "")}" placeholder="Comma-separated issue IDs (optional)" />
       </div>
+      ${externalIdField}
     </div>
     <div class="form-footer">
       <div class="left"></div>
