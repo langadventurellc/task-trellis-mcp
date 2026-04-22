@@ -54,3 +54,24 @@ it("omits section for child issues even when externalIssueId is set", async () =
   );
   expect(html).not.toContain("External issue ID");
 });
+
+it("renders File field with path and Open raw link when filePath given", async () => {
+  const path = "/Users/me/.trellis/projects/k/t/open/T-test.md";
+  const html = await renderDetailView("k", makeObj(), stubRepo, [], path);
+  expect(html).toContain(">File<");
+  expect(html).toContain(path);
+  expect(html).toContain('href="/projects/k/issues/T-test/file"');
+});
+
+it("omits File field when filePath is null", async () => {
+  const html = await renderDetailView("k", makeObj(), stubRepo, [], null);
+  expect(html).not.toContain(">File<");
+});
+
+it("renders the id chip as a click-to-copy control", async () => {
+  const html = await renderDetailView("k", makeObj({ id: "T-xyz" }), stubRepo);
+  expect(html).toContain('class="id-chip"');
+  expect(html).toContain('data-copy="T-xyz"');
+  expect(html).toContain('role="button"');
+  expect(html).toContain("navigator.clipboard.writeText");
+});

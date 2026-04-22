@@ -241,16 +241,19 @@ describe("searchHandler", () => {
 describe("detailViewHandler", () => {
   let mockGetObjectById: jest.Mock;
   let mockListAttachments: jest.Mock;
+  let mockGetObjectFilePath: jest.Mock;
 
   beforeEach(() => {
     jest.resetAllMocks();
     mockGetObjectById = jest.fn().mockResolvedValue(null);
     mockListAttachments = jest.fn().mockResolvedValue([]);
+    mockGetObjectFilePath = jest.fn().mockResolvedValue(null);
     MockedLocalRepository.mockImplementation(
       () =>
         ({
           getObjectById: mockGetObjectById,
           listAttachments: mockListAttachments,
+          getObjectFilePath: mockGetObjectFilePath,
         }) as unknown as LocalRepository,
     );
     mockResolveDataDir.mockReturnValue("/test/data");

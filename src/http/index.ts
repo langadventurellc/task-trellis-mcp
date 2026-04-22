@@ -13,6 +13,7 @@ import {
   detailViewHandler,
   editFormHandler,
   editSubmitHandler,
+  fileHandler,
   projectTreeHandler,
   searchHandler,
 } from "./projectTreePage";
@@ -51,6 +52,9 @@ function buildRouter() {
   router.get(
     "/projects/:key/issues/:id/attachments/:filename",
     (req, res, params) => attachmentHandler(req, res, params),
+  );
+  router.get("/projects/:key/issues/:id/file", (req, res, params) =>
+    fileHandler(req, res, params),
   );
   router.get("/projects/:key/issues/:id/edit", (req, res, params) =>
     editFormHandler(req, res, params),
