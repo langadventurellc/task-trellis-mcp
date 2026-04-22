@@ -9,6 +9,8 @@ type EditFields = {
   body: string;
   prerequisites: string;
   log_entry?: string;
+  externalIssueId?: string;
+  isTopLevel: boolean;
 };
 
 /** Renders the data-view="edit" form fragment for an issue. */
@@ -22,6 +24,13 @@ export function renderEditForm(
   const idEsc = escapeHtml(id);
   const errorBanner = error
     ? `<div class="error-banner" style="padding:10px 12px;margin-bottom:12px;border:1px solid var(--danger);background:var(--danger-tint);color:var(--danger);border-radius:6px;font-size:13px;">${escapeHtml(error)}</div>`
+    : "";
+  const externalIdField = fields.isTopLevel
+    ? `<div class="fld">
+        <label for="f-external-id">External issue ID <span style="color:var(--text-subtle);font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+        <input id="f-external-id" type="text" name="externalIssueId" value="${escapeHtml(fields.externalIssueId ?? "")}" placeholder="e.g., JIRA-42" />
+        <div class="hint">Only available on top-level issues. Leave empty and save to clear.</div>
+      </div>`
     : "";
   return `<div data-view="edit">
   ${errorBanner}
@@ -55,6 +64,7 @@ export function renderEditForm(
         <input id="f-prereqs" type="text" name="prerequisites" value="${escapeHtml(fields.prerequisites)}" placeholder="Comma-separated issue IDs" />
         <div class="hint">Comma-separated list of prerequisite issue IDs.</div>
       </div>
+      ${externalIdField}
       <div class="fld">
         <label for="f-log">Add log entry <span style="color:var(--text-subtle);font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
         <input id="f-log" type="text" name="log_entry" value="${escapeHtml(fields.log_entry ?? "")}" placeholder="What changed?" />

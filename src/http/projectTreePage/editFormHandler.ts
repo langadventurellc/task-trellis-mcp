@@ -27,6 +27,8 @@ export async function editFormHandler(
       priority: obj.priority,
       body: obj.body,
       prerequisites: obj.prerequisites.join(", "),
+      externalIssueId: obj.externalIssueId,
+      isTopLevel: obj.parent === null,
     }),
   );
 }

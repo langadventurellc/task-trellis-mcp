@@ -25,6 +25,7 @@ function parseCreateTopFields(form: URLSearchParams) {
       TrellisObjectPriority.MEDIUM) as TrellisObjectPriority,
     body: form.get("body") ?? "",
     prereqsRaw: form.get("prerequisites") ?? "",
+    externalIssueId: form.get("externalIssueId") ?? undefined,
   };
 }
 
@@ -44,8 +45,15 @@ export async function createTopSubmitHandler(
   const { key } = params;
   const repo = makeRepo(key);
   const form = await readFormBody(req);
-  const { rawType, title, status, priority, body, prereqsRaw } =
-    parseCreateTopFields(form);
+  const {
+    rawType,
+    title,
+    status,
+    priority,
+    body,
+    prereqsRaw,
+    externalIssueId,
+  } = parseCreateTopFields(form);
 
   if (!VALID_TYPES.has(rawType)) {
     res.writeHead(422, { "Content-Type": "text/html" });
@@ -59,6 +67,7 @@ export async function createTopSubmitHandler(
           priority,
           body,
           prerequisites: prereqsRaw,
+          externalIssueId,
         },
         "Please select a valid type.",
       ),
@@ -76,7 +85,15 @@ export async function createTopSubmitHandler(
       res.end(
         renderCreateTopForm(
           key,
-          { type, title, status, priority, body, prerequisites: prereqsRaw },
+          {
+            type,
+            title,
+            status,
+            priority,
+            body,
+            prerequisites: prereqsRaw,
+            externalIssueId,
+          },
           `Unknown prerequisite ID: ${escapeHtml(prereqId)}`,
         ),
       );
@@ -93,6 +110,7 @@ export async function createTopSubmitHandler(
     status,
     prereqs,
     body,
+    externalIssueId,
   );
   const newObj = await resolveCreatedObj(repo, result.content[0]?.text ?? "");
 

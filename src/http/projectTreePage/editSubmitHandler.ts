@@ -21,6 +21,7 @@ function parseEditFields(form: URLSearchParams, obj: TrellisObject) {
     body: form.get("body") ?? "",
     prereqsRaw: form.get("prerequisites") ?? "",
     logEntry: form.get("log_entry") ?? "",
+    externalIssueId: form.get("externalIssueId") ?? undefined,
   };
 }
 
@@ -41,8 +42,15 @@ export async function editSubmitHandler(
   }
 
   const form = await readFormBody(req);
-  const { title, status, priority, body, prereqsRaw, logEntry } =
-    parseEditFields(form, obj);
+  const {
+    title,
+    status,
+    priority,
+    body,
+    prereqsRaw,
+    logEntry,
+    externalIssueId,
+  } = parseEditFields(form, obj);
   const prereqs = parsePrereqs(prereqsRaw);
 
   for (const prereqId of prereqs) {
@@ -60,6 +68,8 @@ export async function editSubmitHandler(
             body,
             prerequisites: prereqsRaw,
             log_entry: logEntry,
+            externalIssueId,
+            isTopLevel: obj.parent === null,
           },
           `Unknown prerequisite ID: ${escapeHtml(prereqId)}`,
         ),
@@ -78,6 +88,7 @@ export async function editSubmitHandler(
     body,
     status,
     true,
+    externalIssueId,
   );
 
   if (logEntry.trim()) {
