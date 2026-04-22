@@ -2,6 +2,7 @@ import { TrellisObjectType, type TrellisObject } from "../../models";
 import type { Repository } from "../../repositories/Repository";
 import { escapeHtml } from "../escapeHtml";
 import { priorityCssClass } from "./priorityCssClass";
+import { renderMarkdown } from "./renderMarkdown";
 import { statusCssClass } from "./statusCssClass";
 import { STATUS_LABELS } from "./statusLabels";
 import { typeLabel } from "./typeLabel";
@@ -111,7 +112,7 @@ export async function renderDetailView(
 </div>`;
 
   const description = obj.body
-    ? `<div class="prose">${escapeHtml(obj.body)}</div>`
+    ? `<div class="markdown">${renderMarkdown(obj.body)}</div>`
     : `<p class="empty">No description.</p>`;
 
   const log =
