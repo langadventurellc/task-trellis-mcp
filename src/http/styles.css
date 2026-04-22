@@ -687,6 +687,7 @@ a {
 .id-chip {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
   font-family: var(--font-mono);
   font-size: 10px;
@@ -696,10 +697,16 @@ a {
   border-radius: 3px;
   background: var(--gray-50);
   margin-left: 2px;
+  cursor: pointer;
+  user-select: all;
 }
 .id-chip:hover {
   background: var(--gray-100);
   color: var(--text);
+}
+.id-chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
 }
 
 /* ----- Field blocks ----- */
@@ -722,6 +729,45 @@ a {
   color: var(--text-subtle);
   font-style: italic;
   font-size: var(--text-sm);
+}
+
+/* File path row (click-to-copy + open-raw link) */
+.file-path-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+.file-path {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text);
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 4px 8px;
+  cursor: pointer;
+  user-select: all;
+  word-break: break-all;
+  flex: 1;
+  min-width: 0;
+}
+.file-path:hover {
+  background: var(--accent-tint);
+  border-color: var(--accent-border);
+}
+.file-path:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.file-raw-link {
+  font-size: var(--text-sm);
+  color: var(--accent);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.file-raw-link:hover {
+  text-decoration: underline;
 }
 
 /* Description body (markdown-ish) */

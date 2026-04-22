@@ -67,6 +67,7 @@ export async function renderDetailView(
   obj: TrellisObject,
   repo: Repository,
   attachments: string[] = [],
+  filePath: string | null = null,
 ): Promise<string> {
   const [breadcrumbs, prerequisites] = await Promise.all([
     buildBreadcrumbs(key, obj, repo),
@@ -102,7 +103,11 @@ export async function renderDetailView(
   <span class="badge kind">${escapeHtml(typeLabel(obj.type))}</span>
   <span class="badge status-${escapeHtml(statusClass)}"><span class="mini-dot"></span>${escapeHtml(statusLabel(obj.status))}</span>
   <span class="badge priority ${escapeHtml(priorityClass)}">${escapeHtml(priorityLabel(obj.priority))}</span>
-  <span class="id-chip">${idEsc}</span>
+  <span class="id-chip" role="button" tabindex="0" title="Click to copy ID"
+    data-copy="${idEsc}"
+    onclick="navigator.clipboard && navigator.clipboard.writeText(this.dataset.copy).then(()=>{const p=this.dataset.prev||this.textContent;this.dataset.prev=p;this.style.minWidth=this.offsetWidth+'px';this.textContent='Copied!';setTimeout(()=>{this.textContent=p;this.style.minWidth='';},1200);})"
+    onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"
+  >${idEsc}</span>
 </div>`;
 
   const description = obj.body
@@ -150,10 +155,25 @@ export async function renderDetailView(
 </div>`
       : "";
 
+  const fileSection = filePath
+    ? `<div class="field-group">
+  <div class="field-label">File</div>
+  <div class="file-path-row">
+    <code class="file-path" role="button" tabindex="0" title="Click to copy path"
+      data-copy="${escapeHtml(filePath)}"
+      onclick="navigator.clipboard && navigator.clipboard.writeText(this.dataset.copy).then(()=>{const p=this.dataset.prev||this.textContent;this.dataset.prev=p;this.textContent='Copied!';setTimeout(()=>{this.textContent=p;},1200);})"
+      onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"
+    >${escapeHtml(filePath)}</code>
+    <a class="file-raw-link" href="/projects/${keyEsc}/issues/${idEsc}/file" target="_blank" rel="noopener">Open raw</a>
+  </div>
+</div>`
+    : "";
+
   return `<div data-view="view">
   ${breadcrumbs}
   ${titleRow}
   ${badgesRow}
+  ${fileSection}
   <div class="field-group">
     <div class="field-label">Description</div>
     ${description}

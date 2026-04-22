@@ -69,6 +69,16 @@ export class LocalRepository implements Repository {
     RepoIndex.invalidate(this.config.planningRootFolder!, trellisObject.id);
   }
 
+  async getObjectFilePath(id: string): Promise<string | null> {
+    const { RepoIndex } = await import("./RepoIndex");
+    let entry = await RepoIndex.lookup(this.config.planningRootFolder!, id);
+    if (!entry) {
+      await RepoIndex.populate(this.config.planningRootFolder!);
+      entry = await RepoIndex.lookup(this.config.planningRootFolder!, id);
+    }
+    return entry?.filePath ?? null;
+  }
+
   async deleteObject(id: string, force?: boolean): Promise<void> {
     const { deleteObjectById } = await import("./deleteObjectById");
     await deleteObjectById(id, this.config.planningRootFolder!, force);

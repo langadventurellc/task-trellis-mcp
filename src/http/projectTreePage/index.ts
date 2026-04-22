@@ -7,6 +7,7 @@ export { deleteFormHandler } from "./deleteFormHandler";
 export { deleteSubmitHandler } from "./deleteSubmitHandler";
 export { detailViewHandler } from "./detailViewHandler";
 export { editFormHandler } from "./editFormHandler";
+export { fileHandler } from "./fileHandler";
 export { editSubmitHandler } from "./editSubmitHandler";
 export { projectTreeHandler } from "./projectTreeHandler";
 export { searchHandler } from "./searchHandler";
