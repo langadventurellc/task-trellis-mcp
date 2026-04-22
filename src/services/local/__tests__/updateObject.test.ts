@@ -227,6 +227,118 @@ describe("updateObject", () => {
       );
       expect(result.content[0].text).toContain("Successfully updated object:");
     });
+
+    it("should set externalIssueId on top-level update", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK, {
+        parent: null,
+      });
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      const result = await updateObject(
+        mockRepository,
+        mockServerConfig,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        false,
+        "JIRA-42",
+      );
+
+      expect(mockRepository.saveObject).toHaveBeenCalledWith(
+        expect.objectContaining({ externalIssueId: "JIRA-42" }),
+      );
+      expect(result.content.length).toBe(1);
+      expect(result.content[0].text).toContain("Successfully updated object:");
+    });
+
+    it("should clear externalIssueId with empty string on top-level update", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK, {
+        parent: null,
+        externalIssueId: "JIRA-42",
+      });
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      const result = await updateObject(
+        mockRepository,
+        mockServerConfig,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        false,
+        "",
+      );
+
+      expect(mockRepository.saveObject).toHaveBeenCalledWith(
+        expect.objectContaining({ externalIssueId: undefined }),
+      );
+      expect(result.content.length).toBe(1);
+      expect(result.content[0].text).toContain("Successfully updated object:");
+    });
+
+    it("should leave externalIssueId unchanged when not provided", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK, {
+        parent: null,
+        externalIssueId: "JIRA-42",
+      });
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      await updateObject(
+        mockRepository,
+        mockServerConfig,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        false,
+        // externalIssueId not passed
+      );
+
+      expect(mockRepository.saveObject).toHaveBeenCalledWith(
+        expect.objectContaining({ externalIssueId: "JIRA-42" }),
+      );
+    });
+
+    it("should drop externalIssueId and warn on child update", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK);
+      // default mock has parent: "F-test-feature" (child)
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      const result = await updateObject(
+        mockRepository,
+        mockServerConfig,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        false,
+        "JIRA-99",
+      );
+
+      expect(mockRepository.saveObject).toHaveBeenCalledWith(
+        expect.not.objectContaining({ externalIssueId: "JIRA-99" }),
+      );
+      expect(result.content).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            text: "Warning: externalIssueId ignored (only allowed on top-level issues)",
+          }),
+        ]),
+      );
+    });
   });
 
   describe("priority updates", () => {

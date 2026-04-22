@@ -71,6 +71,7 @@ describe("updateObjectTool", () => {
         "Updated body content",
         "draft" as TrellisObjectStatus,
         true,
+        undefined,
       );
       expect(result).toBe(mockResult);
     });
@@ -98,6 +99,7 @@ describe("updateObjectTool", () => {
         undefined,
         undefined,
         false,
+        undefined,
       );
       expect(result).toBe(mockResult);
     });
@@ -125,6 +127,7 @@ describe("updateObjectTool", () => {
         undefined,
         undefined,
         false,
+        undefined,
       );
       expect(result).toBe(mockResult);
     });
@@ -152,6 +155,7 @@ describe("updateObjectTool", () => {
         undefined,
         "in-progress" as TrellisObjectStatus,
         false,
+        undefined,
       );
       expect(result).toBe(mockResult);
     });
@@ -179,6 +183,7 @@ describe("updateObjectTool", () => {
         undefined,
         "done" as TrellisObjectStatus,
         false,
+        undefined,
       );
     });
 
@@ -249,6 +254,7 @@ describe("updateObjectTool", () => {
         undefined,
         "done" as TrellisObjectStatus,
         false,
+        undefined,
       );
     });
   });

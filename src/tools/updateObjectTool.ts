@@ -28,6 +28,7 @@ Updatable properties:
 - 'prerequisites': Dependency relationships (add/remove prerequisite issues)
 - 'body': Detailed description or content of the work item
 - 'force': Bypass certain validation checks when necessary
+- 'externalIssueId': External system identifier (e.g., a Jira key) for top-level issues. Omit to leave unchanged; empty string to clear; non-empty string to set. Silently dropped with a warning when provided on a child issue.
 
 Common update patterns:
 - Update title: title='New task title'
@@ -77,6 +78,11 @@ Updates automatically refresh the 'updated' timestamp while preserving creation 
         description: "Force update flag (defaults to false)",
         default: false,
       },
+      externalIssueId: {
+        type: "string",
+        description:
+          "External system identifier (e.g., Jira key). Omit = leave unchanged; '' (empty) = clear; non-empty = set. Top-level issues only; silently dropped with a warning on child issues.",
+      },
     },
     required: ["id"],
   },
@@ -96,6 +102,7 @@ export async function handleUpdateObject(
     body,
     status,
     force = false,
+    externalIssueId,
   } = args as {
     id: string;
     title?: string;
@@ -104,6 +111,7 @@ export async function handleUpdateObject(
     body?: string;
     status?: string;
     force?: boolean;
+    externalIssueId?: string;
   };
 
   return service.updateObject(
@@ -116,5 +124,6 @@ export async function handleUpdateObject(
     body,
     status as TrellisObjectStatus,
     force,
+    externalIssueId,
   );
 }

@@ -43,6 +43,7 @@ export class LocalTaskTrellisService implements TaskTrellisService {
     body?: string,
     status?: TrellisObjectStatus,
     force: boolean = false,
+    externalIssueId?: string,
   ): Promise<{ content: Array<{ type: string; text: string }> }> {
     const { updateObject } = await import("./updateObject");
     return updateObject(
@@ -55,6 +56,7 @@ export class LocalTaskTrellisService implements TaskTrellisService {
       body,
       status,
       force,
+      externalIssueId,
     );
   }
 
