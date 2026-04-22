@@ -24,6 +24,15 @@ Depending on the size of the effort, you can choose to start with any of the abo
 
 Currently, all Task Trellis issues are stored as markdown files in `~/.trellis/projects/<key>/`, shared across all sessions on your machine. This makes it unsuitable for projects with multiple developers. You can override the storage root with `$TRELLIS_DATA_DIR` to point to a shared network drive. See [Installation](installation.md#configuration-options)
 
+## External Issue ID
+
+Top-level issues (those with no parent) can store an `externalIssueId` — a free-form string linking the Trellis issue to a tracker in another system, such as a Jira key (`PROJ-123`) or a GitHub issue number.
+
+- **Set**: pass `externalIssueId` when calling `create_issue` or `update_issue`.
+- **Clear**: pass an empty string (`""`) via `update_issue`.
+- **Child issues**: the field is silently dropped and a warning is included in the response — `externalIssueId` is only stored on top-level issues.
+- **Listing**: `externalIssueId` is included in `list_issues` summaries when it is set.
+
 ## Prerequisites & Dependencies
 
 Tasks can have prerequisites that must be completed before they become available:
