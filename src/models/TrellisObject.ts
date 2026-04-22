@@ -17,4 +17,5 @@ export interface TrellisObject {
   created: string;
   updated: string;
   body: string;
+  externalIssueId?: string;
 }

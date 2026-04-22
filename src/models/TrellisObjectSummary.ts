@@ -13,4 +13,5 @@ export interface TrellisObjectSummary {
   childrenIds: string[];
   created: string;
   updated: string;
+  externalIssueId?: string;
 }

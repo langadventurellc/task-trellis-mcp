@@ -24,6 +24,9 @@ export function serializeTrellisObject(trellisObject: TrellisObject): string {
     childrenIds: trellisObject.childrenIds,
     created: trellisObject.created,
     updated: trellisObject.updated,
+    ...(trellisObject.externalIssueId
+      ? { externalIssueId: trellisObject.externalIssueId }
+      : {}),
   };
 
   // Generate YAML frontmatter

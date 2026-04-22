@@ -357,6 +357,7 @@ const example = "code block";
       type: TrellisObjectType.TASK,
       created: "2025-01-15T10:00:00Z",
       updated: "2025-01-15T10:00:00Z",
+      externalIssueId: "JIRA-99",
     };
 
     // Serialize then deserialize
@@ -365,6 +366,51 @@ const example = "code block";
 
     // Should be identical
     expect(deserialized).toEqual(originalObject);
+  });
+
+  it("should read externalIssueId from frontmatter when present", () => {
+    const markdownString = `---
+id: T-ext-id-test
+title: External ID Test
+status: open
+priority: medium
+prerequisites: []
+affectedFiles: {}
+log: []
+schema: v1.0
+childrenIds: []
+created: "2025-01-15T10:00:00Z"
+updated: "2025-01-15T10:00:00Z"
+externalIssueId: JIRA-42
+---
+
+Test body content`;
+
+    const result = deserializeTrellisObject(markdownString);
+
+    expect(result.externalIssueId).toBe("JIRA-42");
+  });
+
+  it("should leave externalIssueId undefined when absent from frontmatter", () => {
+    const markdownString = `---
+id: T-no-ext-id-test
+title: No External ID Test
+status: open
+priority: medium
+prerequisites: []
+affectedFiles: {}
+log: []
+schema: v1.0
+childrenIds: []
+created: "2025-01-15T10:00:00Z"
+updated: "2025-01-15T10:00:00Z"
+---
+
+Test body content`;
+
+    const result = deserializeTrellisObject(markdownString);
+
+    expect(result.externalIssueId).toBeUndefined();
   });
 
   it("should handle frontmatter that is not an object", () => {
