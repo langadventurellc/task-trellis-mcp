@@ -1,3 +1,15 @@
+<!-- BEGIN TEMPORARY: first-run learning capture for jira-issue-orchestration. Added 2026-04-24. Remove this whole block (down to END TEMPORARY) once learnings are harvested. -->
+
+## Observation Report Protocol (TEMPORARY — first-run learning capture)
+
+The `jira-issue-orchestration` plugin is brand new and being exercised for the first time. To capture learnings across every Claude Code instance and subagent involved, **every agent participating in an orchestration run MUST file a short observation report as its final action before reporting completion.**
+
+This applies to: the top-level conductor session, the planning sub-session, the implementation sub-session, and every subagent spawned inside them (Trellis issue-writer/issue-reviewer, Trellis developer/implementation-reviewer, etc.). If you are reading this file as part of an `orchestrate-jira-issue` run in any role, this protocol applies to you.
+
+### How to file a report
+
+1. Just before declaring your task complete (or just before sending the `done` IPC signal, if you are a sub-session), write a single markdown file to:
+
 # Instructions for working in the Task Trellis MCP
 
 An MCP (Model Context Protocol) server for Task Trellis, a task management application for AI coding agents.
