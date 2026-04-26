@@ -24,7 +24,7 @@ export async function projectTreeHandler(
 
   const repo = makeRepo(key);
   const allObjects = await repo.getObjects(true);
-  const treeHtml = renderTreeFragment(key, allObjects);
+  const treeHtml = renderTreeFragment(key, allObjects, { hideCompleted: true });
   const keyEsc = escapeHtml(key);
 
   const sidebar = `<aside class="sidebar">
@@ -40,6 +40,10 @@ export async function projectTreeHandler(
       <button class="icon-btn" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode" type="button">
         <svg class="theme-icon-light"><use href="#i-moon"/></svg>
         <svg class="theme-icon-dark"><use href="#i-sun"/></svg>
+      </button>
+      <button class="icon-btn" id="filter-toggle" title="Toggle hide completed" aria-label="Toggle hide completed" type="button">
+        <svg class="filter-icon-on"><use href="#i-filter-on"/></svg>
+        <svg class="filter-icon-off"><use href="#i-filter-off"/></svg>
       </button>
       <button class="icon-btn" title="New top-level issue" type="button"
         hx-get="/projects/${keyEsc}/issues/new" hx-target="#detail" hx-swap="innerHTML">
@@ -61,6 +65,7 @@ export async function projectTreeHandler(
 
   <nav class="tree"
     id="issue-tree"
+    data-project-key="${keyEsc}"
     hx-trigger="refreshTree from:body"
     hx-get="/projects/${keyEsc}/issues/search"
     hx-swap="innerHTML">

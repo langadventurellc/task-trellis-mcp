@@ -103,6 +103,8 @@ describe("projectTreeHandler", () => {
     expect(html).toContain("/projects/my-proj/issues/search");
     expect(html).toContain("<strong>3</strong> issues");
     expect(html).toContain("1 open · 1 in-progress · 1 done");
+    // DONE task is pruned from the tree by default; meta-bar counts are unaffected
+    expect(html).not.toContain("Task Three");
   });
 
   it("renders search input wired to search endpoint", async () => {
@@ -115,6 +117,44 @@ describe("projectTreeHandler", () => {
     expect(html).toContain('hx-get="/projects/my-proj/issues/search"');
     expect(html).toContain('hx-trigger="keyup changed delay:200ms"');
     expect(html).toContain('id="detail"');
+  });
+
+  it("emits filter-toggle button with id, aria-label, and icon-btn class", async () => {
+    mockGetObjects.mockResolvedValue([]);
+
+    const res = makeRes();
+    await projectTreeHandler(makeReq(), res, { key: "my-proj" });
+
+    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
+    expect(html).toContain('id="filter-toggle"');
+    expect(html).toContain('aria-label="Toggle hide completed"');
+    expect(html).toContain('class="icon-btn" id="filter-toggle"');
+  });
+
+  it("emits data-project-key on the #issue-tree nav", async () => {
+    mockGetObjects.mockResolvedValue([]);
+
+    const res = makeRes();
+    await projectTreeHandler(makeReq(), res, { key: "my-proj" });
+
+    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
+    expect(html).toContain('id="issue-tree"');
+    expect(html).toContain('data-project-key="my-proj"');
+  });
+
+  it("inline script reconciles filter state on load: triggers refreshTree when hideDone is false", async () => {
+    mockGetObjects.mockResolvedValue([]);
+
+    const res = makeRes();
+    await projectTreeHandler(makeReq(), res, { key: "my-proj" });
+
+    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
+    // The DOMContentLoaded handler must capture loadHideDone() and, when false,
+    // trigger refreshTree so the server-pruned tree is replaced with the full tree.
+    expect(html).toContain("var hideDone = loadHideDone()");
+    expect(html).toContain(
+      "if (!hideDone) htmx.trigger(document.body, 'refreshTree')",
+    );
   });
 
   it("renders tree nodes with kind letter and correct status/priority classes", async () => {
@@ -219,6 +259,183 @@ describe("searchHandler", () => {
     const html = (res.end as jest.Mock).mock.calls[0][0] as string;
     expect(html).toContain("Some Task");
     expect(html).not.toContain("Another");
+  });
+
+  it("prunes completed subtrees when hideDone=1 and q is absent", async () => {
+    mockGetObjects.mockResolvedValue([
+      makeObj({
+        id: "T-open",
+        title: "Open Task",
+        status: TrellisObjectStatus.OPEN,
+      }),
+      makeObj({
+        id: "T-done",
+        title: "Done Task",
+        status: TrellisObjectStatus.DONE,
+      }),
+    ]);
+
+    const res = makeRes();
+    await searchHandler(
+      makeReq("/projects/my-proj/issues/search?hideDone=1"),
+      res,
+      { key: "my-proj" },
+    );
+
+    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
+    expect(html).toContain("Open Task");
+    expect(html).not.toContain("Done Task");
+  });
+
+  it("does not prune when hideDone=1 and q is present (search ignores filter)", async () => {
+    mockGetObjects.mockResolvedValue([
+      makeObj({
+        id: "T-open",
+        title: "foo open",
+        status: TrellisObjectStatus.OPEN,
+      }),
+      makeObj({
+        id: "T-done",
+        title: "foo done",
+        status: TrellisObjectStatus.DONE,
+      }),
+    ]);
+
+    const res = makeRes();
+    await searchHandler(
+      makeReq("/projects/my-proj/issues/search?hideDone=1&q=foo"),
+      res,
+      { key: "my-proj" },
+    );
+
+    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
+    expect(html).toContain("foo open");
+    expect(html).toContain("foo done");
+  });
+
+  it("meta-bar OOB reflects full dataset counts even when hideDone=1 prunes the tree", async () => {
+    mockGetObjects.mockResolvedValue([
+      makeObj({ id: "T-open", status: TrellisObjectStatus.OPEN }),
+      makeObj({ id: "T-done", status: TrellisObjectStatus.DONE }),
+    ]);
+
+    const res = makeRes();
+    await searchHandler(
+      makeReq("/projects/my-proj/issues/search?hideDone=1"),
+      res,
+      { key: "my-proj" },
+    );
+
+    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
+    expect(html).toContain("<strong>2</strong> issues");
+    expect(html).toContain("1 open");
+    expect(html).toContain("1 done");
+  });
+
+  it("honors open CSV param: renders matching rows with open class when q is absent", async () => {
+    mockGetObjects.mockResolvedValue([
+      makeObj({
+        id: "F-parent",
+        title: "Parent Feature",
+        type: TrellisObjectType.FEATURE,
+        childrenIds: ["T-child"],
+        parent: null,
+      }),
+      makeObj({ id: "T-child", title: "Child Task", parent: "F-parent" }),
+      makeObj({
+        id: "F-other",
+        title: "Other Feature",
+        type: TrellisObjectType.FEATURE,
+        childrenIds: [],
+        parent: null,
+      }),
+    ]);
+
+    const res = makeRes();
+    await searchHandler(
+      makeReq("/projects/my-proj/issues/search?open=F-parent"),
+      res,
+      { key: "my-proj" },
+    );
+
+    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
+    // F-parent is in openSet → renders with open class
+    expect(html).toMatch(/class="row open"/);
+    expect(html).toContain("Parent Feature");
+  });
+
+  it("search-clear path: honors open CSV when q is empty string (q=&open=...)", async () => {
+    mockGetObjects.mockResolvedValue([
+      makeObj({
+        id: "F-parent",
+        title: "Parent Feature",
+        type: TrellisObjectType.FEATURE,
+        childrenIds: ["T-child"],
+        parent: null,
+      }),
+      makeObj({ id: "T-child", title: "Child Task", parent: "F-parent" }),
+    ]);
+
+    const res = makeRes();
+    await searchHandler(
+      makeReq("/projects/my-proj/issues/search?q=&open=F-parent"),
+      res,
+      { key: "my-proj" },
+    );
+
+    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
+    // q="" is falsy → tree mode; F-parent in openSet → open class rendered
+    expect(html).toMatch(/class="row open"/);
+    expect(html).toContain("Parent Feature");
+  });
+
+  it("empty open param renders no rows expanded (explicitly all-collapsed state)", async () => {
+    mockGetObjects.mockResolvedValue([
+      makeObj({
+        id: "F-inprogress",
+        title: "In Progress Feature",
+        type: TrellisObjectType.FEATURE,
+        status: TrellisObjectStatus.IN_PROGRESS,
+        childrenIds: ["T-child"],
+        parent: null,
+      }),
+      makeObj({ id: "T-child", title: "Child Task", parent: "F-inprogress" }),
+    ]);
+
+    const res = makeRes();
+    await searchHandler(makeReq("/projects/my-proj/issues/search?open="), res, {
+      key: "my-proj",
+    });
+
+    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
+    // open="" → empty openSet overrides computeInitialOpenSet → no row has open class
+    expect(html).not.toMatch(/class="row open"/);
+    expect(html).toContain("In Progress Feature");
+  });
+
+  it("ignores open param when q is present (search results are flat)", async () => {
+    mockGetObjects.mockResolvedValue([
+      makeObj({
+        id: "F-parent",
+        title: "Parent Feature",
+        type: TrellisObjectType.FEATURE,
+        childrenIds: ["T-child"],
+        parent: null,
+      }),
+      makeObj({ id: "T-child", title: "Child Task", parent: "F-parent" }),
+    ]);
+
+    const res = makeRes();
+    await searchHandler(
+      makeReq("/projects/my-proj/issues/search?q=Parent&open=F-parent"),
+      res,
+      { key: "my-proj" },
+    );
+
+    const html = (res.end as jest.Mock).mock.calls[0][0] as string;
+    // Search returns flat results; open class must not appear
+    expect(html).not.toMatch(/class="row open"/);
+    expect(html).toContain("Parent Feature");
   });
 
   it("returns no-results message when nothing matches", async () => {

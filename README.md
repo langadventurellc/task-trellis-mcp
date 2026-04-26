@@ -138,6 +138,15 @@ Task Trellis UI: http://127.0.0.1:3717
 - The UI shows all projects under `~/.trellis/projects/` and supports creating, editing, and deleting issues directly in the browser.
 - When the leader session exits, the port is released automatically.
 
+#### Project Tree Navigation
+
+The project tree view includes several features for navigating and filtering issues:
+
+- **Expand/Collapse**: Click the chevron next to an issue to expand or collapse its children. Open/closed state is automatically saved per project.
+- **Hide Completed**: Click the filter icon (top toolbar) to toggle hiding completed (done/wont-do) issues. This preference is saved per project.
+- **Search**: Use the search box to filter issues by title or content. Search results are displayed flat and ignore the hide-completed preference.
+- **Issue Details**: Click any issue row to view and edit its full details in the side panel.
+
 ### Breaking Changes
 
 > **Breaking change:** `--projectRootFolder` has been removed. Use `--projectDir` instead.

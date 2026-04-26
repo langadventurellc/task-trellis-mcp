@@ -21,7 +21,7 @@ export function treeRow(
   const openClass = hasChildren && opts.open ? " open" : "";
   const hiddenAttr = opts.hidden ? " hidden" : "";
   const indentPx = depth * 20;
-  return `<div class="row${openClass}"${hiddenAttr} style="--indent:${indentPx}px;"
+  return `<div class="row${openClass}"${hiddenAttr} data-id="${escapeHtml(obj.id)}" style="--indent:${indentPx}px;"
   hx-get="/projects/${escapeHtml(key)}/issues/${escapeHtml(obj.id)}/detail"
   hx-target="#detail"
   hx-swap="innerHTML"
