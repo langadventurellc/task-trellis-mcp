@@ -24,16 +24,28 @@ export async function searchHandler(
   const { key } = params;
   const url = new URL(req.url ?? "/", "http://localhost");
   const q = url.searchParams.get("q") ?? "";
+  const hideDone = url.searchParams.get("hideDone");
+  const openParam = url.searchParams.get("open");
 
   const repo = makeRepo(key);
   const allObjects = await repo.getObjects(true);
 
-  const tree = q
-    ? renderFlatFragment(
-        key,
-        allObjects.filter((o) => matchesQuery(o, q)),
-      )
-    : renderTreeFragment(key, allObjects);
+  let tree: string;
+  if (q) {
+    tree = renderFlatFragment(
+      key,
+      allObjects.filter((o) => matchesQuery(o, q)),
+    );
+  } else {
+    const openSet =
+      openParam !== null
+        ? new Set(openParam.split(",").filter(Boolean))
+        : undefined;
+    tree = renderTreeFragment(key, allObjects, {
+      hideCompleted: hideDone === "1",
+      ...(openSet ? { openSet } : {}),
+    });
+  }
 
   const metaOob = `<div class="tree-meta" id="tree-meta" hx-swap-oob="true">${metaBar(allObjects)}</div>`;
 
