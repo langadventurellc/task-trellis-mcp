@@ -20,6 +20,7 @@ Full documentation is available in the [docs](docs/index.md) folder.
 - [Installation and Configuration](#installation-and-configuration)
 - [Configuration](#configuration)
 - [Available Tools](#available-tools)
+- [MCP Resources](#mcp-resources)
 - [Troubleshooting](#troubleshooting)
 
 ## At a Glance
@@ -179,6 +180,47 @@ Attachments are returned as a list of filenames when calling **get_issue** and a
 ### System Management
 
 - **prune_closed** - Clean up old completed/cancelled issues for maintenance
+
+## MCP Resources
+
+Task Trellis exposes issues as MCP resources, enabling Claude Code to @-mention them inline for quick reference.
+
+### URI Scheme
+
+Resources follow the URI scheme: `trellis://issue/<id>`
+
+Example: `trellis://issue/T-my-task`
+
+### Which Issues Appear
+
+`resources/list` returns all **non-closed** issues — those with status `draft`, `open`, or `in-progress`. Issues with status `done` or `wont-do` are excluded.
+
+### Read Payload (Minimal by Design)
+
+`resources/read` returns **only** the issue's `id`, `title`, and `status` in a small markdown snippet:
+
+```
+# <title>
+
+- id: <id>
+- status: <status>
+```
+
+This is intentional: the resource surface is designed for **discovery and @-mention autocomplete**, not for loading full issue context into prompts. To read the full issue body, prerequisites, history, and all other fields, use the `get_issue` MCP tool instead.
+
+### @-Mention in Claude Code
+
+You can reference a Trellis issue inline in Claude Code using its MCP server name as a prefix. If your MCP configuration names the server `task-trellis` (as in the default `.mcp.json`):
+
+```
+@task-trellis:trellis://issue/T-my-task
+```
+
+If you have renamed the server, substitute that name. See the [Claude Code plugins reference](https://code.claude.com/docs/en/plugins-reference) for the current @-mention prefix format.
+
+### Stale-Context Caveat
+
+Claude Code reads each resource once per @-mention and does not refresh it during the session. If an issue is updated after being mentioned, the in-session view will be stale. Use the `get_issue` tool for fresh data.
 
 ## Troubleshooting
 

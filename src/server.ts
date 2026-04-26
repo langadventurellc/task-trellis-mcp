@@ -5,6 +5,9 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  ListResourcesRequestSchema,
+  ReadResourceRequestSchema,
+  ListResourceTemplatesRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { Command } from "commander";
 import fs from "fs";
@@ -48,6 +51,11 @@ import {
   removeAttachmentTool,
   updateObjectTool,
 } from "./tools";
+import {
+  handleListResources,
+  handleListResourceTemplates,
+  handleReadResource,
+} from "./resources";
 
 // Parse command line arguments
 const program = new Command();
@@ -160,6 +168,7 @@ A browser UI is also available; call get_ui_info to retrieve its URL whenever th
   {
     capabilities: {
       tools: {},
+      resources: { listChanged: true },
     },
   },
 );
@@ -219,6 +228,18 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
     default:
       throw new Error(`Unknown tool: ${toolName}`);
   }
+});
+
+server.setRequestHandler(ListResourcesRequestSchema, (request) => {
+  return handleListResources(request.params ?? {}, getRepository());
+});
+
+server.setRequestHandler(ListResourceTemplatesRequestSchema, () => {
+  return handleListResourceTemplates();
+});
+
+server.setRequestHandler(ReadResourceRequestSchema, (request) => {
+  return handleReadResource(request.params, getRepository());
 });
 
 async function runServer() {
