@@ -98,6 +98,29 @@ describe("renderTreeFragment", () => {
     expect(html).toContain("F-open");
   });
 
+  it("with hideCompleted:true keeps closed descendants of an open root", () => {
+    const openRoot = makeObj({
+      id: "F-open",
+      type: TrellisObjectType.FEATURE,
+      title: "Open Feature",
+      childrenIds: ["T-done-child"],
+      parent: null,
+    });
+    const doneChild = makeObj({
+      id: "T-done-child",
+      title: "Done Child Task",
+      status: TrellisObjectStatus.DONE,
+      parent: "F-open",
+    });
+
+    const html = renderTreeFragment("my-proj", [openRoot, doneChild], {
+      hideCompleted: true,
+    });
+
+    expect(html).toContain("F-open");
+    expect(html).toContain("T-done-child");
+  });
+
   it("falls back to computeInitialOpenSet when openSet is omitted", () => {
     // F-parent has an in-progress child → computeInitialOpenSet will include F-parent
     const parent = makeObj({

@@ -1,6 +1,6 @@
 import type { TrellisObject } from "../../models";
+import { isClosed } from "../../models";
 import { computeInitialOpenSet } from "./computeInitialOpenSet";
-import { pruneCompletedSubtrees } from "./pruneCompletedSubtrees";
 import { treeRow } from "./treeRow";
 
 function buildNodes(
@@ -37,18 +37,17 @@ function buildNodes(
 }
 
 /** Renders the hierarchical tree. Ancestors of in-progress issues start expanded; everything else collapsed.
- * Supply `options.openSet` to override which rows start open. Pass `options.hideCompleted: true` to prune done/wont-do subtrees before rendering. */
+ * Supply `options.openSet` to override which rows start open. Pass `options.hideCompleted: true` to hide closed top-level issues (their descendants come along). */
 export function renderTreeFragment(
   key: string,
   objects: TrellisObject[],
   options?: { openSet?: Set<string>; hideCompleted?: boolean },
 ): string {
-  const visible = options?.hideCompleted
-    ? pruneCompletedSubtrees(objects)
-    : objects;
-  const objectMap = new Map(visible.map((o) => [o.id, o]));
-  const roots = visible.filter((o) => o.parent === null);
-  const openSet = options?.openSet ?? computeInitialOpenSet(visible);
+  const objectMap = new Map(objects.map((o) => [o.id, o]));
+  const roots = objects.filter(
+    (o) => o.parent === null && (!options?.hideCompleted || !isClosed(o)),
+  );
+  const openSet = options?.openSet ?? computeInitialOpenSet(objects);
   const html = buildNodes(
     key,
     objectMap,
