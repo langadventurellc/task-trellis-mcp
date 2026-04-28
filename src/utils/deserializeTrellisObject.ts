@@ -13,27 +13,37 @@ function extractFrontmatterAndBody(markdownString: string): {
   yamlContent: string;
   bodyContent: string;
 } {
-  const frontmatterStart = markdownString.indexOf("---");
-  if (frontmatterStart === -1) {
+  if (!markdownString.startsWith("---")) {
     throw new Error(
       "Invalid format: Expected YAML frontmatter delimited by --- markers",
     );
   }
 
-  const frontmatterEnd = markdownString.indexOf("---", frontmatterStart + 3);
-  if (frontmatterEnd === -1) {
+  const openFenceNewlineIndex = markdownString.indexOf("\n");
+  if (openFenceNewlineIndex === -1) {
     throw new Error(
       "Invalid format: Expected YAML frontmatter delimited by --- markers",
     );
   }
 
-  const yamlContent = markdownString
-    .substring(frontmatterStart + 3, frontmatterEnd)
+  const afterOpenFence = markdownString.substring(openFenceNewlineIndex + 1);
+  const closingFenceMatch = /^---\s*$/m.exec(afterOpenFence);
+  if (!closingFenceMatch) {
+    throw new Error(
+      "Invalid format: Expected YAML frontmatter delimited by --- markers",
+    );
+  }
+
+  const yamlContent = afterOpenFence
+    .substring(0, closingFenceMatch.index)
     .trim();
 
-  const bodyContent = markdownString
-    .substring(frontmatterEnd + 3)
-    .replace(/^\n+/, "");
+  const bodyStart =
+    openFenceNewlineIndex +
+    1 +
+    closingFenceMatch.index +
+    closingFenceMatch[0].length;
+  const bodyContent = markdownString.substring(bodyStart).replace(/^\n+/, "");
 
   return { yamlContent, bodyContent };
 }

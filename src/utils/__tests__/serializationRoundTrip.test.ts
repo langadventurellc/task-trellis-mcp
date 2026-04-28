@@ -1,3 +1,4 @@
+import { Scalar } from "yaml";
 import {
   TrellisObject,
   TrellisObjectPriority,
@@ -6,6 +7,7 @@ import {
 } from "../../models";
 import { deserializeTrellisObject } from "../deserializeTrellisObject";
 import { serializeTrellisObject } from "../serializeTrellisObject";
+import { wrapDangerousScalars } from "../wrapDangerousScalars";
 
 describe("TrellisObject Serialization/Deserialization Integration Tests", () => {
   describe("Round-trip serialization compatibility", () => {
@@ -506,6 +508,97 @@ ${"Final section content repeated multiple times to test large content handling.
 
       expect(deserialized).toEqual(original);
       expect(deserialized.parent).toBeNull();
+    });
+  });
+
+  describe("triple-dash corruption regression cases", () => {
+    const base: TrellisObject = {
+      id: "T-dash-test",
+      type: TrellisObjectType.TASK,
+      title: "Dash Test",
+      status: TrellisObjectStatus.OPEN,
+      priority: TrellisObjectPriority.MEDIUM,
+      prerequisites: [],
+      affectedFiles: new Map(),
+      log: [],
+      schema: "v1.0",
+      childrenIds: [],
+      body: "test body",
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
+      parent: null,
+    };
+
+    it("round-trips when affectedFiles value contains \\n---\\n", () => {
+      const original: TrellisObject = {
+        ...base,
+        affectedFiles: new Map([["src/f.ts", "line1\n---\nline2"]]),
+      };
+      expect(
+        deserializeTrellisObject(serializeTrellisObject(original)),
+      ).toEqual(original);
+    });
+
+    it("round-trips when log entry contains \\n---\\n", () => {
+      const original: TrellisObject = {
+        ...base,
+        log: ["before\n---\nafter"],
+      };
+      expect(
+        deserializeTrellisObject(serializeTrellisObject(original)),
+      ).toEqual(original);
+    });
+
+    it("round-trips when title is exactly ---", () => {
+      const original: TrellisObject = { ...base, title: "---" };
+      expect(
+        deserializeTrellisObject(serializeTrellisObject(original)),
+      ).toEqual(original);
+    });
+
+    it("round-trips when title contains \\n---\\n", () => {
+      const original: TrellisObject = { ...base, title: "Title\n---\nMore" };
+      expect(
+        deserializeTrellisObject(serializeTrellisObject(original)),
+      ).toEqual(original);
+    });
+
+    it("round-trips long affectedFiles value with \\n---\\n (serializer guard fires for block-literal candidate)", () => {
+      const longValue = "A".repeat(80) + "\n---\n" + "B".repeat(80);
+      const original: TrellisObject = {
+        ...base,
+        affectedFiles: new Map([["src/f.ts", longValue]]),
+      };
+      const serialized = serializeTrellisObject(original);
+      // Guard must prevent a bare --- line from appearing in the frontmatter region
+      const frontmatterRegion = serialized.split(/^---\s*$/m)[1];
+      expect(frontmatterRegion).not.toMatch(/^---\s*$/m);
+      expect(deserializeTrellisObject(serialized)).toEqual(original);
+    });
+
+    it("round-trips log entry with --- mid-line only — guard must NOT trigger (negative test)", () => {
+      const original: TrellisObject = {
+        ...base,
+        log: ["see config---v2.yml"],
+      };
+      const serialized = serializeTrellisObject(original);
+      // Mid-line --- should not be double-quoted; confirm plain output
+      expect(serialized).toContain("see config---v2.yml");
+      expect(deserializeTrellisObject(serialized)).toEqual(original);
+    });
+  });
+
+  describe("wrapDangerousScalars unit tests", () => {
+    it("wraps string with bare --- line as QUOTE_DOUBLE Scalar", () => {
+      const result = wrapDangerousScalars("line1\n---\nline2");
+      expect(result).toBeInstanceOf(Scalar);
+      expect((result as Scalar).type).toBe(Scalar.QUOTE_DOUBLE);
+    });
+
+    it("leaves mid-line --- string unchanged (negative case)", () => {
+      const result = wrapDangerousScalars("see config---v2.yml");
+      expect(typeof result).toBe("string");
+      expect(result).toBe("see config---v2.yml");
     });
   });
 });

@@ -505,4 +505,84 @@ Test body content with parent set to 'none'`;
     expect(result.id).toBe("P-none-parent-test");
     expect(result.title).toBe("None Parent Test");
   });
+
+  describe("closing-fence line-anchoring regression cases", () => {
+    const minimalFrontmatter = `id: T-parser-test
+title: Test Task
+status: open
+priority: medium
+prerequisites: []
+affectedFiles: {}
+log: []
+schema: v1.0
+childrenIds: []
+created: "2025-01-15T10:00:00Z"
+updated: "2025-01-15T10:00:00Z"`;
+
+    it("ignores --- inside a double-quoted scalar and finds the real closing fence", () => {
+      const markdownString = `---
+${minimalFrontmatter.replace("title: Test Task", 'title: "has --- inside"')}
+---
+
+body content`;
+
+      const result = deserializeTrellisObject(markdownString);
+      expect(result.body).toBe("body content");
+      expect(result.title).toBe("has --- inside");
+    });
+
+    it("ignores --- inside a single-quoted scalar and finds the real closing fence", () => {
+      const markdownString = `---
+${minimalFrontmatter.replace("title: Test Task", "title: 'has --- inside'")}
+---
+
+body content`;
+
+      const result = deserializeTrellisObject(markdownString);
+      expect(result.body).toBe("body content");
+      expect(result.title).toBe("has --- inside");
+    });
+
+    it("ignores bare --- line nested inside a block-literal scalar (line-anchoring)", () => {
+      const markdownString = `---
+id: T-parser-test
+title: Test Task
+status: open
+priority: medium
+prerequisites: []
+log: []
+schema: v1.0
+childrenIds: []
+created: "2025-01-15T10:00:00Z"
+updated: "2025-01-15T10:00:00Z"
+affectedFiles:
+  src/f.ts: |-
+    line1
+    ---
+    line2
+---
+
+body content`;
+
+      const result = deserializeTrellisObject(markdownString);
+      expect(result.body).toBe("body content");
+      expect(result.affectedFiles.get("src/f.ts")).toBe("line1\n---\nline2");
+    });
+
+    it("parses correctly when closing fence has trailing whitespace", () => {
+      const markdownString = `---\n${minimalFrontmatter}\n---   \n\nbody content`;
+
+      const result = deserializeTrellisObject(markdownString);
+      expect(result.body).toBe("body content");
+      expect(result.id).toBe("T-parser-test");
+    });
+
+    it("throws the exact error message when no closing fence is present", () => {
+      const markdownString = `---\n${minimalFrontmatter}`;
+
+      expect(() => deserializeTrellisObject(markdownString)).toThrow(
+        "Invalid format: Expected YAML frontmatter delimited by --- markers",
+      );
+    });
+  });
 });

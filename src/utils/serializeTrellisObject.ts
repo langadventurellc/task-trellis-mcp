@@ -1,5 +1,6 @@
 import { stringify } from "yaml";
 import { TrellisObject } from "../models";
+import { wrapDangerousScalars } from "./wrapDangerousScalars";
 
 /**
  * Serializes a TrellisObject to a markdown string with YAML frontmatter
@@ -29,8 +30,8 @@ export function serializeTrellisObject(trellisObject: TrellisObject): string {
       : {}),
   };
 
-  // Generate YAML frontmatter
-  const yamlFrontmatter = stringify(frontmatter).trim();
+  // Guard against bare --- lines in scalar values that would confuse the frontmatter extractor
+  const yamlFrontmatter = stringify(wrapDangerousScalars(frontmatter)).trim();
 
   // Combine YAML frontmatter with markdown body
   const markdown = `---
