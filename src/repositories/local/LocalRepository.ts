@@ -105,4 +105,33 @@ export class LocalRepository implements Repository {
     const { deleteAttachment } = await import("./deleteAttachment.js");
     return deleteAttachment(id, filename, this.config.planningRootFolder!);
   }
+
+  async writeProjectFile(
+    filename: string,
+    content: string,
+    failIfExists?: boolean,
+  ): Promise<void> {
+    const { writeProjectFile } = await import("./writeProjectFile.js");
+    return writeProjectFile(
+      filename,
+      content,
+      this.config.planningRootFolder!,
+      failIfExists,
+    );
+  }
+
+  async readProjectFile(filename: string): Promise<string> {
+    const { readProjectFile } = await import("./readProjectFile.js");
+    return readProjectFile(filename, this.config.planningRootFolder!);
+  }
+
+  async listProjectFiles(): Promise<string[]> {
+    const { listProjectFiles } = await import("./listProjectFiles.js");
+    return listProjectFiles(this.config.planningRootFolder!);
+  }
+
+  async deleteProjectFile(filename: string): Promise<void> {
+    const { deleteProjectFile } = await import("./deleteProjectFile.js");
+    return deleteProjectFile(filename, this.config.planningRootFolder!);
+  }
 }

@@ -20,6 +20,22 @@ export { handleListObjects, listObjectsTool } from "./listObjectsTool.js";
 export { handleUpdateObject, updateObjectTool } from "./updateObjectTool.js";
 export { addAttachmentTool, handleAddAttachment } from "./addAttachmentTool.js";
 export {
+  deleteProjectFileTool,
+  handleDeleteProjectFile,
+} from "./deleteProjectFileTool.js";
+export {
+  handleListProjectFiles,
+  listProjectFilesTool,
+} from "./listProjectFilesTool.js";
+export {
+  handleReadProjectFile,
+  readProjectFileTool,
+} from "./readProjectFileTool.js";
+export {
   handleRemoveAttachment,
   removeAttachmentTool,
 } from "./removeAttachmentTool.js";
+export {
+  handleWriteProjectFile,
+  writeProjectFileTool,
+} from "./writeProjectFileTool.js";

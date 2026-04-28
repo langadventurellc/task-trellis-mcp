@@ -106,6 +106,14 @@ describe("completeTask service function", () => {
       listAttachments: jest.fn(),
       copyAttachment: jest.fn(),
       deleteAttachment: jest.fn(),
+
+      writeProjectFile: jest.fn(),
+
+      readProjectFile: jest.fn(),
+
+      listProjectFiles: jest.fn(),
+
+      deleteProjectFile: jest.fn(),
     };
 
     mockServerConfig = {

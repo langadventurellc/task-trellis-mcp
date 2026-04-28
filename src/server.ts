@@ -28,6 +28,7 @@ import {
   completeTaskTool,
   createObjectTool,
   deleteObjectTool,
+  deleteProjectFileTool,
   getNextAvailableIssueTool,
   getObjectTool,
   getUiInfoTool,
@@ -38,15 +39,22 @@ import {
   handleCompleteTask,
   handleCreateObject,
   handleDeleteObject,
+  handleDeleteProjectFile,
   handleGetNextAvailableIssue,
   handleGetObject,
   handleGetUiInfo,
   handleListObjects,
+  handleListProjectFiles,
+  handleReadProjectFile,
   handleRemoveAttachment,
   handleUpdateObject,
+  handleWriteProjectFile,
   listObjectsTool,
+  listProjectFilesTool,
+  readProjectFileTool,
   removeAttachmentTool,
   updateObjectTool,
+  writeProjectFileTool,
 } from "./tools";
 
 // Parse command line arguments
@@ -179,6 +187,10 @@ server.setRequestHandler(ListToolsRequestSchema, () => {
     getUiInfoTool,
     addAttachmentTool,
     removeAttachmentTool,
+    writeProjectFileTool,
+    readProjectFileTool,
+    listProjectFilesTool,
+    deleteProjectFileTool,
   ];
 
   return { tools };
@@ -216,6 +228,14 @@ server.setRequestHandler(CallToolRequestSchema, (request) => {
       return handleAddAttachment(_getService(), repository, args);
     case "remove_attachment":
       return handleRemoveAttachment(_getService(), repository, args);
+    case "write_project_file":
+      return handleWriteProjectFile(_getService(), repository, args);
+    case "read_project_file":
+      return handleReadProjectFile(_getService(), repository, args);
+    case "list_project_files":
+      return handleListProjectFiles(_getService(), repository);
+    case "delete_project_file":
+      return handleDeleteProjectFile(_getService(), repository, args);
     default:
       throw new Error(`Unknown tool: ${toolName}`);
   }
