@@ -24,4 +24,12 @@ export interface Repository {
   listAttachments(obj: TrellisObject): Promise<string[]>;
   copyAttachment(id: string, sourcePath: string): Promise<string>;
   deleteAttachment(id: string, filename: string): Promise<void>;
+  writeProjectFile(
+    filename: string,
+    content: string,
+    failIfExists?: boolean,
+  ): Promise<void>;
+  readProjectFile(filename: string): Promise<string>;
+  listProjectFiles(): Promise<string[]>;
+  deleteProjectFile(filename: string): Promise<void>;
 }

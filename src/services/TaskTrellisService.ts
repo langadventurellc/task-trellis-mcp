@@ -120,4 +120,29 @@ export interface TaskTrellisService {
     id: string,
     filename: string,
   ): Promise<{ content: Array<{ type: string; text: string }> }>;
+
+  /** Writes a UTF-8 text file to the project's files directory. */
+  writeProjectFile(
+    repository: Repository,
+    filename: string,
+    content: string,
+    failIfExists?: boolean,
+  ): Promise<{ content: Array<{ type: string; text: string }> }>;
+
+  /** Reads a UTF-8 text file from the project's files directory. */
+  readProjectFile(
+    repository: Repository,
+    filename: string,
+  ): Promise<{ content: Array<{ type: string; text: string }> }>;
+
+  /** Lists filenames in the project's files directory. */
+  listProjectFiles(
+    repository: Repository,
+  ): Promise<{ content: Array<{ type: string; text: string }> }>;
+
+  /** Deletes a named file from the project's files directory. */
+  deleteProjectFile(
+    repository: Repository,
+    filename: string,
+  ): Promise<{ content: Array<{ type: string; text: string }> }>;
 }

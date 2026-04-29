@@ -21,6 +21,14 @@ describe("getObjectTool", () => {
       listAttachments: jest.fn().mockResolvedValue([]),
       copyAttachment: jest.fn(),
       deleteAttachment: jest.fn(),
+
+      writeProjectFile: jest.fn(),
+
+      readProjectFile: jest.fn(),
+
+      listProjectFiles: jest.fn(),
+
+      deleteProjectFile: jest.fn(),
     };
   });
 

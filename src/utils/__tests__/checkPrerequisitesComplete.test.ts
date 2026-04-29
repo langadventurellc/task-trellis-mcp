@@ -57,6 +57,26 @@ class MockRepository implements Repository {
   async deleteAttachment(_id: string, _filename: string): Promise<void> {
     return Promise.resolve();
   }
+
+  async writeProjectFile(
+    _filename: string,
+    _content: string,
+    _failIfExists?: boolean,
+  ): Promise<void> {
+    return Promise.resolve();
+  }
+
+  async readProjectFile(_filename: string): Promise<string> {
+    return Promise.resolve("");
+  }
+
+  async listProjectFiles(): Promise<string[]> {
+    return Promise.resolve([]);
+  }
+
+  async deleteProjectFile(_filename: string): Promise<void> {
+    return Promise.resolve();
+  }
 }
 
 describe("checkPrerequisitesComplete", () => {
@@ -307,6 +327,10 @@ describe("checkPrerequisitesComplete", () => {
       listAttachments: jest.fn(),
       copyAttachment: jest.fn(),
       deleteAttachment: jest.fn(),
+      writeProjectFile: jest.fn(),
+      readProjectFile: jest.fn(),
+      listProjectFiles: jest.fn(),
+      deleteProjectFile: jest.fn(),
     };
 
     await expect(

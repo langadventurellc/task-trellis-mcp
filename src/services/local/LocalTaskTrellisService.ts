@@ -182,4 +182,37 @@ export class LocalTaskTrellisService implements TaskTrellisService {
     const { removeAttachment } = await import("./removeAttachment");
     return removeAttachment(repository, id, filename);
   }
+
+  async writeProjectFile(
+    repository: Repository,
+    filename: string,
+    content: string,
+    failIfExists?: boolean,
+  ): Promise<{ content: Array<{ type: string; text: string }> }> {
+    const { writeProjectFile } = await import("./writeProjectFile");
+    return writeProjectFile(repository, filename, content, failIfExists);
+  }
+
+  async readProjectFile(
+    repository: Repository,
+    filename: string,
+  ): Promise<{ content: Array<{ type: string; text: string }> }> {
+    const { readProjectFile } = await import("./readProjectFile");
+    return readProjectFile(repository, filename);
+  }
+
+  async listProjectFiles(
+    repository: Repository,
+  ): Promise<{ content: Array<{ type: string; text: string }> }> {
+    const { listProjectFiles } = await import("./listProjectFiles");
+    return listProjectFiles(repository);
+  }
+
+  async deleteProjectFile(
+    repository: Repository,
+    filename: string,
+  ): Promise<{ content: Array<{ type: string; text: string }> }> {
+    const { deleteProjectFile } = await import("./deleteProjectFile");
+    return deleteProjectFile(repository, filename);
+  }
 }

@@ -181,6 +181,15 @@ The project tree view includes several features for navigating and filtering iss
 
 Attachments are returned as a list of filenames when calling **get_issue** and are linked in the browser UI detail view.
 
+### Project Files
+
+- **write_project_file** - Write a UTF-8 text file to the project's files directory. Overwrites by default; pass `failIfExists: true` to error on collision instead.
+- **read_project_file** - Read a UTF-8 text file from the project's files directory.
+- **list_project_files** - List filenames in the project's files directory (returns `[]` if the directory does not yet exist).
+- **delete_project_file** - Delete a named file from the project's files directory.
+
+Project files live at `~/.trellis/projects/<key>/files/<filename>` and are scoped to the project — not tied to any individual issue. Filenames must not contain path separators or `..` (path-traversal protection); v1 supports a flat namespace of UTF-8 text files.
+
 ### Browser UI
 
 - **get_ui_info** - Returns the URL and port of the Task Trellis browser UI; use when the user asks about the UI or wants to view issues in a browser
