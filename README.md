@@ -160,7 +160,7 @@ The project tree view includes several features for navigating and filtering iss
 ### Core Issue Management
 
 - **create_issue** - Create projects, epics, features, or tasks with hierarchical relationships
-- **update_issue** - Modify issue properties, status, priority, or prerequisites
+- **update_issue** - Modify issue properties, status, priority, prerequisites, or labels
 - **get_issue** - Retrieve detailed issue information with history and relationships
 - **list_issues** - Query and filter issues by type, status, priority, or scope (returns issue summaries)
 - **delete_issue** - Remove issues (with dependency validation)

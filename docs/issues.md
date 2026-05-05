@@ -33,6 +33,14 @@ Top-level issues (those with no parent) can store an `externalIssueId` — a fre
 - **Child issues**: the field is silently dropped and a warning is included in the response — `externalIssueId` is only stored on top-level issues.
 - **Listing**: `externalIssueId` is included in `list_issues` summaries when it is set.
 
+## Labels
+
+Any issue can carry a `labels` array — free-form string tags for grouping or filtering issues (e.g. `["bug", "auth"]`).
+
+- **Set**: pass `labels` when calling `create_issue` or `update_issue`. Each label must be 100 characters or fewer; longer values are rejected with a `LABEL_TOO_LONG` validation error.
+- **Update semantics**: on `update_issue`, omit `labels` to leave the existing list unchanged, pass `[]` to clear all labels, or pass a non-empty array to replace the existing list.
+- **Listing**: `labels` is included in `list_issues` summaries.
+
 ## Prerequisites & Dependencies
 
 Tasks can have prerequisites that must be completed before they become available:
