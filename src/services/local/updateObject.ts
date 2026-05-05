@@ -9,6 +9,7 @@ import {
   autoCompleteParentHierarchy,
   updateParentHierarchy,
 } from "../../utils";
+import { validateLabels } from "../../validation/validateLabels";
 import { validateStatusTransition } from "../../validation/validateStatusTransition";
 
 export async function updateObject(
@@ -22,6 +23,7 @@ export async function updateObject(
   status?: TrellisObjectStatus,
   force: boolean = false,
   externalIssueId?: string,
+  labels?: string[],
 ): Promise<{ content: Array<{ type: string; text: string }> }> {
   try {
     // Load the existing object
@@ -41,6 +43,10 @@ export async function updateObject(
     const droppedExternalIssueId =
       existingObject.parent !== null && externalIssueId !== undefined;
 
+    if (labels !== undefined) {
+      validateLabels(labels);
+    }
+
     // Create updated object with new properties, ensuring proper typing
     const updatedObject: TrellisObject = {
       ...existingObject,
@@ -53,6 +59,7 @@ export async function updateObject(
         !droppedExternalIssueId && {
           externalIssueId: externalIssueId || undefined,
         }),
+      ...(labels !== undefined ? { labels } : {}),
     };
 
     // Validate status transition

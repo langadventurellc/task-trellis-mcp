@@ -6,6 +6,7 @@ import {
 } from "../../models";
 import { Repository } from "../../repositories";
 import { generateUniqueId } from "../../utils";
+import { validateLabels } from "../../validation/validateLabels";
 import { validateObjectCreation } from "../../validation/validateObjectCreation";
 
 export async function createObject(
@@ -18,6 +19,7 @@ export async function createObject(
   prerequisites: string[] = [],
   description: string = "",
   externalIssueId?: string,
+  labels: string[] = [],
 ): Promise<{ content: Array<{ type: string; text: string }> }> {
   // Get existing objects to generate unique ID
   const existingObjects = await repository.getObjects(true);
@@ -28,6 +30,8 @@ export async function createObject(
 
   const droppedExternalIssueId = parent != null && !!externalIssueId;
   const shouldStoreExternalIssueId = parent == null && !!externalIssueId;
+
+  validateLabels(labels);
 
   // Create TrellisObject with current timestamp
   const now = new Date().toISOString();
@@ -43,7 +47,7 @@ export async function createObject(
     log: [],
     schema: "v1.0",
     childrenIds: [],
-    labels: [],
+    labels,
     created: now,
     updated: now,
     body: description,

@@ -20,6 +20,7 @@ export interface TaskTrellisService {
     prerequisites?: string[],
     description?: string,
     externalIssueId?: string,
+    labels?: string[],
   ): Promise<{ content: Array<{ type: string; text: string }> }>;
 
   /**
@@ -36,6 +37,7 @@ export interface TaskTrellisService {
     status?: TrellisObjectStatus,
     force?: boolean,
     externalIssueId?: string,
+    labels?: string[],
   ): Promise<{ content: Array<{ type: string; text: string }> }>;
 
   /**

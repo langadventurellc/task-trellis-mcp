@@ -6,6 +6,8 @@ import {
 } from "../../../models";
 import { Repository } from "../../../repositories/Repository";
 import { generateUniqueId } from "../../../utils/generateUniqueId";
+import { ValidationError } from "../../../validation/ValidationError";
+import { ValidationErrorCodes } from "../../../validation/ValidationErrorCodes";
 import { validateObjectCreation } from "../../../validation/validateObjectCreation";
 import { createObject } from "../createObject";
 
@@ -588,5 +590,78 @@ describe("createObject", () => {
       mockRepository.saveObject.mock.calls[0][0].externalIssueId,
     ).toBeUndefined();
     expect(result.content).toHaveLength(1);
+  });
+
+  describe("labels", () => {
+    it("defaults labels to empty array when not provided", async () => {
+      await createObject(mockRepository, TrellisObjectType.TASK, "Test Task");
+
+      expect(mockRepository.saveObject).toHaveBeenCalledWith(
+        expect.objectContaining({ labels: [] }),
+      );
+    });
+
+    it("persists provided labels", async () => {
+      await createObject(
+        mockRepository,
+        TrellisObjectType.TASK,
+        "Test Task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        ["bug", "auth"],
+      );
+
+      expect(mockRepository.saveObject).toHaveBeenCalledWith(
+        expect.objectContaining({ labels: ["bug", "auth"] }),
+      );
+    });
+
+    it("accepts a label of exactly 100 characters", async () => {
+      await createObject(
+        mockRepository,
+        TrellisObjectType.TASK,
+        "Test Task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        ["a".repeat(100)],
+      );
+
+      expect(mockRepository.saveObject).toHaveBeenCalledWith(
+        expect.objectContaining({ labels: ["a".repeat(100)] }),
+      );
+    });
+
+    it("rejects a label exceeding 100 characters with LABEL_TOO_LONG", async () => {
+      try {
+        await createObject(
+          mockRepository,
+          TrellisObjectType.TASK,
+          "Test Task",
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          ["a".repeat(101)],
+        );
+        fail("expected ValidationError");
+      } catch (error) {
+        expect(error).toBeInstanceOf(ValidationError);
+        const ve = error as ValidationError;
+        expect(ve.code).toBe(ValidationErrorCodes.LABEL_TOO_LONG);
+        expect(ve.field).toBe("labels");
+      }
+
+      expect(mockRepository.saveObject).not.toHaveBeenCalled();
+    });
   });
 });

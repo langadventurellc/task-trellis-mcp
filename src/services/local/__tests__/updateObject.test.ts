@@ -10,6 +10,8 @@ import {
   autoCompleteParentHierarchy,
   updateParentHierarchy,
 } from "../../../utils";
+import { ValidationError } from "../../../validation/ValidationError";
+import { ValidationErrorCodes } from "../../../validation/ValidationErrorCodes";
 import { validateStatusTransition } from "../../../validation/validateStatusTransition";
 import { updateObject } from "../updateObject";
 
@@ -1147,6 +1149,139 @@ describe("updateObject", () => {
       );
 
       expect(mockAutoCompleteParentHierarchy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("labels", () => {
+    it("replaces existing labels when labels is provided", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK, {
+        labels: ["old"],
+      });
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      await updateObject(
+        mockRepository,
+        mockServerConfig,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        false,
+        undefined,
+        ["new"],
+      );
+
+      expect(mockRepository.saveObject).toHaveBeenCalledWith(
+        expect.objectContaining({ labels: ["new"] }),
+      );
+    });
+
+    it("clears labels when empty array is provided", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK, {
+        labels: ["old"],
+      });
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      await updateObject(
+        mockRepository,
+        mockServerConfig,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        false,
+        undefined,
+        [],
+      );
+
+      expect(mockRepository.saveObject).toHaveBeenCalledWith(
+        expect.objectContaining({ labels: [] }),
+      );
+    });
+
+    it("preserves existing labels when labels is omitted", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK, {
+        labels: ["keep"],
+      });
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      await updateObject(
+        mockRepository,
+        mockServerConfig,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        false,
+        undefined,
+        // labels omitted
+      );
+
+      expect(mockRepository.saveObject).toHaveBeenCalledWith(
+        expect.objectContaining({ labels: ["keep"] }),
+      );
+    });
+
+    it("passes validation for a label of exactly 100 characters", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK);
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+      mockRepository.saveObject.mockResolvedValue();
+
+      await updateObject(
+        mockRepository,
+        mockServerConfig,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        false,
+        undefined,
+        ["a".repeat(100)],
+      );
+
+      expect(mockRepository.saveObject).toHaveBeenCalledWith(
+        expect.objectContaining({ labels: ["a".repeat(100)] }),
+      );
+    });
+
+    it("returns error message for label exceeding 100 characters", async () => {
+      const mockTask = createMockObject(TrellisObjectType.TASK);
+      mockRepository.getObjectById.mockResolvedValue(mockTask);
+
+      const result = await updateObject(
+        mockRepository,
+        mockServerConfig,
+        "T-test-task",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        false,
+        undefined,
+        ["a".repeat(101)],
+      );
+
+      expect(result.content[0].text).toMatch(/Error updating object:/);
+      const errorText = result.content[0].text;
+      const thrownError = new ValidationError(
+        errorText,
+        ValidationErrorCodes.LABEL_TOO_LONG,
+        "labels",
+      );
+      expect(thrownError.code).toBe(ValidationErrorCodes.LABEL_TOO_LONG);
+      expect(mockRepository.saveObject).not.toHaveBeenCalled();
     });
   });
 });
