@@ -585,6 +585,7 @@ describe("E2E Workflow - appendModifiedFiles", () => {
         status: "open",
         priority: "medium",
         childrenIds: ["T-merge-parent-task"],
+        labels: [],
         affectedFiles: {
           "src/core/engine.ts": "Core engine implementation",
           "README.md": "Project documentation",

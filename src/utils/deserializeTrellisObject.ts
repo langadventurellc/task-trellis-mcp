@@ -184,6 +184,7 @@ export function deserializeTrellisObject(
     log: toStringArray(fm.log),
     schema: fm.schema as string,
     childrenIds: toStringArray(fm.childrenIds),
+    labels: toStringArray(fm.labels),
     created: fm.created as string,
     updated: fm.updated as string,
     body: bodyContent,

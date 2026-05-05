@@ -56,6 +56,7 @@ describe("validateParentExists", () => {
       log: [],
       schema: "v1.0",
       childrenIds: [],
+      labels: [],
       body: "Parent project description",
       created: "2025-01-15T10:00:00Z",
       updated: "2025-01-15T10:00:00Z",

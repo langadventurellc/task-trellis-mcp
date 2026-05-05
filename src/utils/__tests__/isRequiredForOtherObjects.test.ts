@@ -94,6 +94,7 @@ describe("isRequiredForOtherObjects", () => {
     log: [],
     schema: "v1.0",
     childrenIds: [],
+    labels: [],
     body: `Body for ${id}`,
     type: TrellisObjectType.TASK,
     created: "2025-01-15T10:00:00Z",

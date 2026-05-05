@@ -16,6 +16,7 @@ describe("isClaimable", () => {
     log: [],
     schema: "1.0",
     childrenIds: [],
+    labels: [],
     body: "Test body",
     created: "2025-01-15T10:00:00Z",
     updated: "2025-01-15T10:00:00Z",

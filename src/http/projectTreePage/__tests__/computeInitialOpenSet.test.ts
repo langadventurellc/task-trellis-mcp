@@ -20,6 +20,7 @@ function makeObj(overrides: Partial<TrellisObject> = {}): TrellisObject {
     log: [],
     schema: "v1.0",
     childrenIds: [],
+    labels: [],
     created: "2026-01-01T00:00:00Z",
     updated: "2026-01-01T00:00:00Z",
     body: "",
@@ -42,6 +43,7 @@ describe("computeInitialOpenSet", () => {
       type: TrellisObjectType.FEATURE,
       status: TrellisObjectStatus.IN_PROGRESS,
       childrenIds: ["T-child"],
+      labels: [],
       parent: null,
     });
     const child = makeObj({ id: "T-child", parent: "F-parent" });
@@ -56,12 +58,14 @@ describe("computeInitialOpenSet", () => {
       id: "P-gp",
       type: TrellisObjectType.PROJECT,
       childrenIds: ["F-mid"],
+      labels: [],
       parent: null,
     });
     const middle = makeObj({
       id: "F-mid",
       type: TrellisObjectType.FEATURE,
       childrenIds: ["T-leaf"],
+      labels: [],
       parent: "P-gp",
     });
     const leaf = makeObj({
@@ -81,6 +85,7 @@ describe("computeInitialOpenSet", () => {
       id: "T-solo",
       status: TrellisObjectStatus.IN_PROGRESS,
       childrenIds: [],
+      labels: [],
       parent: null,
     });
 

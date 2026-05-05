@@ -542,6 +542,7 @@ describe("E2E CRUD - listObjects", () => {
           id: "P-parent",
           title: "Parent Project",
           childrenIds: ["E-child-1", "E-child-2"],
+          labels: [],
         }),
       );
 
@@ -554,6 +555,7 @@ describe("E2E CRUD - listObjects", () => {
           title: "Child Epic 1",
           parent: "P-parent",
           childrenIds: ["F-grandchild-1"],
+          labels: [],
         }),
         { projectId: "P-parent" },
       );
@@ -797,6 +799,7 @@ describe("E2E CRUD - listObjects", () => {
           log: ["Created", "Updated"],
           schema: "1.1",
           childrenIds: ["E-child"],
+          labels: [],
           body: "Project description",
         }),
       );

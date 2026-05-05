@@ -24,6 +24,7 @@ function makeObj(overrides: Partial<TrellisObject> = {}): TrellisObject {
     log: [],
     schema: "v1.0",
     childrenIds: [],
+    labels: [],
     created: "2026-01-01T00:00:00Z",
     updated: "2026-01-01T00:00:00Z",
     body: "",

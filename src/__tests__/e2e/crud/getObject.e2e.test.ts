@@ -37,6 +37,7 @@ describe("E2E CRUD - getObject", () => {
         log: ["Created project", "Updated priority"],
         schema: "1.1",
         childrenIds: ["E-child-epic"],
+        labels: [],
         body: "This is the project description",
       };
 
@@ -205,6 +206,7 @@ describe("E2E CRUD - getObject", () => {
           id: projectId,
           title: "Hierarchy Project",
           childrenIds: [epicId],
+          labels: [],
         }),
       );
 
@@ -218,6 +220,7 @@ describe("E2E CRUD - getObject", () => {
           title: "Hierarchy Epic",
           parent: projectId,
           childrenIds: [featureId],
+          labels: [],
         }),
         { projectId },
       );
@@ -232,6 +235,7 @@ describe("E2E CRUD - getObject", () => {
           title: "Hierarchy Feature",
           parent: epicId,
           childrenIds: [taskId],
+          labels: [],
         }),
         { projectId, epicId },
       );
@@ -294,6 +298,7 @@ describe("E2E CRUD - getObject", () => {
           id: featureId,
           title: "Feature with Tasks",
           childrenIds: [task1Id, task2Id],
+          labels: [],
         }),
       );
 
@@ -581,6 +586,7 @@ affectedFiles: {}
 log: []
 schema: "1.0"
 childrenIds: []
+labels: []
 created: "2024-01-01T00:00:00.000Z"
 updated: "2024-01-01T00:00:00.000Z"
 ---

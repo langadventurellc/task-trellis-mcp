@@ -23,6 +23,9 @@ export function serializeTrellisObject(trellisObject: TrellisObject): string {
     log: trellisObject.log,
     schema: trellisObject.schema,
     childrenIds: trellisObject.childrenIds,
+    ...(trellisObject.labels.length > 0
+      ? { labels: trellisObject.labels }
+      : {}),
     created: trellisObject.created,
     updated: trellisObject.updated,
     ...(trellisObject.externalIssueId

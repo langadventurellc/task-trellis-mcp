@@ -45,6 +45,7 @@ const makeObj = (id: string): TrellisObject => ({
   log: [],
   schema: "1.0",
   childrenIds: [],
+  labels: [],
   body: "",
   created: "2025-01-15T10:00:00Z",
   updated: "2025-01-15T10:00:00Z",

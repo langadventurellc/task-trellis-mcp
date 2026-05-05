@@ -28,6 +28,7 @@ describe("completeTask service function", () => {
     created: "2025-01-15T10:00:00Z",
     updated: "2025-01-15T10:00:00Z",
     childrenIds: [],
+    labels: [],
     body: "This is a test task",
     ...overrides,
   });
@@ -50,6 +51,7 @@ describe("completeTask service function", () => {
     created: "2025-01-15T10:00:00Z",
     updated: "2025-01-15T10:00:00Z",
     childrenIds,
+    labels: [],
     body: "This is a test feature",
   });
 
@@ -71,6 +73,7 @@ describe("completeTask service function", () => {
     created: "2025-01-15T10:00:00Z",
     updated: "2025-01-15T10:00:00Z",
     childrenIds,
+    labels: [],
     body: "This is a test epic",
   });
 
@@ -92,6 +95,7 @@ describe("completeTask service function", () => {
     created: "2025-01-15T10:00:00Z",
     updated: "2025-01-15T10:00:00Z",
     childrenIds,
+    labels: [],
     body: "This is a test project",
   });
 

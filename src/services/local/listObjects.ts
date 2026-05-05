@@ -17,6 +17,7 @@ function convertToSummary(obj: TrellisObject): TrellisObjectSummary {
     parent: obj.parent,
     prerequisites: obj.prerequisites,
     childrenIds: obj.childrenIds,
+    labels: obj.labels,
     created: obj.created,
     updated: obj.updated,
     externalIssueId: obj.externalIssueId,

@@ -61,6 +61,7 @@ describe("pruneClosed", () => {
       log: [],
       schema: "v1.0",
       childrenIds: [],
+      labels: [],
       body: "",
       created: updatedTime.toISOString(),
       updated: updatedTime.toISOString(),

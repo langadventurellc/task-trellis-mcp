@@ -45,6 +45,7 @@ describe("appendObjectLog", () => {
     log: ["Initial log entry", "Second log entry"],
     schema: "1.0",
     childrenIds: [],
+    labels: [],
     body: "This is a test task",
     created: "2025-01-15T10:00:00Z",
     updated: "2025-01-15T10:00:00Z",

@@ -9,6 +9,7 @@ export interface ObjectData {
   log?: string[];
   schema?: string;
   childrenIds?: string[];
+  labels?: string[];
   body?: string;
   kind?: string;
   created?: string;

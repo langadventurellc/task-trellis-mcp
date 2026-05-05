@@ -19,6 +19,7 @@ function makeObj(overrides: Partial<TrellisObject> = {}): TrellisObject {
     log: [],
     schema: "v1.0",
     childrenIds: [],
+    labels: [],
     created: "2026-01-01T00:00:00Z",
     updated: "2026-01-01T00:00:00Z",
     body: "",
@@ -33,6 +34,7 @@ describe("renderTreeFragment", () => {
       type: TrellisObjectType.FEATURE,
       title: "Open Feature",
       childrenIds: ["T-child"],
+      labels: [],
       parent: null,
     });
     const child = makeObj({ id: "T-child", parent: "F-open" });
@@ -41,6 +43,7 @@ describe("renderTreeFragment", () => {
       type: TrellisObjectType.FEATURE,
       title: "Closed Feature",
       childrenIds: ["T-other-child"],
+      labels: [],
       parent: null,
     });
     const otherChild = makeObj({ id: "T-other-child", parent: "F-closed" });
@@ -73,6 +76,7 @@ describe("renderTreeFragment", () => {
       title: "Done Feature",
       status: TrellisObjectStatus.DONE,
       childrenIds: ["T-done-child"],
+      labels: [],
       parent: null,
     });
     const doneChild = makeObj({
@@ -104,6 +108,7 @@ describe("renderTreeFragment", () => {
       type: TrellisObjectType.FEATURE,
       title: "Open Feature",
       childrenIds: ["T-done-child"],
+      labels: [],
       parent: null,
     });
     const doneChild = makeObj({
@@ -128,6 +133,7 @@ describe("renderTreeFragment", () => {
       type: TrellisObjectType.FEATURE,
       title: "Parent Feature",
       childrenIds: ["T-inprogress"],
+      labels: [],
       parent: null,
     });
     const inProgress = makeObj({

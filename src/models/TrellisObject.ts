@@ -14,6 +14,7 @@ export interface TrellisObject {
   log: string[];
   schema: string;
   childrenIds: string[];
+  labels: string[];
   created: string;
   updated: string;
   body: string;

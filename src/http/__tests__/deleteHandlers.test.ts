@@ -37,6 +37,7 @@ function makeObj(overrides: Record<string, unknown> = {}) {
     log: [],
     schema: "v1.0",
     childrenIds: [],
+    labels: [],
     created: "2026-01-01T00:00:00Z",
     updated: "2026-01-01T00:00:00Z",
     body: "",

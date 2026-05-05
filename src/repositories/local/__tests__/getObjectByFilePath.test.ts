@@ -32,6 +32,7 @@ describe("getObjectByFilePath", () => {
         log: [],
         schema: "v1.0",
         childrenIds: [],
+        labels: [],
         body: expect.stringContaining("Configure the database connection"),
         created: "2025-01-15T10:00:00Z",
         updated: "2025-01-15T10:00:00Z",
@@ -63,6 +64,7 @@ describe("getObjectByFilePath", () => {
           "T-implement-login",
           "T-setup-auth-models",
         ]),
+        labels: [],
         body: expect.stringContaining(
           "Implement comprehensive user authentication",
         ),
@@ -93,6 +95,7 @@ describe("getObjectByFilePath", () => {
         log: [],
         schema: "v1.0",
         childrenIds: [],
+        labels: [],
         body: expect.stringContaining("Initialize the project structure"),
         created: "2025-01-10T09:00:00Z",
         updated: "2025-01-14T16:30:00Z",

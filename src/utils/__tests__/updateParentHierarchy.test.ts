@@ -47,6 +47,7 @@ describe("updateParentHierarchy", () => {
     log: [],
     schema: "v1.0",
     childrenIds: [],
+    labels: [],
     created: "2023-01-01T00:00:00.000Z",
     updated: "2023-01-01T00:00:00.000Z",
     body: "",

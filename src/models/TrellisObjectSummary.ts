@@ -11,6 +11,7 @@ export interface TrellisObjectSummary {
   parent: string | null;
   prerequisites: string[];
   childrenIds: string[];
+  labels: string[];
   created: string;
   updated: string;
   externalIssueId?: string;

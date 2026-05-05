@@ -24,6 +24,7 @@ describe("appendAffectedFiles service function", () => {
     created: "2025-01-15T10:00:00Z",
     updated: "2025-01-15T10:00:00Z",
     childrenIds: [],
+    labels: [],
     body: "This is a test task",
     ...overrides,
   });

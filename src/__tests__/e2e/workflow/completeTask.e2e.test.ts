@@ -188,6 +188,7 @@ describe("E2E Workflow - completeTask", () => {
         status: "open",
         priority: "high",
         childrenIds: ["E-auto-epic"],
+        labels: [],
       };
       await createObjectFile(
         testEnv.projectRoot,
@@ -204,6 +205,7 @@ describe("E2E Workflow - completeTask", () => {
         priority: "high",
         parent: "P-auto-test",
         childrenIds: ["F-auto-feature"],
+        labels: [],
       };
       await createObjectFile(
         testEnv.projectRoot,
@@ -221,6 +223,7 @@ describe("E2E Workflow - completeTask", () => {
         priority: "high",
         parent: "E-auto-epic",
         childrenIds: ["T-auto-task1", "T-auto-task2"],
+        labels: [],
       };
       await createObjectFile(
         testEnv.projectRoot,
@@ -327,6 +330,7 @@ describe("E2E Workflow - completeTask", () => {
         status: "open",
         priority: "medium",
         childrenIds: ["T-partial-task1", "T-partial-task2"],
+        labels: [],
       };
       await createObjectFile(
         testEnv.projectRoot,
@@ -398,6 +402,7 @@ describe("E2E Workflow - completeTask", () => {
         status: "open",
         priority: "low",
         childrenIds: ["T-mixed-task1", "T-mixed-task2"],
+        labels: [],
       };
       await createObjectFile(
         testEnv.projectRoot,
@@ -471,6 +476,7 @@ describe("E2E Workflow - completeTask", () => {
         status: "open",
         priority: "medium",
         childrenIds: ["T-standalone-task"],
+        labels: [],
       };
       await createObjectFile(
         testEnv.projectRoot,
@@ -528,6 +534,7 @@ describe("E2E Workflow - completeTask", () => {
         status: "open",
         priority: "medium",
         childrenIds: ["T-no-auto-task"],
+        labels: [],
       };
       await createObjectFile(
         testEnv.projectRoot,
@@ -584,6 +591,7 @@ describe("E2E Workflow - completeTask", () => {
         status: "open",
         priority: "high",
         childrenIds: ["E-parent-files-epic"],
+        labels: [],
       };
       await createObjectFile(
         testEnv.projectRoot,
@@ -600,6 +608,7 @@ describe("E2E Workflow - completeTask", () => {
         priority: "high",
         parent: "P-parent-files-test",
         childrenIds: ["F-parent-files-feature"],
+        labels: [],
       };
       await createObjectFile(
         testEnv.projectRoot,
@@ -617,6 +626,7 @@ describe("E2E Workflow - completeTask", () => {
         priority: "high",
         parent: "E-parent-files-epic",
         childrenIds: ["T-parent-files-task"],
+        labels: [],
       };
       await createObjectFile(
         testEnv.projectRoot,
@@ -712,6 +722,7 @@ describe("E2E Workflow - completeTask", () => {
         status: "open",
         priority: "medium",
         childrenIds: ["T-merge-files-task"],
+        labels: [],
         affectedFiles: {
           "src/existing.ts": "Existing feature implementation",
           "docs/feature.md": "Feature documentation",
@@ -821,6 +832,7 @@ describe("E2E Workflow - completeTask", () => {
         status: "open",
         priority: "medium",
         childrenIds: ["T-partial-task"],
+        labels: [],
       };
       await createObjectFile(
         testEnv.projectRoot,

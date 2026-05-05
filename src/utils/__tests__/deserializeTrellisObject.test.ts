@@ -28,6 +28,7 @@ schema: v1.0
 childrenIds:
   - child-1
   - child-2
+labels: []
 created: "2025-01-15T10:00:00Z"
 updated: "2025-01-15T10:00:00Z"
 ---
@@ -51,6 +52,7 @@ This is the main content of the task.`;
       log: ["Initial commit", "Updated implementation"],
       schema: "v1.0",
       childrenIds: ["child-1", "child-2"],
+      labels: [],
       body: "This is the main content of the task.",
       created: "2025-01-15T10:00:00Z",
       updated: "2025-01-15T10:00:00Z",
@@ -81,6 +83,7 @@ log:
     - Final point
 schema: v1.0
 childrenIds: []
+labels: []
 created: "2025-01-15T10:00:00Z"
 updated: "2025-01-15T10:00:00Z"
 ---
@@ -111,6 +114,7 @@ affectedFiles: {}
 log: []
 schema: v1.0
 childrenIds: []
+labels: []
 created: "2025-01-15T10:00:00Z"
 updated: "2025-01-15T10:00:00Z"
 ---
@@ -146,6 +150,7 @@ schema: v2.0-beta
 childrenIds:
   - child-with-dashes
   - child with spaces
+labels: []
 created: "2025-01-15T10:00:00Z"
 updated: "2025-01-15T10:00:00Z"
 ---
@@ -244,6 +249,7 @@ schema: v1.0
 childrenIds:
   - valid-child
   - 789
+labels: []
 created: "2025-01-15T10:00:00Z"
 updated: "2025-01-15T10:00:00Z"
 ---
@@ -272,6 +278,7 @@ affectedFiles:
 log: []
 schema: v1.0
 childrenIds: []
+labels: []
 created: "2025-01-15T10:00:00Z"
 updated: "2025-01-15T10:00:00Z"
 ---
@@ -298,6 +305,7 @@ affectedFiles: {}
 log: []
 schema: v1.0
 childrenIds: []
+labels: []
 created: "2025-01-15T10:00:00Z"
 updated: "2025-01-15T10:00:00Z"
 ---
@@ -353,6 +361,7 @@ const example = "code block";
       ],
       schema: "v1.0",
       childrenIds: ["child-1", "child-2"],
+      labels: [],
       body: "# Task Description\n\nThis is the task body with **markdown** formatting.",
       type: TrellisObjectType.TASK,
       created: "2025-01-15T10:00:00Z",
@@ -379,6 +388,7 @@ affectedFiles: {}
 log: []
 schema: v1.0
 childrenIds: []
+labels: []
 created: "2025-01-15T10:00:00Z"
 updated: "2025-01-15T10:00:00Z"
 externalIssueId: JIRA-42
@@ -402,6 +412,7 @@ affectedFiles: {}
 log: []
 schema: v1.0
 childrenIds: []
+labels: []
 created: "2025-01-15T10:00:00Z"
 updated: "2025-01-15T10:00:00Z"
 ---
@@ -411,6 +422,79 @@ Test body content`;
     const result = deserializeTrellisObject(markdownString);
 
     expect(result.externalIssueId).toBeUndefined();
+  });
+
+  it("should default labels to empty array when absent from frontmatter", () => {
+    const markdownString = `---
+id: T-no-labels-test
+title: No Labels Test
+status: open
+priority: medium
+prerequisites: []
+affectedFiles: {}
+log: []
+schema: v1.0
+childrenIds: []
+created: "2025-01-15T10:00:00Z"
+updated: "2025-01-15T10:00:00Z"
+---
+
+Test body content`;
+
+    const result = deserializeTrellisObject(markdownString);
+
+    expect(result.labels).toStrictEqual([]);
+  });
+
+  it("should read labels from frontmatter when present", () => {
+    const markdownString = `---
+id: T-labels-test
+title: Labels Test
+status: open
+priority: medium
+prerequisites: []
+affectedFiles: {}
+log: []
+schema: v1.0
+childrenIds: []
+labels:
+  - bug
+  - urgent
+created: "2025-01-15T10:00:00Z"
+updated: "2025-01-15T10:00:00Z"
+---
+
+Test body content`;
+
+    const result = deserializeTrellisObject(markdownString);
+
+    expect(result.labels).toEqual(["bug", "urgent"]);
+  });
+
+  it("should filter non-string entries from labels array", () => {
+    const markdownString = `---
+id: T-mixed-labels-test
+title: Mixed Labels Test
+status: open
+priority: medium
+prerequisites: []
+affectedFiles: {}
+log: []
+schema: v1.0
+childrenIds: []
+labels:
+  - valid
+  - 123
+  - another
+created: "2025-01-15T10:00:00Z"
+updated: "2025-01-15T10:00:00Z"
+---
+
+Test body content`;
+
+    const result = deserializeTrellisObject(markdownString);
+
+    expect(result.labels).toEqual(["valid", "another"]);
   });
 
   it("should handle frontmatter that is not an object", () => {
@@ -436,6 +520,7 @@ affectedFiles: {}
 log: []
 schema: v1.0
 childrenIds: []
+labels: []
 created: "2025-01-15T10:00:00Z"
 updated: "2025-01-15T10:00:00Z"
 ---
@@ -468,6 +553,7 @@ affectedFiles: {}
 log: []
 schema: v1.0
 childrenIds: []
+labels: []
 created: "2025-01-15T10:00:00Z"
 updated: "2025-01-15T10:00:00Z"
 ---
@@ -493,6 +579,7 @@ affectedFiles: {}
 log: []
 schema: v1.0
 childrenIds: []
+labels: []
 created: "2025-01-15T10:00:00Z"
 updated: "2025-01-15T10:00:00Z"
 ---
@@ -516,6 +603,7 @@ affectedFiles: {}
 log: []
 schema: v1.0
 childrenIds: []
+labels: []
 created: "2025-01-15T10:00:00Z"
 updated: "2025-01-15T10:00:00Z"`;
 
@@ -553,6 +641,7 @@ prerequisites: []
 log: []
 schema: v1.0
 childrenIds: []
+labels: []
 created: "2025-01-15T10:00:00Z"
 updated: "2025-01-15T10:00:00Z"
 affectedFiles:

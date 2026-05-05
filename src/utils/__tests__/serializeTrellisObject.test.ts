@@ -23,6 +23,7 @@ describe("serializeTrellisObject", () => {
       log: ["Initial commit", "Updated implementation"],
       schema: "v1.0",
       childrenIds: ["child-1", "child-2"],
+      labels: [],
       body: "This is the main content of the task.",
       type: TrellisObjectType.PROJECT,
       created: "2025-01-15T10:00:00Z",
@@ -58,6 +59,58 @@ describe("serializeTrellisObject", () => {
     });
   });
 
+  it("should include labels in frontmatter when non-empty", () => {
+    const trellisObject: TrellisObject = {
+      id: "labels-test",
+      title: "Labels Test",
+      status: TrellisObjectStatus.OPEN,
+      priority: TrellisObjectPriority.MEDIUM,
+      prerequisites: [],
+      affectedFiles: new Map(),
+      log: [],
+      schema: "v1.0",
+      childrenIds: [],
+      labels: ["bug", "priority"],
+      body: "Test content",
+      type: TrellisObjectType.PROJECT,
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
+      parent: null,
+    };
+
+    const result = serializeTrellisObject(trellisObject);
+    const yamlPart = result.split("---\n")[1];
+    const parsedYaml = parse(yamlPart);
+
+    expect(parsedYaml.labels).toEqual(["bug", "priority"]);
+  });
+
+  it("should omit labels from frontmatter when empty", () => {
+    const trellisObject: TrellisObject = {
+      id: "no-labels-test",
+      title: "No Labels Test",
+      status: TrellisObjectStatus.OPEN,
+      priority: TrellisObjectPriority.MEDIUM,
+      prerequisites: [],
+      affectedFiles: new Map(),
+      log: [],
+      schema: "v1.0",
+      childrenIds: [],
+      labels: [],
+      body: "Test content",
+      type: TrellisObjectType.PROJECT,
+      created: "2025-01-15T10:00:00Z",
+      updated: "2025-01-15T10:00:00Z",
+      parent: null,
+    };
+
+    const result = serializeTrellisObject(trellisObject);
+    const yamlPart = result.split("---\n")[1];
+    const parsedYaml = parse(yamlPart);
+
+    expect(parsedYaml.labels).toBeUndefined();
+  });
+
   it("should handle multi-line log entries correctly", () => {
     const trellisObject: TrellisObject = {
       id: "multiline-test",
@@ -74,6 +127,7 @@ describe("serializeTrellisObject", () => {
       ],
       schema: "v1.0",
       childrenIds: [],
+      labels: [],
       body: "Test body content",
       type: TrellisObjectType.PROJECT,
       created: "2025-01-15T10:00:00Z",
@@ -113,6 +167,7 @@ describe("serializeTrellisObject", () => {
       log: [],
       schema: "v1.0",
       childrenIds: [],
+      labels: [],
       body: "",
       type: TrellisObjectType.PROJECT,
       created: "2025-01-15T10:00:00Z",
@@ -148,6 +203,7 @@ describe("serializeTrellisObject", () => {
       ],
       schema: "v2.0-beta",
       childrenIds: ["child-with-dashes", "child with spaces"],
+      labels: [],
       body: 'Body with "quotes", symbols: @#$%, and other special characters!',
       type: TrellisObjectType.PROJECT,
       created: "2025-01-15T10:00:00Z",
@@ -192,6 +248,7 @@ describe("serializeTrellisObject", () => {
       log: [],
       schema: "v1.0",
       childrenIds: [],
+      labels: [],
       body: bodyContent,
       type: TrellisObjectType.PROJECT,
       created: "2025-01-15T10:00:00Z",
@@ -226,6 +283,7 @@ describe("serializeTrellisObject", () => {
       log: [],
       schema: "v1.0",
       childrenIds: [],
+      labels: [],
       body: "Test content",
       type: TrellisObjectType.PROJECT,
       created: "2025-01-15T10:00:00Z",
@@ -256,6 +314,7 @@ describe("serializeTrellisObject", () => {
       log: [],
       schema: "v1.0",
       childrenIds: [],
+      labels: [],
       body: "Test content",
       type: TrellisObjectType.PROJECT,
       created: "2025-01-15T10:00:00Z",
@@ -283,6 +342,7 @@ describe("serializeTrellisObject", () => {
       log: [],
       schema: "v1.0",
       childrenIds: [],
+      labels: [],
       body: "Test content",
       type: TrellisObjectType.PROJECT,
       created: "2025-01-15T10:00:00Z",
@@ -309,6 +369,7 @@ describe("serializeTrellisObject", () => {
       log: [],
       schema: "v1.0",
       childrenIds: [],
+      labels: [],
       body: "Test content",
       type: TrellisObjectType.PROJECT,
       created: "2025-01-15T10:00:00Z",

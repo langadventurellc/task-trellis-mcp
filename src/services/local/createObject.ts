@@ -43,6 +43,7 @@ export async function createObject(
     log: [],
     schema: "v1.0",
     childrenIds: [],
+    labels: [],
     created: now,
     updated: now,
     body: description,

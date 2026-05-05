@@ -294,6 +294,7 @@ This is the new body content with markdown formatting.
         parent: "E-parent-epic",
         prerequisites: ["F-dep-1", "T-dep-2"],
         childrenIds: ["T-child-1", "T-child-2"],
+        labels: [],
         affectedFiles: { "src/main.ts": "Added feature" },
         log: ["Created feature", "Updated status"],
         schema: "1.1",
@@ -867,6 +868,7 @@ const test = "value with 'quotes' and 'double quotes'";
           id: projectId,
           title: "Hierarchy Project",
           childrenIds: [epicId],
+          labels: [],
         }),
       );
 
@@ -880,6 +882,7 @@ const test = "value with 'quotes' and 'double quotes'";
           title: "Hierarchy Epic",
           parent: projectId,
           childrenIds: [featureId],
+          labels: [],
         }),
         { projectId },
       );
@@ -894,6 +897,7 @@ const test = "value with 'quotes' and 'double quotes'";
           title: "Hierarchy Feature",
           parent: epicId,
           childrenIds: [taskId],
+          labels: [],
         }),
         { projectId, epicId },
       );
@@ -1012,6 +1016,7 @@ const test = "value with 'quotes' and 'double quotes'";
           title: "Hierarchy Status Project",
           status: "open",
           childrenIds: [epicId],
+          labels: [],
         }),
       );
 
@@ -1026,6 +1031,7 @@ const test = "value with 'quotes' and 'double quotes'";
           parent: projectId,
           status: "open",
           childrenIds: [featureId],
+          labels: [],
         }),
         { projectId },
       );
@@ -1041,6 +1047,7 @@ const test = "value with 'quotes' and 'double quotes'";
           parent: epicId,
           status: "open",
           childrenIds: [taskId],
+          labels: [],
         }),
         { projectId, epicId },
       );
@@ -1115,6 +1122,7 @@ const test = "value with 'quotes' and 'double quotes'";
           title: "Partial Hierarchy Feature",
           status: "open",
           childrenIds: [taskId],
+          labels: [],
         }),
       );
 
@@ -1176,6 +1184,7 @@ const test = "value with 'quotes' and 'double quotes'";
           title: "Already In Progress Parent Project",
           status: "open",
           childrenIds: [epicId],
+          labels: [],
         }),
       );
 
@@ -1190,6 +1199,7 @@ const test = "value with 'quotes' and 'double quotes'";
           parent: projectId,
           status: "in-progress",
           childrenIds: [featureId],
+          labels: [],
         }),
         { projectId },
       );
@@ -1205,6 +1215,7 @@ const test = "value with 'quotes' and 'double quotes'";
           parent: epicId,
           status: "open",
           childrenIds: [taskId],
+          labels: [],
         }),
         { projectId, epicId },
       );
@@ -1268,6 +1279,7 @@ const test = "value with 'quotes' and 'double quotes'";
           title: "Status Change Test Feature",
           status: "open",
           childrenIds: [taskId],
+          labels: [],
         }),
       );
 
@@ -1322,6 +1334,7 @@ const test = "value with 'quotes' and 'double quotes'";
           title: "Auto Complete Done Project",
           status: "open",
           childrenIds: [epicId],
+          labels: [],
         }),
       );
 
@@ -1336,6 +1349,7 @@ const test = "value with 'quotes' and 'double quotes'";
           parent: projectId,
           status: "open",
           childrenIds: [featureId],
+          labels: [],
         }),
         { projectId },
       );
@@ -1351,6 +1365,7 @@ const test = "value with 'quotes' and 'double quotes'";
           parent: epicId,
           status: "open",
           childrenIds: [task1Id, task2Id],
+          labels: [],
         }),
         { projectId, epicId },
       );
@@ -1441,6 +1456,7 @@ const test = "value with 'quotes' and 'double quotes'";
           title: "Auto Complete Mixed Feature",
           status: "open",
           childrenIds: [task1Id, task2Id, task3Id],
+          labels: [],
         }),
       );
 
@@ -1530,6 +1546,7 @@ const test = "value with 'quotes' and 'double quotes'";
           title: "Not Auto Complete Project",
           status: "open",
           childrenIds: [epicId],
+          labels: [],
         }),
       );
 
@@ -1544,6 +1561,7 @@ const test = "value with 'quotes' and 'double quotes'";
           parent: projectId,
           status: "open",
           childrenIds: [feature1Id, feature2Id],
+          labels: [],
         }),
         { projectId },
       );
@@ -1559,6 +1577,7 @@ const test = "value with 'quotes' and 'double quotes'";
           parent: epicId,
           status: "done",
           childrenIds: [],
+          labels: [],
         }),
         { projectId, epicId },
       );
@@ -1574,6 +1593,7 @@ const test = "value with 'quotes' and 'double quotes'";
           parent: epicId,
           status: "open",
           childrenIds: [],
+          labels: [],
         }),
         { projectId, epicId },
       );
@@ -1611,6 +1631,7 @@ const test = "value with 'quotes' and 'double quotes'";
           title: "No Status Change Feature",
           status: "open",
           childrenIds: [taskId],
+          labels: [],
         }),
       );
 
@@ -1692,6 +1713,7 @@ const test = "value with 'quotes' and 'double quotes'";
           title: "Deep Auto Complete Project",
           status: "open",
           childrenIds: [epicId],
+          labels: [],
         }),
       );
 
@@ -1706,6 +1728,7 @@ const test = "value with 'quotes' and 'double quotes'";
           parent: projectId,
           status: "open",
           childrenIds: [featureId],
+          labels: [],
         }),
         { projectId },
       );
@@ -1721,6 +1744,7 @@ const test = "value with 'quotes' and 'double quotes'";
           parent: epicId,
           status: "open",
           childrenIds: [taskId],
+          labels: [],
         }),
         { projectId, epicId },
       );
@@ -1791,6 +1815,7 @@ const test = "value with 'quotes' and 'double quotes'";
           title: "Already Done Parent Feature",
           status: "done",
           childrenIds: [taskId],
+          labels: [],
         }),
       );
 
