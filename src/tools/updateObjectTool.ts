@@ -83,6 +83,12 @@ Updates automatically refresh the 'updated' timestamp while preserving creation 
         description:
           "External system identifier (e.g., Jira key). Omit = leave unchanged; '' (empty) = clear; non-empty = set. Top-level issues only; silently dropped with a warning on child issues.",
       },
+      labels: {
+        type: "array",
+        items: { type: "string" },
+        description:
+          "Labels to set on the issue. Each label must be ≤ 100 characters. IMPORTANT: omit this field to leave existing labels unchanged; pass an empty array [] to clear all labels; pass a non-empty array to replace all existing labels.",
+      },
     },
     required: ["id"],
   },
@@ -103,6 +109,7 @@ export async function handleUpdateObject(
     status,
     force = false,
     externalIssueId,
+    labels,
   } = args as {
     id: string;
     title?: string;
@@ -112,6 +119,7 @@ export async function handleUpdateObject(
     status?: string;
     force?: boolean;
     externalIssueId?: string;
+    labels?: string[];
   };
 
   return service.updateObject(
@@ -125,5 +133,6 @@ export async function handleUpdateObject(
     status as TrellisObjectStatus,
     force,
     externalIssueId,
+    labels,
   );
 }

@@ -75,6 +75,7 @@ describe("createObjectTool", () => {
         [],
         "",
         undefined,
+        [],
       );
       expect(result).toEqual(mockResult);
     });
@@ -106,6 +107,7 @@ describe("createObjectTool", () => {
         ["P-dependency1", "P-dependency2"],
         "This is a new project description",
         undefined,
+        [],
       );
       expect(result).toEqual(mockResult);
     });
@@ -129,6 +131,7 @@ describe("createObjectTool", () => {
         [],
         "",
         undefined,
+        [],
       );
     });
 
@@ -160,6 +163,7 @@ describe("createObjectTool", () => {
           [],
           "",
           undefined,
+          [],
         );
       }
     });
@@ -197,6 +201,7 @@ describe("createObjectTool", () => {
           [],
           "",
           undefined,
+          [],
         );
       }
     });
@@ -229,6 +234,7 @@ describe("createObjectTool", () => {
           [],
           "",
           undefined,
+          [],
         );
       }
     });
@@ -252,7 +258,52 @@ describe("createObjectTool", () => {
         ["T-setup", "T-config", "F-auth"],
         "",
         undefined,
+        [],
       );
+    });
+
+    describe("labels", () => {
+      it("should pass labels to service when provided", async () => {
+        const args = {
+          type: "task",
+          title: "Labeled Task",
+          labels: ["bug", "auth"],
+        };
+
+        await handleCreateObject(mockService, mockRepository, args);
+
+        expect(mockService.createObject).toHaveBeenCalledWith(
+          mockRepository,
+          TrellisObjectType.TASK,
+          "Labeled Task",
+          undefined,
+          TrellisObjectPriority.MEDIUM,
+          TrellisObjectStatus.OPEN,
+          [],
+          "",
+          undefined,
+          ["bug", "auth"],
+        );
+      });
+
+      it("should default labels to [] when absent", async () => {
+        const args = { type: "task", title: "No Labels" };
+
+        await handleCreateObject(mockService, mockRepository, args);
+
+        expect(mockService.createObject).toHaveBeenCalledWith(
+          mockRepository,
+          TrellisObjectType.TASK,
+          "No Labels",
+          undefined,
+          TrellisObjectPriority.MEDIUM,
+          TrellisObjectStatus.OPEN,
+          [],
+          "",
+          undefined,
+          [],
+        );
+      });
     });
 
     it("should propagate service errors", async () => {
@@ -278,6 +329,7 @@ describe("createObjectTool", () => {
         [],
         "",
         undefined,
+        [],
       );
     });
   });

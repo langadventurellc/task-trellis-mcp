@@ -95,6 +95,13 @@ Optional \`externalIssueId\` (e.g., a Jira key) can be provided for top-level is
         description:
           "Optional external system identifier (e.g., a Jira key). Only stored on top-level issues (no parent). Silently dropped with a warning when provided on a child issue.",
       },
+      labels: {
+        type: "array",
+        items: { type: "string" },
+        default: [],
+        description:
+          'Optional list of string labels to tag this issue (e.g. ["bug", "auth"]). Each label must be ≤ 100 characters. Defaults to [].',
+      },
     },
     required: ["type", "title"],
   },
@@ -114,6 +121,7 @@ export async function handleCreateObject(
     prerequisites = [],
     description = "",
     externalIssueId,
+    labels = [],
   } = args as {
     type: string;
     title: string;
@@ -123,6 +131,7 @@ export async function handleCreateObject(
     prerequisites?: string[];
     description?: string;
     externalIssueId?: string;
+    labels?: string[];
   };
 
   // Delegate to service layer
@@ -136,5 +145,6 @@ export async function handleCreateObject(
     prerequisites,
     description,
     externalIssueId,
+    labels,
   );
 }

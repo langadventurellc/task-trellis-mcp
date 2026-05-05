@@ -80,6 +80,7 @@ describe("updateObjectTool", () => {
         "draft" as TrellisObjectStatus,
         true,
         undefined,
+        undefined,
       );
       expect(result).toBe(mockResult);
     });
@@ -107,6 +108,7 @@ describe("updateObjectTool", () => {
         undefined,
         undefined,
         false,
+        undefined,
         undefined,
       );
       expect(result).toBe(mockResult);
@@ -136,6 +138,7 @@ describe("updateObjectTool", () => {
         undefined,
         false,
         undefined,
+        undefined,
       );
       expect(result).toBe(mockResult);
     });
@@ -164,6 +167,7 @@ describe("updateObjectTool", () => {
         "in-progress" as TrellisObjectStatus,
         false,
         undefined,
+        undefined,
       );
       expect(result).toBe(mockResult);
     });
@@ -191,6 +195,7 @@ describe("updateObjectTool", () => {
         undefined,
         "done" as TrellisObjectStatus,
         false,
+        undefined,
         undefined,
       );
     });
@@ -263,7 +268,85 @@ describe("updateObjectTool", () => {
         "done" as TrellisObjectStatus,
         false,
         undefined,
+        undefined,
       );
+    });
+
+    describe("labels", () => {
+      it("should pass labels array to service when provided", async () => {
+        mockService.updateObject.mockResolvedValue(mockResult);
+
+        await handleUpdateObject(
+          mockService,
+          mockRepository,
+          { id: "T-test-task", labels: ["bug", "auth"] },
+          mockServerConfig,
+        );
+
+        expect(mockService.updateObject).toHaveBeenCalledWith(
+          mockRepository,
+          mockServerConfig,
+          "T-test-task",
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          false,
+          undefined,
+          ["bug", "auth"],
+        );
+      });
+
+      it("should pass empty labels array to service to clear labels", async () => {
+        mockService.updateObject.mockResolvedValue(mockResult);
+
+        await handleUpdateObject(
+          mockService,
+          mockRepository,
+          { id: "T-test-task", labels: [] },
+          mockServerConfig,
+        );
+
+        expect(mockService.updateObject).toHaveBeenCalledWith(
+          mockRepository,
+          mockServerConfig,
+          "T-test-task",
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          false,
+          undefined,
+          [],
+        );
+      });
+
+      it("should pass undefined labels to service when labels omitted", async () => {
+        mockService.updateObject.mockResolvedValue(mockResult);
+
+        await handleUpdateObject(
+          mockService,
+          mockRepository,
+          { id: "T-test-task", status: "open" },
+          mockServerConfig,
+        );
+
+        expect(mockService.updateObject).toHaveBeenCalledWith(
+          mockRepository,
+          mockServerConfig,
+          "T-test-task",
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          "open" as TrellisObjectStatus,
+          false,
+          undefined,
+          undefined,
+        );
+      });
     });
   });
 });
